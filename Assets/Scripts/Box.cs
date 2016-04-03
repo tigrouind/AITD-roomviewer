@@ -21,6 +21,7 @@ public class Box : MonoBehaviour
 	public int Anim;
 	public int Frame;
 	public int Speed;
+	public int Room;
 
 	public bool HighLight
 	{

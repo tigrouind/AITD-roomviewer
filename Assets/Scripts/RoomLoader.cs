@@ -13,6 +13,7 @@ public class RoomLoader : MonoBehaviour
 {
 	private int floor = 0;
 	private int room = 0;
+	private string[] cardinalPositions = new [] { "N", "E", "S", "W" };
 	private int[] roomsPerFloor = new [] { 1, 8, 11, 14, 2, 12, 7, 2 };
 	private int[] cameraColors = new [] { 0xFF8080, 0x789CF0, 0xB0DE6F, 0xCC66C0, 0x5DBAAB, 0xF2BA79, 0x8E71E3, 0x6ED169, 0xBF6080, 0x7CCAF7 };
 	private Vector3 mousePosition;
@@ -155,6 +156,7 @@ public class RoomLoader : MonoBehaviour
 			{  
 				Box box = Instantiate(BoxPrefab);
 				box.name = "Collider";
+				box.Room = currentroom;
 				box.transform.parent = roomObject.transform; 
 
 				box.transform.localPosition = new Vector3((ReadShort(allPointsA[i + 0], allPointsA[i + 1]) + ReadShort(allPointsA[i + 2], allPointsA[i + 3])),
@@ -193,6 +195,7 @@ public class RoomLoader : MonoBehaviour
 
 				Box box = Instantiate(BoxPrefab);
 				box.name = "Trigger";
+				box.Room = currentroom;
 				box.transform.parent = roomObject.transform;
 
 				box.transform.localPosition = new Vector3((ReadShort(allPointsA[i + 0], allPointsA[i + 1]) + ReadShort(allPointsA[i + 2], allPointsA[i + 3])),
@@ -269,6 +272,7 @@ public class RoomLoader : MonoBehaviour
 
 					Box box = Instantiate(BoxPrefab);   
 					box.name = "Camera";
+					box.Room = currentroom;
 					box.transform.parent = roomObject.transform;
 					box.transform.localPosition = Vector3.zero;
 					box.Color = new Color32((byte)((colorRGB >> 16) & 0xFF), (byte)((colorRGB >> 8) & 0xFF), (byte)(colorRGB & 0xFF), 100);
@@ -490,13 +494,37 @@ public class RoomLoader : MonoBehaviour
 		RefreshHighLightedBox();          
 	}
 
+	private int BoxComparer(RaycastHit a, RaycastHit b)
+	{
+		// check distance
+		if(Mathf.Abs(a.distance - b.distance) >= 0.0005f)
+		{
+			return a.distance.CompareTo(b.distance);
+		}
+
+		//if objects are too close each other, check current room
+		int aCurrentRoom = a.collider.GetComponent<Box>().Room == room ? 0 : 1;
+		int bCurrentRoom = b.collider.GetComponent<Box>().Room == room ? 0 : 1;
+		if(aCurrentRoom != bCurrentRoom)
+		{
+			return aCurrentRoom.CompareTo(bCurrentRoom);
+		}
+
+		return 0;
+	}
+
 	private void RefreshHighLightedBox()
 	{
-		RaycastHit hitInfo;
+		
 		Vector3 mousePosition = Input.mousePosition;
-		if (Physics.Raycast(Camera.main.ScreenPointToRay(mousePosition), out hitInfo))
+		RaycastHit[] hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
+
+		if (hitInfos.Length > 0)
 		{
-			Box box = hitInfo.collider.GetComponent<Box>();
+			//boxes inside current room have priority over other boxes
+			Array.Sort(hitInfos, BoxComparer);
+
+			Box box = hitInfos[0].collider.GetComponent<Box>();
 			if (box != HighLightedBox)
 			{
 				if (HighLightedBox != null)
@@ -597,13 +625,16 @@ public class RoomLoader : MonoBehaviour
 
 						box.transform.position = new Vector3(x, -y, z) / 1000.0f; 
 
+						//make actors appears slightly bigger than they are to be not covered by actors
+						float delta = 1.0f;
 						box.transform.localScale = new Vector3(
-							ReadShort(memory[w + 2], memory[w + 3]) - ReadShort(memory[w + 0], memory[w + 1]),
-							ReadShort(memory[w + 6], memory[w + 7]) - ReadShort(memory[w + 4], memory[w + 5]),
-							ReadShort(memory[w + 10], memory[w + 11]) - ReadShort(memory[w + 8], memory[w + 9])) / 1000.0f;
+							ReadShort(memory[w + 2], memory[w + 3]) - ReadShort(memory[w + 0], memory[w + 1]) + delta,
+							ReadShort(memory[w + 6], memory[w + 7]) - ReadShort(memory[w + 4], memory[w + 5]) + delta,
+							ReadShort(memory[w + 10], memory[w + 11]) - ReadShort(memory[w + 8], memory[w + 9]) + delta) / 1000.0f;
 
 						box.ID = objectid;
 						box.Body = body;
+						box.Room = roomNumber;
 						box.Flags = ReadShort(memory[k + 4], memory[k + 5]);
 						box.Life = ReadShort(memory[k + 52], memory[k + 53]);
 						box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
@@ -613,11 +644,15 @@ public class RoomLoader : MonoBehaviour
 						//player
 						if (objectid == 1)
 						{
-							float angle = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;                           
+							float angle = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f; 
 
-							float sideAngle = 45.0f - (angle + 45.0f) % 90.0f;
+							angle = (540.0f - angle)%360.0f;
+							                    							                                           
+							float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
+
+							int cardinalPos = (int)Math.Floor((angle+45.0f)/90);
 							
-							RightText.text = string.Format("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}", x, y, z, angle, sideAngle);
+							RightText.text = string.Format("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}", x, y, z, angle, sideAngle, cardinalPositions[cardinalPos%4]);
                      
 							if (followPlayer)
 							{
@@ -637,7 +672,7 @@ public class RoomLoader : MonoBehaviour
 							arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
 							//face camera
 							arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left); 
-							arrow.transform.rotation *= Quaternion.AngleAxis(angle + 180.0f, Vector3.forward);
+							arrow.transform.rotation *= Quaternion.AngleAxis(-angle, Vector3.forward);
 
 							//player is white
 							box.Color = new Color32(255, 255, 255, 255);
