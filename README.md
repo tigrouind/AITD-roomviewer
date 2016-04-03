@@ -1,10 +1,9 @@
-AITD room viewer v0.97
-----------------------
+# AITD room viewer
 
-This is a room viewer for the game Alone in The Dark (1992).
-It has been created for speedrunning.
+This is a room (and 3D model) viewer for the game Alone in The Dark (1992).
+It has been created mostly for speedrunning.
 
-Instructions : 
+## Instructions 
 
 1) Make sure you have original version of the game installed somewhere.
 2) Start QuickBMS
@@ -14,7 +13,7 @@ Instructions :
 3) Now you should have folders like ETAGE00, ETAGE01, ETAGE02, ... in output folder
 4) Copy ETAGEXX folders to the same folder as "AITD room viewer" application (where the EXE is)
 
-Keys : 
+## Keys
 
 - Click on the map and drag cursor to move it.
 - Mouse wheel : zoom in / out
@@ -37,8 +36,7 @@ Blue boxes are colliders that player can interact with
 Red and amber boxes are triggers. It is usually used to switch from one room to another. It can also trigger other things like enemies, sounds, scripted sequences, ...
 
 
-Link to DOSBOX process: 
-----------------------
+## Link to DOSBOX process: 
 This feature allows to view all active entities in the game, displayed and updated in realtime from DOSBOX.
 
 To do this :
@@ -53,13 +51,14 @@ If you leave current room, next room is switched automatically.
 Note : once game is linked, you can start another new game, or load a saved game, it will continue to work.
 
 
-Model viewer :
---------------
+# Model viewer 
 
-Installation : repeat installation steps with QuickBMS but select files LISTBODY.PAK and LISTBOD2.PAK 
+## Installation 
+
+Repeat installation steps with QuickBMS but select files LISTBODY.PAK and LISTBOD2.PAK 
 Use TAB to switch between room viewer and model viewer
 
-Keys : 
+## Keys : 
 
 - Left, right arrows : change model 
 - Up, down arrows : change model folder (only difference is Edward vs Emily) 
@@ -67,7 +66,7 @@ Keys :
 - Mouse wheel : zoom in / out
 - Left mouse button : click and drag cursor on model to move camera 
 
-Known bugs/limitations :
+## Known bugs/limitations :
 
 - there is z-fighting on some models (eg : wardrobe doors, oil can, vinyl, ...)  
 - some materials are not supported :
