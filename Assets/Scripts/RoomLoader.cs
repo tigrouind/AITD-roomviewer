@@ -21,7 +21,7 @@ public class RoomLoader : MonoBehaviour
 	private int showrooms = 1;
 	private bool showtriggers = true;
 	private int showareas = 0;
-	private bool followPlayer = false;
+	private int cameraFollow = 1;
 
 	private int linkfloor = 0;
 	private int linkroom = 0;
@@ -73,7 +73,7 @@ public class RoomLoader : MonoBehaviour
 
 		SetRoomObjectsVisibility(room);
 
-		if (!followPlayer && transform.childCount > 0)
+		if (cameraFollow == 1 && transform.childCount > 0)
 		{
 			Transform roomTransform = transform.Find("ROOM" + room);
 			if (roomTransform != null)
@@ -298,6 +298,12 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
+	void StopCameraFollowPlayer()
+	{
+		if(cameraFollow == 2)   
+			cameraFollow = 1;    
+	}
+
 	void Update()
 	{       
 		if (Input.GetKeyDown(KeyCode.Home))
@@ -306,8 +312,8 @@ public class RoomLoader : MonoBehaviour
 			{                                
 				floor--;
 				room = 0;
-				RefreshRooms();      
-				followPlayer = false;                   
+				RefreshRooms();  
+				StopCameraFollowPlayer();     
 			}
 		}
 
@@ -318,7 +324,7 @@ public class RoomLoader : MonoBehaviour
 				floor++;
 				room = 0;
 				RefreshRooms();
-				followPlayer = false;
+				StopCameraFollowPlayer();       
 			}
 		}
 
@@ -328,7 +334,7 @@ public class RoomLoader : MonoBehaviour
 			{                                                                                 
 				room--;
 				RefreshRooms();
-				followPlayer = false;
+				StopCameraFollowPlayer();      
 			}
 		}
 
@@ -338,7 +344,7 @@ public class RoomLoader : MonoBehaviour
 			{  
 				room++;
 				RefreshRooms();
-				followPlayer = false;
+				StopCameraFollowPlayer();
 			}
 		}
 
@@ -363,7 +369,7 @@ public class RoomLoader : MonoBehaviour
 
 		if (Input.GetKeyDown(KeyCode.F))
 		{
-			followPlayer = !followPlayer;
+			cameraFollow = (cameraFollow+1)%3;
 			linkfloor = -1;
 			linkroom = -1;
 		}
@@ -485,7 +491,7 @@ public class RoomLoader : MonoBehaviour
 
 				Camera.main.transform.position += mouseDelta;
 				mousePosition = newMousePosition;
-				followPlayer = false;
+				StopCameraFollowPlayer(); 
 			}
 		}
 
@@ -654,7 +660,7 @@ public class RoomLoader : MonoBehaviour
 							
 							RightText.text = string.Format("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}", x, y, z, angle, sideAngle, cardinalPositions[cardinalPos%4]);
                      
-							if (followPlayer)
+							if (cameraFollow == 2) //follow player
 							{
 								Camera.main.transform.position = new Vector3(box.transform.position.x, 
 									Camera.main.transform.position.y,
