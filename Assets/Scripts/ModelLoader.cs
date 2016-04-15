@@ -12,7 +12,7 @@ public class ModelLoader : MonoBehaviour
 	private int modelIndex = 0;
 	private int modelFolderIndex = 0;
 
-	private string[] modelFolders = new string[] { "LISTBODY", "LISTBOD2" };
+	private string[] modelFolders = new string[] { "GAMEDATA\\LISTBODY", "GAMEDATA\\LISTBOD2" };
 	private List<string> modelFiles = new List<string>();
 	private List<Color32> paletteColors = new List<Color32>();
 	public GUIText LeftText;
@@ -35,7 +35,7 @@ public class ModelLoader : MonoBehaviour
 
 	void LoadBody(string filename)
 	{
-		LeftText.text = Path.GetDirectoryName(filename) + " " + modelIndex + "/" + (modelFiles.Count - 1);
+		LeftText.text = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1);
 
 		//camera
 		autoRotate = true;
@@ -386,31 +386,36 @@ public class ModelLoader : MonoBehaviour
 			}
 		}  
 
-		if (Input.GetKeyDown(KeyCode.Tab))
-		{
-			SceneManager.LoadScene("room");
-		}  
+		//menu
+		if (Input.GetMouseButtonDown(1))
+		{			
+			menuEnabled = !menuEnabled;
+		}
 
 		if (Input.GetKeyDown(KeyCode.Escape) && Screen.fullScreen)
 		{
 			Application.Quit();
 		}  
 
-		//start drag
-		if (Input.GetMouseButtonDown(0))
+		if(!menuEnabled)
 		{
-			mousePosition = Input.mousePosition;
-			autoRotate = false;
+			//start drag
+			if (Input.GetMouseButtonDown(0))
+			{
+				mousePosition = Input.mousePosition;
+				autoRotate = false;
+			}
+
+			//dragging
+			if (Input.GetMouseButton(0))
+			{
+				Vector3 mouseDelta = mousePosition - Input.mousePosition;
+				cameraSettings += mouseDelta * Time.deltaTime * 50.0f;
+				cameraSettings.y = Mathf.Clamp(cameraSettings.y, -90.0f, 90.0f);
+				mousePosition = Input.mousePosition;
+			}
 		}
 
-		//dragging
-		if (Input.GetMouseButton(0))
-		{
-			Vector3 mouseDelta = mousePosition - Input.mousePosition;
-			cameraSettings += mouseDelta * Time.deltaTime * 50.0f;
-			cameraSettings.y = Mathf.Clamp(cameraSettings.y, -90.0f, 90.0f);
-			mousePosition = Input.mousePosition;
-		}
 		newModelIndex = Math.Min(Math.Max(newModelIndex, 0), modelFiles.Count - 1);
 
 		//load new model if needed
@@ -437,5 +442,30 @@ public class ModelLoader : MonoBehaviour
 		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);               
 		Camera.main.transform.position = center + (Vector3.back * Mathf.Cos(cameraSettings.y * Mathf.Deg2Rad) + Vector3.up * Mathf.Sin(cameraSettings.y * Mathf.Deg2Rad)) * cameraDistance;           
 		Camera.main.transform.LookAt(center);
+	}
+
+	private bool menuEnabled;
+	public MenuStyle MenuStyle;
+
+	void OnGUI() 
+	{
+		if(menuEnabled)
+		{
+			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15, 400, 30);
+			if(Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition)) {
+				menuEnabled = false;
+			}
+
+			GUILayout.BeginArea(rect);
+			GUILayout.BeginVertical();
+
+			if (GUILayout.Button("Room viewer", MenuStyle.Button) && Event.current.button == 0)
+			{
+				SceneManager.LoadScene("room");
+			}
+
+			GUILayout.EndVertical();
+			GUILayout.EndArea ();
+		}
 	}
 }
