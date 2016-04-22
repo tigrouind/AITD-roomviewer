@@ -449,14 +449,14 @@ public class ModelLoader : MonoBehaviour
 
 	void OnGUI() 
 	{
-		if(menuEnabled)
+		if (menuEnabled)
 		{
 			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15, 400, 30);
 			if(Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition)) {
 				menuEnabled = false;
 			}
 
-			GUILayout.BeginArea(rect);
+			GUILayout.BeginArea(rect, MenuStyle.Panel);
 			GUILayout.BeginVertical();
 
 			if (GUILayout.Button("Room viewer", MenuStyle.Button) && Event.current.button == 0)

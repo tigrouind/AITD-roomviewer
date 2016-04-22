@@ -19,7 +19,6 @@ It has been created mostly for speedrunning.
 - Right mouse cursor : show options menu
 - Up or down arrows : change floor
 - Left right arrows : change room
-- Page down, page up : rotate camera
 - Esc : quit (only in fullscreen mode)
 
 Put mouse on a box to highlight it.
