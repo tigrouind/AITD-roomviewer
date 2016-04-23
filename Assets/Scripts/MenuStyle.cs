@@ -7,7 +7,9 @@ public class MenuStyle : MonoBehaviour
 	public Texture2D HoverTexture;
 
 	public Texture2D SliderTexture;
+	public Texture2D SliderHoverTexture;
 	public Texture2D ThumbTexture;
+	public Texture2D ThumbHoverTexture;
 
 	public GUIStyle Panel;
 	public GUIStyle Button;
@@ -47,10 +49,12 @@ public class MenuStyle : MonoBehaviour
 		Slider = new GUIStyle();
 		Slider.fixedHeight = 30;
 		Slider.normal.background = SliderTexture;
+		Slider.hover.background = SliderHoverTexture;
 
 		Thumb = new GUIStyle();
 		Thumb.fixedHeight = 30;
 		Thumb.fixedWidth = 30;
 		Thumb.normal.background = ThumbTexture;
+		Thumb.hover.background = ThumbHoverTexture;
 	}
 }

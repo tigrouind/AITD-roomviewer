@@ -59,8 +59,9 @@ public class RoomLoader : MonoBehaviour
 			Box box = Instantiate(BoxPrefab);
 			box.transform.parent = Actors.transform;                
 			box.name = "Actor";           
-		}                       
-
+		}    
+		Directory.CreateDirectory("GAMEDATA");           
+		     
 		RefreshRooms();
 	}
 
