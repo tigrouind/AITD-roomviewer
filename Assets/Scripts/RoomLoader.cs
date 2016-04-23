@@ -110,7 +110,7 @@ public class RoomLoader : MonoBehaviour
 
 				if (box.name == "Camera")
 				{
-					box.gameObject.SetActive((showareas == 3 && box.Room == roomIndex) || (showareas == 2 && currentRoom) || (showareas == 1 && currentRoom && box.Room == room));
+					box.gameObject.SetActive(showareas == 2 || (showareas == 1 && currentRoom));
 				} 
 
 				if (box.name == "Collider")
@@ -249,59 +249,61 @@ public class RoomLoader : MonoBehaviour
 			foreach (int cameraID in camerasPerRoom[roomIndex])
 			{				
 				int cameraHeader = ReadShort(allPointsB[cameraID * 4 + 0], allPointsB[cameraID * 4 + 1]);                 
-				int numentries = ReadShort(allPointsB[cameraHeader + 0x12], allPointsB[cameraHeader + 0x13]);               
+				int numentries = ReadShort(allPointsB[cameraHeader + 0x12], allPointsB[cameraHeader + 0x13]);     
+
+				List<Vector2> points = new List<Vector2>();
+				List<int> indices = new List<int>();           
 
 				for (int k = 0; k < numentries; k++)
-				{              
-					List<Vector2> points = new List<Vector2>();
-					List<int> indices = new List<int>();             
-
+				{              					            
 					int i = cameraHeader + 0x14 + k * 12; 
 					int cameraRoom = ReadShort(allPointsB[i + 0], allPointsB[i + 1]); 
 
-					i = cameraHeader + ReadShort(allPointsB[i + 4], allPointsB[i + 5]);
-					int totalAreas = ReadShort(allPointsB[i + 0], allPointsB[i + 1]);
-					i += 2;
-
-					for (int g = 0; g < totalAreas; g++)
-					{               
-						int totalPoints = ReadShort(allPointsB[i + 0], allPointsB[i + 1]);                           
-						i += 2;                                                                     
-
-						List<Vector2> pts = new List<Vector2>();
-						for (int u = 0; u < totalPoints; u++)
-						{
-							short px = ReadShort(allPointsB[i + 0], allPointsB[i + 1]);
-							short pz = ReadShort(allPointsB[i + 2], allPointsB[i + 3]);
-							pts.Add(new Vector2(px, pz) / 100.0f);                                      
-							i += 4;                                               
-						}
-
-						Triangulator tr = new Triangulator(pts);
-						int[] idc = tr.Triangulate();  
-						indices.AddRange(idc.Select(x => x + points.Count).ToArray());
-						points.AddRange(pts);
-					}  
-					   
-					if (points.Count > 0)
+					if(cameraRoom == roomIndex)
 					{
-						int colorRGB = cameraColors[cameraID % cameraColors.Length];
+						i = cameraHeader + ReadShort(allPointsB[i + 4], allPointsB[i + 5]);
+						int totalAreas = ReadShort(allPointsB[i + 0], allPointsB[i + 1]);
+						i += 2;
 
-						Box box = Instantiate(BoxPrefab);   
-						box.name = "Camera";
-						box.Room = cameraRoom;
-						box.transform.parent = room;
-						box.transform.localPosition = rooms[cameraRoom].localPosition - room.transform.position;
-						box.Color = new Color32((byte)((colorRGB >> 16) & 0xFF), (byte)((colorRGB >> 8) & 0xFF), (byte)(colorRGB & 0xFF), 100);
-						box.ID = cameraID;                   
-						MeshFilter filter = box.GetComponent<MeshFilter>();
-	                 
-						// Use the triangulator to get indices for creating triangles                               
-						filter.sharedMesh = GetMeshFromPoints(points, indices);
-						Destroy(box.gameObject.GetComponent<BoxCollider>());
-						box.gameObject.AddComponent<MeshCollider>();
-					}		
+						for (int g = 0; g < totalAreas; g++)
+						{               
+							int totalPoints = ReadShort(allPointsB[i + 0], allPointsB[i + 1]);                           
+							i += 2;                                                                     
+
+							List<Vector2> pts = new List<Vector2>();
+							for (int u = 0; u < totalPoints; u++)
+							{
+								short px = ReadShort(allPointsB[i + 0], allPointsB[i + 1]);
+								short pz = ReadShort(allPointsB[i + 2], allPointsB[i + 3]);
+								pts.Add(new Vector2(px, pz) / 100.0f);                                      
+								i += 4;                                               
+							}
+
+							Triangulator tr = new Triangulator(pts);
+							int[] idc = tr.Triangulate();  
+							indices.AddRange(idc.Select(x => x + points.Count).ToArray());
+							points.AddRange(pts);
+						}  						   						
+					}
 				}
+
+				if (points.Count > 0)
+				{
+					int colorRGB = cameraColors[cameraID % cameraColors.Length];
+
+					Box box = Instantiate(BoxPrefab);   
+					box.name = "Camera";
+					box.transform.parent = room;
+					box.transform.localPosition = Vector3.zero;
+					box.Color = new Color32((byte)((colorRGB >> 16) & 0xFF), (byte)((colorRGB >> 8) & 0xFF), (byte)(colorRGB & 0xFF), 100);
+					box.ID = cameraID;                   
+					MeshFilter filter = box.GetComponent<MeshFilter>();
+                 
+					// Use the triangulator to get indices for creating triangles                               
+					filter.sharedMesh = GetMeshFromPoints(points, indices);
+					Destroy(box.gameObject.GetComponent<BoxCollider>());
+					box.gameObject.AddComponent<MeshCollider>();
+				}	
 			}
 
 			roomIndex++;
@@ -634,7 +636,7 @@ public class RoomLoader : MonoBehaviour
    	#region GUI
 	
 	private string[] roomModes = new string[] { "No", "Current room", "Current room / All", "All"  };
-	private string[] areaModes = new string[] { "No", "Current room", "Current room / Adjacent", "All" };
+	private string[] areaModes = new string[] { "No", "Current room", "All" };
 	private bool menuEnabled;
 	public MenuStyle Style;
 
@@ -755,7 +757,7 @@ public class RoomLoader : MonoBehaviour
 			GUILayout.Label("Areas", Style.Label);
 			if (GUILayout.Button(areaModes[showareas],  Style.Option) && Event.current.button == 0)
 			{
-				showareas = (showareas + 1) % 4;
+				showareas = (showareas + 1) % 3;
 				SetRoomObjectsVisibility(room);
 			}
 			GUILayout.EndHorizontal();
