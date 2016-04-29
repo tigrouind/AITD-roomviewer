@@ -330,7 +330,7 @@ public class ModelLoader : MonoBehaviour
 
 	void Update()
 	{
-		int newModelIndex = modelIndex;
+		int oldModelIndex = modelIndex;
 
 		if (Input.GetAxis("Mouse ScrollWheel") > 0)
 		{
@@ -343,59 +343,20 @@ public class ModelLoader : MonoBehaviour
 			cameraDistance *= 1.0f / 0.9f;
 		}
 
-		if (Input.GetKeyDown(KeyCode.LeftArrow))
-		{            
-			if (Input.GetKey(KeyCode.RightShift))
-			{
-				newModelIndex -= 10;
-			}
-			else
-			{
-				newModelIndex--;
-			}
-		}
-
-		if (Input.GetKeyDown(KeyCode.RightArrow))
-		{
-			if (Input.GetKey(KeyCode.RightShift))
-			{
-				newModelIndex += 10;
-			}
-			else
-			{
-				newModelIndex++;
-			}
-		}
-
-		if (Input.GetKeyDown(KeyCode.UpArrow))
-		{
-			if (modelFolderIndex < (modelFolders.Length - 1))
-			{
-				modelFolderIndex++;
-				LoadModels(modelFolders[modelFolderIndex]);
-			}
-		}
-
-
-		if (Input.GetKeyDown(KeyCode.DownArrow))
-		{
-			if (modelFolderIndex > 0)
-			{
-				modelFolderIndex--;
-				LoadModels(modelFolders[modelFolderIndex]);
-			}
-		}  
-
 		//menu
 		if (Input.GetMouseButtonDown(1))
 		{			
 			menuEnabled = !menuEnabled;
 		}
 
-		if (Input.GetKeyDown(KeyCode.Escape) && Screen.fullScreen)
+		//process keys
+		foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
 		{
-			Application.Quit();
-		}  
+			if(Input.GetKeyDown(key))
+			{
+				ProcessKey(key);
+			}
+		}
 
 		if(!menuEnabled)
 		{
@@ -416,12 +377,11 @@ public class ModelLoader : MonoBehaviour
 			}
 		}
 
-		newModelIndex = Math.Min(Math.Max(newModelIndex, 0), modelFiles.Count - 1);
+		modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
 
 		//load new model if needed
-		if (newModelIndex != modelIndex)
+		if (oldModelIndex != modelIndex)
 		{           
-			modelIndex = newModelIndex;
 			LoadBody(modelFiles[modelIndex]);
 		}   
          
@@ -461,11 +421,66 @@ public class ModelLoader : MonoBehaviour
 
 			if (GUILayout.Button("Room viewer", MenuStyle.Button) && Event.current.button == 0)
 			{
-				SceneManager.LoadScene("room");
+				ProcessKey(KeyCode.Tab);
 			}
 
 			GUILayout.EndVertical();
 			GUILayout.EndArea ();
+		}
+	}
+
+	void ProcessKey(KeyCode code)
+	{
+		switch(code)
+		{
+			case KeyCode.LeftArrow:			          
+				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+				{
+					modelIndex -= 10;
+				}
+				else
+				{
+					modelIndex--;
+				}
+				break;
+
+			case KeyCode.RightArrow:		
+				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+				{
+					modelIndex += 10;
+				}
+				else
+				{
+					modelIndex++;
+				}
+				break;
+			
+			case KeyCode.UpArrow:					
+				if (modelFolderIndex < (modelFolders.Length - 1))
+				{
+					modelIndex++;
+					LoadModels(modelFolders[modelIndex]);
+				}
+				break;
+			
+			case KeyCode.DownArrow:	
+				if (modelFolderIndex > 0)
+				{
+					modelFolderIndex--;
+					LoadModels(modelFolders[modelFolderIndex]);
+				}
+				break;
+			  
+			case KeyCode.Escape:
+				if(Screen.fullScreen)
+				{
+					Application.Quit();
+				}
+				break;		  
+
+			case KeyCode.Tab:
+				SceneManager.LoadScene("room");
+				break;
 		}
 	}
 }

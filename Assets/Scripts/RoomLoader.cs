@@ -322,44 +322,6 @@ public class RoomLoader : MonoBehaviour
 
 	void Update()
 	{       
-		if (Input.GetKeyDown(KeyCode.DownArrow))
-		{
-			if (floor > 0)
-			{                                
-				floor--;
-				room = 0;
-				RefreshRooms();  				 
-			}
-		}
-
-		if (Input.GetKeyDown(KeyCode.UpArrow))
-		{
-			if (floor < 7)
-			{                                
-				floor++;
-				room = 0;				  
-				RefreshRooms();				   
-			}
-		}
-
-		if (Input.GetKeyDown(KeyCode.LeftArrow))
-		{
-			if (room > 0)
-			{                                                                                 
-				room--;				  
-				RefreshRooms();				  
-			}
-		}
-
-		if (Input.GetKeyDown(KeyCode.RightArrow))
-		{                       
-			if (room < (roomsPerFloor[floor] - 1))
-			{  
-				room++;
-				RefreshRooms();
-			}
-		}
-		            
 		if (Input.GetAxis("Mouse ScrollWheel") > 0)
 		{
 			if (Camera.main.orthographic)
@@ -384,11 +346,6 @@ public class RoomLoader : MonoBehaviour
 				Camera.main.transform.position = Vector3.Scale(Camera.main.transform.position, new Vector3(1.0f, 1.0f / 0.9f, 1.0f));
 			}
 		}  
-
-		if(Input.GetKeyDown(KeyCode.Escape) && Screen.fullScreen)
-		{
-			Application.Quit();
-		}           		
 
 		if (!menuEnabled)
 		{
@@ -424,6 +381,14 @@ public class RoomLoader : MonoBehaviour
 		{
 			RefreshHighLightedBox();          
 		}
+
+		foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
+		{
+			if(Input.GetKeyDown(key))
+			{
+				ProcessKey(key);
+			}
+		}
 	}
 
 	private int BoxComparer(RaycastHit a, RaycastHit b)
@@ -446,8 +411,7 @@ public class RoomLoader : MonoBehaviour
 	}
 
 	private void RefreshHighLightedBox()
-	{
-		
+	{		
 		Vector3 mousePosition = Input.mousePosition;
 		RaycastHit[] hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
 
@@ -661,6 +625,104 @@ public class RoomLoader : MonoBehaviour
 			//dosbox
 			if(GUILayout.Button(readMemoryFunc == null ? "Link to DOSBOX" : "Unlink DOSBOX", Style.Button) && Event.current.button == 0)
 			{
+				ProcessKey(KeyCode.L);
+			}
+
+			if(GUILayout.Button("Model viewer", Style.Button) && Event.current.button == 0)
+			{
+				ProcessKey(KeyCode.Tab);
+			}
+
+			//camera 
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Camera projection", Style.Label);
+			if (GUILayout.Button(Camera.main.orthographic ? "Orthographic" : "Perspective", Style.Option) && Event.current.button == 0)
+			{
+				ProcessKey(KeyCode.C);
+			}	
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Camera follow room", Style.Label);
+			if (GUILayout.Button(cameraFollowRoom ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
+			{
+				ProcessKey(KeyCode.R);
+			}
+			GUILayout.EndHorizontal();
+
+			//follow
+			if (readMemoryFunc != null) 
+			{
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Camera follow player", Style.Label);
+				if (GUILayout.Button(cameraFollowPlayer ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
+				{
+					ProcessKey(KeyCode.F);
+				}
+				GUILayout.EndHorizontal();
+			}
+
+			//rooms
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Rooms", Style.Label);
+			if (GUILayout.Button(roomModes[showrooms], Style.Option) && Event.current.button == 0)
+			{
+				ProcessKey(KeyCode.H);
+			}
+			GUILayout.EndHorizontal();
+
+			//areas
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Cameras", Style.Label);
+			if (GUILayout.Button(areaModes[showareas],  Style.Option) && Event.current.button == 0)
+			{
+				ProcessKey(KeyCode.A);
+			}
+			GUILayout.EndHorizontal();
+
+
+			//triggers
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Triggers", Style.Label);
+			if (GUILayout.Button(showtriggers ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
+			{
+				ProcessKey(KeyCode.T);
+			}
+			GUILayout.EndHorizontal();
+
+			//actors
+			if (readMemoryFunc != null)
+			{
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Actors", Style.Label);
+				if (GUILayout.Button(Actors.activeSelf ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
+				{				
+					ProcessKey(KeyCode.J);
+				}
+				GUILayout.EndHorizontal();
+			}
+
+			//camera rotate
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Camera rotation", Style.Label);
+			float rotation = Mathf.Round(GUILayout.HorizontalSlider(cameraRotation, -8.0f, 8.0f, Style.Slider, Style.Thumb));
+			if(Event.current.button == 0)
+			{
+				cameraRotation = rotation;
+				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
+			}
+			GUILayout.EndHorizontal();
+
+			GUILayout.EndVertical();
+			GUILayout.EndArea ();
+		}
+    }
+
+    private void ProcessKey(KeyCode keyCode)
+    {
+		switch(keyCode)
+		{
+			case KeyCode.L:
 				if (readMemoryFunc == null)
 				{   
 					//search player position in DOSBOX                          
@@ -688,18 +750,13 @@ public class RoomLoader : MonoBehaviour
 					Actors.SetActive(false);
 				}  
 				menuEnabled = false;
-			}
+				break;
 
-			if(GUILayout.Button("Model viewer", Style.Button) && Event.current.button == 0)
-			{
+			case KeyCode.Tab:
 				SceneManager.LoadScene("model");
-			}
+				break;
 
-			//camera 
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Camera projection", Style.Label);
-			if (GUILayout.Button(Camera.main.orthographic ? "Perspective" : "Orthographic", Style.Option) && Event.current.button == 0)
-			{
+			case KeyCode.C:
 				Camera.main.orthographic = !Camera.main.orthographic;
 				float planeSize = Mathf.Tan(Camera.main.fieldOfView * Mathf.Deg2Rad / 2.0f);
 
@@ -715,89 +772,86 @@ public class RoomLoader : MonoBehaviour
 						Camera.main.orthographicSize / planeSize,
 						Camera.main.transform.position.z);
 				}
-			}	
-			GUILayout.EndHorizontal();
+				break;
 
+			case KeyCode.F:
+				cameraFollowPlayer = !cameraFollowPlayer;
+				lastPlayerPosition = Vector3.zero;
+				linkfloor = floor;
+				linkroom = room;
+				break;		
 
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Camera follow room", Style.Label);
-			if (GUILayout.Button(cameraFollowRoom ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
-			{
-				cameraFollowRoom = !cameraFollowRoom;
-			}
-			GUILayout.EndHorizontal();
-
-			//follow
-			if (readMemoryFunc != null) 
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Camera follow player", Style.Label);
-				if (GUILayout.Button(cameraFollowPlayer ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
-				{
-					cameraFollowPlayer = !cameraFollowPlayer;
-					lastPlayerPosition = Vector3.zero;
-					linkfloor = floor;
-					linkroom = room;
-				}
-				GUILayout.EndHorizontal();
-			}
-
-			//rooms
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Rooms", Style.Label);
-			if (GUILayout.Button(roomModes[showrooms], Style.Option) && Event.current.button == 0)
-			{
+			case KeyCode.H:	
 				showrooms = (showrooms + 1) % 4;
 				SetRoomObjectsVisibility(room);
-			}
-			GUILayout.EndHorizontal();
+				break;
 
-			//areas
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Areas", Style.Label);
-			if (GUILayout.Button(areaModes[showareas],  Style.Option) && Event.current.button == 0)
-			{
+			case KeyCode.A:
 				showareas = (showareas + 1) % 3;
 				SetRoomObjectsVisibility(room);
-			}
-			GUILayout.EndHorizontal();
+				break;
 
-
-			//triggers
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Triggers", Style.Label);
-			if (GUILayout.Button(showtriggers ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
-			{
+			case KeyCode.T:	
 				showtriggers = !showtriggers; 
 				SetRoomObjectsVisibility(room);
-			}
-			GUILayout.EndHorizontal();
+				break;
 
-			//actors
-			if (readMemoryFunc != null)
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Actors", Style.Label);
-				if (GUILayout.Button(Actors.activeSelf ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
-				{				
-					Actors.SetActive(!Actors.activeSelf);
-				}
-				GUILayout.EndHorizontal();
-			}
+			case KeyCode.J:
+				Actors.SetActive(!Actors.activeSelf);
+				break;
 
-			//camera rotate
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Camera rotation", Style.Label);
-			float rotation = Mathf.Round(GUILayout.HorizontalSlider(cameraRotation, -8.0f, 8.0f, Style.Slider, Style.Thumb));
-			if(Event.current.button == 0)
-			{
-				cameraRotation = rotation;
+			case KeyCode.R:
+				cameraFollowRoom = !cameraFollowRoom;
+				break;	
+
+			case KeyCode.Escape:	
+				if (Screen.fullScreen)
+					Application.Quit();
+				break;	
+
+			case KeyCode.PageUp:	
+				cameraRotation = Math.Min(cameraRotation + 1, 8);
 				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
-			}
-			GUILayout.EndHorizontal();
+				break;	
 
-			GUILayout.EndVertical();
-			GUILayout.EndArea ();
+			case KeyCode.PageDown:	
+				cameraRotation = Math.Max(cameraRotation - 1, -8);
+				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
+				break;	
+
+			case KeyCode.DownArrow:	
+				if (floor > 0)
+				{                                
+					floor--;
+					room = 0;
+					RefreshRooms();  				 
+				}
+				break;
+
+			case KeyCode.UpArrow:	
+				if (floor < 7)
+				{                                
+					floor++;
+					room = 0;				  
+					RefreshRooms();				   
+				}
+				break;
+
+			case KeyCode.LeftArrow:	
+				if (room > 0)
+				{                                                                                 
+					room--;				  
+					RefreshRooms();				  
+				}
+				break;
+
+			case KeyCode.RightArrow:	
+				if (room < (roomsPerFloor[floor] - 1))
+				{  
+					room++;
+					RefreshRooms();
+				}
+				break;
 		}
     }
 
