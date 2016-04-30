@@ -11,6 +11,7 @@ public class ModelLoader : MonoBehaviour
 {
 	private int modelIndex = 0;
 	private int modelFolderIndex = 0;
+	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 
 	private string[] modelFolders = new string[] { "GAMEDATA\\LISTBODY", "GAMEDATA\\LISTBOD2" };
 	private List<string> modelFiles = new List<string>();
@@ -350,8 +351,8 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//process keys
-		foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
-		{
+		foreach (var key in keyCodes)
+		{			
 			if(Input.GetKeyDown(key))
 			{
 				ProcessKey(key);

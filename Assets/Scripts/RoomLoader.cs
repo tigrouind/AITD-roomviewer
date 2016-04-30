@@ -18,6 +18,7 @@ public class RoomLoader : MonoBehaviour
 	private int[] cameraColors = new [] { 0xFF8080, 0x789CF0, 0xB0DE6F, 0xCC66C0, 0x5DBAAB, 0xF2BA79, 0x8E71E3, 0x6ED169, 0xBF6080, 0x7CCAF7 };
 	private Vector3 mousePosition;
 	private float cameraRotation;
+	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 
 	private int showrooms = 2;
 	private bool showtriggers = true;
@@ -382,8 +383,8 @@ public class RoomLoader : MonoBehaviour
 			RefreshHighLightedBox();          
 		}
 
-		foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
-		{
+		foreach (var key in keyCodes)
+		{			
 			if(Input.GetKeyDown(key))
 			{
 				ProcessKey(key);
