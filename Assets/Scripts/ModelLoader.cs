@@ -311,6 +311,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//load first model
+		modelIndex = 0;
 		LoadModels(modelFolders[modelFolderIndex]);
 	}
 
@@ -320,7 +321,6 @@ public class ModelLoader : MonoBehaviour
 		{
 			modelFiles = Directory.GetFiles(foldername)
                     .OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();            
-			modelIndex = 0;
 			LoadBody(modelFiles[modelIndex]);
 		}
 		else
@@ -348,6 +348,7 @@ public class ModelLoader : MonoBehaviour
 		if (Input.GetMouseButtonDown(1))
 		{			
 			menuEnabled = !menuEnabled;
+			ModelIndexString = modelIndex.ToString();
 		}
 
 		//process keys
@@ -364,10 +365,10 @@ public class ModelLoader : MonoBehaviour
 			//start drag
 			if (Input.GetMouseButtonDown(0))
 			{
-				mousePosition = Input.mousePosition;
+				mousePosition = Input.mousePosition;			
 				autoRotate = false;
 			}
-
+				
 			//dragging
 			if (Input.GetMouseButton(0))
 			{
@@ -383,6 +384,7 @@ public class ModelLoader : MonoBehaviour
 		//load new model if needed
 		if (oldModelIndex != modelIndex)
 		{           
+			ModelIndexString = modelIndex.ToString();
 			LoadBody(modelFiles[modelIndex]);
 		}   
          
@@ -407,12 +409,13 @@ public class ModelLoader : MonoBehaviour
 
 	private bool menuEnabled;
 	public MenuStyle MenuStyle;
+	public string ModelIndexString;
 
 	void OnGUI() 
 	{
 		if (menuEnabled)
 		{
-			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15, 400, 30);
+			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 2, 400, 30 * 2);
 			if(Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition)) {
 				menuEnabled = false;
 			}
@@ -424,6 +427,19 @@ public class ModelLoader : MonoBehaviour
 			{
 				ProcessKey(KeyCode.Tab);
 			}
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Model", MenuStyle.Label);
+			ModelIndexString = GUILayout.TextField(ModelIndexString, MenuStyle.Button);
+
+			if(Event.current.keyCode == KeyCode.Return)
+			{
+				int.TryParse(ModelIndexString, out modelIndex);
+				modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
+				ModelIndexString = modelIndex.ToString();
+				LoadBody(modelFiles[modelIndex]);
+			}
+			GUILayout.EndHorizontal();
 
 			GUILayout.EndVertical();
 			GUILayout.EndArea ();
@@ -458,9 +474,9 @@ public class ModelLoader : MonoBehaviour
 			
 			case KeyCode.UpArrow:					
 				if (modelFolderIndex < (modelFolders.Length - 1))
-				{
-					modelIndex++;
-					LoadModels(modelFolders[modelIndex]);
+				{					
+					modelFolderIndex++;
+					LoadModels(modelFolders[modelFolderIndex]);
 				}
 				break;
 			
