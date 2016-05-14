@@ -23,8 +23,7 @@ public class RoomLoader : MonoBehaviour
 	private int showrooms = 2;
 	private bool showtriggers = true;
 	private int showareas = 0;
-	private bool cameraFollowPlayer;
-	private bool cameraFollowRoom = true;
+	private int cameraFollow = 1;
 
 	private Vector3 lastPlayerPosition;
 
@@ -79,8 +78,15 @@ public class RoomLoader : MonoBehaviour
 
 		SetRoomObjectsVisibility(room);
 
-		//center camera on current room
-		if (cameraFollowRoom && transform.childCount > 0)
+		if (cameraFollow == 1)
+		{
+			CenterCamera(room);
+		}
+	}
+
+	void CenterCamera(int room)
+	{
+		if (transform.childCount > 0)
 		{
 			Transform roomTransform = transform.Find("ROOM" + room);
 			if (roomTransform != null)
@@ -549,7 +555,7 @@ public class RoomLoader : MonoBehaviour
 							if(box.transform.position != lastPlayerPosition)
 							{
 								//center camera to player position
-								if(cameraFollowPlayer)
+								if(cameraFollow == 2)
 								{
 									Camera.main.transform.position = new Vector3(box.transform.position.x, 
 										Camera.main.transform.position.y,
@@ -602,6 +608,7 @@ public class RoomLoader : MonoBehaviour
 	
 	private string[] roomModes = new string[] { "No", "Current room", "Current room / All", "All"  };
 	private string[] areaModes = new string[] { "No", "Current room", "All" };
+	private string[] cameraModes = new string[] { "Nothing", "Current room", "Player" };
 	private bool menuEnabled;
 	public MenuStyle Style;
 
@@ -643,25 +650,14 @@ public class RoomLoader : MonoBehaviour
 			}	
 			GUILayout.EndHorizontal();
 
+			//follow
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Camera follow room", Style.Label);
-			if (GUILayout.Button(cameraFollowRoom ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
+			GUILayout.Label("Camera follow", Style.Label);
+			if (GUILayout.Button(cameraModes[cameraFollow], Style.Option) && Event.current.button == 0)
 			{
-				ProcessKey(KeyCode.R);
+				ProcessKey(KeyCode.F);
 			}
 			GUILayout.EndHorizontal();
-
-			//follow
-			if (readMemoryFunc != null) 
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Camera follow player", Style.Label);
-				if (GUILayout.Button(cameraFollowPlayer ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
-				{
-					ProcessKey(KeyCode.F);
-				}
-				GUILayout.EndHorizontal();
-			}
 
 			//rooms
 			GUILayout.BeginHorizontal();
@@ -746,6 +742,10 @@ public class RoomLoader : MonoBehaviour
 				}
 				else
 				{
+					if(cameraFollow == 2) 
+					{
+						cameraFollow = 1;
+					}
 					readMemoryFunc = null;
 					RightText.text = string.Empty;
 					Actors.SetActive(false);
@@ -776,10 +776,18 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.F:
-				cameraFollowPlayer = !cameraFollowPlayer;
-				lastPlayerPosition = Vector3.zero;
-				linkfloor = floor;
-				linkroom = room;
+				cameraFollow = (cameraFollow + 1) % (readMemoryFunc == null ? 2 : 3);
+				if (cameraFollow == 1)
+				{
+					CenterCamera(room);
+				}
+				else if (cameraFollow == 2)
+				{
+					//make sure camear snap back
+					lastPlayerPosition = Vector3.zero;
+					linkfloor = floor;
+					linkroom = room;				
+				}
 				break;		
 
 			case KeyCode.H:	
@@ -801,9 +809,6 @@ public class RoomLoader : MonoBehaviour
 				Actors.SetActive(!Actors.activeSelf);
 				break;
 
-			case KeyCode.R:
-				cameraFollowRoom = !cameraFollowRoom;
-				break;	
 
 			case KeyCode.Escape:	
 				if (Screen.fullScreen)
