@@ -620,7 +620,7 @@ public class RoomLoader : MonoBehaviour
 			if (readMemoryFunc == null)
 				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 8, 400, 30 * 8);					
 			else
-				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 10, 400, 30 * 10);
+				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 9, 400, 30 * 9);
 
 			//close menu if there is a  click out side
 			if(Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition)) {
