@@ -21,8 +21,10 @@ public class ModelLoader : MonoBehaviour
 	public Mesh CubeMesh;
 
 	private Vector3 cameraSettings = new Vector3(0.0f, 0.0f, 2.0f);
+
 	private Vector3 mousePosition;
 	private bool autoRotate;
+	private bool enableNoise = true;
 
 	public static short ReadShort(byte a, byte b)
 	{
@@ -32,12 +34,15 @@ public class ModelLoader : MonoBehaviour
 		}
 	}
 
-	void LoadBody(string filename)
+	void LoadBody(string filename, bool reset = true)
 	{
 		LeftText.text = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1);
 
 		//camera
-		autoRotate = true;
+		if(reset)
+		{
+			autoRotate = true;
+		}
 
 		//clear model
 		MeshFilter filter = this.gameObject.GetComponent<MeshFilter>();
@@ -63,14 +68,6 @@ public class ModelLoader : MonoBehaviour
 			vertices.Add(position / 1000.0f);
 			i += 6;
 		}
-
-		//compute line size 
-		Bounds bounds = new Bounds();
-		foreach (Vector3 vector in vertices)
-		{
-			bounds.Encapsulate(vector);
-		}
-		float linesize = bounds.size.magnitude / 250.0f;
 
 		//check if model has bones 
 		if ((flags & 2) == 2)
@@ -98,6 +95,15 @@ public class ModelLoader : MonoBehaviour
 			}
 		}
 
+		//compute line size 
+		Bounds bounds = new Bounds();
+		foreach (Vector3 vector in vertices)
+		{
+			bounds.Encapsulate(vector);
+		}
+		float linesize = bounds.size.magnitude / 250.0f;
+		float noisesize = 0.8f / bounds.size.magnitude;
+
 		//primitives
 		count = ReadShort(allbytes[i + 0], allbytes[i + 1]);
 		i += 2;
@@ -105,6 +111,7 @@ public class ModelLoader : MonoBehaviour
 		List<Vector3> allVertices = new List<Vector3>();
 		List<Color32> colors = new List<Color32>();
 		List<int> indices = new List<int>();
+		List<Vector2> uv = new List<Vector2>();
 
 		for (int n = 0; n < count; n++)
 		{
@@ -127,6 +134,7 @@ public class ModelLoader : MonoBehaviour
 						Vector3 middle = (vertices[pointIndexA] + vertices[pointIndexB]) / 2.0f;
 						Quaternion rotation = Quaternion.LookRotation(directionVector);                                       
 
+						uv.AddRange(CubeMesh.uv);
 						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x =>
                         rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
@@ -144,13 +152,22 @@ public class ModelLoader : MonoBehaviour
 						i += 3;
 
 						Color32 color = paletteColors[colorIndex];
-						//transparency
-						if (polyType == 2)
+
+						if (polyType == 1 && enableNoise)
 						{
+							//noise
+							color.a = 254;
+							color.r = (byte)((colorIndex % 16) * 16);
+							color.g = (byte)((colorIndex / 16) * 16);    
+						}
+						else if (polyType == 2)
+						{
+							//transparency
 							color.a = 128;
 						}
 
-						//add vertices    
+						//add vertices   
+						List<Vector3> polyVertices = new List<Vector3>();
 						int verticesCount = allVertices.Count;
 						for (int m = 0; m < numPoints; m++)
 						{
@@ -159,7 +176,40 @@ public class ModelLoader : MonoBehaviour
 
 							colors.Add(color);
 							allVertices.Add(vertices[pointIndex]);  
-						}  
+							polyVertices.Add(vertices[pointIndex]);  						
+						} 
+
+						if(polyType == 1 && enableNoise)
+						{
+							//compute UV coordinates
+							int lastPoly = polyVertices.Count - 1;
+							Vector3 up, left, forward;
+
+							do
+							{
+								Vector3 a = polyVertices[0];
+								Vector3 b = polyVertices[1];
+								Vector3 c = polyVertices[lastPoly];
+
+								left = (b - a).normalized;
+								forward = (c - a).normalized;
+								up = Vector3.Cross(left, forward).normalized;
+								left = Vector3.Cross(up, forward).normalized;
+								lastPoly--;
+							} while(up == Vector3.zero && lastPoly > 1);
+												
+							foreach (Vector3 poly in polyVertices)
+							{
+								uv.Add(new Vector2(
+									Vector3.Dot(poly, left) * noisesize ,
+									Vector3.Dot(poly, forward) * noisesize
+								));
+							}
+						}
+						else
+						{
+							uv.AddRange(polyVertices.Select(x => Vector2.zero));
+						}
 
 						//triangulate       
 						int v0 = 0;
@@ -198,10 +248,18 @@ public class ModelLoader : MonoBehaviour
 						Color32 color = paletteColors[colorIndex];
 						i += 2;
 
-						//transparency
-						if (polyType == 2)
+
+						if (polyType == 1)
 						{
-							color.a = 128;                  
+							//noise
+							color.a = 254;
+							color.r = (byte)((colorIndex % 16) * 16);
+							color.g = (byte)((colorIndex / 16) * 16);    
+						}
+						else if (polyType == 2)
+						{
+							//transparency
+							color.a = 128;							             
 						}               
                
 						int size = ReadShort(allbytes[i + 0], allbytes[i + 1]);
@@ -212,6 +270,7 @@ public class ModelLoader : MonoBehaviour
 						Vector3 position = vertices[pointSphereIndex];
 						Vector3 scale = new Vector3(size, size, size) / 500.0f;
 
+						uv.AddRange(SphereMesh.uv.Select(x => x * noisesize * size / 200.0f));
 						indices.AddRange(SphereMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(SphereMesh.vertices.Select(x => Vector3.Scale(x, scale) + position));
 						colors.AddRange(SphereMesh.vertices.Select(x => color));
@@ -247,6 +306,7 @@ public class ModelLoader : MonoBehaviour
 							scale = 0.05f * Vector3.one;
 						}
 
+						uv.AddRange(CubeMesh.uv);
 						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x => rotation * Vector3.Scale(x, scale) + position));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
@@ -265,6 +325,7 @@ public class ModelLoader : MonoBehaviour
 
 		//separate transparent/opaque triangles
 		List<int> opaque = new List<int>();
+		List<int> noise = new List<int>();
 		List<int> transparent = new List<int>();
 
 		for (int t = 0; t < indices.Count; t += 3)
@@ -273,6 +334,10 @@ public class ModelLoader : MonoBehaviour
 			if (colors[indices[t]].a == 255)
 			{
 				trianglesList = opaque;
+			}
+			else if (colors[indices[t]].a == 254)
+			{
+				trianglesList = noise;
 			}
 			else
 			{
@@ -284,9 +349,11 @@ public class ModelLoader : MonoBehaviour
 			trianglesList.Add(indices[t + 2]);
 		}
 
-		msh.subMeshCount = 2;
+		msh.subMeshCount = 3;
 		msh.SetTriangles(opaque, 0);
 		msh.SetTriangles(transparent, 1);
+		msh.SetTriangles(noise, 2);
+		msh.SetUVs(0, uv);
 
 		msh.RecalculateNormals();
 		msh.RecalculateBounds();
@@ -412,7 +479,7 @@ public class ModelLoader : MonoBehaviour
 	{
 		if (menuEnabled)
 		{
-			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 2, 400, 30 * 2);
+			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 3, 400, 30 * 3);
 			if(Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition)) {
 				menuEnabled = false;
 			}
@@ -425,6 +492,7 @@ public class ModelLoader : MonoBehaviour
 				ProcessKey(KeyCode.Tab);
 			}
 
+			//model no
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Model", MenuStyle.Label);
 			ModelIndexString = GUILayout.TextField(ModelIndexString, MenuStyle.Button);
@@ -435,6 +503,15 @@ public class ModelLoader : MonoBehaviour
 				modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
 				ModelIndexString = modelIndex.ToString();
 				LoadBody(modelFiles[modelIndex]);
+			}
+			GUILayout.EndHorizontal();
+
+			//render mode
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Render mode", MenuStyle.Label);
+			if (GUILayout.Button(enableNoise ? "Texture shaded" : "Flat shaded", MenuStyle.Option) && Event.current.button == 0)
+			{
+				ProcessKey(KeyCode.R);
 			}
 			GUILayout.EndHorizontal();
 
@@ -484,6 +561,11 @@ public class ModelLoader : MonoBehaviour
 					LoadModels(modelFolders[modelFolderIndex]);
 				}
 				break;
+
+			case KeyCode.R:
+				enableNoise = !enableNoise;
+				LoadBody(modelFiles[modelIndex], false);
+				break;	
 			  
 			case KeyCode.Escape:
 				if(Screen.fullScreen)

@@ -59,8 +59,4 @@ Repeat room viewer installation steps with QuickBMS but select files LISTBODY.PA
 ## Known bugs/limitations :
 
 - there is z-fighting on some models (eg : wardrobe doors, oil can, vinyl, ...)  
-- some materials are not supported :
-  * noise (as seen on doors, zombie chicken, ...)
-  * vertical and horizontal gradients (eg: oil can, cookie box, sword, ...)
-  3D models in the model viewer will appears like original game running in low quality 
-    (except for transparency which is supported).
+- vertical and horizontal gradient materials are not supported (eg: oil can, cookie box, sword, ...)

@@ -117,7 +117,10 @@ MonoBehaviour:
   LeftText: {fileID: 1466640561}
   SphereMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   CubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  NoiseTexture: {fileID: 2800000, guid: ad898f78e0689cb488e00dfd6534d6c7, type: 3}
+  BlackTexture: {fileID: 2800000, guid: 6d54d8047cfb5274da22c70bae804d64, type: 3}
   MenuStyle: {fileID: 1855528287}
+  ModelIndexString: 
 --- !u!4 &888752819
 Transform:
   m_ObjectHideFlags: 0
@@ -142,6 +145,7 @@ MeshRenderer:
   m_Materials:
   - {fileID: 2100000, guid: aad6fb61163c2014da79ccfa77f04eeb, type: 2}
   - {fileID: 2100000, guid: c032181150b77d94498c34c5729d7382, type: 2}
+  - {fileID: 2100000, guid: 4de699cee54d0ee42b5e907fb1796d15, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -331,7 +335,9 @@ MonoBehaviour:
   PanelTexture: {fileID: 2800000, guid: 985b364130aebe1418e8acb6c6d97422, type: 3}
   HoverTexture: {fileID: 2800000, guid: 7a54185207c9c3f4d8590f8b5cedca84, type: 3}
   SliderTexture: {fileID: 2800000, guid: 41bcdd969c420d64bbd2b5ad82a59f11, type: 3}
+  SliderHoverTexture: {fileID: 0}
   ThumbTexture: {fileID: 2800000, guid: a312d4ad03a68e14d9c0212d832e3e90, type: 3}
+  ThumbHoverTexture: {fileID: 0}
   Panel:
     m_Name: 
     m_Normal:
