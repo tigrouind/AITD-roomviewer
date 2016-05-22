@@ -20,9 +20,7 @@ public class ModelLoader : MonoBehaviour
 	public Mesh SphereMesh;
 	public Mesh CubeMesh;
 
-	private float cameraDistance = 2.0f;
-
-	private Vector3 cameraSettings;
+	private Vector3 cameraSettings = new Vector3(0.0f, 0.0f, 2.0f);
 	private Vector3 mousePosition;
 	private bool autoRotate;
 
@@ -40,8 +38,6 @@ public class ModelLoader : MonoBehaviour
 
 		//camera
 		autoRotate = true;
-		transform.position = Vector3.zero;
-		transform.rotation = Quaternion.identity;
 
 		//clear model
 		MeshFilter filter = this.gameObject.GetComponent<MeshFilter>();
@@ -335,13 +331,13 @@ public class ModelLoader : MonoBehaviour
 
 		if (Input.GetAxis("Mouse ScrollWheel") > 0)
 		{
-			if (cameraDistance > 0.1f)
-				cameraDistance *= 0.9f;           
+			if (cameraSettings.z > 0.1f)
+				cameraSettings.z *= 0.9f;           
 		}
 
 		if (Input.GetAxis("Mouse ScrollWheel") < 0)
 		{            
-			cameraDistance *= 1.0f / 0.9f;
+			cameraSettings.z *= 1.0f / 0.9f;
 		}
 
 		//menu
@@ -374,7 +370,7 @@ public class ModelLoader : MonoBehaviour
 			{
 				Vector3 mouseDelta = mousePosition - Input.mousePosition;
 				cameraSettings += mouseDelta * Time.deltaTime * 50.0f;
-				cameraSettings.y = Mathf.Clamp(cameraSettings.y, -90.0f, 90.0f);
+				cameraSettings.y = Mathf.Clamp(cameraSettings.y, -89.99f, 89.99f);
 				mousePosition = Input.mousePosition;
 			}
 		}
@@ -394,16 +390,17 @@ public class ModelLoader : MonoBehaviour
 			cameraSettings.x = Time.time * 100.0f;
 			cameraSettings.y = 20.0f;
 		}            
-
-		gameObject.transform.rotation = Quaternion.AngleAxis(cameraSettings.x, Vector3.up);
 	}
-
 
 	private void LateUpdate()
 	{
 		//set camera to look at model      
-		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);               
-		Camera.main.transform.position = center + (Vector3.back * Mathf.Cos(cameraSettings.y * Mathf.Deg2Rad) + Vector3.up * Mathf.Sin(cameraSettings.y * Mathf.Deg2Rad)) * cameraDistance;           
+		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);   
+
+		Camera.main.transform.position = center 
+			+ (Quaternion.AngleAxis(cameraSettings.x, Vector3.down)
+			* Quaternion.AngleAxis(cameraSettings.y, Vector3.right))
+			* (Vector3.back * cameraSettings.z); 
 		Camera.main.transform.LookAt(center);
 	}
 
