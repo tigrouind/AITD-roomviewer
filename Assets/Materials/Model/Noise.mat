@@ -89,7 +89,7 @@ Material:
         first:
           name: _Palette
         second:
-          m_Texture: {fileID: 2800000, guid: 57e6d7ce414cddd4f96f9875d239d467, type: 3}
+          m_Texture: {fileID: 2800000, guid: c0878cc6c32d82a48a6a1f5a9bbe9adf, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
     m_Floats:

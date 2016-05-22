@@ -15,7 +15,8 @@ public class ModelLoader : MonoBehaviour
 
 	private string[] modelFolders = new string[] { "GAMEDATA\\LISTBODY", "GAMEDATA\\LISTBOD2" };
 	private List<string> modelFiles = new List<string>();
-	private List<Color32> paletteColors = new List<Color32>();
+
+	public Texture2D PaletteTexture;
 	public GUIText LeftText;
 	public Mesh SphereMesh;
 	public Mesh CubeMesh;
@@ -107,6 +108,9 @@ public class ModelLoader : MonoBehaviour
 		//primitives
 		count = ReadShort(allbytes[i + 0], allbytes[i + 1]);
 		i += 2;
+
+		//load palette
+		Color32[] paletteColors = PaletteTexture.GetPixels32();
 
 		List<Vector3> allVertices = new List<Vector3>();
 		List<Color32> colors = new List<Color32>();
@@ -364,15 +368,6 @@ public class ModelLoader : MonoBehaviour
 
 	void Start()
 	{
-		//load palette
-		TextAsset asset = Resources.Load("palette") as TextAsset;
-		byte[] allbytes = asset.bytes;
-		for (int i = 0; i < 256; i++)
-		{
-			Color32 color = new Color32(allbytes[i * 3 + 0], allbytes[i * 3 + 1], allbytes[i * 3 + 2], 255);
-			paletteColors.Add(color);
-		}
-
 		//load first model
 		modelIndex = 0;
 		LoadModels(modelFolders[modelFolderIndex]);
@@ -472,8 +467,8 @@ public class ModelLoader : MonoBehaviour
 	}
 
 	private bool menuEnabled;
+	private string ModelIndexString;
 	public MenuStyle MenuStyle;
-	public string ModelIndexString;
 
 	void OnGUI() 
 	{

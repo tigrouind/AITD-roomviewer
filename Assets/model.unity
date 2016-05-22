@@ -114,13 +114,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 297e408e493d53c4ab9dd661fb24ff67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PaletteTexture: {fileID: 2800000, guid: c0878cc6c32d82a48a6a1f5a9bbe9adf, type: 3}
   LeftText: {fileID: 1466640561}
   SphereMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   CubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  NoiseTexture: {fileID: 2800000, guid: ad898f78e0689cb488e00dfd6534d6c7, type: 3}
-  BlackTexture: {fileID: 2800000, guid: 6d54d8047cfb5274da22c70bae804d64, type: 3}
   MenuStyle: {fileID: 1855528287}
-  ModelIndexString: 
 --- !u!4 &888752819
 Transform:
   m_ObjectHideFlags: 0
