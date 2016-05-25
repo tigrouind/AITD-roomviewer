@@ -25,7 +25,7 @@ public class ModelLoader : MonoBehaviour
 
 	private Vector3 mousePosition;
 	private bool autoRotate;
-	private bool enableNoise = true;
+	private bool enableNoise;
 
 	public static short ReadShort(byte a, byte b)
 	{
@@ -185,30 +185,16 @@ public class ModelLoader : MonoBehaviour
 
 						if(polyType == 1 && enableNoise)
 						{
-							//compute UV coordinates
-							int lastPoly = polyVertices.Count - 1;
-							Vector3 up, left, forward;
+                            Vector3 forward, left;
+                            ComputeUV(polyVertices, out forward, out left);
 
-							do
-							{
-								Vector3 a = polyVertices[0];
-								Vector3 b = polyVertices[1];
-								Vector3 c = polyVertices[lastPoly];
-
-								left = (b - a).normalized;
-								forward = (c - a).normalized;
-								up = Vector3.Cross(left, forward).normalized;
-								left = Vector3.Cross(up, forward).normalized;
-								lastPoly--;
-							} while(up == Vector3.zero && lastPoly > 1);
-												
-							foreach (Vector3 poly in polyVertices)
-							{
+                            foreach (Vector3 poly in polyVertices)
+                            {
 								uv.Add(new Vector2(
 									Vector3.Dot(poly, left) * noisesize ,
 									Vector3.Dot(poly, forward) * noisesize
 								));
-							}
+                            }												
 						}
 						else
 						{
@@ -252,8 +238,7 @@ public class ModelLoader : MonoBehaviour
 						Color32 color = paletteColors[colorIndex];
 						i += 2;
 
-
-						if (polyType == 1)
+                        if (polyType == 1 && enableNoise)
 						{
 							//noise
 							color.a = 254;
@@ -272,11 +257,12 @@ public class ModelLoader : MonoBehaviour
 						i += 2;
 
 						Vector3 position = vertices[pointSphereIndex];
-						Vector3 scale = new Vector3(size, size, size) / 500.0f;
+						float scale = size / 500.0f;
+                        float uvScale = noisesize * size / 200.0f;
 
-						uv.AddRange(SphereMesh.uv.Select(x => x * noisesize * size / 200.0f));
+                        uv.AddRange(SphereMesh.uv.Select(x => x * uvScale));
 						indices.AddRange(SphereMesh.triangles.Select(x => x + allVertices.Count));
-						allVertices.AddRange(SphereMesh.vertices.Select(x => Vector3.Scale(x, scale) + position));
+                        allVertices.AddRange(SphereMesh.vertices.Select(x => x * scale + position));
 						colors.AddRange(SphereMesh.vertices.Select(x => color));
 						break;
 					}
@@ -365,6 +351,24 @@ public class ModelLoader : MonoBehaviour
 		filter = this.gameObject.GetComponent<MeshFilter>();
 		filter.sharedMesh = msh;
 	}
+
+    void ComputeUV(List<Vector3> polyVertices, out Vector3 forward, out Vector3 left)
+    {
+        int lastPoly = polyVertices.Count - 1;
+        Vector3 up;
+        do
+        {
+            Vector3 a = polyVertices[0];
+            Vector3 b = polyVertices[1];
+            Vector3 c = polyVertices[lastPoly];
+            left = (b - a).normalized;
+            forward = (c - a).normalized;
+            up = Vector3.Cross(left, forward).normalized;
+            left = Vector3.Cross(up, forward).normalized;
+            lastPoly--;
+        }
+        while (up == Vector3.zero && lastPoly > 1);
+    }
 
 	void Start()
 	{

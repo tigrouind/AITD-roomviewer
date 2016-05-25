@@ -40,9 +40,9 @@
             fixed4 frag (vertOutput output) : SV_Target
             {   
             	float2 noiseuv = output.uv;
-               	float shift = 0.5 - tex2D (_Noise, noiseuv).r;
+               	float shift = tex2D (_Noise, noiseuv).r;
 
-            	float2 paletteuv = output.color.rg + 1.0/32.0 + float2(shift * 8.0/16.0, 0.0);
+            	float2 paletteuv = output.color.rg + 1.0/32.0 + float2(shift * 5.0/16.0, 0.0);
                 return tex2D (_Palette, paletteuv);
             }
             ENDCG
