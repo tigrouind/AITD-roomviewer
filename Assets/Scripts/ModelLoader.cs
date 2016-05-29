@@ -20,12 +20,18 @@ public class ModelLoader : MonoBehaviour
 	public GUIText LeftText;
 	public Mesh SphereMesh;
 	public Mesh CubeMesh;
+	public MenuStyle MenuStyle;
 
-	private Vector3 cameraSettings = new Vector3(0.0f, 0.0f, 2.0f);
+	private Vector2 cameraRotation = new Vector2();
+	private Vector2 cameraPosition = new Vector2();
+	private float cameraZoom = 2.0f;
 
-	private Vector3 mousePosition;
+	private Vector3 mousePosition; //mouse drag
 	private bool autoRotate;
-	private bool enableNoise;
+	private bool enableNoise = true;
+	private bool displayMenuAfterDrag;
+	private bool menuEnabled;
+	private string ModelIndexString;
 
 	public static short ReadShort(byte a, byte b)
 	{
@@ -43,6 +49,7 @@ public class ModelLoader : MonoBehaviour
 		if(reset)
 		{
 			autoRotate = true;
+			cameraPosition = Vector2.zero;
 		}
 
 		//clear model
@@ -397,20 +404,13 @@ public class ModelLoader : MonoBehaviour
 
 		if (Input.GetAxis("Mouse ScrollWheel") > 0)
 		{
-			if (cameraSettings.z > 0.1f)
-				cameraSettings.z *= 0.9f;           
+			if (cameraZoom > 0.1f)
+				cameraZoom *= 0.9f;           
 		}
 
 		if (Input.GetAxis("Mouse ScrollWheel") < 0)
 		{            
-			cameraSettings.z *= 1.0f / 0.9f;
-		}
-
-		//menu
-		if (Input.GetMouseButtonDown(1))
-		{			
-			menuEnabled = !menuEnabled;
-			ModelIndexString = modelIndex.ToString();
+			cameraZoom *= 1.0f / 0.9f;
 		}
 
 		//process keys
@@ -424,20 +424,55 @@ public class ModelLoader : MonoBehaviour
 
 		if(!menuEnabled)
 		{
-			//start drag
+			//start drag (rotate)
 			if (Input.GetMouseButtonDown(0))
 			{
 				mousePosition = Input.mousePosition;			
 				autoRotate = false;
 			}
 				
-			//dragging
+			//dragging (rotate)
 			if (Input.GetMouseButton(0))
 			{
-				Vector3 mouseDelta = mousePosition - Input.mousePosition;
-				cameraSettings += mouseDelta * Time.deltaTime * 50.0f;
-				cameraSettings.y = Mathf.Clamp(cameraSettings.y, -89.99f, 89.99f);
+				Vector2 mouseDelta = mousePosition - Input.mousePosition;
+				cameraRotation += mouseDelta * Time.deltaTime * 50.0f;
+				cameraRotation.y = Mathf.Clamp(cameraRotation.y, -90.00f, 90.00f);
 				mousePosition = Input.mousePosition;
+			}
+
+			//start drag (pan)
+			if (Input.GetMouseButtonDown(1))
+			{
+				mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraZoom);		
+				autoRotate = false;
+				displayMenuAfterDrag = true;
+			}
+				
+			//dragging (pan)
+			if (Input.GetMouseButton(1))
+			{	
+				Vector3 newMousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraZoom);
+				if (newMousePosition != this.mousePosition)
+				{
+					Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition) - Camera.main.ScreenToWorldPoint(newMousePosition);
+					displayMenuAfterDrag = false;
+					cameraPosition += mouseDelta;
+					mousePosition = newMousePosition;
+				}
+			}
+
+			//end drag (pan)
+			if (Input.GetMouseButtonUp(1))
+			{
+				//show/hide menu
+				if(displayMenuAfterDrag)
+				{
+					menuEnabled = !menuEnabled;
+					if(menuEnabled)
+					{
+						ModelIndexString = modelIndex.ToString();
+					}
+				}
 			}
 		}
 
@@ -446,33 +481,32 @@ public class ModelLoader : MonoBehaviour
 		//load new model if needed
 		if (oldModelIndex != modelIndex)
 		{           
-			ModelIndexString = modelIndex.ToString();
 			LoadBody(modelFiles[modelIndex]);
 		}   
          
 		//rotate model
 		if (autoRotate)
 		{
-			cameraSettings.x = Time.time * 100.0f;
-			cameraSettings.y = 20.0f;
+			cameraRotation.x = Time.time * 100.0f;
+			cameraRotation.y = 20.0f;
 		}            
 	}
 
 	private void LateUpdate()
 	{
-		//set camera to look at model      
+		//rotate model 
+		transform.rotation = Quaternion.identity;
+		transform.position = Vector3.zero;
 		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);   
 
-		Camera.main.transform.position = center 
-			+ (Quaternion.AngleAxis(cameraSettings.x, Vector3.down)
-			* Quaternion.AngleAxis(cameraSettings.y, Vector3.right))
-			* (Vector3.back * cameraSettings.z); 
-		Camera.main.transform.LookAt(center);
-	}
+		transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
+		transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
+							* Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
 
-	private bool menuEnabled;
-	private string ModelIndexString;
-	public MenuStyle MenuStyle;
+		//set camera
+		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
+		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
+	}
 
 	void OnGUI() 
 	{

@@ -53,8 +53,8 @@ Repeat room viewer installation steps with QuickBMS but select files LISTBODY.PA
 - Up, down arrows : change model folder (only difference is Edward vs Emily) 
 - Shift : hold it while pressing Left or Right to skip 10 models at once
 - Mouse wheel : zoom in / out
-- Left mouse button : click and drag cursor on model to move camera 
-- Right mouse cursor : show options menu
+- Left mouse button : click and drag cursor on model to rotate model
+- Right mouse cursor : show options menu / move model
 
 ## Known bugs/limitations :
 
