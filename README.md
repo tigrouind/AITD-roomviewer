@@ -3,6 +3,8 @@
 This is a room viewer (and 3D model viewer) for the game Alone in The Dark (1992).
 It has been created mostly for speedrunning.
 
+AITD2 and AITD3 games are also supported.
+
 ## Instructions 
 1. Extract AITD room viewer archive somewhere (eg : on the desktop)
 2. Make sure you have original version of the game installed on your computer.

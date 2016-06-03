@@ -16,7 +16,8 @@ public class ModelLoader : MonoBehaviour
 	private string[] modelFolders = new string[] { "GAMEDATA\\LISTBODY", "GAMEDATA\\LISTBOD2" };
 	private List<string> modelFiles = new List<string>();
 
-	public Texture2D PaletteTexture;
+	private int PaletteIndex;
+	public Texture2D[] PaletteTexture;
 	public GUIText LeftText;
 	public Mesh SphereMesh;
 	public Mesh CubeMesh;
@@ -117,7 +118,7 @@ public class ModelLoader : MonoBehaviour
 		i += 2;
 
 		//load palette
-		Color32[] paletteColors = PaletteTexture.GetPixels32();
+        Color32[] paletteColors = PaletteTexture[PaletteIndex].GetPixels32();
 
 		List<Vector3> allVertices = new List<Vector3>();
 		List<Color32> colors = new List<Color32>();
@@ -355,7 +356,6 @@ public class ModelLoader : MonoBehaviour
 		msh.RecalculateNormals();
 		msh.RecalculateBounds();
                
-		filter = this.gameObject.GetComponent<MeshFilter>();
 		filter.sharedMesh = msh;
 	}
 
@@ -379,9 +379,37 @@ public class ModelLoader : MonoBehaviour
 
 	void Start()
 	{
+        if (!Directory.Exists(modelFolders[1]))
+        {
+            Array.Resize(ref modelFolders, 1);
+        }
+
 		//load first model
 		modelIndex = 0;
 		LoadModels(modelFolders[modelFolderIndex]);
+	}
+
+	void SetPalette()
+	{
+		//detect game
+		if (modelFiles.Count > 700)
+		{
+			//AITD3
+			PaletteIndex = 2;
+		}
+		else if (modelFiles.Count > 500)
+		{
+			//AITD2
+			PaletteIndex = 1;
+		}
+		else
+		{
+			//AITD1
+			PaletteIndex = 0;
+		}
+
+		GetComponent<Renderer>().materials[2] //noise
+			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
 	}
 
 	void LoadModels(string foldername)
@@ -389,7 +417,9 @@ public class ModelLoader : MonoBehaviour
 		if (Directory.Exists(foldername))
 		{
 			modelFiles = Directory.GetFiles(foldername)
-                    .OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();            
+				.OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();     
+
+			SetPalette();
 			LoadBody(modelFiles[modelIndex]);
 		}
 		else
@@ -490,22 +520,19 @@ public class ModelLoader : MonoBehaviour
 			cameraRotation.x = Time.time * 100.0f;
 			cameraRotation.y = 20.0f;
 		}            
-	}
 
-	private void LateUpdate()
-	{
-		//rotate model 
-		transform.rotation = Quaternion.identity;
-		transform.position = Vector3.zero;
-		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);   
+        //update model 
+        transform.position = Vector3.zero;
+        transform.rotation = Quaternion.identity;
+        Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);   
 
-		transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
-		transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
-							* Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
+        transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
+        transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
+            * Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
 
-		//set camera
-		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
-		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
+        //set camera
+        Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
+        Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
 	}
 
 	void OnGUI() 

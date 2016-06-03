@@ -114,7 +114,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 297e408e493d53c4ab9dd661fb24ff67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PaletteTexture: {fileID: 2800000, guid: c0878cc6c32d82a48a6a1f5a9bbe9adf, type: 3}
+  PaletteTexture:
+  - {fileID: 2800000, guid: c0878cc6c32d82a48a6a1f5a9bbe9adf, type: 3}
+  - {fileID: 2800000, guid: 4b31818a291beb543a3744b792568af2, type: 3}
+  - {fileID: 2800000, guid: a19c1244574785e4d8fc0bf3a447fef7, type: 3}
   LeftText: {fileID: 1466640561}
   SphereMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   CubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}

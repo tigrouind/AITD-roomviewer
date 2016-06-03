@@ -14,11 +14,11 @@ public class RoomLoader : MonoBehaviour
 	private int floor = 0;
 	private int room = 0;
 	private string[] cardinalPositions = new [] { "N", "E", "S", "W" };
-	private int[] roomsPerFloor = new [] { 1, 8, 11, 14, 2, 12, 7, 2 };
 	private int[] cameraColors = new [] { 0xFF8080, 0x789CF0, 0xB0DE6F, 0xCC66C0, 0x5DBAAB, 0xF2BA79, 0x8E71E3, 0x6ED169, 0xBF6080, 0x7CCAF7 };
 	private Vector3 mousePosition;
 	private float cameraRotation;
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
+    private List<int> floors = new List<int>();
 
 	private int showrooms = 2;
 	private bool showtriggers = true;
@@ -26,11 +26,11 @@ public class RoomLoader : MonoBehaviour
 	private int cameraFollow = 1;
 
 	private Vector3 lastPlayerPosition;
-
 	private int linkfloor = 0;
 	private int linkroom = 0;
 	private Func<byte[], int, int, bool> readMemoryFunc;
-	private byte[] memory = new byte[160 * 50];
+	private byte[] memory;
+    private int dosBoxIndex;
 
 	public GUIText LeftText;
 	public GUIText RightText;
@@ -51,6 +51,14 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
+    public static int ReadInt(byte a, byte b, byte c, byte d)
+    {
+        unchecked
+        {
+            return (int)(a | b << 8 | c << 16 | d << 24);
+        }
+    }
+
 	void Start()
 	{
 		//game has maximum 50 actors
@@ -60,8 +68,16 @@ public class RoomLoader : MonoBehaviour
 			box.transform.parent = Actors.transform;                
 			box.name = "Actor";           
 		}    
-		Directory.CreateDirectory("GAMEDATA");           
-		     
+		Directory.CreateDirectory("GAMEDATA"); 
+
+        //check existing ETAGEXX folders
+        floors = Directory.GetDirectories("GAMEDATA")
+            .Select(x => Path.GetFileName(x))
+            .Where(x => x.StartsWith("ETAGE"))
+            .Select(x => int.Parse(x.Substring(5, 2)))
+            .ToList();
+        floor = floors.FirstOrDefault();
+
 		RefreshRooms();
 	}
 
@@ -146,10 +162,16 @@ public class RoomLoader : MonoBehaviour
 		List<List<int>> camerasPerRoom = new List<List<int>>();
 
 		name = "FLOOR" + floor;
-		for (int currentroom = 0; currentroom < roomsPerFloor[floor]; currentroom++)
+        int maxrooms = ReadInt(allPointsA[0], allPointsA[1], allPointsA[2], allPointsA[3]) / 4;
+        for (int currentroom = 0; currentroom < maxrooms ; currentroom++)
 		{
 			int i = currentroom * 4;
-			int roomheader = ReadShort(allPointsA[i + 0], allPointsA[i + 1]);
+            int roomheader = ReadInt(allPointsA[i + 0], allPointsA[i + 1], allPointsA[i + 2], allPointsA[i + 3]);
+            if (roomheader > allPointsA.Length)
+            {
+                //all rooms parsed
+                break;                
+            }
 
 			//room
 			GameObject roomObject = new GameObject();
@@ -246,7 +268,9 @@ public class RoomLoader : MonoBehaviour
 			camerasPerRoom.Add(cameraInRoom);				                                                                                                                                                                                                                                                               				  
 		}
 
-		//cameras
+
+        //cameras
+        bool AITD1 = floors.Count <= 8; //detect game based on number of floors
 		filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000001");
 		byte[] allPointsB = File.ReadAllBytes(filePath);
 		int roomIndex = 0;
@@ -263,7 +287,7 @@ public class RoomLoader : MonoBehaviour
 
 				for (int k = 0; k < numentries; k++)
 				{              					            
-					int i = cameraHeader + 0x14 + k * 12; 
+                    int i = cameraHeader + 0x14 + k * (AITD1 ? 12 : 16); 
 					int cameraRoom = ReadShort(allPointsB[i + 0], allPointsB[i + 1]); 
 
 					if(cameraRoom == roomIndex)
@@ -382,7 +406,7 @@ public class RoomLoader : MonoBehaviour
 			menuEnabled = !menuEnabled;
 		}
 
-		ProcessActors();
+		UpdateActors();
 
 		if(!menuEnabled)
 		{
@@ -472,16 +496,20 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	private void ProcessActors()
+	private void UpdateActors()
 	{
+        GameObject player = null;
+        int playerActorIndex = DosBox.PlayerActorIndex[dosBoxIndex];
+        
 		if (readMemoryFunc != null)
 		{  
-			if (readMemoryFunc(memory, -28 - 160, memory.Length))
-			{                
+            if (readMemoryFunc(memory, DosBox.Offets[dosBoxIndex], memory.Length))
+			{                          
+                int roomsCount = transform.Cast<Transform>().Where(x => x.name != "DELETED").Count();
 				int i = 0;
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{                                                           
-					int k = i * 160;
+                    int k = i * DosBox.ActorStructSize[dosBoxIndex];
 					int floorNumber = ReadShort(memory[k + 46], memory[k + 47]);
 					int roomNumber = ReadShort(memory[k + 48], memory[k + 49]);
 
@@ -490,23 +518,22 @@ public class RoomLoader : MonoBehaviour
 					bool isActive = objectid != -1;
 
 					//player 
-					if (isActive && objectid == 1)
+                    if (isActive && objectid == playerActorIndex)
 					{
 						//automatically switch room and floor (has to be done before setting objects positions)
-						if (linkfloor != floorNumber || linkroom != roomNumber)
+                        if (linkfloor != floorNumber || linkroom != roomNumber)
 						{                           
 							linkfloor = floor = floorNumber;
 							linkroom = room = roomNumber;
 
-							if (linkfloor >= 0 && linkfloor <= 7
-							                         && linkroom >= 0 && linkroom < roomsPerFloor[floor])
-							{                 
-								RefreshRooms();
-							}                                   
+                            if (floors.Contains(linkfloor))
+                            {
+                                RefreshRooms();                                  
+                            }
 						}
 					}
 
-					if (isActive && floorNumber == floor && roomNumber < roomsPerFloor[floor])
+                    if (isActive && floorNumber == floor && roomNumber >= 0 && roomNumber < roomsCount)
 					{
 						//local position
 						int w = k + 8;
@@ -515,7 +542,7 @@ public class RoomLoader : MonoBehaviour
 						int z = (ReadShort(memory[w + 8], memory[w + 9]) + ReadShort(memory[w + 10], memory[w + 11])) / 2;
 
 						//local to global position
-						Transform roomObject = transform.GetChild(roomNumber); //transform.Find("ROOM" + roomNumber);
+                        Transform roomObject = transform.GetChild(roomNumber); //transform.Find("ROOM" + roomNumber);
 						x += (int)(roomObject.localPosition.x * 1000.0f);
 						y += (int)(roomObject.localPosition.y * 1000.0f);
 						z += (int)(roomObject.localPosition.z * 1000.0f);
@@ -539,7 +566,7 @@ public class RoomLoader : MonoBehaviour
 						box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
                                                
 						//player
-						if (objectid == 1)
+                        if (objectid == playerActorIndex)
 						{
 							float angle = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f; 
 
@@ -578,8 +605,15 @@ public class RoomLoader : MonoBehaviour
 							arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left); 
 							arrow.transform.rotation *= Quaternion.AngleAxis(-angle, Vector3.forward);
 
+                            arrow.transform.localScale = new Vector3(
+                                box.transform.localScale.x * 0.9f, 
+                                box.transform.localScale.z * 0.9f,
+                                1.0f);
+
 							//player is white
 							box.Color = new Color32(255, 255, 255, 255);
+
+                            player = box.gameObject;
 						}
 						else
 						{
@@ -600,8 +634,10 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//arrow is only active if actors are active and player is active
-		arrow.SetActive(Actors.activeSelf && Actors.transform.GetComponentsInChildren<Box>()
-                .Where(x => x.ID == 1).Select(x => x.gameObject.activeSelf).FirstOrDefault());
+        arrow.SetActive(Actors.activeSelf 
+            && player != null 
+            && player.activeSelf 
+            && player.transform.localScale.magnitude > 0.01f);
    	}
 
    	#region GUI
@@ -716,7 +752,7 @@ public class RoomLoader : MonoBehaviour
     }
 
     private void ProcessKey(KeyCode keyCode)
-    {
+    {        
 		switch(keyCode)
 		{
 			case KeyCode.L:
@@ -724,21 +760,24 @@ public class RoomLoader : MonoBehaviour
 				{   
 					//search player position in DOSBOX                          
 					string errorMessage;
-					if (MemoryRead.GetAddress("DOSBOX", new byte[]
-						{
-							0x9F, 0x0C, 0x00, 0x00, 0xF4, 0xF9, 
-							0x9F, 0x0C, 0x00, 0x00, 0xF4, 0xF9
-						}, out errorMessage, out readMemoryFunc))
-					{
-						//force reload
-						linkfloor = floor;
-						linkroom = room;
-						Actors.SetActive(true);
-					}
-					else
-					{
-						RightText.text = errorMessage;
-					}                                   
+                    for (int i = 0; i < DosBox.Patterns.Length ; i++)
+                    {
+                        if (MemoryRead.GetAddress("DOSBOX", DosBox.Patterns[i], out errorMessage, out readMemoryFunc))
+    					{
+    						//force reload
+    						linkfloor = floor;
+    						linkroom = room;
+    						Actors.SetActive(true);
+
+                            memory = new byte[DosBox.ActorStructSize[i] * 50];
+                            dosBoxIndex = i;
+                            break;
+    					}
+    					else
+    					{
+    						RightText.text = errorMessage;
+    					}
+                    }
 				}
 				else
 				{
@@ -825,19 +864,23 @@ public class RoomLoader : MonoBehaviour
 				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
 				break;	
 
-			case KeyCode.DownArrow:	
-				if (floor > 0)
+            case KeyCode.DownArrow:	
+                int index = floors.IndexOf(floor);
+                if (index > 0)
 				{                                
-					floor--;
+                    index--;
+                    floor = floors[index];
 					room = 0;
 					RefreshRooms();  				 
 				}
 				break;
 
-			case KeyCode.UpArrow:	
-				if (floor < 7)
-				{                                
-					floor++;
+            case KeyCode.UpArrow:	  
+                int idx = floors.IndexOf(floor);
+                if (idx < floors.Count - 1)
+				{                             
+                    idx++;
+                    floor = floors[idx];
 					room = 0;				  
 					RefreshRooms();				   
 				}
@@ -851,8 +894,9 @@ public class RoomLoader : MonoBehaviour
 				}
 				break;
 
-			case KeyCode.RightArrow:	
-				if (room < (roomsPerFloor[floor] - 1))
+			case KeyCode.RightArrow:
+                int roomsCount = transform.Cast<Transform>().Where(x => x.name != "DELETED").Count();
+                if (room < roomsCount - 1)
 				{  
 					room++;
 					RefreshRooms();
