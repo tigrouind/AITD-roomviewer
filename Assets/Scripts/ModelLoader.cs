@@ -47,7 +47,7 @@ public class ModelLoader : MonoBehaviour
 		LeftText.text = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1);
 
 		//camera
-		if(reset)
+		if (reset)
 		{
 			autoRotate = true;
 			cameraPosition = Vector2.zero;
@@ -56,7 +56,7 @@ public class ModelLoader : MonoBehaviour
 		//clear model
 		MeshFilter filter = this.gameObject.GetComponent<MeshFilter>();
 		filter.sharedMesh = null;
-            
+
 		//load data
 		byte[] allbytes = File.ReadAllBytes(filename);
 		int i = 0;
@@ -69,7 +69,7 @@ public class ModelLoader : MonoBehaviour
 		//vertexes
 		int count = ReadShort(allbytes[i + 0], allbytes[i + 1]);
 		i += 2;
-               
+
 		List<Vector3> vertices = new List<Vector3>();
 		for (int j = 0; j < count; j++)
 		{
@@ -78,16 +78,16 @@ public class ModelLoader : MonoBehaviour
 			i += 6;
 		}
 
-		//check if model has bones 
+		//check if model has bones
 		if ((flags & 2) == 2)
 		{
 			//bones
 			count = ReadShort(allbytes[i + 0], allbytes[i + 1]);
 			i += 2;
 			i += count * 2;
-           
+
 			for (int n = 0; n < count; n++)
-			{                
+			{
 				int startindex = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
 				int numpoints = ReadShort(allbytes[i + 2], allbytes[i + 3]);
 				int boneindex = ReadShort(allbytes[i + 4], allbytes[i + 5]) / 6;
@@ -104,7 +104,7 @@ public class ModelLoader : MonoBehaviour
 			}
 		}
 
-		//compute line size 
+		//compute line size
 		Bounds bounds = new Bounds();
 		foreach (Vector3 vector in vertices)
 		{
@@ -118,7 +118,7 @@ public class ModelLoader : MonoBehaviour
 		i += 2;
 
 		//load palette
-        Color32[] paletteColors = PaletteTexture[PaletteIndex].GetPixels32();
+		Color32[] paletteColors = PaletteTexture[PaletteIndex].GetPixels32();
 
 		List<Vector3> allVertices = new List<Vector3>();
 		List<Color32> colors = new List<Color32>();
@@ -139,25 +139,25 @@ public class ModelLoader : MonoBehaviour
 						int colorIndex = allbytes[i + 0];
 						i += 2;
 
-						Color32 color = paletteColors[colorIndex];   
+						Color32 color = paletteColors[colorIndex];
 						int pointIndexA = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
 						int pointIndexB = ReadShort(allbytes[i + 2], allbytes[i + 3]) / 6;
 						Vector3 directionVector = vertices[pointIndexA] - vertices[pointIndexB];
 						Vector3 middle = (vertices[pointIndexA] + vertices[pointIndexB]) / 2.0f;
-						Quaternion rotation = Quaternion.LookRotation(directionVector);                                       
+						Quaternion rotation = Quaternion.LookRotation(directionVector);
 
 						uv.AddRange(CubeMesh.uv);
 						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x =>
                         rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
 								+ middle));
-						colors.AddRange(CubeMesh.vertices.Select(x => color));                                       
+						colors.AddRange(CubeMesh.vertices.Select(x => color));
 						i += 4;
 						break;
 					}
 			//polygon
 				case 1:
-					{                       
+					{
 						int numPoints = allbytes[i + 0];
 						int polyType = allbytes[i + 1];
 						int colorIndex = allbytes[i + 2];
@@ -170,7 +170,7 @@ public class ModelLoader : MonoBehaviour
 							//noise
 							color.a = 254;
 							color.r = (byte)((colorIndex % 16) * 16);
-							color.g = (byte)((colorIndex / 16) * 16);    
+							color.g = (byte)((colorIndex / 16) * 16);
 						}
 						else if (polyType == 2)
 						{
@@ -178,7 +178,7 @@ public class ModelLoader : MonoBehaviour
 							color.a = 128;
 						}
 
-						//add vertices   
+						//add vertices
 						List<Vector3> polyVertices = new List<Vector3>();
 						int verticesCount = allVertices.Count;
 						for (int m = 0; m < numPoints; m++)
@@ -187,39 +187,39 @@ public class ModelLoader : MonoBehaviour
 							i += 2;
 
 							colors.Add(color);
-							allVertices.Add(vertices[pointIndex]);  
-							polyVertices.Add(vertices[pointIndex]);  						
-						} 
+							allVertices.Add(vertices[pointIndex]);
+							polyVertices.Add(vertices[pointIndex]);
+						}
 
-						if(polyType == 1 && enableNoise)
+						if (polyType == 1 && enableNoise)
 						{
-                            Vector3 forward, left;
-                            ComputeUV(polyVertices, out forward, out left);
+							Vector3 forward, left;
+							ComputeUV(polyVertices, out forward, out left);
 
-                            foreach (Vector3 poly in polyVertices)
-                            {
+							foreach (Vector3 poly in polyVertices)
+							{
 								uv.Add(new Vector2(
-									Vector3.Dot(poly, left) * noisesize ,
-									Vector3.Dot(poly, forward) * noisesize
-								));
-                            }												
+										Vector3.Dot(poly, left) * noisesize,
+										Vector3.Dot(poly, forward) * noisesize
+									));
+							}
 						}
 						else
 						{
 							uv.AddRange(polyVertices.Select(x => Vector2.zero));
 						}
 
-						//triangulate       
+						//triangulate
 						int v0 = 0;
 						int v1 = 1;
 						int v2 = numPoints - 1;
 						bool swap = true;
 
 						while (v1 < v2)
-						{                       
-							indices.Add(verticesCount + v0);                
-							indices.Add(verticesCount + v1); 
-							indices.Add(verticesCount + v2); 
+						{
+							indices.Add(verticesCount + v0);
+							indices.Add(verticesCount + v1);
+							indices.Add(verticesCount + v2);
 
 							if (swap)
 							{
@@ -233,12 +233,12 @@ public class ModelLoader : MonoBehaviour
 							}
 
 							swap = !swap;
-						}   
+						}
 
 						break;
 					}
 			//sphere
-				case 3: 
+				case 3:
 					{
 						int polyType = allbytes[i];
 						i++;
@@ -246,19 +246,19 @@ public class ModelLoader : MonoBehaviour
 						Color32 color = paletteColors[colorIndex];
 						i += 2;
 
-                        if (polyType == 1 && enableNoise)
+						if (polyType == 1 && enableNoise)
 						{
 							//noise
 							color.a = 254;
 							color.r = (byte)((colorIndex % 16) * 16);
-							color.g = (byte)((colorIndex / 16) * 16);    
+							color.g = (byte)((colorIndex / 16) * 16);
 						}
 						else if (polyType == 2)
 						{
 							//transparency
-							color.a = 128;							             
-						}               
-               
+							color.a = 128;
+						}
+
 						int size = ReadShort(allbytes[i + 0], allbytes[i + 1]);
 						i += 2;
 						int pointSphereIndex = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
@@ -266,15 +266,15 @@ public class ModelLoader : MonoBehaviour
 
 						Vector3 position = vertices[pointSphereIndex];
 						float scale = size / 500.0f;
-                        float uvScale = noisesize * size / 200.0f;
+						float uvScale = noisesize * size / 200.0f;
 
-                        uv.AddRange(SphereMesh.uv.Select(x => x * uvScale));
+						uv.AddRange(SphereMesh.uv.Select(x => x * uvScale));
 						indices.AddRange(SphereMesh.triangles.Select(x => x + allVertices.Count));
-                        allVertices.AddRange(SphereMesh.vertices.Select(x => x * scale + position));
+						allVertices.AddRange(SphereMesh.vertices.Select(x => x * scale + position));
 						colors.AddRange(SphereMesh.vertices.Select(x => color));
 						break;
 					}
-                
+
 				case 2: //1x1 pixel
 				case 6: //ending guy
 				case 7: //square
@@ -317,8 +317,8 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		// Create the mesh
-		Mesh msh = new Mesh(); 
-		msh.vertices = allVertices.ToArray();      
+		Mesh msh = new Mesh();
+		msh.vertices = allVertices.ToArray();
 		msh.colors32 = colors.ToArray();
 
 		//separate transparent/opaque triangles
@@ -355,34 +355,33 @@ public class ModelLoader : MonoBehaviour
 
 		msh.RecalculateNormals();
 		msh.RecalculateBounds();
-               
+
 		filter.sharedMesh = msh;
 	}
 
-    void ComputeUV(List<Vector3> polyVertices, out Vector3 forward, out Vector3 left)
-    {
-        int lastPoly = polyVertices.Count - 1;
-        Vector3 up;
-        do
-        {
-            Vector3 a = polyVertices[0];
-            Vector3 b = polyVertices[1];
-            Vector3 c = polyVertices[lastPoly];
-            left = (b - a).normalized;
-            forward = (c - a).normalized;
-            up = Vector3.Cross(left, forward).normalized;
-            left = Vector3.Cross(up, forward).normalized;
-            lastPoly--;
-        }
-        while (up == Vector3.zero && lastPoly > 1);
-    }
+	void ComputeUV(List<Vector3> polyVertices, out Vector3 forward, out Vector3 left)
+	{
+		int lastPoly = polyVertices.Count - 1;
+		Vector3 up;
+		do
+		{
+			Vector3 a = polyVertices[0];
+			Vector3 b = polyVertices[1];
+			Vector3 c = polyVertices[lastPoly];
+			left = (b - a).normalized;
+			forward = (c - a).normalized;
+			up = Vector3.Cross(left, forward).normalized;
+			left = Vector3.Cross(up, forward).normalized;
+			lastPoly--;
+		} while (up == Vector3.zero && lastPoly > 1);
+	}
 
 	void Start()
 	{
-        if (!Directory.Exists(modelFolders[1]))
-        {
-            Array.Resize(ref modelFolders, 1);
-        }
+		if (!Directory.Exists(modelFolders[1]))
+		{
+			Array.Resize(ref modelFolders, 1);
+		}
 
 		//load first model
 		modelIndex = 0;
@@ -417,7 +416,7 @@ public class ModelLoader : MonoBehaviour
 		if (Directory.Exists(foldername))
 		{
 			modelFiles = Directory.GetFiles(foldername)
-				.OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();     
+				.OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();
 
 			SetPalette();
 			LoadBody(modelFiles[modelIndex]);
@@ -435,32 +434,32 @@ public class ModelLoader : MonoBehaviour
 		if (Input.GetAxis("Mouse ScrollWheel") > 0)
 		{
 			if (cameraZoom > 0.1f)
-				cameraZoom *= 0.9f;           
+				cameraZoom *= 0.9f;
 		}
 
 		if (Input.GetAxis("Mouse ScrollWheel") < 0)
-		{            
+		{
 			cameraZoom *= 1.0f / 0.9f;
 		}
 
 		//process keys
 		foreach (var key in keyCodes)
-		{			
-			if(Input.GetKeyDown(key))
+		{
+			if (Input.GetKeyDown(key))
 			{
 				ProcessKey(key);
 			}
 		}
 
-		if(!menuEnabled)
+		if (!menuEnabled)
 		{
 			//start drag (rotate)
 			if (Input.GetMouseButtonDown(0))
 			{
-				mousePosition = Input.mousePosition;			
+				mousePosition = Input.mousePosition;
 				autoRotate = false;
 			}
-				
+
 			//dragging (rotate)
 			if (Input.GetMouseButton(0))
 			{
@@ -473,14 +472,14 @@ public class ModelLoader : MonoBehaviour
 			//start drag (pan)
 			if (Input.GetMouseButtonDown(1))
 			{
-				mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraZoom);		
+				mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraZoom);
 				autoRotate = false;
 				displayMenuAfterDrag = true;
 			}
-				
+
 			//dragging (pan)
 			if (Input.GetMouseButton(1))
-			{	
+			{
 				Vector3 newMousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraZoom);
 				if (newMousePosition != this.mousePosition)
 				{
@@ -495,10 +494,10 @@ public class ModelLoader : MonoBehaviour
 			if (Input.GetMouseButtonUp(1))
 			{
 				//show/hide menu
-				if(displayMenuAfterDrag)
+				if (displayMenuAfterDrag)
 				{
 					menuEnabled = !menuEnabled;
-					if(menuEnabled)
+					if (menuEnabled)
 					{
 						ModelIndexString = modelIndex.ToString();
 					}
@@ -510,37 +509,38 @@ public class ModelLoader : MonoBehaviour
 
 		//load new model if needed
 		if (oldModelIndex != modelIndex)
-		{           
+		{
 			LoadBody(modelFiles[modelIndex]);
-		}   
-         
+		}
+
 		//rotate model
 		if (autoRotate)
 		{
 			cameraRotation.x = Time.time * 100.0f;
 			cameraRotation.y = 20.0f;
-		}            
+		}
 
-        //update model 
-        transform.position = Vector3.zero;
-        transform.rotation = Quaternion.identity;
-        Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);   
+		//update model
+		transform.position = Vector3.zero;
+		transform.rotation = Quaternion.identity;
+		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);
 
-        transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
-        transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
-            * Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
+		transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
+		transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
+		* Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
 
-        //set camera
-        Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
-        Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
+		//set camera
+		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
+		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
 	}
 
-	void OnGUI() 
+	void OnGUI()
 	{
 		if (menuEnabled)
 		{
 			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 3, 400, 30 * 3);
-			if(Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition)) {
+			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
+			{
 				menuEnabled = false;
 			}
 
@@ -557,7 +557,7 @@ public class ModelLoader : MonoBehaviour
 			GUILayout.Label("Model", MenuStyle.Label);
 			ModelIndexString = GUILayout.TextField(ModelIndexString, MenuStyle.Button);
 
-			if(Event.current.keyCode == KeyCode.Return)
+			if (Event.current.keyCode == KeyCode.Return)
 			{
 				int.TryParse(ModelIndexString, out modelIndex);
 				modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
@@ -576,15 +576,15 @@ public class ModelLoader : MonoBehaviour
 			GUILayout.EndHorizontal();
 
 			GUILayout.EndVertical();
-			GUILayout.EndArea ();
+			GUILayout.EndArea();
 		}
 	}
 
 	void ProcessKey(KeyCode code)
 	{
-		switch(code)
+		switch (code)
 		{
-			case KeyCode.LeftArrow:			          
+			case KeyCode.LeftArrow:
 				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 				{
 					modelIndex -= 10;
@@ -595,7 +595,7 @@ public class ModelLoader : MonoBehaviour
 				}
 				break;
 
-			case KeyCode.RightArrow:		
+			case KeyCode.RightArrow:
 				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 				{
 					modelIndex += 10;
@@ -605,16 +605,16 @@ public class ModelLoader : MonoBehaviour
 					modelIndex++;
 				}
 				break;
-			
-			case KeyCode.UpArrow:					
+
+			case KeyCode.UpArrow:
 				if (modelFolderIndex < (modelFolders.Length - 1))
-				{					
+				{
 					modelFolderIndex++;
 					LoadModels(modelFolders[modelFolderIndex]);
 				}
 				break;
-			
-			case KeyCode.DownArrow:	
+
+			case KeyCode.DownArrow:
 				if (modelFolderIndex > 0)
 				{
 					modelFolderIndex--;
@@ -625,14 +625,14 @@ public class ModelLoader : MonoBehaviour
 			case KeyCode.R:
 				enableNoise = !enableNoise;
 				LoadBody(modelFiles[modelIndex], false);
-				break;	
-			  
+				break;
+
 			case KeyCode.Escape:
-				if(Screen.fullScreen)
+				if (Screen.fullScreen)
 				{
 					Application.Quit();
 				}
-				break;		  
+				break;
 
 			case KeyCode.Tab:
 				SceneManager.LoadScene("room");

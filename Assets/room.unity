@@ -992,8 +992,9 @@ GameObject:
   m_Component:
   - 4: {fileID: 2046595781}
   - 114: {fileID: 2046595780}
+  - 114: {fileID: 2046595782}
   m_Layer: 0
-  m_Name: Main
+  m_Name: Room
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1011,12 +1012,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LeftText: {fileID: 741178600}
-  RightText: {fileID: 814574756}
   BottomText: {fileID: 546744332}
-  Actors: {fileID: 1100510531}
-  arrow: {fileID: 845929839}
   BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}
   BoxInfo: {fileID: 740337439}
+  Actors: {fileID: 1100510531}
   Style: {fileID: 1962405138}
 --- !u!4 &2046595781
 Transform:
@@ -1030,3 +1029,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
+--- !u!114 &2046595782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2046595779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60c5f913828fed442bb74fbaaa3380f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RightText: {fileID: 814574756}
+  Actors: {fileID: 1100510531}
+  Arrow: {fileID: 845929839}
+  BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}
