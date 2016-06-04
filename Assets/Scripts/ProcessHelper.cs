@@ -44,6 +44,11 @@ public class ProcessHelper
 		this.processHandle = processHandle;
 	}
 
+	~ProcessHelper()
+	{
+		Close();
+	}
+
 	public static ProcessHelper OpenProcess(int processId)
 	{
 		return new ProcessHelper(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_WM_READ, false, processId));
