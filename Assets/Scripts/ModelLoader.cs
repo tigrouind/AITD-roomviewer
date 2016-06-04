@@ -29,7 +29,7 @@ public class ModelLoader : MonoBehaviour
 
 	private Vector3 mousePosition; //mouse drag
 	private bool autoRotate;
-	private bool enableNoise = true;
+	private int renderMode = 2;
 	private bool displayMenuAfterDrag;
 	private bool menuEnabled;
 	private string ModelIndexString;
@@ -124,6 +124,8 @@ public class ModelLoader : MonoBehaviour
 		List<Color32> colors = new List<Color32>();
 		List<int> indices = new List<int>();
 		List<Vector2> uv = new List<Vector2>();
+		bool enableNoise = renderMode == 1 || renderMode == 2;
+		bool enableGradient = renderMode == 2;
 
 		for (int n = 0; n < count; n++)
 		{
@@ -177,7 +179,22 @@ public class ModelLoader : MonoBehaviour
 							//transparency
 							color.a = 128;
 						}
-
+						else if ((polyType == 3 || polyType == 6) && enableGradient)
+						{
+							//horizontal gradient
+							color.a = 253;
+							color.r = 255;
+							color.g = 0;
+							color.b = (byte)((colorIndex / 16) * 16);
+						}
+						else if ((polyType == 4 || polyType == 5) && enableGradient)
+						{
+							//vertical gradient
+							color.a = 253;
+							color.r = 0;
+							color.g = 255;
+							color.b = (byte)((colorIndex / 16) * 16);
+						}
 						//add vertices
 						List<Vector3> polyVertices = new List<Vector3>();
 						int verticesCount = allVertices.Count;
@@ -258,6 +275,22 @@ public class ModelLoader : MonoBehaviour
 							//transparency
 							color.a = 128;
 						}
+						else if ((polyType == 3 || polyType == 6) && enableGradient)
+						{
+							//horizontal gradient
+							color.a = 253;
+							color.r = 255;
+							color.g = 0;
+							color.b = (byte)((colorIndex / 16) * 16);
+						}
+						else if ((polyType == 4 || polyType == 5) && enableGradient)
+						{
+							//vertical gradient
+							color.a = 253;
+							color.r = 0;
+							color.g = 255;
+							color.b = (byte)((colorIndex / 16) * 16);
+						}
 
 						int size = ReadShort(allbytes[i + 0], allbytes[i + 1]);
 						i += 2;
@@ -325,17 +358,23 @@ public class ModelLoader : MonoBehaviour
 		List<int> opaque = new List<int>();
 		List<int> noise = new List<int>();
 		List<int> transparent = new List<int>();
+		List<int> gradient = new List<int>();
 
 		for (int t = 0; t < indices.Count; t += 3)
 		{
 			List<int> trianglesList;
-			if (colors[indices[t]].a == 255)
+			float alpha = colors[indices[t]].a;
+			if (alpha == 255)
 			{
 				trianglesList = opaque;
 			}
-			else if (colors[indices[t]].a == 254)
+			else if (alpha == 254)
 			{
 				trianglesList = noise;
+			}
+			else if (alpha == 253)
+			{
+				trianglesList = gradient;
 			}
 			else
 			{
@@ -347,10 +386,11 @@ public class ModelLoader : MonoBehaviour
 			trianglesList.Add(indices[t + 2]);
 		}
 
-		msh.subMeshCount = 3;
+		msh.subMeshCount = 4;
 		msh.SetTriangles(opaque, 0);
 		msh.SetTriangles(transparent, 1);
 		msh.SetTriangles(noise, 2);
+		msh.SetTriangles(gradient, 3);
 		msh.SetUVs(0, uv);
 
 		msh.RecalculateNormals();
@@ -408,6 +448,8 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		GetComponent<Renderer>().materials[2] //noise
+			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
+		GetComponent<Renderer>().materials[3] //gradient
 			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
 	}
 
@@ -534,6 +576,8 @@ public class ModelLoader : MonoBehaviour
 		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
 	}
 
+	private string[] renderModes = new[] { "Flat", "Noise", "Noise / Gradient"};
+
 	void OnGUI()
 	{
 		if (menuEnabled)
@@ -569,7 +613,7 @@ public class ModelLoader : MonoBehaviour
 			//render mode
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Render mode", MenuStyle.Label);
-			if (GUILayout.Button(enableNoise ? "Texture shaded" : "Flat shaded", MenuStyle.Option) && Event.current.button == 0)
+			if (GUILayout.Button(renderModes[renderMode], MenuStyle.Option) && Event.current.button == 0)
 			{
 				ProcessKey(KeyCode.R);
 			}
@@ -623,7 +667,7 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.R:
-				enableNoise = !enableNoise;
+				renderMode = (renderMode+1)%3;
 				LoadBody(modelFiles[modelIndex], false);
 				break;
 
