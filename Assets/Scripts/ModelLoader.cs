@@ -309,8 +309,8 @@ public class ModelLoader : MonoBehaviour
 					}
 
 				case 2: //1x1 pixel
-				case 6: //ending guy
-				case 7: //square
+				case 6: //square
+				case 7: 
 					{
 						i++;
 						int colorIndex = allbytes[i];
@@ -320,26 +320,20 @@ public class ModelLoader : MonoBehaviour
 
 						Color32 color = paletteColors[colorIndex];
 						Vector3 position = vertices[cubeIndex];
-						Quaternion rotation = Quaternion.identity;
 
-						Vector3 scale;
-						if (primitiveType == 2)
+						float pointsize;
+						if(primitiveType == 2)
 						{
-							scale = bounds.size.magnitude / 250.0f * Vector3.one;
-						}
-						else if (primitiveType == 6)
-						{
-							scale = new Vector3(0.05f, 0.05f, 0.1f);
-							rotation = Quaternion.LookRotation(new Vector3(position.x, 0.0f, position.z));
+							pointsize = linesize;
 						}
 						else
 						{
-							scale = 0.05f * Vector3.one;
+							pointsize = linesize * 2.5f;
 						}
 
 						uv.AddRange(CubeMesh.uv);
 						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
-						allVertices.AddRange(CubeMesh.vertices.Select(x => rotation * Vector3.Scale(x, scale) + position));
+						allVertices.AddRange(CubeMesh.vertices.Select(x => x * pointsize + position));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
 						break;
 					}

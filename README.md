@@ -61,4 +61,3 @@ Repeat room viewer installation steps with QuickBMS but select files LISTBODY.PA
 ## Known bugs/limitations :
 
 - there is z-fighting on some models (eg : wardrobe doors, oil can, vinyl, ...)  
-- vertical and horizontal gradient materials are not supported (eg: oil can, cookie box, sword, ...)
