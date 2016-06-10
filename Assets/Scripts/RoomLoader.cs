@@ -627,7 +627,7 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	private void ProcessKey(KeyCode keyCode)
+	public void ProcessKey(KeyCode keyCode)
 	{
 		switch (keyCode)
 		{
