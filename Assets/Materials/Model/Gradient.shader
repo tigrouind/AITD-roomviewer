@@ -29,7 +29,7 @@
             {
                 vertOutput o;
                 o.pos = mul(UNITY_MATRIX_MVP, input.pos);
-                o.uv = mul(UNITY_MATRIX_MVP, input.pos);
+                o.uv = mul(UNITY_MATRIX_MV, input.pos);
                 o.color = input.color;
                 return o;
             }
