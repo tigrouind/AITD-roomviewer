@@ -90,88 +90,92 @@ public class DosBox : MonoBehaviour
 						}
 
 						Transform roomObject = GetComponent<RoomLoader>().GetRoom(floorNumber, roomNumber);
-						if (roomObject != null)
-						{
-							//local position
-							int w = k + 8;
-							int x = (ReadShort(memory[w + 0], memory[w + 1]) + ReadShort(memory[w + 2], memory[w + 3])) / 2;
-							int y = (ReadShort(memory[w + 4], memory[w + 5]) + ReadShort(memory[w + 6], memory[w + 7])) / 2;
-							int z = (ReadShort(memory[w + 8], memory[w + 9]) + ReadShort(memory[w + 10], memory[w + 11])) / 2;
+                        if (roomObject != null)
+                        {
+                            //local position
+                            int w = k + 8;
+                            int x = (ReadShort(memory[w + 0], memory[w + 1]) + ReadShort(memory[w + 2], memory[w + 3])) / 2;
+                            int y = (ReadShort(memory[w + 4], memory[w + 5]) + ReadShort(memory[w + 6], memory[w + 7])) / 2;
+                            int z = (ReadShort(memory[w + 8], memory[w + 9]) + ReadShort(memory[w + 10], memory[w + 11])) / 2;
 
-							//local to global position
-							x += (int)(roomObject.localPosition.x * 1000.0f);
-							y += (int)(roomObject.localPosition.y * 1000.0f);
-							z += (int)(roomObject.localPosition.z * 1000.0f);
+                            //local to global position
+                            x += (int)(roomObject.localPosition.x * 1000.0f);
+                            y += (int)(roomObject.localPosition.y * 1000.0f);
+                            z += (int)(roomObject.localPosition.z * 1000.0f);
 
-							box.transform.position = new Vector3(x, -y, z) / 1000.0f;
+                            box.transform.position = new Vector3(x, -y, z) / 1000.0f;
 
-							//make actors appears slightly bigger than they are to be not covered by actors
-							float delta = 1.0f;
-							box.transform.localScale = new Vector3(
-								ReadShort(memory[w + 2], memory[w + 3]) - ReadShort(memory[w + 0], memory[w + 1]) + delta,
-								ReadShort(memory[w + 6], memory[w + 7]) - ReadShort(memory[w + 4], memory[w + 5]) + delta,
-								ReadShort(memory[w + 10], memory[w + 11]) - ReadShort(memory[w + 8], memory[w + 9]) + delta) / 1000.0f;
+                            //make actors appears slightly bigger than they are to be not covered by actors
+                            float delta = 1.0f;
+                            box.transform.localScale = new Vector3(
+                                ReadShort(memory[w + 2], memory[w + 3]) - ReadShort(memory[w + 0], memory[w + 1]) + delta,
+                                ReadShort(memory[w + 6], memory[w + 7]) - ReadShort(memory[w + 4], memory[w + 5]) + delta,
+                                ReadShort(memory[w + 10], memory[w + 11]) - ReadShort(memory[w + 8], memory[w + 9]) + delta) / 1000.0f;
 
-							box.ID = objectid;
-							box.Body = body;
-							box.Room = roomNumber;
-							box.Flags = ReadShort(memory[k + 4], memory[k + 5]);
-							box.Life = ReadShort(memory[k + 52], memory[k + 53]);
-							box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
-							box.Frame = ReadShort(memory[k + 74], memory[k + 75]);
-							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
+                            box.ID = objectid;
+                            box.Body = body;
+                            box.Room = roomNumber;
+                            box.Flags = ReadShort(memory[k + 4], memory[k + 5]);
+                            box.Life = ReadShort(memory[k + 52], memory[k + 53]);
+                            box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
+                            box.Frame = ReadShort(memory[k + 74], memory[k + 75]);
+                            box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
 
-							//player
-							if (objectid == lastValidPlayerIndex)
-							{
-								float angle = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;
+                            //player
+                            if (objectid == lastValidPlayerIndex)
+                            {
+                                float angle = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;
 
-								angle = (540.0f - angle) % 360.0f;
+                                angle = (540.0f - angle) % 360.0f;
 
-								float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
+                                float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
-								int cardinalPos = (int)Math.Floor((angle + 45.0f) / 90);
+                                int cardinalPos = (int)Math.Floor((angle + 45.0f) / 90);
 
-								RightText.text = string.Format("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}", x, y, z, angle, sideAngle, cardinalPositions[cardinalPos % 4]);
+                                RightText.text = string.Format("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}", x, y, z, angle, sideAngle, cardinalPositions[cardinalPos % 4]);
 
-								//check if player has moved
-								if (box.transform.position != lastPlayerPosition)
-								{
-									//center camera to player position
-									GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
-									lastPlayerPosition = box.transform.position;
-								}
+                                //check if player has moved
+                                if (box.transform.position != lastPlayerPosition)
+                                {
+                                    //center camera to player position
+                                    GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
+                                    lastPlayerPosition = box.transform.position;
+                                }
 
-								if (Camera.main.orthographic)
-								{
-									//make sure player is always visible
-									box.transform.localScale = new Vector3(box.transform.localScale.x, box.transform.localScale.y * 5.0f, box.transform.localScale.z);
-								}
+                                if (Camera.main.orthographic)
+                                {
+                                    //make sure player is always visible
+                                    box.transform.localScale = new Vector3(box.transform.localScale.x, box.transform.localScale.y * 5.0f, box.transform.localScale.z);
+                                }
 
-								//follow player
-								Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
-								//face camera
-								Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
-								Arrow.transform.rotation *= Quaternion.AngleAxis(-angle, Vector3.forward);
+                                //follow player
+                                Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
+                                //face camera
+                                Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
+                                Arrow.transform.rotation *= Quaternion.AngleAxis(-angle, Vector3.forward);
 
-								Arrow.transform.localScale = new Vector3(
-									box.transform.localScale.x * 0.9f,
-									box.transform.localScale.z * 0.9f,
-									1.0f);
+                                Arrow.transform.localScale = new Vector3(
+                                    box.transform.localScale.x * 0.9f,
+                                    box.transform.localScale.z * 0.9f,
+                                    1.0f);
 
-								//player is white
-								box.Color = new Color32(255, 255, 255, 255);
+                                //player is white
+                                box.Color = new Color32(255, 255, 255, 255);
 
-								player = box.gameObject;
-							}
-							else
-							{
-								//other actors are green
-								box.Color = new Color32(0, 128, 0, 255);
-							}
+                                player = box.gameObject;
+                            }
+                            else
+                            {
+                                //other actors are green
+                                box.Color = new Color32(0, 128, 0, 255);
+                            }
 
-							box.gameObject.SetActive(true);
-						}
+                            box.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            box.gameObject.SetActive(false);
+                        }
 					}
 					else
 					{

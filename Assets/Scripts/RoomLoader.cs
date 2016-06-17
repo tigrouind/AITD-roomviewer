@@ -443,15 +443,7 @@ public class RoomLoader : MonoBehaviour
 				box.HighLight = true;
 
 				HighLightedBox = box;
-			}
-
-			if (Input.GetMouseButtonDown(0) && box.name == "Actor")
-			{
-				if (SelectedBox != HighLightedBox)
-					SelectedBox = HighLightedBox;
-				else
-					SelectedBox = null;
-			}
+			}                		
 
 			//display info
 			Vector3 position = Camera.main.WorldToScreenPoint(box.GetComponent<Renderer>().bounds.center);
@@ -470,7 +462,22 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 
-		if (SelectedBox != null)
+        //toggle selected box
+        if (Input.GetMouseButtonDown(0) && HighLightedBox != null && HighLightedBox.name == "Actor")
+        {
+            if (SelectedBox != HighLightedBox)
+                SelectedBox = HighLightedBox;
+            else
+                SelectedBox = null;
+        }
+
+        if (!DosBoxEnabled)
+        {
+            SelectedBox = null;
+        }
+
+        //display selected box info
+        if (SelectedBox != null)
 		{
 			BottomText.text = SelectedBox.ToString();
 		}
