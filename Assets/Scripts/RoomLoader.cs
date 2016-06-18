@@ -232,11 +232,17 @@ public class RoomLoader : MonoBehaviour
 				box.ID = ReadShort(allPointsA[i + 12], allPointsA[i + 13]);
 				box.Flags = ReadShort(allPointsA[i + 14], allPointsA[i + 15]);
 
-				//custom trigger or exit
-				box.Color = new Color32(255, 0, 0, 45);
-				if (box.Flags == 9 || box.Flags == 10)
+				if (box.Flags == 9 || box.Flags == 10) //custom trigger or exit
 				{
 					box.Color = new Color32(255, 128, 0, 50);
+				}
+				else if (box.Flags == 0) //room switch
+				{
+					box.Color = new Color32(255, 0, 0, 45); 
+				}
+				else
+				{
+					box.Color = new Color32(255, 128, 128, 50);
 				}
 
 				i += 16;
@@ -256,7 +262,7 @@ public class RoomLoader : MonoBehaviour
 
 
 		//cameras
-		bool AITD1 = floors.Count <= 8; //detect game based on number of floors
+		bool isAITD1 = DetectGame() == 1;
 		filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000001");
 		byte[] allPointsB = File.ReadAllBytes(filePath);
 		int roomIndex = 0;
@@ -273,7 +279,7 @@ public class RoomLoader : MonoBehaviour
 
 				for (int k = 0; k < numentries; k++)
 				{
-					int i = cameraHeader + 0x14 + k * (AITD1 ? 12 : 16);
+					int i = cameraHeader + 0x14 + k * (isAITD1 ? 12 : 16);
 					int cameraRoom = ReadShort(allPointsB[i + 0], allPointsB[i + 1]);
 
 					if (cameraRoom == roomIndex)
@@ -335,6 +341,14 @@ public class RoomLoader : MonoBehaviour
 			t.name = "DELETED"; //bug fix
 			Destroy(t.gameObject);
 		}
+	}
+
+	public int DetectGame()
+	{
+		//detect game based on number of floors
+		if(floors.Count >= 15) return 2; 
+		else if(floors.Count >= 14) return 3;
+		else return 1;
 	}
 
 	void Update()
@@ -510,7 +524,6 @@ public class RoomLoader : MonoBehaviour
 		}
 		return null;
 	}
-
 
 	public void CenterCamera(Vector2 position)
 	{

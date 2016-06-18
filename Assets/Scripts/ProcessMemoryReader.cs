@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 
-public class ProcessHelper
+public class ProcessMemoryReader
 {
 	const int PROCESS_QUERY_INFORMATION = 0x0400;
 	const int PROCESS_WM_READ = 0x0010;
@@ -37,21 +37,16 @@ public class ProcessHelper
 	[DllImport("kernel32.dll")]
 	private static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
 
-	private readonly IntPtr processHandle;
+	private IntPtr processHandle;
 
-	public ProcessHelper(IntPtr processHandle)
+	public ProcessMemoryReader(int processId)
 	{
-		this.processHandle = processHandle;
+		this.processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_WM_READ, false, processId);
 	}
 
-	~ProcessHelper()
+	~ProcessMemoryReader()
 	{
 		Close();
-	}
-
-	public static ProcessHelper OpenProcess(int processId)
-	{
-		return new ProcessHelper(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_WM_READ, false, processId));
 	}
 
 	public long Read(byte[] buffer, long offset, int count)
@@ -66,7 +61,11 @@ public class ProcessHelper
 
 	public void Close()
 	{
-		CloseHandle(processHandle);
+		if(processHandle != IntPtr.Zero)
+		{			
+			CloseHandle(processHandle);
+			processHandle = IntPtr.Zero;
+		}
 	}
 
 	public long SearchForBytePattern(byte[] pattern)

@@ -422,24 +422,17 @@ public class ModelLoader : MonoBehaviour
 		LoadModels(modelFolders[modelFolderIndex]);
 	}
 
+	int DetectGame()
+	{
+		//detect game based on number of models
+		if (modelFiles.Count > 700) return 3;
+		else if (modelFiles.Count > 500) return 2;
+		else return 1;
+	}
+
 	void SetPalette()
 	{
-		//detect game
-		if (modelFiles.Count > 700)
-		{
-			//AITD3
-			PaletteIndex = 2;
-		}
-		else if (modelFiles.Count > 500)
-		{
-			//AITD2
-			PaletteIndex = 1;
-		}
-		else
-		{
-			//AITD1
-			PaletteIndex = 0;
-		}
+		PaletteIndex = DetectGame() - 1;
 
 		GetComponent<Renderer>().materials[2] //noise
 			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
