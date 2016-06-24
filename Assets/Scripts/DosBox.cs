@@ -55,7 +55,7 @@ public class DosBox : MonoBehaviour
 
 		if (processReader != null)
 		{
-			if (processReader.Read(memory, memoryAddress + MemoryOffsets[dosBoxPattern], memory.Length) > 0)
+			if (processReader.Read(memory, memoryAddress, memory.Length) > 0)
 			{
 				int i = 0;
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
@@ -111,6 +111,12 @@ public class DosBox : MonoBehaviour
 								ReadShort(memory[w + 2], memory[w + 3]) - ReadShort(memory[w + 0], memory[w + 1]) + delta,
 								ReadShort(memory[w + 6], memory[w + 7]) - ReadShort(memory[w + 4], memory[w + 5]) + delta,
 								ReadShort(memory[w + 10], memory[w + 11]) - ReadShort(memory[w + 8], memory[w + 9]) + delta) / 1000.0f;
+
+							//make sure very small actors are visible
+							box.transform.localScale = new Vector3(
+								Mathf.Max(box.transform.localScale.x, 0.1f),
+								Mathf.Max(box.transform.localScale.y, 0.1f),
+								Mathf.Max(box.transform.localScale.z, 0.1f));
 
 							box.ID = objectid;
 							box.Body = body;
@@ -248,7 +254,7 @@ public class DosBox : MonoBehaviour
 					linkfloor = floor;
 					linkroom = room;
 
-					memoryAddress = address;
+					memoryAddress = address + MemoryOffsets[patternIndex];
 					processReader = reader;
 					memory = new byte[ActorStructSize[patternIndex] * 50];
 					dosBoxPattern = patternIndex;
