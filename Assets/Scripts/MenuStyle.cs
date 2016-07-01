@@ -15,7 +15,6 @@ public class MenuStyle : MonoBehaviour
 	public GUIStyle Button;
 	public GUIStyle Label;
 	public GUIStyle Option;
-	public GUIStyle Toggle;
 
 	public GUIStyle Slider;
 	public GUIStyle Thumb;
@@ -31,7 +30,7 @@ public class MenuStyle : MonoBehaviour
 		Button.alignment = TextAnchor.MiddleCenter;
 		Button.fontSize = 16;
 		Button.fixedHeight = 30;
-		Button.hover.textColor = new Color32(0, 250, 150, 255);
+		Button.hover.textColor = new Color32(63, 63, 63, 255);
 		Button.hover.background = HoverTexture;
 		Button.padding = new RectOffset(10, 10, 10, 10);
 
@@ -42,9 +41,6 @@ public class MenuStyle : MonoBehaviour
 
 		Option = new GUIStyle(Button);
 		Option.fixedWidth = 200;
-
-		Toggle = new GUIStyle(Option);
-		Toggle.fontSize = 35;
 
 		Slider = new GUIStyle();
 		Slider.fixedHeight = 30;
