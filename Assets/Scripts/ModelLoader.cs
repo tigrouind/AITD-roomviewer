@@ -151,7 +151,7 @@ public class ModelLoader : MonoBehaviour
 						uv.AddRange(CubeMesh.uv);
 						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x =>
-                        rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
+							rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
 								+ middle));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
 						i += 4;
@@ -501,7 +501,7 @@ public class ModelLoader : MonoBehaviour
 			//start drag (pan)
 			if (Input.GetMouseButtonDown(1))
 			{
-				mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraZoom);
+				mousePosition = Input.mousePosition;
 				autoRotate = false;
 				displayMenuAfterDrag = true;
 			}
@@ -509,10 +509,12 @@ public class ModelLoader : MonoBehaviour
 			//dragging (pan)
 			if (Input.GetMouseButton(1))
 			{
-				Vector3 newMousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, cameraZoom);
+				Vector3 newMousePosition = Input.mousePosition;
 				if (newMousePosition != this.mousePosition)
 				{
-					Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition) - Camera.main.ScreenToWorldPoint(newMousePosition);
+					Vector3 cameraDistance = new Vector3(0.0f, 0.0f, cameraZoom);
+					Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraDistance)
+						- Camera.main.ScreenToWorldPoint(newMousePosition + cameraDistance);
 					displayMenuAfterDrag = false;
 					cameraPosition += mouseDelta;
 					mousePosition = newMousePosition;

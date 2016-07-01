@@ -383,16 +383,18 @@ public class RoomLoader : MonoBehaviour
 			//start drag
 			if (Input.GetMouseButtonDown(0))
 			{
-				mousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.transform.position.y);
+				mousePosition = Input.mousePosition;
 			}
 
 			//dragging
 			if (Input.GetMouseButton(0))
 			{
-				Vector3 newMousePosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.transform.position.y);
+				Vector3 newMousePosition = Input.mousePosition;
 				if (newMousePosition != this.mousePosition)
-				{
-					Vector3 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition) - Camera.main.ScreenToWorldPoint(newMousePosition);
+				{ 
+					Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
+					Vector3 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraHeight)
+						- Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
 
 					Camera.main.transform.position += mouseDelta;
 					mousePosition = newMousePosition;
@@ -442,9 +444,16 @@ public class RoomLoader : MonoBehaviour
 	private void RefreshHighLightedBox()
 	{
 		Vector3 mousePosition = Input.mousePosition;
-		RaycastHit[] hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
 
-		if (hitInfos.Length > 0)
+		RaycastHit[] hitInfos = null;
+
+		if (mousePosition.x > 0 && mousePosition.x < Screen.width &&
+			mousePosition.y > 0 && mousePosition.y < Screen.height)
+		{
+			hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
+		}
+
+		if (hitInfos != null && hitInfos.Length > 0)
 		{
 			//boxes inside current room have priority over other boxes
 			Array.Sort(hitInfos, BoxComparer);
@@ -457,7 +466,7 @@ public class RoomLoader : MonoBehaviour
 				box.HighLight = true;
 
 				HighLightedBox = box;
-			}                		
+			}
 
 			//display info
 			Vector3 position = Camera.main.WorldToScreenPoint(box.GetComponent<Renderer>().bounds.center);
@@ -476,22 +485,22 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 
-        //toggle selected box
-        if (Input.GetMouseButtonDown(0) && HighLightedBox != null && HighLightedBox.name == "Actor")
-        {
-            if (SelectedBox != HighLightedBox)
-                SelectedBox = HighLightedBox;
-            else
-                SelectedBox = null;
-        }
+		//toggle selected box
+		if (Input.GetMouseButtonDown(0) && HighLightedBox != null && HighLightedBox.name == "Actor")
+		{
+			if (SelectedBox != HighLightedBox)
+				SelectedBox = HighLightedBox;
+			else
+				SelectedBox = null;
+		}
 
-        if (!DosBoxEnabled)
-        {
-            SelectedBox = null;
-        }
+		if (!DosBoxEnabled)
+		{
+			SelectedBox = null;
+		}
 
-        //display selected box info
-        if (SelectedBox != null)
+		//display selected box info
+		if (SelectedBox != null)
 		{
 			BottomText.text = SelectedBox.ToString();
 		}
@@ -613,7 +622,7 @@ public class RoomLoader : MonoBehaviour
 			//triggers
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Triggers", Style.Label);
-			if (GUILayout.Button(showtriggers ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
+			if (GUILayout.Button(showtriggers ? "Yes" : "No", Style.Option) && Event.current.button == 0)
 			{
 				ProcessKey(KeyCode.T);
 			}
@@ -624,7 +633,7 @@ public class RoomLoader : MonoBehaviour
 			{
 				GUILayout.BeginHorizontal();
 				GUILayout.Label("Actors", Style.Label);
-				if (GUILayout.Button(Actors.activeSelf ? "\u25CF" : "\u25CB", Style.Toggle) && Event.current.button == 0)
+				if (GUILayout.Button(Actors.activeSelf ? "Yes" : "No", Style.Option) && Event.current.button == 0)
 				{
 					ProcessKey(KeyCode.J);
 				}
@@ -808,4 +817,3 @@ public class RoomLoader : MonoBehaviour
 
 	}
 }
-
