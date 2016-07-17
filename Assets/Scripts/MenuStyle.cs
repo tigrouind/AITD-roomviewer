@@ -30,7 +30,7 @@ public class MenuStyle : MonoBehaviour
 		Button.alignment = TextAnchor.MiddleCenter;
 		Button.fontSize = 16;
 		Button.fixedHeight = 30;
-		Button.hover.textColor = new Color32(63, 63, 63, 255);
+		Button.hover.textColor = new Color32(40, 40, 40, 255);
 		Button.hover.background = HoverTexture;
 		Button.padding = new RectOffset(10, 10, 10, 10);
 
