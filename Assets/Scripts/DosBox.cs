@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Linq;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 public class DosBox : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class DosBox : MonoBehaviour
 	public GameObject Actors;
 	public GameObject Arrow;
 	public Box BoxPrefab;
+	public uint InternalTimer;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -36,6 +38,7 @@ public class DosBox : MonoBehaviour
 	private ProcessMemoryReader processReader;
 	private long memoryAddress;
 	private byte[] memory;
+	private byte[] additionalInfoMemory = new byte[8];
 
 
 	public void Start()
@@ -49,7 +52,7 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	public void Update()
+		public void Update()
 	{
 		GameObject player = null;
 
@@ -122,9 +125,14 @@ public class DosBox : MonoBehaviour
 							box.Body = body;
 							box.Room = roomNumber;
 							box.Flags = ReadShort(memory[k + 4], memory[k + 5]);
+							box.LifeMode = ReadShort(memory[k + 50], memory[k + 51]);
 							box.Life = ReadShort(memory[k + 52], memory[k + 53]);
+							box.Chrono = ReadUnsignedInt(memory[k + 54], memory[k + 55], memory[k + 56], memory[k + 57]);
+							box.RoomChrono =  ReadUnsignedInt(memory[k + 58], memory[k + 59], memory[k + 60], memory[k + 61]);
 							box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
 							box.Frame = ReadShort(memory[k + 74], memory[k + 75]);
+							box.TotalFrames = ReadShort(memory[k + 76], memory[k + 77]);
+							box.TrackMode = ReadShort(memory[k + 82], memory[k + 83]);
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
 
 							//player
@@ -138,7 +146,12 @@ public class DosBox : MonoBehaviour
 
 								int cardinalPos = (int)Math.Floor((angle + 45.0f) / 90);
 
-								RightText.text = string.Format("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}", x, y, z, angle, sideAngle, cardinalPositions[cardinalPos % 4]);
+								//timer + fps
+								processReader.Read(additionalInfoMemory, memoryAddress - 0x83B6 - 6, additionalInfoMemory.Length);
+								InternalTimer = ReadUnsignedInt(additionalInfoMemory[0], additionalInfoMemory[1], additionalInfoMemory[2], additionalInfoMemory[3]);
+								int fps = ReadShort(additionalInfoMemory[6], additionalInfoMemory[7]);
+															
+								RightText.text = string.Format("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}\nFps: {6}", x, y, z, angle, sideAngle, cardinalPositions[cardinalPos % 4], fps);
 
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
@@ -202,7 +215,15 @@ public class DosBox : MonoBehaviour
 		Arrow.SetActive(Actors.activeSelf
 			&& player != null
 			&& player.activeSelf
-			&& player.transform.localScale.magnitude > 0.01f);
+			&& player.transform.localScale.magnitude > 0.01f);				
+	}
+
+	private uint ReadUnsignedInt(byte a, byte b, byte c, byte d)
+	{
+		unchecked
+		{
+			return (uint)(a | b << 8 | c << 16 | d << 24);
+		}
 	}
 
 	private short ReadShort(byte a, byte b)

@@ -565,8 +565,6 @@ public class ModelLoader : MonoBehaviour
         Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
 	}
 
-	private string[] renderModes = new[] { "Flat", "Noise", "Noise / Gradient"};
-
 	void OnGUI()
 	{
 		if (menuEnabled)

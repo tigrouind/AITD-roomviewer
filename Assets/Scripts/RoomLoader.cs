@@ -473,7 +473,7 @@ public class RoomLoader : MonoBehaviour
 			BoxInfo.transform.position = new Vector3(position.x / Screen.width, position.y / Screen.height, 0.0f);
 
 			//text
-			BoxInfo.text = box.ToString();
+			BoxInfo.text = box.ToString(GetComponent<DosBox>().InternalTimer);
 		}
 		else
 		{
@@ -502,7 +502,7 @@ public class RoomLoader : MonoBehaviour
 		//display selected box info
 		if (SelectedBox != null)
 		{
-			BottomText.text = SelectedBox.ToString();
+			BottomText.text = SelectedBox.ToString(GetComponent<DosBox>().InternalTimer);
 		}
 		else
 		{

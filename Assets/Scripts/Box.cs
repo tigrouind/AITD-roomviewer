@@ -17,11 +17,16 @@ public class Box : MonoBehaviour
 	public int ID;
 	public int Flags;
 	public int Life;
+	public int LifeMode;
+	public int TrackMode;
 	public int Body;
 	public int Anim;
 	public int Frame;
+	public int TotalFrames;
 	public int Speed;
 	public int Room;
+	public uint Chrono;
+	public uint RoomChrono;
 
 	public bool HighLight
 	{
@@ -92,7 +97,7 @@ public class Box : MonoBehaviour
 		return material;
 	}
 
-	public override string ToString()
+	public string ToString(uint timer)
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.Append(name.ToUpper() + "\r\nID = " + ID);   
@@ -106,13 +111,23 @@ public class Box : MonoBehaviour
 			if (Body != -1)
 				sb.Append("\r\nBODY = " + Body);
 			if (Life != -1)
-				sb.Append("\r\nLIFE = " + Life);   
+				sb.Append("\r\nLIFE = " + Life);
+			if (LifeMode != -1)
+				sb.Append("\r\nLIFEMODE = " + LifeMode);
 			if (Anim != -1)
-				sb.Append("\r\nANIM = " + Anim);   
-			if (Frame != -1)
-				sb.Append("\r\nFRAME = " + Frame);   
+			{
+				sb.Append("\r\nANIM = " + Anim);
+				sb.Append("\r\nFRAME = " + Frame + "/" + (TotalFrames - 1));
+			}
+			if (Chrono != 0)
+				sb.AppendFormat("\r\nCHRONO = {0}", TimeSpan.FromSeconds((timer - Chrono) / 60));
+			if (RoomChrono != 0)
+				sb.AppendFormat("\r\nROOM_CHRONO = {0}", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
 			if (Speed != -1)
-				sb.Append("\r\nSPEED = " + Speed);   
+				sb.Append("\r\nSPEED = " + Speed);
+			if (TrackMode != -1)
+				sb.Append("\r\nTRACKMODE = " + TrackMode);
+			
 		}
 
 		return sb.ToString();
