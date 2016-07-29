@@ -117,7 +117,10 @@ public class Box : MonoBehaviour
 			if (Anim != -1)
 			{
 				sb.Append("\r\nANIM = " + Anim);
-				sb.Append("\r\nFRAME = " + Frame + "/" + (TotalFrames - 1));
+				if(Frame != -1)
+				{
+					sb.Append("\r\nFRAME = " + Frame + "/" + (TotalFrames - 1));
+				}
 			}
 			if (Chrono != 0)
 				sb.AppendFormat("\r\nCHRONO = {0}", TimeSpan.FromSeconds((timer - Chrono) / 60));

@@ -52,7 +52,7 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-		public void Update()
+	public void Update()
 	{
 		GameObject player = null;
 
@@ -61,6 +61,7 @@ public class DosBox : MonoBehaviour
 			if (processReader.Read(memory, memoryAddress, memory.Length) > 0)
 			{
 				int i = 0;
+				int detectedGame = GetComponent<RoomLoader>().DetectGame();
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{
 					int k = i * ActorStructSize[dosBoxPattern];
@@ -132,8 +133,17 @@ public class DosBox : MonoBehaviour
 							box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
 							box.Frame = ReadShort(memory[k + 74], memory[k + 75]);
 							box.TotalFrames = ReadShort(memory[k + 76], memory[k + 77]);
-							box.TrackMode = ReadShort(memory[k + 82], memory[k + 83]);
+							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
+
+							if(detectedGame != 1)
+							{
+								//those fields are only supported in AITD1
+								box.Chrono = 0;
+								box.RoomChrono = 0;
+								box.Frame = -1;
+								box.Speed = -1;
+							}
 
 							//player
 							if (objectid == lastValidPlayerIndex)
