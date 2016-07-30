@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Text;
 
 public class DosBox : MonoBehaviour
 {
@@ -37,9 +38,17 @@ public class DosBox : MonoBehaviour
 	private int linkroom = 0;
 	private ProcessMemoryReader processReader;
 	private long memoryAddress;
+	private StringBuilder playerInfo;
 	private byte[] memory;
-	private byte[] additionalInfoMemory = new byte[8];
 
+	//fps 
+	private int oldFramesCount;
+	private Queue<int> previousFramesCount = new Queue<int>();
+	private float calculatedFps;
+	private int delayFpsCounter;
+	private int lastDelayFpsCounter;
+	private int frameCounter;
+	private StringBuilder fpsInfo;
 
 	public void Start()
 	{
@@ -156,12 +165,8 @@ public class DosBox : MonoBehaviour
 
 								int cardinalPos = (int)Math.Floor((angle + 45.0f) / 90);
 
-								//timer + fps
-								processReader.Read(additionalInfoMemory, memoryAddress - 0x83B6 - 6, additionalInfoMemory.Length);
-								InternalTimer = ReadUnsignedInt(additionalInfoMemory[0], additionalInfoMemory[1], additionalInfoMemory[2], additionalInfoMemory[3]);
-								int fps = ReadShort(additionalInfoMemory[6], additionalInfoMemory[7]);
-															
-								RightText.text = string.Format("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}\nFps: {6}", x, y, z, angle, sideAngle, cardinalPositions[cardinalPos % 4], fps);
+								playerInfo = new StringBuilder();
+								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}", x, y, z, angle, sideAngle, cardinalPositions[cardinalPos % 4]);
 
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
@@ -213,6 +218,21 @@ public class DosBox : MonoBehaviour
 
 					i++;
 				}
+
+				if (detectedGame == 1)
+				{
+					fpsInfo = new StringBuilder();
+					fpsInfo.AppendFormat("Timer: {0}\nFrames: {2}\nFps: {1}", TimeSpan.FromSeconds(InternalTimer / 60), calculatedFps, frameCounter);
+					if(lastDelayFpsCounter > 0)
+					{
+						fpsInfo.AppendFormat("\nDelay: {0} ms", lastDelayFpsCounter * 1000 / 50);
+					}
+				}
+
+				if (playerInfo != null)
+					RightText.text = playerInfo.ToString();
+				if (fpsInfo != null)
+					RightText.text += "\n\n" + fpsInfo.ToString();
 			}
 			else
 			{
@@ -226,6 +246,53 @@ public class DosBox : MonoBehaviour
 			&& player != null
 			&& player.activeSelf
 			&& player.transform.localScale.magnitude > 0.01f);				
+	}
+
+	void FixedUpdate()
+	{
+		int detectedGame = GetComponent<RoomLoader>().DetectGame();
+		if (processReader != null && detectedGame == 1)
+		{
+			//timer
+			processReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
+			InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
+
+			//fps
+			processReader.Read(memory, memoryAddress - 0x83B6, 2);
+			int fps = ReadShort(memory[0], memory[1]);
+
+			//frames
+			processReader.Read(memory, memoryAddress - 0x83B6 + 0x7464, 2);
+			int frames = ReadShort(memory[0], memory[1]);
+
+			//check how much frames elapsed since last time
+			int diff;
+			if(frames >= oldFramesCount)
+				diff = frames - oldFramesCount;
+			else
+				diff = (fps - oldFramesCount) + frames;	
+			oldFramesCount = frames;
+
+			//check for large delays
+			if(diff == 0) 
+			{ 
+				delayFpsCounter++;
+				if(delayFpsCounter > 5) // 5 frames at 50FPS = 100ms
+				{
+					lastDelayFpsCounter = delayFpsCounter;
+				}
+			}
+			else 
+			{
+				delayFpsCounter = 0; 
+			}
+
+			frameCounter += diff;
+			previousFramesCount.Enqueue(diff);
+			while(previousFramesCount.Count > 50) previousFramesCount.Dequeue();
+
+			calculatedFps = previousFramesCount.Sum();
+		}
 	}
 
 	private uint ReadUnsignedInt(byte a, byte b, byte c, byte d)

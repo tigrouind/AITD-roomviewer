@@ -121,16 +121,16 @@ public class Box : MonoBehaviour
 				{
 					sb.Append("\r\nFRAME = " + Frame + "/" + (TotalFrames - 1));
 				}
+				if (Speed != -1)
+					sb.Append("\r\nSPEED = " + Speed);
 			}
+
 			if (Chrono != 0)
 				sb.AppendFormat("\r\nCHRONO = {0}", TimeSpan.FromSeconds((timer - Chrono) / 60));
 			if (RoomChrono != 0)
 				sb.AppendFormat("\r\nROOM_CHRONO = {0}", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
-			if (Speed != -1)
-				sb.Append("\r\nSPEED = " + Speed);
 			if (TrackMode != -1)
 				sb.Append("\r\nTRACKMODE = " + TrackMode);
-			
 		}
 
 		return sb.ToString();

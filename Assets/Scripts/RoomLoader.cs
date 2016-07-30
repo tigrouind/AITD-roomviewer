@@ -153,7 +153,7 @@ public class RoomLoader : MonoBehaviour
 		{
 			int i = currentroom * 4;
 			int roomheader = ReadInt(allPointsA[i + 0], allPointsA[i + 1], allPointsA[i + 2], allPointsA[i + 3]);
-			if (roomheader > allPointsA.Length)
+			if (roomheader > allPointsA.Length || roomheader == 0)
 			{
 				//all rooms parsed
 				break;
