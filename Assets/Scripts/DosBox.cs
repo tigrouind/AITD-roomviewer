@@ -49,6 +49,7 @@ public class DosBox : MonoBehaviour
 	private int lastDelayFpsCounter;
 	private int frameCounter;
 	private StringBuilder fpsInfo;
+	private bool showFpsInfo;
 
 	public void Start()
 	{
@@ -70,7 +71,6 @@ public class DosBox : MonoBehaviour
 			if (processReader.Read(memory, memoryAddress, memory.Length) > 0)
 			{
 				int i = 0;
-				int detectedGame = GetComponent<RoomLoader>().DetectGame();
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{
 					int k = i * ActorStructSize[dosBoxPattern];
@@ -145,7 +145,7 @@ public class DosBox : MonoBehaviour
 							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
 
-							if(detectedGame != 1)
+							if(!showFpsInfo)
 							{
 								//those fields are only supported in AITD1
 								box.Chrono = 0;
@@ -219,7 +219,7 @@ public class DosBox : MonoBehaviour
 					i++;
 				}
 
-				if (detectedGame == 1)
+				if (showFpsInfo)
 				{
 					fpsInfo = new StringBuilder();
 					fpsInfo.AppendFormat("Timer: {0}\nFrames: {2}\nFps: {1}", TimeSpan.FromSeconds(InternalTimer / 60), calculatedFps, frameCounter);
@@ -227,6 +227,10 @@ public class DosBox : MonoBehaviour
 					{
 						fpsInfo.AppendFormat("\nDelay: {0} ms", lastDelayFpsCounter * 1000 / 50);
 					}
+				}
+				else
+				{
+					fpsInfo = null;
 				}
 
 				if (playerInfo != null)
@@ -250,8 +254,7 @@ public class DosBox : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		int detectedGame = GetComponent<RoomLoader>().DetectGame();
-		if (processReader != null && detectedGame == 1)
+		if(processReader != null && showFpsInfo)
 		{
 			//timer
 			processReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
@@ -379,6 +382,11 @@ public class DosBox : MonoBehaviour
 		lastPlayerPosition = Vector3.zero;
 		linkfloor = floor;
 		linkroom = room;
+	}
+
+	public void ShowFpsInfo(bool enabled)
+	{
+		showFpsInfo = enabled;
 	}
 
 	#endregion

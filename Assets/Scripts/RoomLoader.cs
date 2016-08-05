@@ -23,6 +23,7 @@ public class RoomLoader : MonoBehaviour
 	private bool showtriggers = true;
 	private int showareas = 0;
 	private int cameraFollow = 1;
+	private bool showFpsInfo;
 
 	public GUIText LeftText;
 	public GUIText BottomText;
@@ -558,9 +559,9 @@ public class RoomLoader : MonoBehaviour
 		{
 			Rect rect;
 			if (!DosBoxEnabled)
-				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 8, 400, 30 * 8);
-			else
 				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 9, 400, 30 * 9);
+			else
+				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 10, 400, 30 * 10);
 
 			//close menu if there is a  click out side
 			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
@@ -597,6 +598,17 @@ public class RoomLoader : MonoBehaviour
 			if (GUILayout.Button(cameraModes[cameraFollow], Style.Option) && Event.current.button == 0)
 			{
 				ProcessKey(KeyCode.F);
+			}
+			GUILayout.EndHorizontal();
+
+			//camera rotate
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Camera rotation", Style.Label);
+			float rotation = Mathf.Round(GUILayout.HorizontalSlider(cameraRotation, -8.0f, 8.0f, Style.Slider, Style.Thumb));
+			if (Event.current.button == 0)
+			{
+				cameraRotation = rotation;
+				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
 			}
 			GUILayout.EndHorizontal();
 
@@ -640,14 +652,12 @@ public class RoomLoader : MonoBehaviour
 				GUILayout.EndHorizontal();
 			}
 
-			//camera rotate
+			//show fps info
 			GUILayout.BeginHorizontal();
-			GUILayout.Label("Camera rotation", Style.Label);
-			float rotation = Mathf.Round(GUILayout.HorizontalSlider(cameraRotation, -8.0f, 8.0f, Style.Slider, Style.Thumb));
-			if (Event.current.button == 0)
+			GUILayout.Label("Show FPS info", Style.Label);
+			if (GUILayout.Button(showFpsInfo ? "Yes" : "No", Style.Option) && Event.current.button == 0)
 			{
-				cameraRotation = rotation;
-				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
+				ProcessKey(KeyCode.M);
 			}
 			GUILayout.EndHorizontal();
 
@@ -736,6 +746,10 @@ public class RoomLoader : MonoBehaviour
 				Actors.SetActive(!Actors.activeSelf);
 				break;
 
+			case KeyCode.M:
+				showFpsInfo = !showFpsInfo && (DetectGame() == 1);
+				GetComponent<DosBox>().ShowFpsInfo(showFpsInfo);
+				break;
 
 			case KeyCode.Escape:
 				if (Screen.fullScreen)
