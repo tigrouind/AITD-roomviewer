@@ -280,7 +280,7 @@ public class DosBox : MonoBehaviour
 			if(diff == 0) 
 			{ 
 				delayFpsCounter++;
-				if(delayFpsCounter > 5) // 5 frames at 50FPS = 100ms
+				if(delayFpsCounter > 20) // 20 frames at 200FPS = 100ms
 				{
 					lastDelayFpsCounter = delayFpsCounter;
 				}
@@ -292,7 +292,7 @@ public class DosBox : MonoBehaviour
 
 			frameCounter += diff;
 			previousFramesCount.Enqueue(diff);
-			while(previousFramesCount.Count > 50) previousFramesCount.Dequeue();
+			while(previousFramesCount.Count > 200) previousFramesCount.Dequeue();
 
 			calculatedFps = previousFramesCount.Sum();
 		}
