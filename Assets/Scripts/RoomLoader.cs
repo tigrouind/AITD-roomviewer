@@ -23,6 +23,7 @@ public class RoomLoader : MonoBehaviour
 	private bool showtriggers = true;
 	private int showareas = 0;
 	private int cameraFollow = 1;
+	private int menuItemsCount;
 
 	public GUIText LeftText;
 	public GUIText BottomText;
@@ -568,11 +569,8 @@ public class RoomLoader : MonoBehaviour
 	{
 		if (menuEnabled)
 		{
-			Rect rect;
-			if (!DosBoxEnabled)
-				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 9, 400, 30 * 9);
-			else
-				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 11, 400, 30 * 11);
+			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * menuItemsCount, 400, 30 * menuItemsCount);
+			int itemsCount = 0;
 
 			//close menu if there is a click out side
 			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
@@ -588,18 +586,21 @@ public class RoomLoader : MonoBehaviour
 			{
 				ProcessKey(KeyCode.L);
 			}
+			itemsCount++;
 
 			if (GUILayout.Button("Model viewer", Style.Button) && Event.current.button == 0)
 			{
 				ProcessKey(KeyCode.Tab);
 			}
+			itemsCount++;
 
-			if (DosBoxEnabled)
+			if (DosBoxEnabled && DetectGame() == 1)
 			{
 				if (GUILayout.Button("Show VARS", Style.Button) && Event.current.button == 0)
 				{
 					ProcessKey(KeyCode.U);
 				}
+				itemsCount++;
 			}
 
 			//camera
@@ -610,6 +611,7 @@ public class RoomLoader : MonoBehaviour
 				ProcessKey(KeyCode.C);
 			}
 			GUILayout.EndHorizontal();
+			itemsCount++;
 
 			//follow
 			GUILayout.BeginHorizontal();
@@ -619,6 +621,7 @@ public class RoomLoader : MonoBehaviour
 				ProcessKey(KeyCode.F);
 			}
 			GUILayout.EndHorizontal();
+			itemsCount++;
 
 			//camera rotate
 			GUILayout.BeginHorizontal();
@@ -630,6 +633,7 @@ public class RoomLoader : MonoBehaviour
 				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
 			}
 			GUILayout.EndHorizontal();
+			itemsCount++;
 
 			//rooms
 			GUILayout.BeginHorizontal();
@@ -639,6 +643,7 @@ public class RoomLoader : MonoBehaviour
 				ProcessKey(KeyCode.H);
 			}
 			GUILayout.EndHorizontal();
+			itemsCount++;
 
 			//areas
 			GUILayout.BeginHorizontal();
@@ -648,7 +653,7 @@ public class RoomLoader : MonoBehaviour
 				ProcessKey(KeyCode.A);
 			}
 			GUILayout.EndHorizontal();
-
+			itemsCount++;
 
 			//triggers
 			GUILayout.BeginHorizontal();
@@ -658,6 +663,7 @@ public class RoomLoader : MonoBehaviour
 				ProcessKey(KeyCode.T);
 			}
 			GUILayout.EndHorizontal();
+			itemsCount++;
 
 			//actors
 			if (DosBoxEnabled)
@@ -669,19 +675,26 @@ public class RoomLoader : MonoBehaviour
 					ProcessKey(KeyCode.J);
 				}
 				GUILayout.EndHorizontal();
+				itemsCount++;
 			}
 
-			//show fps info
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Show FPS info", Style.Label);
-			if (GUILayout.Button(GetComponent<DosBox>().ShowFpsInfo ? "Yes" : "No", Style.Option) && Event.current.button == 0)
+			if(DosBoxEnabled && DetectGame() == 1)
 			{
-				ProcessKey(KeyCode.M);
+				//show fps info
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Show FPS info", Style.Label);
+				if (GUILayout.Button(GetComponent<DosBox>().ShowFpsInfo ? "Yes" : "No", Style.Option) && Event.current.button == 0)
+				{
+					ProcessKey(KeyCode.M);
+				}
+				GUILayout.EndHorizontal();
+				itemsCount++;
 			}
-			GUILayout.EndHorizontal();
 
 			GUILayout.EndVertical();
 			GUILayout.EndArea();
+
+			menuItemsCount = itemsCount;
 		}
 	}
 
