@@ -15,10 +15,17 @@ public class DosBox : MonoBehaviour
 	public MenuStyle Style;
 
 	private byte[] varsMemory = new byte[207*2];
-	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 }; 
-	private long varsMemoryAddress = -1;
 	private byte[] oldVarsMemory = new byte[207*2];
 	private float[] varsMemoryTime = new float[207];
+	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 }; 
+	private long varsMemoryAddress = -1;
+
+	private byte[] cvarsMemory = new byte[44*2];
+	private byte[] oldCVarsMemory = new byte[44*2];
+	private float[] cvarsMemoryTime = new float[44];
+	private byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 }; 
+	private long cvarsMemoryAddress = -1;
+
 	public bool ShowVarsMemory;
 
 	//initial player position
@@ -255,20 +262,13 @@ public class DosBox : MonoBehaviour
 			if(varsMemoryAddress != -1)
 			{
 				processReader.Read(varsMemory, varsMemoryAddress, varsMemory.Length);
+				CheckDifferences(varsMemory, oldVarsMemory, varsMemoryTime, 207);
+			}
 
-				//check differences
-				for(int i = 0 ; i < 207 ; i++)
-				{
-					int value = ReadShort(varsMemory[i * 2 + 0], varsMemory[i * 2 + 1]);
-					int oldValue = ReadShort(oldVarsMemory[i * 2 + 0], oldVarsMemory[i * 2 + 1]);
-					if(value != oldValue)
-					{
-						varsMemoryTime[i] = Time.time;
-					}
-
-					oldVarsMemory[i * 2 + 0] = varsMemory[i * 2 + 0];
-					oldVarsMemory[i * 2 + 1] = varsMemory[i * 2 + 1];
-				}
+			if(cvarsMemoryAddress != -1)
+			{
+				processReader.Read(cvarsMemory, cvarsMemoryAddress, cvarsMemory.Length);
+				CheckDifferences(cvarsMemory, oldCVarsMemory, cvarsMemoryTime, 44);
 			}
 		}
 
@@ -349,64 +349,92 @@ public class DosBox : MonoBehaviour
 		{
 			GUIStyle panel = new GUIStyle(Style.Panel);
 			panel.normal.background = Style.BlackTexture;
+			Rect areaA = new Rect(0, 0, Screen.width, Screen.height * 22.0f/28.0f);
+			Rect areaB = new Rect(0, Screen.height * 22.0f/28.0f, Screen.width, Screen.height * 6.0f/28.0f);
 
-			GUILayout.BeginArea(new Rect(0, 0, Screen.width, Screen.height), panel);
-			GUIStyle labelStyle = new GUIStyle(Style.Label);
-			labelStyle.fixedWidth = Screen.width/11.0f;
-			labelStyle.fixedHeight = Screen.height/22.0f;
-			labelStyle.alignment = TextAnchor.MiddleCenter;
-
-			GUIStyle headerStyle = new GUIStyle(labelStyle);
-			headerStyle.normal.textColor = new Color32(0, 200, 100, 255);
-
-			//header
-			GUILayout.BeginHorizontal();
-			GUILayout.Label(string.Empty, labelStyle);
-			for (int i = 0 ; i < 10 ; i++)
-			{
-				GUILayout.Label(i.ToString(), headerStyle);
-			}
-			GUILayout.EndHorizontal();
-
-			//body
-			for (int i = 0 ; i < 210 ; i++)
-			{
-				if (i%10 == 0)
-				{
-					GUILayout.BeginHorizontal();
-					headerStyle.alignment = TextAnchor.MiddleRight;
-					GUILayout.Label((i / 10).ToString(), headerStyle);
-				}
-
-				string stringValue = string.Empty;
-				if(i < 207)
-				{
-					int value = ReadShort(varsMemory[i * 2 + 0], varsMemory[i * 2 + 1]);
-					bool different = (Time.time - varsMemoryTime[i]) < 4.0f;
-
-					if(value != 0 || different)
-						stringValue = value.ToString();
-
-					//highlight recently changed vars
-					if(different)
-					{
-						labelStyle.normal.background = Style.RedTexture;
-					}
-					else
-					{
-						labelStyle.normal.background = null;
-					}
-				}
-
-				GUILayout.Label(stringValue, labelStyle);
-
-				if (i%10 == 9)
-				{
-					GUILayout.EndHorizontal();
-				}
-			}
-
+			GUILayout.BeginArea(areaA, panel);
+			DisplayTable(areaA, 207, varsMemory, varsMemoryTime);
 			GUILayout.EndArea();
+
+			GUILayout.BeginArea(areaB, panel);
+			DisplayTable(areaB, 44, cvarsMemory, cvarsMemoryTime);
+			GUILayout.EndArea();
+		}
+	}
+
+	void CheckDifferences(byte[] values, byte[] oldvalues, float[] time, int count)
+	{
+		for(int i = 0 ; i < count ; i++)
+		{
+			int value = ReadShort(values[i * 2 + 0], values[i * 2 + 1]);
+			int oldValue = ReadShort(oldvalues[i * 2 + 0], oldvalues[i * 2 + 1]);
+			if (value != oldValue)
+			{
+				time[i] = Time.time;
+			}
+
+			oldvalues[i * 2 + 0] = values[i * 2 + 0];
+			oldvalues[i * 2 + 1] = values[i * 2 + 1];
+		}
+	}
+
+	void DisplayTable(Rect area, int count, byte[] values, float[] timer)
+	{
+		int rows = (int)(Mathf.Ceil(count / 10.0f));
+
+		GUIStyle labelStyle = new GUIStyle(Style.Label);
+		labelStyle.fixedWidth = area.width/11.0f;
+		labelStyle.fixedHeight = area.height/((float)(rows + 1));
+		labelStyle.alignment = TextAnchor.MiddleCenter;
+
+		GUIStyle headerStyle = new GUIStyle(labelStyle);
+		headerStyle.normal.textColor = new Color32(0, 200, 100, 255);
+
+		//header
+		GUILayout.BeginHorizontal();
+		GUILayout.Label(string.Empty, labelStyle);
+		for (int i = 0 ; i < 10 ; i++)
+		{
+			GUILayout.Label(i.ToString(), headerStyle);
+		}
+		GUILayout.EndHorizontal();
+
+		//body
+		for (int i = 0 ; i < rows * 10 ; i++)
+		{
+			if (i%10 == 0)
+			{
+				GUILayout.BeginHorizontal();
+				headerStyle.alignment = TextAnchor.MiddleRight;
+				GUILayout.Label((i / 10).ToString(), headerStyle);
+			}
+
+			string stringValue = string.Empty;
+			if(i < count)
+			{
+				int value = ReadShort(values[i * 2 + 0], values[i * 2 + 1]);
+				bool different = (Time.time - timer[i]) < 4.0f;
+
+				if(value != 0 || different)
+					stringValue = value.ToString();
+
+				//highlight recently changed vars
+				if(different)
+				{
+					labelStyle.normal.background = Style.RedTexture;
+				}
+				else
+				{
+					labelStyle.normal.background = null;
+				}
+			}
+
+			GUILayout.Label(stringValue, labelStyle);
+
+			if (i%10 == 9)
+			{
+				GUILayout.EndHorizontal();
+			}
 		}
 	}
 
@@ -458,6 +486,7 @@ public class DosBox : MonoBehaviour
 					if(patternIndex == 0) //AITD1 only
 					{
 						varsMemoryAddress = reader.SearchForBytePattern(varsMemoryPattern);
+						cvarsMemoryAddress = reader.SearchForBytePattern(cvarsMemoryPattern);
 					}
 					return true;
 				}
