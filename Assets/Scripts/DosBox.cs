@@ -240,7 +240,7 @@ public class DosBox : MonoBehaviour
 					fpsInfo.AppendFormat("Timer: {0}\nFrames: {2}\nFps: {1}", TimeSpan.FromSeconds(InternalTimer / 60), calculatedFps, frameCounter);
 					if(lastDelayFpsCounter > 0)
 					{
-						fpsInfo.AppendFormat("\nDelay: {0} ms", lastDelayFpsCounter * 1000 / 50);
+						fpsInfo.AppendFormat("\nDelay: {0} ms", lastDelayFpsCounter * 1000 / 200);
 					}
 				}
 				else
@@ -258,7 +258,10 @@ public class DosBox : MonoBehaviour
 				//unlink DOSBOX
 				GetComponent<RoomLoader>().ProcessKey(KeyCode.L);
 			}
+		}
 
+		if(processReader != null)
+		{
 			if(varsMemoryAddress != -1)
 			{
 				processReader.Read(varsMemory, varsMemoryAddress, varsMemory.Length);
@@ -386,13 +389,14 @@ public class DosBox : MonoBehaviour
 		labelStyle.fixedWidth = area.width/11.0f;
 		labelStyle.fixedHeight = area.height/((float)(rows + 1));
 		labelStyle.alignment = TextAnchor.MiddleCenter;
-
+	
 		GUIStyle headerStyle = new GUIStyle(labelStyle);
-		headerStyle.normal.textColor = new Color32(0, 200, 100, 255);
+		headerStyle.normal.textColor = new Color32(0, 0, 0, 255);
+		headerStyle.normal.background = Style.GreenTexture;
 
 		//header
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Empty, labelStyle);
+		GUILayout.Label(string.Empty, headerStyle);
 		for (int i = 0 ; i < 10 ; i++)
 		{
 			GUILayout.Label(i.ToString(), headerStyle);
@@ -413,7 +417,7 @@ public class DosBox : MonoBehaviour
 			if(i < count)
 			{
 				int value = ReadShort(values[i * 2 + 0], values[i * 2 + 1]);
-				bool different = (Time.time - timer[i]) < 4.0f;
+				bool different = (Time.time - timer[i]) < 5.0f;
 
 				if(value != 0 || different)
 					stringValue = value.ToString();

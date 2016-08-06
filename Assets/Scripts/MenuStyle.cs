@@ -13,6 +13,7 @@ public class MenuStyle : MonoBehaviour
 
 	public Texture2D RedTexture;
 	public Texture2D BlackTexture;
+	public Texture2D GreenTexture;
 
 	public GUIStyle Panel;
 	public GUIStyle Button;

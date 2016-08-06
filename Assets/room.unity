@@ -560,6 +560,7 @@ MonoBehaviour:
   ThumbHoverTexture: {fileID: 2800000, guid: 390f86bf92eb5ee408623bd9341b1f55, type: 3}
   RedTexture: {fileID: 2800000, guid: be760246c22da2943a3b22a3ba33979e, type: 3}
   BlackTexture: {fileID: 2800000, guid: d21b9d6728a05164faddb0e70251ee38, type: 3}
+  GreenTexture: {fileID: 2800000, guid: 86642a3a0a405334484fa1456ce7c37a, type: 3}
   Panel:
     m_Name: 
     m_Normal:
