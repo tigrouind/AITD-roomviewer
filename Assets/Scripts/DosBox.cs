@@ -12,6 +12,14 @@ public class DosBox : MonoBehaviour
 	public GameObject Arrow;
 	public Box BoxPrefab;
 	public uint InternalTimer;
+	public MenuStyle Style;
+
+	private byte[] varsMemory = new byte[207*2];
+	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 }; 
+	private long varsMemoryAddress = -1;
+	private byte[] oldVarsMemory = new byte[207*2];
+	private float[] varsMemoryTime = new float[207];
+	public bool ShowVarsMemory;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -49,7 +57,7 @@ public class DosBox : MonoBehaviour
 	private int lastDelayFpsCounter;
 	private int frameCounter;
 	private StringBuilder fpsInfo;
-	private bool showFpsInfo;
+	public bool ShowFpsInfo;
 
 	public void Start()
 	{
@@ -145,7 +153,7 @@ public class DosBox : MonoBehaviour
 							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
 
-							if(!showFpsInfo)
+							if(!ShowFpsInfo)
 							{
 								//those fields are only supported in AITD1
 								box.Chrono = 0;
@@ -219,7 +227,7 @@ public class DosBox : MonoBehaviour
 					i++;
 				}
 
-				if (showFpsInfo)
+				if (ShowFpsInfo)
 				{
 					fpsInfo = new StringBuilder();
 					fpsInfo.AppendFormat("Timer: {0}\nFrames: {2}\nFps: {1}", TimeSpan.FromSeconds(InternalTimer / 60), calculatedFps, frameCounter);
@@ -243,6 +251,25 @@ public class DosBox : MonoBehaviour
 				//unlink DOSBOX
 				GetComponent<RoomLoader>().ProcessKey(KeyCode.L);
 			}
+
+			if(varsMemoryAddress != -1)
+			{
+				processReader.Read(varsMemory, varsMemoryAddress, varsMemory.Length);
+
+				//check differences
+				for(int i = 0 ; i < 207 ; i++)
+				{
+					int value = ReadShort(varsMemory[i * 2 + 0], varsMemory[i * 2 + 1]);
+					int oldValue = ReadShort(oldVarsMemory[i * 2 + 0], oldVarsMemory[i * 2 + 1]);
+					if(value != oldValue)
+					{
+						varsMemoryTime[i] = Time.time;
+					}
+
+					oldVarsMemory[i * 2 + 0] = varsMemory[i * 2 + 0];
+					oldVarsMemory[i * 2 + 1] = varsMemory[i * 2 + 1];
+				}
+			}
 		}
 
 		//arrow is only active if actors are active and player is active
@@ -254,7 +281,7 @@ public class DosBox : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		if(processReader != null && showFpsInfo)
+		if(processReader != null && ShowFpsInfo)
 		{
 			//timer
 			processReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
@@ -316,6 +343,73 @@ public class DosBox : MonoBehaviour
 
 	#region Room loader
 
+	void OnGUI()
+	{
+		if(ShowVarsMemory)
+		{
+			GUIStyle panel = new GUIStyle(Style.Panel);
+			panel.normal.background = Style.BlackTexture;
+
+			GUILayout.BeginArea(new Rect(0, 0, Screen.width, Screen.height), panel);
+			GUIStyle labelStyle = new GUIStyle(Style.Label);
+			labelStyle.fixedWidth = Screen.width/11.0f;
+			labelStyle.fixedHeight = Screen.height/22.0f;
+			labelStyle.alignment = TextAnchor.MiddleCenter;
+
+			GUIStyle headerStyle = new GUIStyle(labelStyle);
+			headerStyle.normal.textColor = new Color32(0, 200, 100, 255);
+
+			//header
+			GUILayout.BeginHorizontal();
+			GUILayout.Label(string.Empty, labelStyle);
+			for (int i = 0 ; i < 10 ; i++)
+			{
+				GUILayout.Label(i.ToString(), headerStyle);
+			}
+			GUILayout.EndHorizontal();
+
+			//body
+			for (int i = 0 ; i < 210 ; i++)
+			{
+				if (i%10 == 0)
+				{
+					GUILayout.BeginHorizontal();
+					headerStyle.alignment = TextAnchor.MiddleRight;
+					GUILayout.Label((i / 10).ToString(), headerStyle);
+				}
+
+				string stringValue = string.Empty;
+				if(i < 207)
+				{
+					int value = ReadShort(varsMemory[i * 2 + 0], varsMemory[i * 2 + 1]);
+					bool different = (Time.time - varsMemoryTime[i]) < 4.0f;
+
+					if(value != 0 || different)
+						stringValue = value.ToString();
+
+					//highlight recently changed vars
+					if(different)
+					{
+						labelStyle.normal.background = Style.RedTexture;
+					}
+					else
+					{
+						labelStyle.normal.background = null;
+					}
+				}
+
+				GUILayout.Label(stringValue, labelStyle);
+
+				if (i%10 == 9)
+				{
+					GUILayout.EndHorizontal();
+				}
+			}
+
+			GUILayout.EndArea();
+		}
+	}
+
 	public bool LinkToDosBOX(int floor, int room)
 	{
 		int[] processIds = Process.GetProcesses()
@@ -359,6 +453,12 @@ public class DosBox : MonoBehaviour
 					processReader = reader;
 					memory = new byte[ActorStructSize[patternIndex] * 50];
 					dosBoxPattern = patternIndex;
+
+					//vars
+					if(patternIndex == 0) //AITD1 only
+					{
+						varsMemoryAddress = reader.SearchForBytePattern(varsMemoryPattern);
+					}
 					return true;
 				}
 			}
@@ -382,11 +482,6 @@ public class DosBox : MonoBehaviour
 		lastPlayerPosition = Vector3.zero;
 		linkfloor = floor;
 		linkroom = room;
-	}
-
-	public void ShowFpsInfo(bool enabled)
-	{
-		showFpsInfo = enabled;
 	}
 
 	#endregion

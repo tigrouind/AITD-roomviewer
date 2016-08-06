@@ -23,7 +23,6 @@ public class RoomLoader : MonoBehaviour
 	private bool showtriggers = true;
 	private int showareas = 0;
 	private int cameraFollow = 1;
-	private bool showFpsInfo;
 
 	public GUIText LeftText;
 	public GUIText BottomText;
@@ -406,7 +405,19 @@ public class RoomLoader : MonoBehaviour
 		//menu
 		if (Input.GetMouseButtonDown(1))
 		{
-			menuEnabled = !menuEnabled;
+			if(GetComponent<DosBox>().ShowVarsMemory)
+			{
+				GetComponent<DosBox>().ShowVarsMemory = false;
+			}
+			else
+			{
+				menuEnabled = !menuEnabled;
+			}
+		}
+
+		if (Input.GetMouseButtonDown(0))
+		{
+			GetComponent<DosBox>().ShowVarsMemory = false;
 		}
 
 		if (!menuEnabled)
@@ -561,9 +572,9 @@ public class RoomLoader : MonoBehaviour
 			if (!DosBoxEnabled)
 				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 9, 400, 30 * 9);
 			else
-				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 10, 400, 30 * 10);
+				rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 11, 400, 30 * 11);
 
-			//close menu if there is a  click out side
+			//close menu if there is a click out side
 			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
 			{
 				menuEnabled = false;
@@ -581,6 +592,14 @@ public class RoomLoader : MonoBehaviour
 			if (GUILayout.Button("Model viewer", Style.Button) && Event.current.button == 0)
 			{
 				ProcessKey(KeyCode.Tab);
+			}
+
+			if (DosBoxEnabled)
+			{
+				if (GUILayout.Button("Show VARS", Style.Button) && Event.current.button == 0)
+				{
+					ProcessKey(KeyCode.U);
+				}
 			}
 
 			//camera
@@ -655,7 +674,7 @@ public class RoomLoader : MonoBehaviour
 			//show fps info
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Show FPS info", Style.Label);
-			if (GUILayout.Button(showFpsInfo ? "Yes" : "No", Style.Option) && Event.current.button == 0)
+			if (GUILayout.Button(GetComponent<DosBox>().ShowFpsInfo ? "Yes" : "No", Style.Option) && Event.current.button == 0)
 			{
 				ProcessKey(KeyCode.M);
 			}
@@ -727,6 +746,14 @@ public class RoomLoader : MonoBehaviour
 				}
 				break;
 
+			case KeyCode.U:
+				if(DetectGame() == 1)
+				{
+					GetComponent<DosBox>().ShowVarsMemory = !GetComponent<DosBox>().ShowVarsMemory;
+					menuEnabled = false; 
+				}
+				break;
+
 			case KeyCode.H:
 				showrooms = (showrooms + 1) % 4;
 				SetRoomObjectsVisibility(room);
@@ -747,8 +774,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.M:
-				showFpsInfo = !showFpsInfo && (DetectGame() == 1);
-				GetComponent<DosBox>().ShowFpsInfo(showFpsInfo);
+				GetComponent<DosBox>().ShowFpsInfo = !GetComponent<DosBox>().ShowFpsInfo;
 				break;
 
 			case KeyCode.Escape:

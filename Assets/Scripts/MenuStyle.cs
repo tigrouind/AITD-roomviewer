@@ -11,6 +11,9 @@ public class MenuStyle : MonoBehaviour
 	public Texture2D ThumbTexture;
 	public Texture2D ThumbHoverTexture;
 
+	public Texture2D RedTexture;
+	public Texture2D BlackTexture;
+
 	public GUIStyle Panel;
 	public GUIStyle Button;
 	public GUIStyle Label;
@@ -18,7 +21,6 @@ public class MenuStyle : MonoBehaviour
 
 	public GUIStyle Slider;
 	public GUIStyle Thumb;
-
 
 	void Start()
 	{
