@@ -350,11 +350,11 @@ public class DosBox : MonoBehaviour
 			Rect areaB = new Rect(0, Screen.height * 22.0f/28.0f, Screen.width, Screen.height * 6.0f/28.0f);
 
 			GUILayout.BeginArea(areaA, panel);
-			DisplayTable(areaA, 207, varsMemory, varsMemoryTime, "VARS");
+			DisplayTable(areaA, 10, 21, varsMemory, varsMemoryTime, "VARS");
 			GUILayout.EndArea();
 
 			GUILayout.BeginArea(areaB, panel);
-			DisplayTable(areaB, 44, cvarsMemory, cvarsMemoryTime, "CVARS");
+			DisplayTable(areaB, 10, 5, cvarsMemory, cvarsMemoryTime, "CVARS");
 			GUILayout.EndArea();
 		}
 	}
@@ -375,12 +375,11 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-    void DisplayTable(Rect area, int count, byte[] values, float[] timer, string title)
+    void DisplayTable(Rect area, int columns, int rows, byte[] values, float[] timer, string title)
 	{
-		int rows = (int)(Mathf.Ceil(count / 10.0f));
-
+        //setup style
 		GUIStyle labelStyle = new GUIStyle(Style.Label);
-		labelStyle.fixedWidth = area.width/11.0f;
+        labelStyle.fixedWidth = area.width/(columns + 1);
 		labelStyle.fixedHeight = area.height/((float)(rows + 1));
 		labelStyle.alignment = TextAnchor.MiddleCenter;
 	
@@ -391,48 +390,39 @@ public class DosBox : MonoBehaviour
 		//header
 		GUILayout.BeginHorizontal();
 		GUILayout.Label(title, headerStyle);
-		for (int i = 0 ; i < 10 ; i++)
+		for (int i = 0 ; i < columns ; i++)
 		{
 			GUILayout.Label(i.ToString(), headerStyle);
 		}
 		GUILayout.EndHorizontal();
 
 		//body
-		for (int i = 0 ; i < rows * 10 ; i++)
+        int count = 0;
+		for (int i = 0 ; i < rows ; i++)
 		{
-			if (i%10 == 0)
-			{
-				GUILayout.BeginHorizontal();
-				headerStyle.alignment = TextAnchor.MiddleRight;
-				GUILayout.Label((i / 10).ToString(), headerStyle);
-			}
+            GUILayout.BeginHorizontal();
+            headerStyle.alignment = TextAnchor.MiddleRight;
+            GUILayout.Label(i.ToString(), headerStyle);
 
-			string stringValue = string.Empty;
-			if(i < count)
-			{
-				int value = ReadShort(values[i * 2 + 0], values[i * 2 + 1]);
-				bool different = (Time.time - timer[i]) < 5.0f;
+            for (int j = 0; j < columns; j++)
+            {
+                string stringValue = string.Empty;
+                if (count < values.Length / 2)
+                {
+                    int value = ReadShort(values[count * 2 + 0], values[count * 2 + 1]);
+                    bool different = (Time.time - timer[count]) < 5.0f;
 
-				if(value != 0 || different)
-					stringValue = value.ToString();
+                    if (value != 0 || different)
+                        stringValue = value.ToString();
 
-				//highlight recently changed vars
-				if(different)
-				{
-					labelStyle.normal.background = Style.RedTexture;
-				}
-				else
-				{
-					labelStyle.normal.background = null;
-				}
-			}
-
-			GUILayout.Label(stringValue, labelStyle);
-
-			if (i%10 == 9)
-			{
-				GUILayout.EndHorizontal();
-			}
+                    //highlight recently changed vars
+                    labelStyle.normal.background = different ? Style.RedTexture : null;
+                }
+               
+                count++;
+                GUILayout.Label(stringValue, labelStyle);
+            }
+            GUILayout.EndHorizontal();
 		}
 	}
 
