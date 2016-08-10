@@ -62,7 +62,6 @@ public class DosBox : MonoBehaviour
 	private float calculatedFps;
 	private int delayFpsCounter;
 	private int lastDelayFpsCounter;
-	private int frameCounter;
 	private StringBuilder fpsInfo;
 	public bool ShowFpsInfo;
 
@@ -237,11 +236,7 @@ public class DosBox : MonoBehaviour
 				if (ShowFpsInfo)
 				{
 					fpsInfo = new StringBuilder();
-					fpsInfo.AppendFormat("Timer: {0}\nFrames: {2}\nFps: {1}", TimeSpan.FromSeconds(InternalTimer / 60), calculatedFps, frameCounter);
-					if(lastDelayFpsCounter > 0)
-					{
-						fpsInfo.AppendFormat("\nDelay: {0} ms", lastDelayFpsCounter * 1000 / 200);
-					}
+                    fpsInfo.AppendFormat("Fps: {1}\nDelay: {0} ms", lastDelayFpsCounter * 1000 / 200, calculatedFps);
 				}
 				else
 				{
@@ -310,7 +305,7 @@ public class DosBox : MonoBehaviour
 			if(diff == 0) 
 			{ 
 				delayFpsCounter++;
-				if(delayFpsCounter > 20) // 20 frames at 200FPS = 100ms
+                if(delayFpsCounter > 100/(1000/200)) // 20 frames at 200FPS = 100ms
 				{
 					lastDelayFpsCounter = delayFpsCounter;
 				}
@@ -320,7 +315,6 @@ public class DosBox : MonoBehaviour
 				delayFpsCounter = 0; 
 			}
 
-			frameCounter += diff;
 			previousFramesCount.Enqueue(diff);
 			while(previousFramesCount.Count > 200) previousFramesCount.Dequeue();
 
