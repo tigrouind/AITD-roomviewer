@@ -236,7 +236,8 @@ public class DosBox : MonoBehaviour
 				if (ShowFpsInfo)
 				{
 					fpsInfo = new StringBuilder();
-                    fpsInfo.AppendFormat("Fps: {1}\nDelay: {0} ms", lastDelayFpsCounter * 1000 / 200, calculatedFps);
+                    fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms", TimeSpan.FromSeconds(InternalTimer / 60),
+                        calculatedFps, lastDelayFpsCounter * 1000 / 200);
 				}
 				else
 				{
@@ -361,13 +362,14 @@ public class DosBox : MonoBehaviour
 
 	void CheckDifferences(byte[] values, byte[] oldvalues, float[] time, int count)
 	{
+        float currenttime = Time.time;
 		for(int i = 0 ; i < count ; i++)
 		{
 			int value = ReadShort(values[i * 2 + 0], values[i * 2 + 1]);
 			int oldValue = ReadShort(oldvalues[i * 2 + 0], oldvalues[i * 2 + 1]);
 			if (value != oldValue)
 			{
-				time[i] = Time.time;
+                time[i] = currenttime;
 			}
 
 			oldvalues[i * 2 + 0] = values[i * 2 + 0];
@@ -398,6 +400,7 @@ public class DosBox : MonoBehaviour
 
 		//body
         int count = 0;
+        float currenttime = Time.time;
 		for (int i = 0 ; i < rows ; i++)
 		{
             GUILayout.BeginHorizontal();
@@ -410,7 +413,7 @@ public class DosBox : MonoBehaviour
                 if (count < values.Length / 2)
                 {
                     int value = ReadShort(values[count * 2 + 0], values[count * 2 + 1]);
-                    bool different = (Time.time - timer[count]) < 5.0f;
+                    bool different = (currenttime - timer[count]) < 5.0f;
 
                     if (value != 0 || different)
                         stringValue = value.ToString();
