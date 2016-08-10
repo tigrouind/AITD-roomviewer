@@ -356,11 +356,11 @@ public class DosBox : MonoBehaviour
 			Rect areaB = new Rect(0, Screen.height * 22.0f/28.0f, Screen.width, Screen.height * 6.0f/28.0f);
 
 			GUILayout.BeginArea(areaA, panel);
-			DisplayTable(areaA, 207, varsMemory, varsMemoryTime);
+			DisplayTable(areaA, 207, varsMemory, varsMemoryTime, "VARS");
 			GUILayout.EndArea();
 
 			GUILayout.BeginArea(areaB, panel);
-			DisplayTable(areaB, 44, cvarsMemory, cvarsMemoryTime);
+			DisplayTable(areaB, 44, cvarsMemory, cvarsMemoryTime, "CVARS");
 			GUILayout.EndArea();
 		}
 	}
@@ -381,7 +381,7 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	void DisplayTable(Rect area, int count, byte[] values, float[] timer)
+    void DisplayTable(Rect area, int count, byte[] values, float[] timer, string title)
 	{
 		int rows = (int)(Mathf.Ceil(count / 10.0f));
 
@@ -396,7 +396,7 @@ public class DosBox : MonoBehaviour
 
 		//header
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(string.Empty, headerStyle);
+		GUILayout.Label(title, headerStyle);
 		for (int i = 0 ; i < 10 ; i++)
 		{
 			GUILayout.Label(i.ToString(), headerStyle);
