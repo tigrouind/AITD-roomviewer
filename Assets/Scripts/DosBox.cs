@@ -63,7 +63,7 @@ public class DosBox : MonoBehaviour
 	private int delayFpsCounter;
 	private int lastDelayFpsCounter;
 	private StringBuilder fpsInfo;
-	public bool ShowFpsInfo;
+	public bool ShowAdditionalInfo;
 
 	public void Start()
 	{
@@ -159,7 +159,7 @@ public class DosBox : MonoBehaviour
 							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
 
-							if(!ShowFpsInfo)
+							if(!ShowAdditionalInfo)
 							{
 								//those fields are only supported in AITD1
 								box.Chrono = 0;
@@ -233,7 +233,7 @@ public class DosBox : MonoBehaviour
 					i++;
 				}
 
-				if (ShowFpsInfo)
+				if (ShowAdditionalInfo)
 				{
 					fpsInfo = new StringBuilder();
                     fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms", TimeSpan.FromSeconds(InternalTimer / 60),
@@ -258,6 +258,13 @@ public class DosBox : MonoBehaviour
 
 		if(processReader != null)
 		{
+            if (ShowAdditionalInfo)
+            {
+                //timer
+                processReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
+                InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
+            }
+
 			if(varsMemoryAddress != -1)
 			{
 				processReader.Read(varsMemory, varsMemoryAddress, varsMemory.Length);
@@ -280,12 +287,8 @@ public class DosBox : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		if(processReader != null && ShowFpsInfo)
+		if(processReader != null && ShowAdditionalInfo)
 		{
-			//timer
-			processReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
-			InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
-
 			//fps
 			processReader.Read(memory, memoryAddress - 0x83B6, 2);
 			int fps = ReadShort(memory[0], memory[1]);

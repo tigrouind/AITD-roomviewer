@@ -682,8 +682,8 @@ public class RoomLoader : MonoBehaviour
 			{
 				//show fps info
 				GUILayout.BeginHorizontal();
-				GUILayout.Label("Show FPS info", Style.Label);
-				if (GUILayout.Button(GetComponent<DosBox>().ShowFpsInfo ? "Yes" : "No", Style.Option) && Event.current.button == 0)
+				GUILayout.Label("Show additional info", Style.Label);
+				if (GUILayout.Button(GetComponent<DosBox>().ShowAdditionalInfo ? "Yes" : "No", Style.Option) && Event.current.button == 0)
 				{
 					ProcessKey(KeyCode.M);
 				}
@@ -787,7 +787,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.M:
-				GetComponent<DosBox>().ShowFpsInfo = !GetComponent<DosBox>().ShowFpsInfo;
+				GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
 				break;
 
 			case KeyCode.Escape:
