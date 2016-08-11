@@ -13,7 +13,8 @@ public class DosBox : MonoBehaviour
 	public Box BoxPrefab;
 	public uint InternalTimer;
 	public MenuStyle Style;
-
+    public bool ShowAdditionalInfo;
+   
 	private byte[] varsMemory = new byte[207*2];
 	private byte[] oldVarsMemory = new byte[207*2];
 	private float[] varsMemoryTime = new float[207];
@@ -63,7 +64,7 @@ public class DosBox : MonoBehaviour
 	private int delayFpsCounter;
 	private int lastDelayFpsCounter;
 	private StringBuilder fpsInfo;
-	public bool ShowAdditionalInfo;
+    private bool allowInventory;
 
 	public void Start()
 	{
@@ -84,6 +85,7 @@ public class DosBox : MonoBehaviour
 		{
 			if (processReader.Read(memory, memoryAddress, memory.Length) > 0)
 			{
+                //read actors info
 				int i = 0;
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{
@@ -236,8 +238,8 @@ public class DosBox : MonoBehaviour
 				if (ShowAdditionalInfo)
 				{
 					fpsInfo = new StringBuilder();
-                    fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms", TimeSpan.FromSeconds(InternalTimer / 60),
-                        calculatedFps, lastDelayFpsCounter * 1000 / 200);
+                    fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}", TimeSpan.FromSeconds(InternalTimer / 60),
+                        calculatedFps, lastDelayFpsCounter * 1000 / 200, allowInventory ? "Yes" : "No");
 				}
 				else
 				{
@@ -263,19 +265,23 @@ public class DosBox : MonoBehaviour
                 //timer
                 processReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
                 InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
+
+                //inventory
+                processReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 4);
+                allowInventory = ReadShort(memory[0], memory[1]) == 1;
             }
 
-			if(varsMemoryAddress != -1)
-			{
-				processReader.Read(varsMemory, varsMemoryAddress, varsMemory.Length);
-				CheckDifferences(varsMemory, oldVarsMemory, varsMemoryTime, 207);
-			}
+            if (varsMemoryAddress != -1)
+            {
+                processReader.Read(varsMemory, varsMemoryAddress, varsMemory.Length);
+                CheckDifferences(varsMemory, oldVarsMemory, varsMemoryTime, 207);
+            }
 
-			if(cvarsMemoryAddress != -1)
-			{
-				processReader.Read(cvarsMemory, cvarsMemoryAddress, cvarsMemory.Length);
-				CheckDifferences(cvarsMemory, oldCVarsMemory, cvarsMemoryTime, 44);
-			}
+            if (cvarsMemoryAddress != -1)
+            {
+                processReader.Read(cvarsMemory, cvarsMemoryAddress, cvarsMemory.Length);
+                CheckDifferences(cvarsMemory, oldCVarsMemory, cvarsMemoryTime, 44);
+            }
 		}
 
 		//arrow is only active if actors are active and player is active
