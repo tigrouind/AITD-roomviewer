@@ -406,19 +406,10 @@ public class RoomLoader : MonoBehaviour
 		//menu
 		if (Input.GetMouseButtonDown(1))
 		{
-			if(GetComponent<DosBox>().ShowVarsMemory)
+            if(!GetComponent<Vars>().enabled)
 			{
-				GetComponent<DosBox>().ShowVarsMemory = false;
+                menuEnabled = !menuEnabled;
 			}
-			else
-			{
-				menuEnabled = !menuEnabled;
-			}
-		}
-
-		if (Input.GetMouseButtonDown(0))
-		{
-			GetComponent<DosBox>().ShowVarsMemory = false;
 		}
 
 		if (!menuEnabled)
@@ -762,7 +753,7 @@ public class RoomLoader : MonoBehaviour
 			case KeyCode.U:
 				if(DetectGame() == 1)
 				{
-					GetComponent<DosBox>().ShowVarsMemory = !GetComponent<DosBox>().ShowVarsMemory;
+                    GetComponent<Vars>().enabled = !GetComponent<Vars>().enabled;
 					menuEnabled = false; 
 				}
 				break;

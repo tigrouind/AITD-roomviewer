@@ -14,20 +14,7 @@ public class DosBox : MonoBehaviour
 	public uint InternalTimer;
 	public MenuStyle Style;
     public bool ShowAdditionalInfo;
-   
-	private byte[] varsMemory = new byte[207*2];
-	private byte[] oldVarsMemory = new byte[207*2];
-	private float[] varsMemoryTime = new float[207];
-	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 }; 
-	private long varsMemoryAddress = -1;
-
-	private byte[] cvarsMemory = new byte[44*2];
-	private byte[] oldCVarsMemory = new byte[44*2];
-	private float[] cvarsMemoryTime = new float[44];
-	private byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 }; 
-	private long cvarsMemoryAddress = -1;
-
-	public bool ShowVarsMemory;
+    public ProcessMemoryReader ProcessReader;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -51,8 +38,7 @@ public class DosBox : MonoBehaviour
 	private Vector3 lastPlayerPosition;
 	private int lastValidPlayerIndex;
 	private int linkfloor = 0;
-	private int linkroom = 0;
-	private ProcessMemoryReader processReader;
+	private int linkroom = 0;	
 	private long memoryAddress;
 	private StringBuilder playerInfo;
 	private byte[] memory;
@@ -81,9 +67,9 @@ public class DosBox : MonoBehaviour
 	{
 		GameObject player = null;
 
-		if (processReader != null)
+		if (ProcessReader != null)
 		{
-			if (processReader.Read(memory, memoryAddress, memory.Length) > 0)
+			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
 			{
                 //read actors info
 				int i = 0;
@@ -258,49 +244,37 @@ public class DosBox : MonoBehaviour
 			}
 		}
 
-		if(processReader != null)
+		if(ProcessReader != null)
 		{
             if (ShowAdditionalInfo)
             {
                 //timer
-                processReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
+                ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
                 InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
 
                 //inventory
-                processReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 4);
+                ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 4);
                 allowInventory = ReadShort(memory[0], memory[1]) == 1;
             }
-
-            if (varsMemoryAddress != -1)
-            {
-                processReader.Read(varsMemory, varsMemoryAddress, varsMemory.Length);
-                CheckDifferences(varsMemory, oldVarsMemory, varsMemoryTime, 207);
-            }
-
-            if (cvarsMemoryAddress != -1)
-            {
-                processReader.Read(cvarsMemory, cvarsMemoryAddress, cvarsMemory.Length);
-                CheckDifferences(cvarsMemory, oldCVarsMemory, cvarsMemoryTime, 44);
-            }
-		}
+   		}
 
 		//arrow is only active if actors are active and player is active
 		Arrow.SetActive(Actors.activeSelf
 			&& player != null
 			&& player.activeSelf
-			&& player.transform.localScale.magnitude > 0.01f);				
+			&& player.transform.localScale.magnitude > 0.01f);	
 	}
 
 	void FixedUpdate()
 	{
-		if(processReader != null && ShowAdditionalInfo)
+		if(ProcessReader != null && ShowAdditionalInfo)
 		{
 			//fps
-			processReader.Read(memory, memoryAddress - 0x83B6, 2);
+			ProcessReader.Read(memory, memoryAddress - 0x83B6, 2);
 			int fps = ReadShort(memory[0], memory[1]);
 
 			//frames
-			processReader.Read(memory, memoryAddress - 0x83B6 + 0x7464, 2);
+			ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0x7464, 2);
 			int frames = ReadShort(memory[0], memory[1]);
 
 			//check how much frames elapsed since last time
@@ -350,94 +324,6 @@ public class DosBox : MonoBehaviour
 
 	#region Room loader
 
-	void OnGUI()
-	{
-		if(ShowVarsMemory)
-		{
-			GUIStyle panel = new GUIStyle(Style.Panel);
-			panel.normal.background = Style.BlackTexture;
-			Rect areaA = new Rect(0, 0, Screen.width, Screen.height * 22.0f/28.0f);
-			Rect areaB = new Rect(0, Screen.height * 22.0f/28.0f, Screen.width, Screen.height * 6.0f/28.0f);
-
-			GUILayout.BeginArea(areaA, panel);
-			DisplayTable(areaA, 10, 21, varsMemory, varsMemoryTime, "VARS");
-			GUILayout.EndArea();
-
-			GUILayout.BeginArea(areaB, panel);
-			DisplayTable(areaB, 10, 5, cvarsMemory, cvarsMemoryTime, "CVARS");
-			GUILayout.EndArea();
-		}
-	}
-
-	void CheckDifferences(byte[] values, byte[] oldvalues, float[] time, int count)
-	{
-        float currenttime = Time.time;
-		for(int i = 0 ; i < count ; i++)
-		{
-			int value = ReadShort(values[i * 2 + 0], values[i * 2 + 1]);
-			int oldValue = ReadShort(oldvalues[i * 2 + 0], oldvalues[i * 2 + 1]);
-			if (value != oldValue)
-			{
-                time[i] = currenttime;
-			}
-
-			oldvalues[i * 2 + 0] = values[i * 2 + 0];
-			oldvalues[i * 2 + 1] = values[i * 2 + 1];
-		}
-	}
-
-    void DisplayTable(Rect area, int columns, int rows, byte[] values, float[] timer, string title)
-	{
-        //setup style
-		GUIStyle labelStyle = new GUIStyle(Style.Label);
-        labelStyle.fixedWidth = area.width/(columns + 1);
-		labelStyle.fixedHeight = area.height/((float)(rows + 1));
-		labelStyle.alignment = TextAnchor.MiddleCenter;
-	
-		GUIStyle headerStyle = new GUIStyle(labelStyle);
-		headerStyle.normal.textColor = new Color32(0, 0, 0, 255);
-		headerStyle.normal.background = Style.GreenTexture;
-
-		//header
-		GUILayout.BeginHorizontal();
-		GUILayout.Label(title, headerStyle);
-		for (int i = 0 ; i < columns ; i++)
-		{
-			GUILayout.Label(i.ToString(), headerStyle);
-		}
-		GUILayout.EndHorizontal();
-
-		//body
-        int count = 0;
-        float currenttime = Time.time;
-		for (int i = 0 ; i < rows ; i++)
-		{
-            GUILayout.BeginHorizontal();
-            headerStyle.alignment = TextAnchor.MiddleRight;
-            GUILayout.Label(i.ToString(), headerStyle);
-
-            for (int j = 0; j < columns; j++)
-            {
-                string stringValue = string.Empty;
-                if (count < values.Length / 2)
-                {
-                    int value = ReadShort(values[count * 2 + 0], values[count * 2 + 1]);
-                    bool different = (currenttime - timer[count]) < 5.0f;
-
-                    if (value != 0 || different)
-                        stringValue = value.ToString();
-
-                    //highlight recently changed vars
-                    labelStyle.normal.background = different ? Style.RedTexture : null;
-                }
-               
-                count++;
-                GUILayout.Label(stringValue, labelStyle);
-            }
-            GUILayout.EndHorizontal();
-		}
-	}
-
 	public bool LinkToDosBOX(int floor, int room)
 	{
 		int[] processIds = Process.GetProcesses()
@@ -478,16 +364,15 @@ public class DosBox : MonoBehaviour
 					linkroom = room;
 
 					memoryAddress = address + MemoryOffsets[patternIndex];
-					processReader = reader;
+					ProcessReader = reader;
 					memory = new byte[ActorStructSize[patternIndex] * 50];
 					dosBoxPattern = patternIndex;
 
 					//vars
-					if(patternIndex == 0) //AITD1 only
-					{
-						varsMemoryAddress = reader.SearchForBytePattern(varsMemoryPattern);
-						cvarsMemoryAddress = reader.SearchForBytePattern(cvarsMemoryPattern);
-					}
+                    if (patternIndex == 0) //AITD1 only
+                    {
+                        GetComponent<Vars>().SearchForPatterns(reader);
+                    }
 					return true;
 				}
 			}
@@ -501,8 +386,8 @@ public class DosBox : MonoBehaviour
 
 	public void UnlinkDosBox()
 	{
-		processReader.Close();
-		processReader = null;
+		ProcessReader.Close();
+		ProcessReader = null;
 		RightText.text = string.Empty;
 	}
 
