@@ -32,6 +32,7 @@ public class RoomLoader : MonoBehaviour
 	public GUIText BoxInfo;
 	private Box HighLightedBox;
 	private Box SelectedBox;
+	private int SelectedBoxId;
 
 	private bool DosBoxEnabled;
 	public GameObject Actors;
@@ -493,12 +494,15 @@ public class RoomLoader : MonoBehaviour
 		if (Input.GetMouseButtonDown(0) && HighLightedBox != null && HighLightedBox.name == "Actor")
 		{
 			if (SelectedBox != HighLightedBox)
+			{
 				SelectedBox = HighLightedBox;
+				SelectedBoxId = HighLightedBox.ID;
+			}
 			else
 				SelectedBox = null;
 		}
 
-		if (!DosBoxEnabled)
+		if (!DosBoxEnabled || (SelectedBox != null && SelectedBox.ID != SelectedBoxId))
 		{
 			SelectedBox = null;
 		}
