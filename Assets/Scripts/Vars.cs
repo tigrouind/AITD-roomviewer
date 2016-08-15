@@ -17,6 +17,16 @@ public class Vars : MonoBehaviour
 	private byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 };
 	private long cvarsMemoryAddress = -1;
 
+	private bool compare;
+	private bool oldcompare;
+	private bool ignoreDifferences;
+
+	public void OnEnable()
+	{
+		ignoreDifferences = true;
+	}
+
+
 	private short ReadShort(byte a, byte b)
 	{
 		unchecked
@@ -43,19 +53,14 @@ public class Vars : MonoBehaviour
 					processReader.Read(memory, cvarsMemoryAddress, 44 * 2);
 					CheckDifferences(memory, cvars);
 				}
-			}
-		}
 
-		//freeze vars tracking
-		if (Input.GetMouseButtonDown(0))
-		{
-			pauseVarsTracking = !pauseVarsTracking;
+				ignoreDifferences = false;
+			}
 		}
 
 		//hide table
 		if (Input.GetMouseButtonDown(1))
 		{
-			pauseVarsTracking = false;
 			GetComponent<Vars>().enabled = false;
 		}
 	}
@@ -64,8 +69,10 @@ public class Vars : MonoBehaviour
 	{
 		GUIStyle panel = new GUIStyle(Style.Panel);
 		panel.normal.background = Style.BlackTexture;
-		Rect areaA = new Rect(0, 0, Screen.width, Screen.height * 22.0f / 28.0f);
-		Rect areaB = new Rect(0, Screen.height * 22.0f / 28.0f, Screen.width, Screen.height * 6.0f / 28.0f);
+		Rect screen = new Rect(0, 0, Screen.width, Screen.height - 30 * 3);
+		Rect areaA = new Rect(0, 0, screen.width, screen.height * 22.0f / 28.0f);
+		Rect areaB = new Rect(0, screen.height * 22.0f / 28.0f, screen.width, screen.height * 6.0f / 28.0f);
+		Rect areaC = new Rect(0, screen.height, screen.width, 30 * 3);
 
 		GUILayout.BeginArea(areaA, panel);
 		DisplayTable(areaA, 10, 21, vars, "VARS");
@@ -74,6 +81,38 @@ public class Vars : MonoBehaviour
 		GUILayout.BeginArea(areaB, panel);
 		DisplayTable(areaB, 10, 5, cvars, "CVARS");
 		GUILayout.EndArea();
+
+		GUILayout.BeginArea(areaC, panel);
+		GUILayout.BeginVertical();
+		if (GUILayout.Button(!pauseVarsTracking ? "Freeze" : "Unfreeze", Style.Button) && Event.current.button == 0)
+		{
+			pauseVarsTracking = !pauseVarsTracking;
+		}
+		if (GUILayout.Button("Save state", Style.Button))
+		{
+			SaveState(vars);
+			SaveState(cvars);
+		}
+
+		bool isPressed = GUILayout.RepeatButton("Load state", Style.Button) && Event.current.button == 0;
+		if (Event.current.type == EventType.Repaint)
+			compare = isPressed;
+
+		if(!compare && oldcompare)
+		{
+			ignoreDifferences = true;
+		}
+		oldcompare = compare;
+		GUILayout.EndVertical();
+		GUILayout.EndArea();
+	}
+
+	void SaveState(Var[] data)
+	{
+		for (int i = 0; i < data.Length; i++)
+		{
+			data[i].saveState = data[i].value;
+		}
 	}
 
 	void CheckDifferences(byte[] memory, Var[] data)
@@ -81,17 +120,30 @@ public class Vars : MonoBehaviour
 		float currenttime = Time.time;
 		for (int i = 0; i < data.Length; i++)
 		{
-			int value = ReadShort(memory[i * 2 + 0], memory[i * 2 + 1]);
 			int oldValue = data[i].value;
+			int value;
+
+			if(compare) 
+			{
+				value = data[i].saveState;
+			}
+			else
+			{
+				value = ReadShort(memory[i * 2 + 0], memory[i * 2 + 1]);
+			}
+
 			data[i].value = value;
 
-			if (value != oldValue)
+			if(ignoreDifferences)
+			{
+				data[i].time = float.MinValue;
+			}
+			else if (value != oldValue)
 			{
 				data[i].time = currenttime;
 			}
 
-			data[i].difference = (currenttime - data[i].time) < 5.0f;
-			data[i].oldValue = value;
+			data[i].difference = (currenttime - data[i].time) < 3.0f;
 		}
 	}
 
@@ -105,7 +157,7 @@ public class Vars : MonoBehaviour
 
 		GUIStyle headerStyle = new GUIStyle(labelStyle);
 		headerStyle.normal.textColor = Color.black;
-		headerStyle.normal.background = pauseVarsTracking ? Style.RedTexture : Style.GreenTexture;
+		headerStyle.normal.background = Style.GreenTexture;
 
 		//header
 		GUILayout.BeginHorizontal();
@@ -138,6 +190,10 @@ public class Vars : MonoBehaviour
 					//highlight recently changed vars
 					labelStyle.normal.background = different ? Style.RedTexture : null;
 				}
+				else
+				{
+					labelStyle.normal.background = null;
+				}
 
 				count++;
 				GUILayout.Label(stringValue, labelStyle);
@@ -155,8 +211,7 @@ public class Vars : MonoBehaviour
 	public struct Var
 	{
 		public int value;
-		public int oldValue;
-		public int state;
+		public int saveState;
 		public float time;
 		public bool difference;
 	}
