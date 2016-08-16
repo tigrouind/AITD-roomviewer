@@ -94,7 +94,7 @@ public class Vars : MonoBehaviour
 			SaveState(cvars);
 		}
 
-		bool isPressed = GUILayout.RepeatButton("Load state", Style.Button) && Event.current.button == 0;
+		bool isPressed = GUILayout.RepeatButton("Compare saved state", Style.Button) && Event.current.button == 0;
 		if (Event.current.type == EventType.Repaint)
 			compare = isPressed;
 

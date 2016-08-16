@@ -27,6 +27,7 @@ public class Box : MonoBehaviour
 	public int Room;
 	public uint Chrono;
 	public uint RoomChrono;
+	public int TrackNumber;
 
 	public bool HighLight
 	{
@@ -131,6 +132,8 @@ public class Box : MonoBehaviour
 				sb.AppendFormat("\r\nROOM_CHRONO = {0}", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
 			if (TrackMode != -1)
 				sb.Append("\r\nTRACKMODE = " + TrackMode);
+			if (TrackNumber != -1)
+				sb.Append("\r\nTRACKNUMBER = " + TrackNumber);
 		}
 
 		return sb.ToString();

@@ -144,6 +144,7 @@ public class DosBox : MonoBehaviour
 							box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
 							box.Frame = ReadShort(memory[k + 74], memory[k + 75]);
 							box.TotalFrames = ReadShort(memory[k + 76], memory[k + 77]);
+							box.TrackNumber = ReadShort(memory[k + 84], memory[k + 85]);
 							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
 
