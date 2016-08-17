@@ -151,14 +151,12 @@ public class DosBox : MonoBehaviour
 
 							if(!ShowAdditionalInfo)
 							{
-								//those fields are only supported in AITD1
+								//those fields are only supported when timer info is available
 								box.Chrono = 0;
-								box.RoomChrono = 0;
-								box.Frame = -1;
-								box.Speed = -1;
+								box.RoomChrono = 0;							
 							}
 
-							//player
+						    //player
 							if (objectid == lastValidPlayerIndex)
 							{
 								float angle = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;

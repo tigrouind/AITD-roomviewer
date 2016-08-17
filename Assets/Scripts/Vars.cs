@@ -69,10 +69,10 @@ public class Vars : MonoBehaviour
 	{
 		GUIStyle panel = new GUIStyle(Style.Panel);
 		panel.normal.background = Style.BlackTexture;
-		Rect screen = new Rect(0, 0, Screen.width, Screen.height - 30 * 3);
+		Rect screen = new Rect(0, 0, Screen.width, Screen.height - 30 * 1);
 		Rect areaA = new Rect(0, 0, screen.width, screen.height * 22.0f / 28.0f);
 		Rect areaB = new Rect(0, screen.height * 22.0f / 28.0f, screen.width, screen.height * 6.0f / 28.0f);
-		Rect areaC = new Rect(0, screen.height, screen.width, 30 * 3);
+		Rect areaC = new Rect(0, screen.height, screen.width, 30 * 1);
 
 		GUILayout.BeginArea(areaA, panel);
 		DisplayTable(areaA, 10, 21, vars, "VARS");
@@ -84,17 +84,19 @@ public class Vars : MonoBehaviour
 
 		GUILayout.BeginArea(areaC, panel);
 		GUILayout.BeginVertical();
-		if (GUILayout.Button(!pauseVarsTracking ? "Freeze" : "Unfreeze", Style.Button) && Event.current.button == 0)
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button(!pauseVarsTracking ? "Freeze" : "Unfreeze", Style.Button) && Event.current.button == 0)
 		{
 			pauseVarsTracking = !pauseVarsTracking;
 		}
+
 		if (GUILayout.Button("Save state", Style.Button))
 		{
 			SaveState(vars);
 			SaveState(cvars);
 		}
 
-		bool isPressed = GUILayout.RepeatButton("Compare saved state", Style.Button) && Event.current.button == 0;
+		bool isPressed = GUILayout.RepeatButton("Compare", Style.Button) && Event.current.button == 0;
 		if (Event.current.type == EventType.Repaint)
 			compare = isPressed;
 
@@ -103,6 +105,7 @@ public class Vars : MonoBehaviour
 			ignoreDifferences = true;
 		}
 		oldcompare = compare;
+        GUILayout.EndHorizontal();
 		GUILayout.EndVertical();
 		GUILayout.EndArea();
 	}
