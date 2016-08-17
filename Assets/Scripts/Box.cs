@@ -16,6 +16,7 @@ public class Box : MonoBehaviour
 
 	public int ID;
 	public int Flags;
+    public int ColFlags;
 	public int Life;
 	public int LifeMode;
 	public int TrackMode;
@@ -109,6 +110,8 @@ public class Box : MonoBehaviour
 
 		if (name == "Actor")
 		{
+            if (ColFlags != -1)
+                sb.Append("\r\nCOLFLAGS = " + ColFlags);
 			if (Body != -1)
 				sb.Append("\r\nBODY = " + Body);
 			if (Life != -1)
@@ -133,7 +136,7 @@ public class Box : MonoBehaviour
 			if (TrackMode != -1)
 				sb.Append("\r\nTRACKMODE = " + TrackMode);
 			if (TrackNumber != -1)
-				sb.Append("\r\nTRACKNUMBER = " + TrackNumber);
+				sb.Append("\r\nTRACKNUMBER = " + TrackNumber);           
 		}
 
 		return sb.ToString();

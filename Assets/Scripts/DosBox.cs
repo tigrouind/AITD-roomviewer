@@ -137,6 +137,7 @@ public class DosBox : MonoBehaviour
 							box.Body = body;
 							box.Room = roomNumber;
 							box.Flags = ReadShort(memory[k + 4], memory[k + 5]);
+                            box.ColFlags = ReadShort(memory[k + 6], memory[k + 7]);
 							box.LifeMode = ReadShort(memory[k + 50], memory[k + 51]);
 							box.Life = ReadShort(memory[k + 52], memory[k + 53]);
 							box.Chrono = ReadUnsignedInt(memory[k + 54], memory[k + 55], memory[k + 56], memory[k + 57]);
