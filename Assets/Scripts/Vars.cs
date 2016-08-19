@@ -74,6 +74,7 @@ public class Vars : MonoBehaviour
 		Rect areaB = new Rect(0, screen.height * 22.0f / 28.0f, screen.width, screen.height * 6.0f / 28.0f);
 		Rect areaC = new Rect(0, screen.height, screen.width, 30 * 1);
 
+		//table
 		GUILayout.BeginArea(areaA, panel);
 		DisplayTable(areaA, 10, 21, vars, "VARS");
 		GUILayout.EndArea();
@@ -82,21 +83,24 @@ public class Vars : MonoBehaviour
 		DisplayTable(areaB, 10, 5, cvars, "CVARS");
 		GUILayout.EndArea();
 
+		//buttons
+		GUIStyle button = new GUIStyle(Style.Button);
+		button.fixedWidth = areaC.width / 3.0f;		
 		GUILayout.BeginArea(areaC, panel);
 		GUILayout.BeginVertical();
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button(!pauseVarsTracking ? "Freeze" : "Unfreeze", Style.Button) && Event.current.button == 0)
+		GUILayout.BeginHorizontal();
+		if (GUILayout.Button(!pauseVarsTracking ? "Freeze" : "Unfreeze", button) && Event.current.button == 0)
 		{
 			pauseVarsTracking = !pauseVarsTracking;
 		}
 
-		if (GUILayout.Button("Save state", Style.Button))
+		if (GUILayout.Button("Save state", button))
 		{
 			SaveState(vars);
 			SaveState(cvars);
 		}
 
-		bool isPressed = GUILayout.RepeatButton("Compare", Style.Button) && Event.current.button == 0;
+		bool isPressed = GUILayout.RepeatButton("Compare", button) && Event.current.button == 0;
 		if (Event.current.type == EventType.Repaint)
 			compare = isPressed;
 
@@ -105,7 +109,7 @@ public class Vars : MonoBehaviour
 			ignoreDifferences = true;
 		}
 		oldcompare = compare;
-        GUILayout.EndHorizontal();
+		GUILayout.EndHorizontal();
 		GUILayout.EndVertical();
 		GUILayout.EndArea();
 	}
@@ -137,7 +141,11 @@ public class Vars : MonoBehaviour
 
 			data[i].value = value;
 
-			if(ignoreDifferences)
+			if(compare)
+			{
+				data[i].time = float.MaxValue;
+			}			
+			else if(ignoreDifferences)
 			{
 				data[i].time = float.MinValue;
 			}

@@ -50,7 +50,7 @@ public class DosBox : MonoBehaviour
 	private int delayFpsCounter;
 	private int lastDelayFpsCounter;
 	private StringBuilder fpsInfo;
-    private bool allowInventory;
+	private bool allowInventory;
 
 	public void Start()
 	{
@@ -71,7 +71,7 @@ public class DosBox : MonoBehaviour
 		{
 			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
 			{
-                //read actors info
+				//read actors info
 				int i = 0;
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{
@@ -119,7 +119,7 @@ public class DosBox : MonoBehaviour
 
 							box.transform.position = new Vector3(x, -y, z) / 1000.0f;
 
-							//make actors appears slightly bigger than they are to be not covered by actors
+							//make actors appears slightly bigger than they are to be not covered by colliders
 							float delta = 1.0f;
 							box.transform.localScale = new Vector3(
 								ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k +  8], memory[k +  9]) + delta,
@@ -136,7 +136,7 @@ public class DosBox : MonoBehaviour
 							box.Body = body;
 							box.Room = roomNumber;
 							box.Flags = ReadShort(memory[k + 4], memory[k + 5]);
-                            box.ColFlags = ReadShort(memory[k + 6], memory[k + 7]);
+							box.ColFlags = ReadShort(memory[k + 6], memory[k + 7]);
 							box.LifeMode = ReadShort(memory[k + 50], memory[k + 51]);
 							box.Life = ReadShort(memory[k + 52], memory[k + 53]);
 							box.Chrono = ReadUnsignedInt(memory[k + 54], memory[k + 55], memory[k + 56], memory[k + 57]);
@@ -155,7 +155,7 @@ public class DosBox : MonoBehaviour
 								box.RoomChrono = 0;							
 							}
 
-						    //player
+							//player
 							if (objectid == lastValidPlayerIndex)
 							{
 								float angle = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;
@@ -223,8 +223,8 @@ public class DosBox : MonoBehaviour
 				if (ShowAdditionalInfo)
 				{
 					fpsInfo = new StringBuilder();
-                    fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}", TimeSpan.FromSeconds(InternalTimer / 60),
-                        calculatedFps, lastDelayFpsCounter * 1000 / 200, allowInventory ? "Yes" : "No");
+					fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}", TimeSpan.FromSeconds(InternalTimer / 60),
+						calculatedFps, lastDelayFpsCounter * 1000 / 200, allowInventory ? "Yes" : "No");
 				}
 				else
 				{
@@ -245,16 +245,16 @@ public class DosBox : MonoBehaviour
 
 		if(ProcessReader != null)
 		{
-            if (ShowAdditionalInfo)
-            {
-                //timer
-                ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
-                InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
+			if (ShowAdditionalInfo)
+			{
+				//timer
+				ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
+				InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
 
-                //inventory
-                ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 4);
-                allowInventory = ReadShort(memory[0], memory[1]) == 1;
-            }
+				//inventory
+				ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 4);
+				allowInventory = ReadShort(memory[0], memory[1]) == 1;
+			}
    		}
 
 		//arrow is only active if actors are active and player is active
@@ -288,7 +288,7 @@ public class DosBox : MonoBehaviour
 			if(diff == 0) 
 			{ 
 				delayFpsCounter++;
-                if(delayFpsCounter > 100/(1000/200)) // 20 frames at 200FPS = 100ms
+				if(delayFpsCounter > 100/(1000/200)) // 20 frames at 200FPS = 100ms
 				{
 					lastDelayFpsCounter = delayFpsCounter;
 				}
@@ -368,10 +368,10 @@ public class DosBox : MonoBehaviour
 					dosBoxPattern = patternIndex;
 
 					//vars
-                    if (patternIndex == 0) //AITD1 only
-                    {
-                        GetComponent<Vars>().SearchForPatterns(reader);
-                    }
+					if (patternIndex == 0) //AITD1 only
+					{
+						GetComponent<Vars>().SearchForPatterns(reader);
+					}
 					return true;
 				}
 			}

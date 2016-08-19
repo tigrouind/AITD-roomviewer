@@ -407,9 +407,9 @@ public class RoomLoader : MonoBehaviour
 		//menu
 		if (Input.GetMouseButtonDown(1))
 		{
-            if(!GetComponent<Vars>().enabled)
+			if(!GetComponent<Vars>().enabled)
 			{
-                menuEnabled = !menuEnabled;
+				menuEnabled = !menuEnabled;
 			}
 		}
 

@@ -5,6 +5,7 @@ public class MenuStyle : MonoBehaviour
 {
 	public Texture2D PanelTexture;
 	public Texture2D HoverTexture;
+	public Texture2D ActiveTexture;
 
 	public Texture2D SliderTexture;
 	public Texture2D SliderHoverTexture;
@@ -35,6 +36,8 @@ public class MenuStyle : MonoBehaviour
 		Button.fixedHeight = 30;
 		Button.hover.textColor = new Color32(40, 40, 40, 255);
 		Button.hover.background = HoverTexture;
+		Button.onActive.textColor = new Color32(253, 204, 78, 255);
+		Button.onActive.background = ActiveTexture;
 		Button.padding = new RectOffset(10, 10, 10, 10);
 
 		Label = new GUIStyle(Button);
