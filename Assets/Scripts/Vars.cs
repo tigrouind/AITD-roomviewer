@@ -23,7 +23,7 @@ public class Vars : MonoBehaviour
 
 	public void OnEnable()
 	{
-		ignoreDifferences = true;
+		ignoreDifferences = !compare;
 	}
 
 
@@ -85,11 +85,15 @@ public class Vars : MonoBehaviour
 
 		//buttons
 		GUIStyle button = new GUIStyle(Style.Button);
+		GUIStyle buttonToggled = new GUIStyle(button);
+		buttonToggled.normal = buttonToggled.active; 
+		buttonToggled.hover = buttonToggled.active;
+
 		button.fixedWidth = areaC.width / 3.0f;		
 		GUILayout.BeginArea(areaC, panel);
 		GUILayout.BeginVertical();
 		GUILayout.BeginHorizontal();
-		if (GUILayout.Button(!pauseVarsTracking ? "Freeze" : "Unfreeze", button) && Event.current.button == 0)
+		if (GUILayout.Button(!pauseVarsTracking ? "Freeze" : "Unfreeze", pauseVarsTracking ? buttonToggled : button) && Event.current.button == 0)
 		{
 			pauseVarsTracking = !pauseVarsTracking;
 		}
@@ -100,9 +104,10 @@ public class Vars : MonoBehaviour
 			SaveState(cvars);
 		}
 
-		bool isPressed = GUILayout.RepeatButton("Compare", button) && Event.current.button == 0;
-		if (Event.current.type == EventType.Repaint)
-			compare = isPressed;
+		if (GUILayout.Button(!compare ? "Compare" : "Compare", compare ? buttonToggled : button) && Event.current.button == 0)
+		{
+			compare = !compare;
+		}
 
 		if(!compare && oldcompare)
 		{
@@ -141,17 +146,21 @@ public class Vars : MonoBehaviour
 
 			data[i].value = value;
 
-			if(compare)
-			{
-				data[i].time = float.MaxValue;
-			}			
-			else if(ignoreDifferences)
+					
+			if(ignoreDifferences)
 			{
 				data[i].time = float.MinValue;
 			}
 			else if (value != oldValue)
 			{
-				data[i].time = currenttime;
+				if(compare)
+				{
+					data[i].time = float.MaxValue;
+				}	
+				else
+				{
+					data[i].time = currenttime;
+				}
 			}
 
 			data[i].difference = (currenttime - data[i].time) < 3.0f;
