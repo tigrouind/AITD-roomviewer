@@ -108,10 +108,9 @@ public class DosBox : MonoBehaviour
 						if (roomObject != null)
 						{
 							//local position
-							int w = k + 8;
-							int x = (ReadShort(memory[w + 0], memory[w + 1]) + ReadShort(memory[w + 2], memory[w + 3])) / 2;
-							int y = (ReadShort(memory[w + 4], memory[w + 5]) + ReadShort(memory[w + 6], memory[w + 7])) / 2;
-							int z = (ReadShort(memory[w + 8], memory[w + 9]) + ReadShort(memory[w + 10], memory[w + 11])) / 2;
+							int x = (ReadShort(memory[k +  8], memory[k +  9]) + ReadShort(memory[k + 10], memory[k + 11])) / 2;
+							int y = (ReadShort(memory[k + 12], memory[k + 13]) + ReadShort(memory[k + 14], memory[k + 15])) / 2;
+							int z = (ReadShort(memory[k + 16], memory[k + 17]) + ReadShort(memory[k + 18], memory[k + 19])) / 2;
 
 							//local to global position
 							x += (int)(roomObject.localPosition.x * 1000.0f);
@@ -123,9 +122,9 @@ public class DosBox : MonoBehaviour
 							//make actors appears slightly bigger than they are to be not covered by actors
 							float delta = 1.0f;
 							box.transform.localScale = new Vector3(
-								ReadShort(memory[w + 2], memory[w + 3]) - ReadShort(memory[w + 0], memory[w + 1]) + delta,
-								ReadShort(memory[w + 6], memory[w + 7]) - ReadShort(memory[w + 4], memory[w + 5]) + delta,
-								ReadShort(memory[w + 10], memory[w + 11]) - ReadShort(memory[w + 8], memory[w + 9]) + delta) / 1000.0f;
+								ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k +  8], memory[k +  9]) + delta,
+								ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]) + delta,
+								ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]) + delta) / 1000.0f;
 
 							//make sure very small actors are visible
 							box.transform.localScale = new Vector3(
