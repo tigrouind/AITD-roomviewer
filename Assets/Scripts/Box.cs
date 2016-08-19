@@ -29,6 +29,9 @@ public class Box : MonoBehaviour
 	public uint Chrono;
 	public uint RoomChrono;
 	public int TrackNumber;
+	public Vector3 localPosition;
+	public Vector3 worldPosition;
+	public Vector3 boundings;
 
 	public bool HighLight
 	{
@@ -110,8 +113,11 @@ public class Box : MonoBehaviour
 
 		if (name == "Actor")
 		{
-            if (ColFlags != -1)
-                sb.Append("\r\nCOLFLAGS = " + ColFlags);
+			sb.AppendFormat("\r\nLOCAL_POSITION = {0} {1} {2}", localPosition.x, localPosition.y, localPosition.z);
+			sb.AppendFormat("\r\nWORLD_POSITION = {0} {1} {2}", worldPosition.x, worldPosition.y, worldPosition.z);
+			sb.AppendFormat("\r\nBBOX_POSITION = {0} {1} {2}", boundings.x, boundings.y,  boundings.z);
+			if (ColFlags != -1)
+				sb.Append("\r\nCOLFLAGS = " + ColFlags);
 			if (Body != -1)
 				sb.Append("\r\nBODY = " + Body);
 			if (Life != -1)

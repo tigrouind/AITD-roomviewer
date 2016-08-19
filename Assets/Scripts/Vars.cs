@@ -93,7 +93,7 @@ public class Vars : MonoBehaviour
 		GUILayout.BeginArea(areaC, panel);
 		GUILayout.BeginVertical();
 		GUILayout.BeginHorizontal();
-		if (GUILayout.Button(!pauseVarsTracking ? "Freeze" : "Unfreeze", pauseVarsTracking ? buttonToggled : button) && Event.current.button == 0)
+		if (GUILayout.Button("Freeze", pauseVarsTracking ? buttonToggled : button) && Event.current.button == 0)
 		{
 			pauseVarsTracking = !pauseVarsTracking;
 		}
@@ -104,7 +104,7 @@ public class Vars : MonoBehaviour
 			SaveState(cvars);
 		}
 
-		if (GUILayout.Button(!compare ? "Compare" : "Compare", compare ? buttonToggled : button) && Event.current.button == 0)
+		if (GUILayout.Button("Compare", compare ? buttonToggled : button) && Event.current.button == 0)
 		{
 			compare = !compare;
 		}

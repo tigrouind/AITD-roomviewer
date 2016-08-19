@@ -108,16 +108,16 @@ public class DosBox : MonoBehaviour
 						if (roomObject != null)
 						{
 							//local position
-							int x = (ReadShort(memory[k +  8], memory[k +  9]) + ReadShort(memory[k + 10], memory[k + 11])) / 2;
-							int y = (ReadShort(memory[k + 12], memory[k + 13]) + ReadShort(memory[k + 14], memory[k + 15])) / 2;
-							int z = (ReadShort(memory[k + 16], memory[k + 17]) + ReadShort(memory[k + 18], memory[k + 19])) / 2;
+							int boundingx = (ReadShort(memory[k +  8], memory[k +  9]) + ReadShort(memory[k + 10], memory[k + 11])) / 2;
+							int boundingy = (ReadShort(memory[k + 12], memory[k + 13]) + ReadShort(memory[k + 14], memory[k + 15])) / 2;
+							int boundingz = (ReadShort(memory[k + 16], memory[k + 17]) + ReadShort(memory[k + 18], memory[k + 19])) / 2;
 
 							//local to global position
-							x += (int)(roomObject.localPosition.x * 1000.0f);
-							y += (int)(roomObject.localPosition.y * 1000.0f);
-							z += (int)(roomObject.localPosition.z * 1000.0f);
+							int boxPositionx = boundingx + (int)(roomObject.localPosition.x * 1000.0f);
+							int boxPositiony = boundingy + (int)(roomObject.localPosition.y * 1000.0f);
+							int boxPositionz = boundingz + (int)(roomObject.localPosition.z * 1000.0f);
 
-							box.transform.position = new Vector3(x, -y, z) / 1000.0f;
+							box.transform.position = new Vector3(boxPositionx, -boxPositiony, boxPositionz) / 1000.0f;
 
 							//make actors appears slightly bigger than they are to be not covered by colliders
 							float delta = 1.0f;
@@ -148,6 +148,22 @@ public class DosBox : MonoBehaviour
 							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
 
+							int modx = ReadShort(memory[k + 90], memory[k + 91]);
+							int mody = ReadShort(memory[k + 92], memory[k + 93]);
+							int modz = ReadShort(memory[k + 94], memory[k + 95]);
+
+							box.localPosition.x = ReadShort(memory[k + 28], memory[k + 29]) + modx;
+							box.localPosition.y = ReadShort(memory[k + 30], memory[k + 31]) + mody;
+							box.localPosition.z = ReadShort(memory[k + 32], memory[k + 33]) + modz;
+
+							box.worldPosition.x = ReadShort(memory[k + 34], memory[k + 35]) + modx;
+							box.worldPosition.y = ReadShort(memory[k + 36], memory[k + 37]) + mody;
+							box.worldPosition.z = ReadShort(memory[k + 38], memory[k + 39]) + modz;
+
+							box.boundings.x = boundingx;
+							box.boundings.y = boundingy;
+							box.boundings.z = boundingz;
+
 							if(!ShowAdditionalInfo)
 							{
 								//those fields are only supported when timer info is available
@@ -157,7 +173,7 @@ public class DosBox : MonoBehaviour
 
 							//player
 							if (objectid == lastValidPlayerIndex)
-							{
+							{								
 								float angle = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;
 
 								angle = (540.0f - angle) % 360.0f;
@@ -167,7 +183,7 @@ public class DosBox : MonoBehaviour
 								int cardinalPos = (int)Math.Floor((angle + 45.0f) / 90);
 
 								playerInfo = new StringBuilder();
-								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}", x, y, z, angle, sideAngle, cardinalPositions[cardinalPos % 4]);
+								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}", box.localPosition.x, box.localPosition.y, box.localPosition.z, angle, sideAngle, cardinalPositions[cardinalPos % 4]);
 
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
