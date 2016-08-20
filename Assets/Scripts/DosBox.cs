@@ -150,21 +150,25 @@ public class DosBox : MonoBehaviour
 							box.Angles.y = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;
 							box.Angles.z = ReadShort(memory[k + 44], memory[k + 45]) * 360 / 1024.0f;
 
-							int modx = ReadShort(memory[k + 90], memory[k + 91]);
-							int mody = ReadShort(memory[k + 92], memory[k + 93]);
-							int modz = ReadShort(memory[k + 94], memory[k + 95]);
+							box.Mod.x = ReadShort(memory[k + 90], memory[k + 91]);
+							box.Mod.y = ReadShort(memory[k + 92], memory[k + 93]);
+							box.Mod.z = ReadShort(memory[k + 94], memory[k + 95]);
 
-							box.LocalPosition.x = ReadShort(memory[k + 28], memory[k + 29]) + modx;
-							box.LocalPosition.y = ReadShort(memory[k + 30], memory[k + 31]) + mody;
-							box.LocalPosition.z = ReadShort(memory[k + 32], memory[k + 33]) + modz;
+							box.LocalPosition.x = ReadShort(memory[k + 28], memory[k + 29]) + box.Mod.x;
+							box.LocalPosition.y = ReadShort(memory[k + 30], memory[k + 31]) + box.Mod.y;
+							box.LocalPosition.z = ReadShort(memory[k + 32], memory[k + 33]) + box.Mod.z;
 
-							box.WorldPosition.x = ReadShort(memory[k + 34], memory[k + 35]) + modx;
-							box.WorldPosition.y = ReadShort(memory[k + 36], memory[k + 37]) + mody;
-							box.WorldPosition.z = ReadShort(memory[k + 38], memory[k + 39]) + modz;
+							box.WorldPosition.x = ReadShort(memory[k + 34], memory[k + 35]) + box.Mod.x;
+							box.WorldPosition.y = ReadShort(memory[k + 36], memory[k + 37]) + box.Mod.y;
+							box.WorldPosition.z = ReadShort(memory[k + 38], memory[k + 39]) + box.Mod.z;
 
-							box.Boundings.x = boundingx;
-							box.Boundings.y = boundingy;
-							box.Boundings.z = boundingz;
+							box.BoundingPos.x = boundingx;
+							box.BoundingPos.y = boundingy;
+							box.BoundingPos.z = boundingz;
+
+							box.BoundingSize.x = ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k +  8], memory[k +  9]);
+							box.BoundingSize.y = ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]);
+							box.BoundingSize.z = ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]);
 
 							if(!ShowAdditionalInfo)
 							{
@@ -180,7 +184,7 @@ public class DosBox : MonoBehaviour
 								float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
 								playerInfo = new StringBuilder();
-								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}", box.LocalPosition.x, box.LocalPosition.y, box.LocalPosition.z, angle, sideAngle);
+								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}", box.BoundingPos.x, box.BoundingPos.y, box.BoundingPos.z, angle, sideAngle);
 
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)

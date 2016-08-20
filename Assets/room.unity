@@ -1002,7 +1002,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RightText: {fileID: 814574756}
   Actors: {fileID: 1100510531}
-  Arrow: {fileID: 845929839}
+  Arrow: {fileID: 845929843}
   BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}
   InternalTimer: 0
   Style: {fileID: 1962405138}

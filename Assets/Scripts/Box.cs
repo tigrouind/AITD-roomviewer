@@ -33,8 +33,10 @@ public class Box : MonoBehaviour
 	public int TrackNumber;
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
-	public Vector3 Boundings;
+	public Vector3 BoundingPos;
+	public Vector3 BoundingSize;
 	public Vector3 Angles;
+	public Vector3 Mod;
 
 	public bool HighLight
 	{
@@ -131,20 +133,20 @@ public class Box : MonoBehaviour
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.Append(name.ToUpper() + "\r\nID = " + ID);   
-		if (name == "Collider" || name == "Trigger")
+		if (name == "Collider" || name == "Trigger" || name == "Actor")
 		{
-			sb.AppendFormat("\r\nFLAGS = " + Flags);   
+			sb.AppendFormat("\r\nFLAGS = 0x{0:X4}", Flags);   
 		}
 
 		if (name == "Actor")
 		{
-			sb.AppendFormat("\r\nFLAGS = 0x{0:X4}", Flags);   
-			sb.AppendFormat("\r\nLOCAL_POS = {0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
+			sb.AppendFormat("\r\nCOL_FLAGS = 0x{0:X4}", ColFlags);
+			sb.AppendFormat("\r\nROOM_POS = {0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
 			sb.AppendFormat("\r\nWORLD_POS = {0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
-			sb.AppendFormat("\r\nBBOX_POS = {0} {1} {2}", Boundings.x, Boundings.y, Boundings.z);
+			sb.AppendFormat("\r\nBBOX_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
+			sb.AppendFormat("\r\nBBOX_SIZE = {0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
+			//sb.AppendFormat("\r\nMOD = {0} {1} {2}", Mod.x, Mod.y, Mod.z);
 			sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", Angles.x , Angles.y, Angles.z);
-			if (ColFlags != -1)
-				sb.Append("\r\nCOLFLAGS = " + ColFlags);
 			if (Body != -1)
 				sb.Append("\r\nBODY = " + Body);
 			if (Life != -1)
