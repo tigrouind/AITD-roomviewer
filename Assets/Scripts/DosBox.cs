@@ -9,7 +9,7 @@ public class DosBox : MonoBehaviour
 {
 	public GUIText RightText;
 	public GameObject Actors;
-	public GameObject Arrow;
+	public Arrow Arrow;
 	public Box BoxPrefab;
 	public uint InternalTimer;
 	public MenuStyle Style;
@@ -32,8 +32,6 @@ public class DosBox : MonoBehaviour
 	private int[] MemoryOffsets = new [] { -188, -28, -28 }; //offset to apply to get beginning of actors array
 	private int[] ActorStructSize = new [] { 160, 180, 182 }; //size of one actor
 	private int[] TrackModeOffsets = new [] { 82, 90, 90 };
-
-	private string[] cardinalPositions = new [] { "N", "E", "S", "W" };
 
 	private Vector3 lastPlayerPosition;
 	private int lastValidPlayerIndex;
@@ -148,21 +146,25 @@ public class DosBox : MonoBehaviour
 							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
 
+							box.Angles.x = ReadShort(memory[k + 40], memory[k + 41]) * 360 / 1024.0f;
+							box.Angles.y = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;
+							box.Angles.z = ReadShort(memory[k + 44], memory[k + 45]) * 360 / 1024.0f;
+
 							int modx = ReadShort(memory[k + 90], memory[k + 91]);
 							int mody = ReadShort(memory[k + 92], memory[k + 93]);
 							int modz = ReadShort(memory[k + 94], memory[k + 95]);
 
-							box.localPosition.x = ReadShort(memory[k + 28], memory[k + 29]) + modx;
-							box.localPosition.y = ReadShort(memory[k + 30], memory[k + 31]) + mody;
-							box.localPosition.z = ReadShort(memory[k + 32], memory[k + 33]) + modz;
+							box.LocalPosition.x = ReadShort(memory[k + 28], memory[k + 29]) + modx;
+							box.LocalPosition.y = ReadShort(memory[k + 30], memory[k + 31]) + mody;
+							box.LocalPosition.z = ReadShort(memory[k + 32], memory[k + 33]) + modz;
 
-							box.worldPosition.x = ReadShort(memory[k + 34], memory[k + 35]) + modx;
-							box.worldPosition.y = ReadShort(memory[k + 36], memory[k + 37]) + mody;
-							box.worldPosition.z = ReadShort(memory[k + 38], memory[k + 39]) + modz;
+							box.WorldPosition.x = ReadShort(memory[k + 34], memory[k + 35]) + modx;
+							box.WorldPosition.y = ReadShort(memory[k + 36], memory[k + 37]) + mody;
+							box.WorldPosition.z = ReadShort(memory[k + 38], memory[k + 39]) + modz;
 
-							box.boundings.x = boundingx;
-							box.boundings.y = boundingy;
-							box.boundings.z = boundingz;
+							box.Boundings.x = boundingx;
+							box.Boundings.y = boundingy;
+							box.Boundings.z = boundingz;
 
 							if(!ShowAdditionalInfo)
 							{
@@ -174,16 +176,11 @@ public class DosBox : MonoBehaviour
 							//player
 							if (objectid == lastValidPlayerIndex)
 							{								
-								float angle = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;
-
-								angle = (540.0f - angle) % 360.0f;
-
+								float angle = box.Angles.y;
 								float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
-								int cardinalPos = (int)Math.Floor((angle + 45.0f) / 90);
-
 								playerInfo = new StringBuilder();
-								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}{5}", box.localPosition.x, box.localPosition.y, box.localPosition.z, angle, sideAngle, cardinalPositions[cardinalPos % 4]);
+								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}", box.LocalPosition.x, box.LocalPosition.y, box.LocalPosition.z, angle, sideAngle);
 
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
@@ -193,17 +190,11 @@ public class DosBox : MonoBehaviour
 									lastPlayerPosition = box.transform.position;
 								}
 
-								if (Camera.main.orthographic)
-								{
-									//make sure player is always visible
-									box.transform.localScale = new Vector3(box.transform.localScale.x, box.transform.localScale.y * 5.0f, box.transform.localScale.z);
-								}
-
 								//follow player
 								Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
 								//face camera
 								Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
-								Arrow.transform.rotation *= Quaternion.AngleAxis(-angle, Vector3.forward);
+								Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
 
 								Arrow.transform.localScale = new Vector3(
 									box.transform.localScale.x * 0.9f,
@@ -212,6 +203,8 @@ public class DosBox : MonoBehaviour
 
 								//player is white
 								box.Color = new Color32(255, 255, 255, 255);
+								box.AlwaysOnTop = Camera.main.orthographic;
+								Arrow.AlwaysOnTop = Camera.main.orthographic;
 
 								player = box.gameObject;
 							}
@@ -274,7 +267,7 @@ public class DosBox : MonoBehaviour
    		}
 
 		//arrow is only active if actors are active and player is active
-		Arrow.SetActive(Actors.activeSelf
+		Arrow.gameObject.SetActive(Actors.activeSelf
 			&& player != null
 			&& player.activeSelf
 			&& player.transform.localScale.magnitude > 0.01f);	

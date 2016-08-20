@@ -89,13 +89,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TransparentMaterial: {fileID: 2100000, guid: af2637388dca884479c70aecba1bb5eb, type: 2}
   OpaqueMaterial: {fileID: 2100000, guid: d9b8feb287a1f4642a512ad0d2004e53, type: 2}
+  AlwaysOnTopMaterial: {fileID: 2100000, guid: fa7fa0b1b891ba445b858cf5350eb859, type: 2}
   ID: 0
   Flags: 0
+  ColFlags: 0
   Life: 0
+  LifeMode: 0
+  TrackMode: 0
   Body: 0
   Anim: 0
   Frame: 0
+  TotalFrames: 0
   Speed: 0
+  Room: 0
+  Chrono: 0
+  RoomChrono: 0
+  TrackNumber: 0
+  LocalPosition: {x: 0, y: 0, z: 0}
+  WorldPosition: {x: 0, y: 0, z: 0}
+  Boundings: {x: 0, y: 0, z: 0}
+  Angles: {x: 0, y: 0, z: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
@@ -131,6 +144,10 @@ Prefab:
       propertyPath: OpaqueMaterial
       value: 
       objectReference: {fileID: 2100000, guid: d9b8feb287a1f4642a512ad0d2004e53, type: 2}
+    - target: {fileID: 0}
+      propertyPath: AlwaysOnTopMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: fa7fa0b1b891ba445b858cf5350eb859, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 165520}

@@ -6,13 +6,15 @@ using System;
 using System.Text;
 
 public class Box : MonoBehaviour
-{
+{	
 	private Color32 color;
 	private bool highlighted;
+	private bool alwaysOnTop;
 
 	private static Dictionary<Color32, Material> materialsCache = new Dictionary<Color32, Material>();
 	public Material TransparentMaterial;
 	public Material OpaqueMaterial;
+	public Material AlwaysOnTopMaterial;
 
 	public int ID;
 	public int Flags;
@@ -29,9 +31,10 @@ public class Box : MonoBehaviour
 	public uint Chrono;
 	public uint RoomChrono;
 	public int TrackNumber;
-	public Vector3 localPosition;
-	public Vector3 worldPosition;
-	public Vector3 boundings;
+	public Vector3 LocalPosition;
+	public Vector3 WorldPosition;
+	public Vector3 Boundings;
+	public Vector3 Angles;
 
 	public bool HighLight
 	{
@@ -51,6 +54,15 @@ public class Box : MonoBehaviour
 		}
 	}
 
+	public bool AlwaysOnTop
+	{
+		set
+		{
+			alwaysOnTop = value;
+			RefreshMaterial();
+		}
+	}
+
 	public Color32 Color
 	{
 		set
@@ -66,12 +78,21 @@ public class Box : MonoBehaviour
 		if (highlighted)
 		{
 			if (materialColor.a == 255)
+			{
 				materialColor = new Color32((byte)(Math.Min(materialColor.r + 75, 255)),
 					(byte)(Math.Min(materialColor.g + 75, 255)), 
 					(byte)(Math.Min(materialColor.b + 75, 255)),
 					materialColor.a);
+			}
 			else
+			{
 				materialColor = new Color32(materialColor.r, materialColor.g, materialColor.b, (byte)(Math.Min(materialColor.a + 100, 255)));
+			}
+		}
+
+		if(alwaysOnTop)
+		{
+			materialColor = new Color32(materialColor.r, materialColor.g, materialColor.b, 254);
 		}
 
 		Renderer renderer = this.GetComponent<Renderer>();
@@ -90,6 +111,10 @@ public class Box : MonoBehaviour
 			{
 				material = new Material(OpaqueMaterial);
 			}
+			else if (color.a == 254)
+			{
+				material = new Material(AlwaysOnTopMaterial);
+			}
 			else
 			{
 				material = new Material(TransparentMaterial);
@@ -106,16 +131,18 @@ public class Box : MonoBehaviour
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.Append(name.ToUpper() + "\r\nID = " + ID);   
-		if (name == "Collider" || name == "Trigger" || name == "Actor")
+		if (name == "Collider" || name == "Trigger")
 		{
-			sb.Append("\r\nFLAGS = " + Flags);   
+			sb.AppendFormat("\r\nFLAGS = " + Flags);   
 		}
 
 		if (name == "Actor")
 		{
-			sb.AppendFormat("\r\nLOCAL_POSITION = {0} {1} {2}", localPosition.x, localPosition.y, localPosition.z);
-			sb.AppendFormat("\r\nWORLD_POSITION = {0} {1} {2}", worldPosition.x, worldPosition.y, worldPosition.z);
-			sb.AppendFormat("\r\nBBOX_POSITION = {0} {1} {2}", boundings.x, boundings.y,  boundings.z);
+			sb.AppendFormat("\r\nFLAGS = 0x{0:X4}", Flags);   
+			sb.AppendFormat("\r\nLOCAL_POS = {0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
+			sb.AppendFormat("\r\nWORLD_POS = {0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
+			sb.AppendFormat("\r\nBBOX_POS = {0} {1} {2}", Boundings.x, Boundings.y, Boundings.z);
+			sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", Angles.x , Angles.y, Angles.z);
 			if (ColFlags != -1)
 				sb.Append("\r\nCOLFLAGS = " + ColFlags);
 			if (Body != -1)

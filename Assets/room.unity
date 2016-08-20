@@ -299,6 +299,7 @@ GameObject:
   - 4: {fileID: 845929842}
   - 33: {fileID: 845929841}
   - 23: {fileID: 845929840}
+  - 114: {fileID: 845929843}
   m_Layer: 0
   m_Name: Arrow
   m_TagString: Untagged
@@ -316,7 +317,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 2100000, guid: a34245ddc5c35be4ba0e705d57c080b9, type: 2}
+  - {fileID: 0}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -351,6 +352,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
+--- !u!114 &845929843
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 845929839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edfa41f3858f0ad43ba6376d6105aec8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AlwaysOnTopMaterial: {fileID: 2100000, guid: 9ff79ad70299f2e409ea9b6a49470ae7, type: 2}
+  TransparentMaterial: {fileID: 2100000, guid: a34245ddc5c35be4ba0e705d57c080b9, type: 2}
 --- !u!1 &1100510531
 GameObject:
   m_ObjectHideFlags: 0
