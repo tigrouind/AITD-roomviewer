@@ -143,8 +143,10 @@ public class DosBox : MonoBehaviour
 							box.Frame = ReadShort(memory[k + 74], memory[k + 75]);
 							box.TotalFrames = ReadShort(memory[k + 76], memory[k + 77]);
 							box.TrackNumber = ReadShort(memory[k + 84], memory[k + 85]);
+							box.PositionInTrack = ReadShort(memory[k + 88], memory[k + 89]);
 							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
+
 
 							box.Angles.x = ReadShort(memory[k + 40], memory[k + 41]) * 360 / 1024.0f;
 							box.Angles.y = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;

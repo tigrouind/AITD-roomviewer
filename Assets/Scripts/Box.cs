@@ -31,6 +31,7 @@ public class Box : MonoBehaviour
 	public uint Chrono;
 	public uint RoomChrono;
 	public int TrackNumber;
+	public int PositionInTrack;
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
 	public Vector3 BoundingPos;
@@ -143,8 +144,8 @@ public class Box : MonoBehaviour
 			sb.AppendFormat("\r\nCOL_FLAGS = 0x{0:X4}", ColFlags);
 			sb.AppendFormat("\r\nROOM_POS = {0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
 			sb.AppendFormat("\r\nWORLD_POS = {0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
-			sb.AppendFormat("\r\nBBOX_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
-			sb.AppendFormat("\r\nBBOX_SIZE = {0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
+			sb.AppendFormat("\r\nZV_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
+			sb.AppendFormat("\r\nZV_SIZE = {0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
 			//sb.AppendFormat("\r\nMOD = {0} {1} {2}", Mod.x, Mod.y, Mod.z);
 			sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", Angles.x , Angles.y, Angles.z);
 			if (Body != -1)
@@ -171,7 +172,9 @@ public class Box : MonoBehaviour
 			if (TrackMode != -1)
 				sb.Append("\r\nTRACKMODE = " + TrackMode);
 			if (TrackNumber != -1)
-				sb.Append("\r\nTRACKNUMBER = " + TrackNumber);           
+				sb.Append("\r\nTRACKNUMBER = " + TrackNumber);
+			if (PositionInTrack != -1)
+				sb.Append("\r\nTRACKPOSITION = " + PositionInTrack);
 		}
 
 		return sb.ToString();
