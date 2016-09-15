@@ -16,6 +16,7 @@ public class Box : MonoBehaviour
 	public Material OpaqueMaterial;
 	public Material AlwaysOnTopMaterial;
 
+	public bool ShowAdditionalInfo;
 	public int ID;
 	public int Flags;
     public int ColFlags;
@@ -142,12 +143,17 @@ public class Box : MonoBehaviour
 		if (name == "Actor")
 		{
 			sb.AppendFormat("\r\nCOL_FLAGS = 0x{0:X4}", ColFlags);
-			sb.AppendFormat("\r\nROOM_POS = {0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
-			sb.AppendFormat("\r\nWORLD_POS = {0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
-			sb.AppendFormat("\r\nZV_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
-			sb.AppendFormat("\r\nZV_SIZE = {0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
-			//sb.AppendFormat("\r\nMOD = {0} {1} {2}", Mod.x, Mod.y, Mod.z);
-			sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", Angles.x , Angles.y, Angles.z);
+			
+			if (ShowAdditionalInfo)
+			{
+				sb.AppendFormat("\r\nROOM_POS = {0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
+				sb.AppendFormat("\r\nWORLD_POS = {0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
+				sb.AppendFormat("\r\nZV_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
+				sb.AppendFormat("\r\nZV_SIZE = {0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
+				sb.AppendFormat("\r\nMOD = {0} {1} {2}", Mod.x, Mod.y, Mod.z);
+				sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", Angles.x , Angles.y, Angles.z);
+			}			
+			
 			if (Body != -1)
 				sb.Append("\r\nBODY = " + Body);
 			if (Life != -1)
@@ -161,20 +167,26 @@ public class Box : MonoBehaviour
 				{
 					sb.Append("\r\nFRAME = " + Frame + "/" + (TotalFrames - 1));
 				}
-				if (Speed != -1)
-					sb.Append("\r\nSPEED = " + Speed);
+				if (ShowAdditionalInfo)
+				{
+					if (Speed != -1)
+						sb.Append("\r\nSPEED = " + Speed);
+				}
 			}
 
-			if (Chrono != 0)
-				sb.AppendFormat("\r\nCHRONO = {0}", TimeSpan.FromSeconds((timer - Chrono) / 60));
-			if (RoomChrono != 0)
-				sb.AppendFormat("\r\nROOM_CHRONO = {0}", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
-			if (TrackMode != -1)
-				sb.Append("\r\nTRACKMODE = " + TrackMode);
-			if (TrackNumber != -1)
-				sb.Append("\r\nTRACKNUMBER = " + TrackNumber);
-			if (PositionInTrack != -1)
-				sb.Append("\r\nTRACKPOSITION = " + PositionInTrack);
+			if(ShowAdditionalInfo)
+			{
+				if (Chrono != 0)
+					sb.AppendFormat("\r\nCHRONO = {0}", TimeSpan.FromSeconds((timer - Chrono) / 60));
+				if (RoomChrono != 0)
+					sb.AppendFormat("\r\nROOM_CHRONO = {0}", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
+				if (TrackMode != -1)
+					sb.Append("\r\nTRACKMODE = " + TrackMode);
+				if (TrackNumber != -1)
+					sb.Append("\r\nTRACKNUMBER = " + TrackNumber);
+				if (PositionInTrack != -1)
+					sb.Append("\r\nTRACKPOSITION = " + PositionInTrack);
+			}
 		}
 
 		return sb.ToString();

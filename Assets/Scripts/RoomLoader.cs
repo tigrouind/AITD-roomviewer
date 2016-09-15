@@ -413,10 +413,7 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 
-		if (!menuEnabled)
-		{
-			RefreshHighLightedBox();
-		}
+		RefreshHighLightedBox();
 
 		foreach (var key in keyCodes)
 		{

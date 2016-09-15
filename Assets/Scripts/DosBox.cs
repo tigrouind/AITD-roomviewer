@@ -171,13 +171,8 @@ public class DosBox : MonoBehaviour
 							box.BoundingSize.x = ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k +  8], memory[k +  9]);
 							box.BoundingSize.y = ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]);
 							box.BoundingSize.z = ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]);
-
-							if(!ShowAdditionalInfo)
-							{
-								//those fields are only supported when timer info is available
-								box.Chrono = 0;
-								box.RoomChrono = 0;							
-							}
+							
+							box.ShowAdditionalInfo = ShowAdditionalInfo;
 
 							//player
 							if (objectid == lastValidPlayerIndex)
