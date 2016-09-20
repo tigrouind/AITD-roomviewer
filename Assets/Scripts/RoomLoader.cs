@@ -488,17 +488,28 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//toggle selected box
-		if (Input.GetMouseButtonDown(0) && HighLightedBox != null && HighLightedBox.name == "Actor")
+		if (Input.GetMouseButtonDown(0))
 		{
-			if (SelectedBox != HighLightedBox)
+			//only consider actors
+			Box HitBox = hitInfos
+				.Select(x => x.collider.GetComponent<Box>())
+				.FirstOrDefault(x => x.name == "Actor");			
+			
+			if (HitBox != null)
 			{
-				SelectedBox = HighLightedBox;
-				SelectedBoxId = HighLightedBox.ID;
+				if (SelectedBox != HitBox)
+				{
+					SelectedBox = HitBox;
+					SelectedBoxId = HitBox.ID;
+				}
+				else
+				{
+					SelectedBox = null;
+				}
 			}
-			else
-				SelectedBox = null;
 		}
 
+		//if actor is no more available (eg : after room switch) hide selected box
 		if (!DosBoxEnabled || (SelectedBox != null && SelectedBox.ID != SelectedBoxId))
 		{
 			SelectedBox = null;
