@@ -56,8 +56,13 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//clear model
-		MeshFilter filter = this.gameObject.GetComponent<MeshFilter>();
+		SkinnedMeshRenderer filter = this.gameObject.GetComponent<SkinnedMeshRenderer>();
 		filter.sharedMesh = null;
+
+		//delete all bones
+		foreach (Transform child in transform) {
+  			GameObject.Destroy(child.gameObject);
+ 		}
 
 		//load data
 		byte[] allbytes = File.ReadAllBytes(filename);
@@ -81,6 +86,11 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//check if model has bones
+		List<Transform> bones = new List<Transform>();
+		List<Matrix4x4> bindPoses = new List<Matrix4x4>();
+		Dictionary<int, int> bonesPerVertex = new Dictionary<int, int>();
+		List<Vector3> vertexNoTransform = vertices.ToList();
+
 		if ((flags & 2) == 2)
 		{
 			//bones
@@ -88,21 +98,49 @@ public class ModelLoader : MonoBehaviour
 			i += 2;
 			i += count * 2;
 
+			Dictionary<int, Transform> bonesPerIndex = new Dictionary<int, Transform>();
+
+			bonesPerIndex.Add(255, transform);
 			for (int n = 0; n < count; n++)
 			{
 				int startindex = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
 				int numpoints = ReadShort(allbytes[i + 2], allbytes[i + 3]);
-				int boneindex = ReadShort(allbytes[i + 4], allbytes[i + 5]) / 6;
+				int vertexindex = ReadShort(allbytes[i + 4], allbytes[i + 5]) / 6;
+				int parentindex = allbytes[i + 6];
+				int boneindex = allbytes[i + 7];
+			
+				//create bone
+				Transform bone = new GameObject("BONE").transform;
+				bonesPerIndex.Add(boneindex, bone);
+
+				bone.parent = bonesPerIndex[parentindex];
+				bone.localRotation = Quaternion.identity;
+				bone.localPosition = vertexNoTransform[vertexindex];
+				bones.Add(bone);
+
+				//create pose
+				Matrix4x4 bindPose = new Matrix4x4();
+				bindPose = bone.worldToLocalMatrix * transform.localToWorldMatrix;
+				bindPoses.Add(bindPose);
 
 				//apply bone transformation
-				Vector3 position = vertices[boneindex];
+				Vector3 position = vertices[vertexindex];
 				for (int u = 0; u < numpoints; u++)
 				{
 					vertices[startindex] += position;
+					bonesPerVertex.Add(startindex, bones.Count - 1);
 					startindex++;
 				}
 
 				i += 0x10;
+			}
+		}
+		else
+		{
+			//if no bones add dummy values
+			for (int u = 0; u < vertices.Count; u++)
+			{
+				bonesPerVertex.Add(u, 0);
 			}
 		}
 
@@ -122,6 +160,7 @@ public class ModelLoader : MonoBehaviour
 		//load palette
 		Color32[] paletteColors = PaletteTexture[PaletteIndex].GetPixels32();
 
+		List<BoneWeight> boneWeights = new List<BoneWeight>();
 		List<Vector3> allVertices = new List<Vector3>();
 		List<Color32> colors = new List<Color32>();
 		List<int> indices = new List<int>();
@@ -154,6 +193,8 @@ public class ModelLoader : MonoBehaviour
                         rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
 								+ middle));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
+						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndexA], weight0 = 1 }));
+
 						i += 4;
 						break;
 					}
@@ -195,6 +236,7 @@ public class ModelLoader : MonoBehaviour
 							color.g = 255;
 							color.b = (byte)((colorIndex / 16) * 16);
 						}
+
 						//add vertices
 						List<Vector3> polyVertices = new List<Vector3>();
 						int verticesCount = allVertices.Count;
@@ -206,6 +248,7 @@ public class ModelLoader : MonoBehaviour
 							colors.Add(color);
 							allVertices.Add(vertices[pointIndex]);
 							polyVertices.Add(vertices[pointIndex]);
+							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
 						}
 
                         if (polyType == 1 && noiseEnabled)
@@ -305,6 +348,7 @@ public class ModelLoader : MonoBehaviour
 						indices.AddRange(SphereMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(SphereMesh.vertices.Select(x => x * scale + position));
 						colors.AddRange(SphereMesh.vertices.Select(x => color));
+						boneWeights.AddRange(SphereMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[pointSphereIndex], weight0 = 1 }));
 						break;
 					}
 
@@ -335,6 +379,7 @@ public class ModelLoader : MonoBehaviour
 						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x => x * pointsize + position));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
+						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[cubeIndex], weight0 = 1 }));
 						break;
 					}
 				default:
@@ -390,6 +435,15 @@ public class ModelLoader : MonoBehaviour
 		msh.RecalculateNormals();
 		msh.RecalculateBounds();
 
+		//apply bones
+		if(bones.Count > 0)
+		{
+			msh.boneWeights = boneWeights.ToArray();
+			msh.bindposes = bindPoses.ToArray();
+			GetComponent<SkinnedMeshRenderer>().bones = bones.ToArray();
+		}
+
+		filter.localBounds = msh.bounds;
 		filter.sharedMesh = msh;
 	}
 
@@ -434,9 +488,9 @@ public class ModelLoader : MonoBehaviour
 	{
 		PaletteIndex = DetectGame() - 1;
 
-		GetComponent<Renderer>().materials[2] //noise
+		GetComponent<SkinnedMeshRenderer>().materials[2] //noise
 			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
-		GetComponent<Renderer>().materials[3] //gradient
+		GetComponent<SkinnedMeshRenderer>().materials[3] //gradient
 			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
 	}
 
@@ -554,7 +608,7 @@ public class ModelLoader : MonoBehaviour
         //update model
         transform.position = Vector3.zero;
         transform.rotation = Quaternion.identity;
-        Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);
+        Vector3 center = Vector3.Scale(gameObject.GetComponent<SkinnedMeshRenderer>().bounds.center, Vector3.up);
 
         transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
         transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
