@@ -232,9 +232,18 @@ public class DosBox : MonoBehaviour
 
 				if (ShowAdditionalInfo)
 				{
+					Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
+					Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
+					Transform roomObject = GetComponent<RoomLoader>().GetRoom(linkfloor, linkroom);
+					if (roomObject != null)
+					{
+						mousePosition -= roomObject.position;
+					}
+					mousePosition *= 1000.0f;
+
 					fpsInfo = new StringBuilder();
-					fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}", TimeSpan.FromSeconds(InternalTimer / 60),
-						calculatedFps, lastDelayFpsCounter * 1000 / 200, allowInventory ? "Yes" : "No");
+					fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}\nCursor position: {4} {5} {6}", TimeSpan.FromSeconds(InternalTimer / 60),
+						calculatedFps, lastDelayFpsCounter * 1000 / 200, allowInventory ? "Yes" : "No", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z));
 				}
 				else
 				{
