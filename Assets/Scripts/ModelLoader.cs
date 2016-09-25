@@ -492,13 +492,18 @@ public class ModelLoader : MonoBehaviour
 				int y = ReadShort(allbytes[i + 4], allbytes[i + 5]);
 				int z = ReadShort(allbytes[i + 6], allbytes[i + 7]);
 
-				if(type == 0) 
+				if(type == 0) //rotate
 				{
 					f.Bones.Add(new Vector4(-x * 360 / 1024.0f, -y * 360 / 1024.0f, -z * 360 / 1024.0f, type));
 				}
-				else
+
+				else if(type == 1) //translate
 				{
 					f.Bones.Add(new Vector4(x / 1000.0f, -y / 1000.0f, z / 1000.0f, type));
+				}
+				else //scale
+				{
+					f.Bones.Add(new Vector4(x / 1024.0f + 1.0f, y / 1024.0f + 1.0f, z / 1024.0f + 1.0f, type));
 				}
 				i += 8;
 			}
@@ -514,11 +519,11 @@ public class ModelLoader : MonoBehaviour
 
 		if (!enableAnimation)
 		{
-			//incompatible animation, disable animation
 			for (int i = 0 ; i < bones.Count ; i++)
 			{			
 				bones[i].transform.localRotation = Quaternion.identity;
 				bones[i].transform.localPosition = initialBonesPosition[i];
+				bones[i].transform.localScale = Vector3.one;
 			}
 			return;
 		}
@@ -540,14 +545,24 @@ public class ModelLoader : MonoBehaviour
 		Frame nextFrame = animFrames[(frame + 1) % animFrames.Count];
 		float framePosition = (time - (totaltime - currentFrame.Time)) / currentFrame.Time;
 
-		for (int i = 0 ; i < Math.Min(currentFrame.Bones.Count, bones.Count); i++)
+		for (int i = 0 ; i < bones.Count; i++)
 		{			
+			if(i >= currentFrame.Bones.Count)
+			{
+				bones[i].transform.localPosition = initialBonesPosition[i];
+				bones[i].transform.localRotation = Quaternion.identity;
+				bones[i].transform.localScale = Vector3.one;
+				continue;
+			}
+
 			var currentBone = currentFrame.Bones[i];
 			var nextBone = nextFrame.Bones[i];
 
 			//interpolate
-			if (currentBone.w == 0.0f)
+			if (nextBone.w == 0.0f)
 			{
+				bones[i].transform.localPosition = initialBonesPosition[i];
+				bones[i].transform.localScale = Vector3.one;
 				bones[i].transform.localRotation = 
 					Quaternion.Slerp(
 						Quaternion.AngleAxis(currentBone.z, Vector3.forward) *
@@ -558,9 +573,21 @@ public class ModelLoader : MonoBehaviour
 						Quaternion.AngleAxis(nextBone.y, Vector3.up),
 						framePosition);
 			}
+			else if (nextBone.w == 1.0f)
+			{
+				bones[i].transform.localRotation = Quaternion.identity;
+				bones[i].transform.localScale = Vector3.one;
+				bones[i].transform.localPosition = initialBonesPosition[i] + 
+						Vector3.Lerp(
+							new Vector3(currentBone.x, currentBone.y, currentBone.z),
+							new Vector3(nextBone.x, nextBone.y, nextBone.z),
+							framePosition);
+			}
 			else 
 			{
-				bones[i].transform.localPosition = initialBonesPosition[i] + 
+				bones[i].transform.localRotation = Quaternion.identity;
+				bones[i].transform.localPosition = initialBonesPosition[i];
+				bones[i].transform.localScale = 
 						Vector3.Lerp(
 							new Vector3(currentBone.x, currentBone.y, currentBone.z),
 							new Vector3(nextBone.x, nextBone.y, nextBone.z),
@@ -735,7 +762,7 @@ public class ModelLoader : MonoBehaviour
 			LoadBody(modelFiles[modelIndex]);
 		}            	
 
-		if (oldAnimIndex != animIndex)
+		if (animFiles.Count > 0 && oldAnimIndex != animIndex)
 		{
 			LoadAnim(animFiles[animIndex]);
 		}    
@@ -808,18 +835,21 @@ public class ModelLoader : MonoBehaviour
 			GUILayout.EndHorizontal();
 			itemsCount++;
 
-			//animate
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Enable animation", MenuStyle.Label);
-			if (GUILayout.Button(enableAnimation ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
-            {
-                ProcessKey(KeyCode.A);
-            }
-            GUILayout.EndHorizontal();
-			itemsCount++;
-
 			//anim no
-			if(enableAnimation && animFiles.Count > 1)
+			if (animFiles.Count > 1)
+			{
+				//animate
+	            GUILayout.BeginHorizontal();
+	            GUILayout.Label("Enable animation", MenuStyle.Label);
+				if (GUILayout.Button(enableAnimation ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
+	            {
+	                ProcessKey(KeyCode.A);
+	            }
+	            GUILayout.EndHorizontal();
+				itemsCount++;
+			}
+
+			if (enableAnimation)
 			{
 				GUILayout.BeginHorizontal();
 				GUILayout.Label("Anim", MenuStyle.Label);
