@@ -134,11 +134,7 @@ public class Vars : MonoBehaviour
 			int oldValue = data[i].value;
 			int value;
 
-			if(data[i].freeze)
-			{
-				value = data[i].freezeValue;
-			}
-			else if(compare) 
+			if(compare) 
 			{
 				value = data[i].saveState;
 			}
@@ -225,7 +221,6 @@ public class Vars : MonoBehaviour
 					if(GUILayout.Button(stringValue, labelStyle))
 					{
 						vars[count].freeze = !vars[count].freeze;
-						vars[count].freezeValue = value;
 					}
 				}
 				else
@@ -252,6 +247,5 @@ public class Vars : MonoBehaviour
 		public float time;
 		public bool difference;
 		public bool freeze;
-		public int freezeValue;
 	}
 }
