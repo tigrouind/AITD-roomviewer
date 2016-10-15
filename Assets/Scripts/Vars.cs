@@ -26,7 +26,6 @@ public class Vars : MonoBehaviour
 		ignoreDifferences = !compare;
 	}
 
-
 	private short ReadShort(byte a, byte b)
 	{
 		unchecked
@@ -135,7 +134,11 @@ public class Vars : MonoBehaviour
 			int oldValue = data[i].value;
 			int value;
 
-			if(compare) 
+			if(data[i].freeze)
+			{
+				value = data[i].freezeValue;
+			}
+			else if(compare) 
 			{
 				value = data[i].saveState;
 			}
@@ -145,7 +148,6 @@ public class Vars : MonoBehaviour
 			}
 
 			data[i].value = value;
-
 					
 			if(ignoreDifferences)
 			{
@@ -190,33 +192,48 @@ public class Vars : MonoBehaviour
 
 		//body
 		int count = 0;
-		for (int i = 0; i < rows; i++)
+		for (int j = 0; j < rows; j++)
 		{
 			GUILayout.BeginHorizontal();
 			headerStyle.alignment = TextAnchor.MiddleRight;
-			GUILayout.Label(i.ToString(), headerStyle);
+			GUILayout.Label(j.ToString(), headerStyle);
 
-			for (int j = 0; j < columns; j++)
+			for (int i = 0; i < columns; i++)
 			{
+				labelStyle.normal.background = null;
+
 				string stringValue = string.Empty;
 				if (count < vars.Length)
 				{
-					int value = vars[count].value;
-					bool different = vars[count].difference;
+					Var var = vars[count];
+					int value = var.value;
+					bool different = var.difference;
 
 					if (value != 0 || different)
 						stringValue = value.ToString();
 
 					//highlight recently changed vars
-					labelStyle.normal.background = different ? Style.RedTexture : null;
+					if (var.freeze)
+					{
+						labelStyle.normal.background = Style.GrayTexture;
+					}
+					else if (different)
+					{
+						labelStyle.normal.background = Style.RedTexture;
+					}
+
+					if(GUILayout.Button(stringValue, labelStyle))
+					{
+						vars[count].freeze = !vars[count].freeze;
+						vars[count].freezeValue = value;
+					}
 				}
 				else
 				{
-					labelStyle.normal.background = null;
+					GUILayout.Label(stringValue, labelStyle);
 				}
 
 				count++;
-				GUILayout.Label(stringValue, labelStyle);
 			}
 			GUILayout.EndHorizontal();
 		}
@@ -234,5 +251,7 @@ public class Vars : MonoBehaviour
 		public int saveState;
 		public float time;
 		public bool difference;
+		public bool freeze;
+		public int freezeValue;
 	}
 }

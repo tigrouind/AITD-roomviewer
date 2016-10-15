@@ -81,7 +81,8 @@ public class ProcessMemoryReader
 						 && VirtualQueryEx(processHandle, (IntPtr)min_address, out mem_info, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION))) > 0)
 		{
 			//check if memory region is accessible
-			if (mem_info.Protect == PAGE_READWRITE && mem_info.State == MEM_COMMIT && (mem_info.Type & MEM_PRIVATE) == MEM_PRIVATE)
+			if (mem_info.Protect == PAGE_READWRITE && mem_info.State == MEM_COMMIT && (mem_info.Type & MEM_PRIVATE) == MEM_PRIVATE
+				&& (int)mem_info.RegionSize > 1024*1024*16)
 			{
 				long readPosition = (long)mem_info.BaseAddress;
 				int bytesToRead = (int)mem_info.RegionSize;

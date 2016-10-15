@@ -13,7 +13,7 @@ SceneSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 6
+  serializedVersion: 7
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -37,12 +37,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!157 &4
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 6
+  serializedVersion: 7
   m_GIWorkflowMode: 1
-  m_LightmapsMode: 1
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -53,17 +53,22 @@ LightmapSettings:
     m_EnableBakedLightmaps: 1
     m_EnableRealtimeLightmaps: 0
   m_LightmapEditorSettings:
-    serializedVersion: 3
+    serializedVersion: 4
     m_Resolution: 1
     m_BakeResolution: 50
     m_TextureWidth: 1024
     m_TextureHeight: 1024
+    m_AO: 0
     m_AOMaxDistance: 1
-    m_Padding: 2
     m_CompAOExponent: 0
+    m_CompAOExponentDirect: 0
+    m_Padding: 2
     m_LightmapParameters: {fileID: 0}
+    m_LightmapsBakeMode: 1
     m_TextureCompression: 0
+    m_DirectLightInLightProbes: 1
     m_FinalGather: 0
+    m_FinalGatherFiltering: 1
     m_FinalGatherRayCount: 1024
     m_ReflectionCompression: 2
   m_LightingDataAsset: {fileID: 0}
@@ -133,6 +138,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 8
@@ -184,6 +190,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7
@@ -235,6 +242,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 5
@@ -286,6 +294,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 6
@@ -316,17 +325,20 @@ MeshRenderer:
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
   m_Materials:
   - {fileID: 0}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
-  m_UseLightProbes: 1
-  m_ReflectionProbeUsage: 1
   m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 1
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
+  m_SelectedWireframeHidden: 0
   m_MinimumChartSize: 4
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
@@ -349,6 +361,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -389,6 +402,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -415,7 +429,7 @@ Light:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1688393780}
   m_Enabled: 1
-  serializedVersion: 6
+  serializedVersion: 7
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
@@ -425,6 +439,7 @@ Light:
   m_Shadows:
     m_Type: 0
     m_Resolution: -1
+    m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
@@ -437,10 +452,10 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_Lightmapping: 1
+  m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_AreaSize: {x: 1, y: 1}
 --- !u!4 &1688393782
 Transform:
   m_ObjectHideFlags: 0
@@ -450,6 +465,7 @@ Transform:
   m_LocalRotation: {x: 0.40821794, y: -0.23456973, z: 0.10938166, w: 0.8754261}
   m_LocalPosition: {x: -0.44612217, y: 0.73597527, z: 0.272377}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
@@ -536,6 +552,7 @@ Transform:
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 10, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -576,31 +593,40 @@ MonoBehaviour:
   RedTexture: {fileID: 2800000, guid: be760246c22da2943a3b22a3ba33979e, type: 3}
   BlackTexture: {fileID: 2800000, guid: d21b9d6728a05164faddb0e70251ee38, type: 3}
   GreenTexture: {fileID: 2800000, guid: 86642a3a0a405334484fa1456ce7c37a, type: 3}
+  GrayTexture: {fileID: 2800000, guid: a80a42902baf7624a80f7b5674a66989, type: 3}
   Panel:
     m_Name: 
     m_Normal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Hover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Active:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Focused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnNormal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnHover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnActive:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnFocused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Border:
       m_Left: 0
@@ -639,27 +665,35 @@ MonoBehaviour:
     m_Name: 
     m_Normal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Hover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Active:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Focused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnNormal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnHover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnActive:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnFocused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Border:
       m_Left: 0
@@ -698,27 +732,35 @@ MonoBehaviour:
     m_Name: 
     m_Normal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Hover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Active:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Focused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnNormal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnHover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnActive:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnFocused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Border:
       m_Left: 0
@@ -757,27 +799,35 @@ MonoBehaviour:
     m_Name: 
     m_Normal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Hover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Active:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Focused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnNormal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnHover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnActive:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnFocused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Border:
       m_Left: 0
@@ -816,27 +866,35 @@ MonoBehaviour:
     m_Name: 
     m_Normal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Hover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Active:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Focused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnNormal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnHover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnActive:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnFocused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Border:
       m_Left: 0
@@ -875,27 +933,35 @@ MonoBehaviour:
     m_Name: 
     m_Normal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Hover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Active:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Focused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnNormal:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnHover:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnActive:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_OnFocused:
       m_Background: {fileID: 0}
+      m_ScaledBackgrounds: []
       m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_Border:
       m_Left: 0
@@ -939,6 +1005,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -5.513, y: 90, z: -0.39499664}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 9
@@ -986,6 +1053,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
