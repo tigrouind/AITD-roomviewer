@@ -74,15 +74,16 @@ public class ProcessMemoryReader
 
 		long min_address = 0;
 		long max_address = 0x7FFFFFFF;
-		byte[] buffer = new byte[65536];
+		byte[] buffer = new byte[81920];
 
 		//scan process memory regions
 		while (min_address < max_address
 						 && VirtualQueryEx(processHandle, (IntPtr)min_address, out mem_info, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION))) > 0)
 		{
 			//check if memory region is accessible
+			//skip regions smaller than 16M (default DOSBOX memory size)
 			if (mem_info.Protect == PAGE_READWRITE && mem_info.State == MEM_COMMIT && (mem_info.Type & MEM_PRIVATE) == MEM_PRIVATE
-				&& (int)mem_info.RegionSize > 1024*1024*16)
+				&& (int)mem_info.RegionSize >= 1024*1024*16)
 			{
 				long readPosition = (long)mem_info.BaseAddress;
 				int bytesToRead = (int)mem_info.RegionSize;
