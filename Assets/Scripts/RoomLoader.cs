@@ -426,19 +426,30 @@ public class RoomLoader : MonoBehaviour
 
 	private int BoxComparer(RaycastHit a, RaycastHit b)
 	{
+        Box boxA = a.collider.GetComponent<Box>();
+        Box boxB = b.collider.GetComponent<Box>();
+
+        //actors have priority over the rest
+        int isActorA = boxA.name == "Actor" ? 0 : 1;
+        int isActorB = boxB.name == "Actor" ? 0 : 1;
+        if (isActorA != isActorB)
+        {
+            return isActorA.CompareTo(isActorB);
+        }
+
 		// check distance
 		if (Mathf.Abs(a.distance - b.distance) >= 0.0005f)
 		{
 			return a.distance.CompareTo(b.distance);
 		}
-
+            
 		//if objects are too close each other, check current room
-		int aCurrentRoom = a.collider.GetComponent<Box>().Room == room ? 0 : 1;
-		int bCurrentRoom = b.collider.GetComponent<Box>().Room == room ? 0 : 1;
+        int aCurrentRoom = boxA.Room == room ? 0 : 1;
+		int bCurrentRoom = boxB.Room == room ? 0 : 1;
 		if (aCurrentRoom != bCurrentRoom)
 		{
 			return aCurrentRoom.CompareTo(bCurrentRoom);
-		}
+		}      
 
 		return 0;
 	}
@@ -457,7 +468,7 @@ public class RoomLoader : MonoBehaviour
 
 		if (hitInfos != null && hitInfos.Length > 0)
 		{
-			//boxes inside current room have priority over other boxes
+			//sort colliders by priority
 			Array.Sort(hitInfos, BoxComparer);
 
 			Box box = hitInfos[0].collider.GetComponent<Box>();
@@ -469,6 +480,23 @@ public class RoomLoader : MonoBehaviour
 
 				HighLightedBox = box;
 			}
+
+            //toggle selected box
+            if (Input.GetMouseButtonDown(0))
+            {           
+                if (HighLightedBox != null)
+                {
+                    if (SelectedBox != HighLightedBox)
+                    {
+                        SelectedBox = HighLightedBox;
+                        SelectedBoxId = HighLightedBox.ID;
+                    }
+                    else
+                    {
+                        SelectedBox = null;
+                    }
+                }
+            }
 
 			//display info
 			Vector3 position = Camera.main.WorldToScreenPoint(box.GetComponent<Renderer>().bounds.center);
@@ -485,29 +513,7 @@ public class RoomLoader : MonoBehaviour
 				HighLightedBox = null;
 				BoxInfo.text = string.Empty;
 			}
-		}
-
-		//toggle selected box
-		if (Input.GetMouseButtonDown(0))
-		{
-			//only consider actors
-			Box HitBox = hitInfos
-				.Select(x => x.collider.GetComponent<Box>())
-				.FirstOrDefault(x => x.name == "Actor");			
-			
-			if (HitBox != null)
-			{
-				if (SelectedBox != HitBox)
-				{
-					SelectedBox = HitBox;
-					SelectedBoxId = HitBox.ID;
-				}
-				else
-				{
-					SelectedBox = null;
-				}
-			}
-		}
+		}            	
 
 		//if actor is no more available (eg : after room switch) hide selected box
 		if (!DosBoxEnabled || (SelectedBox != null && SelectedBox.ID != SelectedBoxId))
