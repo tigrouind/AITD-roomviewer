@@ -27,14 +27,15 @@ public class ModelLoader : MonoBehaviour
 	private Vector2 cameraPosition = new Vector2();
 	private float cameraZoom = 2.0f;
 
-	private Vector3 mousePosition; //mouse drag
-	private bool autoRotate;	
+	private Vector3 mousePosition;
+	//mouse drag
+	private bool autoRotate;
 	private bool displayMenuAfterDrag;
 	private bool menuEnabled;
 	private string ModelIndexString;
-    private bool noiseEnabled = true;
-    private bool gradientEnabled = true;
-    private bool autoRotateEnabled = true;
+	private bool noiseEnabled = true;
+	private bool gradientEnabled = true;
+	private bool autoRotateEnabled = true;
 
 	public static short ReadShort(byte a, byte b)
 	{
@@ -167,7 +168,7 @@ public class ModelLoader : MonoBehaviour
 
 						Color32 color = paletteColors[colorIndex];
 
-                        if (polyType == 1 && noiseEnabled)
+						if (polyType == 1 && noiseEnabled)
 						{
 							//noise
 							color.a = 254;
@@ -179,7 +180,7 @@ public class ModelLoader : MonoBehaviour
 							//transparency
 							color.a = 128;
 						}
-                        else if ((polyType == 3 || polyType == 6) && gradientEnabled)
+						else if ((polyType == 3 || polyType == 6) && gradientEnabled)
 						{
 							//horizontal gradient
 							color.a = 253;
@@ -187,7 +188,7 @@ public class ModelLoader : MonoBehaviour
 							color.g = 0;
 							color.b = (byte)((colorIndex / 16) * 16);
 						}
-                        else if ((polyType == 4 || polyType == 5) && gradientEnabled)
+						else if ((polyType == 4 || polyType == 5) && gradientEnabled)
 						{
 							//vertical gradient
 							color.a = 253;
@@ -208,7 +209,7 @@ public class ModelLoader : MonoBehaviour
 							polyVertices.Add(vertices[pointIndex]);
 						}
 
-                        if (polyType == 1 && noiseEnabled)
+						if (polyType == 1 && noiseEnabled)
 						{
 							Vector3 forward, left;
 							ComputeUV(polyVertices, out forward, out left);
@@ -263,7 +264,7 @@ public class ModelLoader : MonoBehaviour
 						Color32 color = paletteColors[colorIndex];
 						i += 2;
 
-                        if (polyType == 1 && noiseEnabled)
+						if (polyType == 1 && noiseEnabled)
 						{
 							//noise
 							color.a = 254;
@@ -275,7 +276,7 @@ public class ModelLoader : MonoBehaviour
 							//transparency
 							color.a = 128;
 						}
-                        else if ((polyType == 3 || polyType == 6) && gradientEnabled)
+						else if ((polyType == 3 || polyType == 6) && gradientEnabled)
 						{
 							//horizontal gradient
 							color.a = 253;
@@ -283,7 +284,7 @@ public class ModelLoader : MonoBehaviour
 							color.g = 0;
 							color.b = (byte)((colorIndex / 16) * 16);
 						}
-                        else if ((polyType == 4 || polyType == 5) && gradientEnabled)
+						else if ((polyType == 4 || polyType == 5) && gradientEnabled)
 						{
 							//vertical gradient
 							color.a = 253;
@@ -322,7 +323,7 @@ public class ModelLoader : MonoBehaviour
 						Vector3 position = vertices[cubeIndex];
 
 						float pointsize;
-						if(primitiveType == 2)
+						if (primitiveType == 2)
 						{
 							pointsize = linesize;
 						}
@@ -425,9 +426,12 @@ public class ModelLoader : MonoBehaviour
 	int DetectGame()
 	{
 		//detect game based on number of models
-		if (modelFiles.Count > 700) return 3;
-		else if (modelFiles.Count > 500) return 2;
-		else return 1;
+		if (modelFiles.Count > 700)
+			return 3;
+		else if (modelFiles.Count > 500)
+			return 2;
+		else
+			return 1;
 	}
 
 	void SetPalette()
@@ -501,7 +505,7 @@ public class ModelLoader : MonoBehaviour
 			//start drag (pan)
 			if (Input.GetMouseButtonDown(1))
 			{
-                mousePosition = Input.mousePosition;
+				mousePosition = Input.mousePosition;
 				autoRotate = false;
 				displayMenuAfterDrag = true;
 			}
@@ -509,12 +513,12 @@ public class ModelLoader : MonoBehaviour
 			//dragging (pan)
 			if (Input.GetMouseButton(1))
 			{
-                Vector3 newMousePosition = Input.mousePosition;
+				Vector3 newMousePosition = Input.mousePosition;
 				if (newMousePosition != this.mousePosition)
 				{
-                    Vector3 cameraDistance = new Vector3(0.0f, 0.0f, cameraZoom);
-                    Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraDistance)
-                        - Camera.main.ScreenToWorldPoint(newMousePosition + cameraDistance);
+					Vector3 cameraDistance = new Vector3(0.0f, 0.0f, cameraZoom);
+					Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraDistance)
+					                                    - Camera.main.ScreenToWorldPoint(newMousePosition + cameraDistance);
 					displayMenuAfterDrag = false;
 					cameraPosition += mouseDelta;
 					mousePosition = newMousePosition;
@@ -544,25 +548,25 @@ public class ModelLoader : MonoBehaviour
 			LoadBody(modelFiles[modelIndex]);
 		}            	
 
-        //rotate model
-        if (autoRotate && autoRotateEnabled)
-        {
-            cameraRotation.x = Time.time * 100.0f;
-            cameraRotation.y = 20.0f;
-        }
+		//rotate model
+		if (autoRotate && autoRotateEnabled)
+		{
+			cameraRotation.x = Time.time * 100.0f;
+			cameraRotation.y = 20.0f;
+		}
 
-        //update model
-        transform.position = Vector3.zero;
-        transform.rotation = Quaternion.identity;
-        Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);
+		//update model
+		transform.position = Vector3.zero;
+		transform.rotation = Quaternion.identity;
+		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);
 
-        transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
-        transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
-            * Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
+		transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
+		transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
+		* Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
 
-        //set camera
-        Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
-        Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
+		//set camera
+		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
+		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
 	}
 
 	void OnGUI()
@@ -597,32 +601,32 @@ public class ModelLoader : MonoBehaviour
 			}
 			GUILayout.EndHorizontal();
 
-            //auto rotate
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Auto rotate", MenuStyle.Label);
-            if (GUILayout.Button(autoRotateEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
-            {
-                ProcessKey(KeyCode.A);
-            }
-            GUILayout.EndHorizontal();
+			//auto rotate
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Auto rotate", MenuStyle.Label);
+			if (GUILayout.Button(autoRotateEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
+			{
+				ProcessKey(KeyCode.A);
+			}
+			GUILayout.EndHorizontal();
 
 			//noise
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Noise material", MenuStyle.Label);
-            if (GUILayout.Button(noiseEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
+			if (GUILayout.Button(noiseEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
 			{
 				ProcessKey(KeyCode.N);
 			}
 			GUILayout.EndHorizontal();
 
-            //gradient
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Gradient material", MenuStyle.Label);
-            if (GUILayout.Button(gradientEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
-            {
-                ProcessKey(KeyCode.G);
-            }
-            GUILayout.EndHorizontal();
+			//gradient
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Gradient material", MenuStyle.Label);
+			if (GUILayout.Button(gradientEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
+			{
+				ProcessKey(KeyCode.G);
+			}
+			GUILayout.EndHorizontal();
 
 			GUILayout.EndVertical();
 			GUILayout.EndArea();
@@ -672,22 +676,22 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.G:
-                gradientEnabled = !gradientEnabled;
+				gradientEnabled = !gradientEnabled;
 				LoadBody(modelFiles[modelIndex], false);
 				break;
 
-            case KeyCode.N:
-                noiseEnabled = !noiseEnabled;
-                LoadBody(modelFiles[modelIndex], false);
-                break;
+			case KeyCode.N:
+				noiseEnabled = !noiseEnabled;
+				LoadBody(modelFiles[modelIndex], false);
+				break;
 
-            case KeyCode.A:
-                autoRotateEnabled = !autoRotateEnabled;
-                if (autoRotateEnabled)
-                {
-                    autoRotate = true;
-                }
-                break;
+			case KeyCode.A:
+				autoRotateEnabled = !autoRotateEnabled;
+				if (autoRotateEnabled)
+				{
+					autoRotate = true;
+				}
+				break;
 
 			case KeyCode.Escape:
 				if (Screen.fullScreen)

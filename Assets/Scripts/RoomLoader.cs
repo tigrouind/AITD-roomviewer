@@ -348,9 +348,12 @@ public class RoomLoader : MonoBehaviour
 	public int DetectGame()
 	{
 		//detect game based on number of floors
-		if(floors.Count >= 15) return 2; 
-		else if(floors.Count >= 14) return 3;
-		else return 1;
+		if (floors.Count >= 15)
+			return 2;
+		else if (floors.Count >= 14)
+			return 3;
+		else
+			return 1;
 	}
 
 	void Update()
@@ -396,7 +399,7 @@ public class RoomLoader : MonoBehaviour
 				{ 
 					Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
 					Vector3 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraHeight)
-						- Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
+					                     - Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
 
 					Camera.main.transform.position += mouseDelta;
 					mousePosition = newMousePosition;
@@ -407,7 +410,7 @@ public class RoomLoader : MonoBehaviour
 		//menu
 		if (Input.GetMouseButtonDown(1))
 		{
-			if(!GetComponent<Vars>().enabled)
+			if (!GetComponent<Vars>().enabled)
 			{
 				menuEnabled = !menuEnabled;
 			}
@@ -426,16 +429,16 @@ public class RoomLoader : MonoBehaviour
 
 	private int BoxComparer(RaycastHit a, RaycastHit b)
 	{
-        Box boxA = a.collider.GetComponent<Box>();
-        Box boxB = b.collider.GetComponent<Box>();
+		Box boxA = a.collider.GetComponent<Box>();
+		Box boxB = b.collider.GetComponent<Box>();
 
-        //actors have priority over the rest
-        int isActorA = boxA.name == "Actor" ? 0 : 1;
-        int isActorB = boxB.name == "Actor" ? 0 : 1;
-        if (isActorA != isActorB)
-        {
-            return isActorA.CompareTo(isActorB);
-        }
+		//actors have priority over the rest
+		int isActorA = boxA.name == "Actor" ? 0 : 1;
+		int isActorB = boxB.name == "Actor" ? 0 : 1;
+		if (isActorA != isActorB)
+		{
+			return isActorA.CompareTo(isActorB);
+		}
 
 		// check distance
 		if (Mathf.Abs(a.distance - b.distance) >= 0.0005f)
@@ -444,7 +447,7 @@ public class RoomLoader : MonoBehaviour
 		}
             
 		//if objects are too close each other, check current room
-        int aCurrentRoom = boxA.Room == room ? 0 : 1;
+		int aCurrentRoom = boxA.Room == room ? 0 : 1;
 		int bCurrentRoom = boxB.Room == room ? 0 : 1;
 		if (aCurrentRoom != bCurrentRoom)
 		{
@@ -461,7 +464,7 @@ public class RoomLoader : MonoBehaviour
 		RaycastHit[] hitInfos = null;
 
 		if (mousePosition.x > 0 && mousePosition.x < Screen.width &&
-			mousePosition.y > 0 && mousePosition.y < Screen.height)
+		    mousePosition.y > 0 && mousePosition.y < Screen.height)
 		{
 			hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
 		}
@@ -481,23 +484,6 @@ public class RoomLoader : MonoBehaviour
 				HighLightedBox = box;
 			}
 
-            //toggle selected box
-            if (Input.GetMouseButtonDown(0))
-            {           
-                if (HighLightedBox != null)
-                {
-                    if (SelectedBox != HighLightedBox)
-                    {
-                        SelectedBox = HighLightedBox;
-                        SelectedBoxId = HighLightedBox.ID;
-                    }
-                    else
-                    {
-                        SelectedBox = null;
-                    }
-                }
-            }
-
 			//display info
 			Vector3 position = Camera.main.WorldToScreenPoint(box.GetComponent<Renderer>().bounds.center);
 			BoxInfo.transform.position = new Vector3(position.x / Screen.width, position.y / Screen.height, 0.0f);
@@ -513,7 +499,21 @@ public class RoomLoader : MonoBehaviour
 				HighLightedBox = null;
 				BoxInfo.text = string.Empty;
 			}
-		}            	
+		}
+
+		//toggle selected box
+		if (Input.GetMouseButtonDown(0) && HighLightedBox != null)
+		{
+			if (SelectedBox != HighLightedBox)
+			{
+				SelectedBox = HighLightedBox;
+				SelectedBoxId = HighLightedBox.ID;
+			}
+			else
+			{
+				SelectedBox = null;
+			}
+		}
 
 		//if actor is no more available (eg : after room switch) hide selected box
 		if (!DosBoxEnabled || (SelectedBox != null && SelectedBox.ID != SelectedBoxId))
@@ -536,7 +536,7 @@ public class RoomLoader : MonoBehaviour
 
 	public void RefreshRooms(int newfloor, int newroom)
 	{
-		if(cameraFollow == 1 || cameraFollow == 2) //room or player
+		if (cameraFollow == 1 || cameraFollow == 2) //room or player
 		{
 			if (floors.Contains(newfloor))
 			{
@@ -687,7 +687,7 @@ public class RoomLoader : MonoBehaviour
 				itemsCount++;
 			}
 
-			if(DosBoxEnabled && DetectGame() == 1)
+			if (DosBoxEnabled && DetectGame() == 1)
 			{
 				//show fps info
 				GUILayout.BeginHorizontal();
@@ -716,9 +716,9 @@ public class RoomLoader : MonoBehaviour
 				{
 					bool result = (GetComponent<DosBox>().LinkToDosBOX(floor, room));
 
-                    //set follow mode to player
-                    cameraFollow = 2; 
-                    GetComponent<DosBox>().ResetCamera(floor, room);
+					//set follow mode to player
+					cameraFollow = 2; 
+					GetComponent<DosBox>().ResetCamera(floor, room);
 
 					Actors.SetActive(result);
 					DosBoxEnabled = result;
@@ -774,9 +774,9 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.U:
-				if(DetectGame() == 1)
+				if (DetectGame() == 1)
 				{
-                    GetComponent<Vars>().enabled = !GetComponent<Vars>().enabled;
+					GetComponent<Vars>().enabled = !GetComponent<Vars>().enabled;
 					menuEnabled = false; 
 				}
 				break;

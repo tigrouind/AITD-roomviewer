@@ -13,8 +13,8 @@ public class DosBox : MonoBehaviour
 	public Box BoxPrefab;
 	public uint InternalTimer;
 	public MenuStyle Style;
-    public bool ShowAdditionalInfo;
-    public ProcessMemoryReader ProcessReader;
+	public bool ShowAdditionalInfo;
+	public ProcessMemoryReader ProcessReader;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -29,19 +29,21 @@ public class DosBox : MonoBehaviour
 		}
 	};
 
-	private int[] MemoryOffsets = new [] { -188, -28, -28 }; //offset to apply to get beginning of actors array
-	private int[] ActorStructSize = new [] { 160, 180, 182 }; //size of one actor
+	private int[] MemoryOffsets = new [] { -188, -28, -28 };
+	//offset to apply to get beginning of actors array
+	private int[] ActorStructSize = new [] { 160, 180, 182 };
+	//size of one actor
 	private int[] TrackModeOffsets = new [] { 82, 90, 90 };
 
 	private Vector3 lastPlayerPosition;
 	private int lastValidPlayerIndex;
 	private int linkfloor = 0;
-	private int linkroom = 0;	
+	private int linkroom = 0;
 	private long memoryAddress;
 	private StringBuilder playerInfo;
 	private byte[] memory;
 
-	//fps 
+	//fps
 	private int oldFramesCount;
 	private Queue<int> previousFramesCount = new Queue<int>();
 	private float calculatedFps;
@@ -106,7 +108,7 @@ public class DosBox : MonoBehaviour
 						if (roomObject != null)
 						{
 							//local position
-							int boundingx = (ReadShort(memory[k +  8], memory[k +  9]) + ReadShort(memory[k + 10], memory[k + 11])) / 2;
+							int boundingx = (ReadShort(memory[k + 8], memory[k + 9]) + ReadShort(memory[k + 10], memory[k + 11])) / 2;
 							int boundingy = (ReadShort(memory[k + 12], memory[k + 13]) + ReadShort(memory[k + 14], memory[k + 15])) / 2;
 							int boundingz = (ReadShort(memory[k + 16], memory[k + 17]) + ReadShort(memory[k + 18], memory[k + 19])) / 2;
 
@@ -120,7 +122,7 @@ public class DosBox : MonoBehaviour
 							//make actors appears slightly bigger than they are to be not covered by colliders
 							float delta = 1.0f;
 							box.transform.localScale = new Vector3(
-								ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k +  8], memory[k +  9]) + delta,
+								ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k + 8], memory[k + 9]) + delta,
 								ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]) + delta,
 								ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]) + delta) / 1000.0f;
 
@@ -138,7 +140,7 @@ public class DosBox : MonoBehaviour
 							box.LifeMode = ReadShort(memory[k + 50], memory[k + 51]);
 							box.Life = ReadShort(memory[k + 52], memory[k + 53]);
 							box.Chrono = ReadUnsignedInt(memory[k + 54], memory[k + 55], memory[k + 56], memory[k + 57]);
-							box.RoomChrono =  ReadUnsignedInt(memory[k + 58], memory[k + 59], memory[k + 60], memory[k + 61]);
+							box.RoomChrono = ReadUnsignedInt(memory[k + 58], memory[k + 59], memory[k + 60], memory[k + 61]);
 							box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
 							box.Frame = ReadShort(memory[k + 74], memory[k + 75]);
 							box.TotalFrames = ReadShort(memory[k + 76], memory[k + 77]);
@@ -168,7 +170,7 @@ public class DosBox : MonoBehaviour
 							box.BoundingPos.y = boundingy;
 							box.BoundingPos.z = boundingz;
 
-							box.BoundingSize.x = ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k +  8], memory[k +  9]);
+							box.BoundingSize.x = ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k + 8], memory[k + 9]);
 							box.BoundingSize.y = ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]);
 							box.BoundingSize.z = ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]);
 							
@@ -262,7 +264,7 @@ public class DosBox : MonoBehaviour
 			}
 		}
 
-		if(ProcessReader != null)
+		if (ProcessReader != null)
 		{
 			if (ShowAdditionalInfo)
 			{
@@ -274,7 +276,7 @@ public class DosBox : MonoBehaviour
 				ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 4);
 				allowInventory = ReadShort(memory[0], memory[1]) == 1;
 			}
-   		}
+		}
 
 		//arrow is only active if actors are active and player is active
 		Arrow.gameObject.SetActive(Actors.activeSelf
@@ -285,7 +287,7 @@ public class DosBox : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		if(ProcessReader != null && ShowAdditionalInfo)
+		if (ProcessReader != null && ShowAdditionalInfo)
 		{
 			//fps
 			ProcessReader.Read(memory, memoryAddress - 0x83B6, 2);
@@ -297,28 +299,29 @@ public class DosBox : MonoBehaviour
 
 			//check how much frames elapsed since last time
 			int diff;
-			if(frames >= oldFramesCount)
+			if (frames >= oldFramesCount)
 				diff = frames - oldFramesCount;
 			else
 				diff = (fps - oldFramesCount) + frames;	
 			oldFramesCount = frames;
 
 			//check for large delays
-			if(diff == 0) 
+			if (diff == 0)
 			{ 
 				delayFpsCounter++;
-				if(delayFpsCounter > 100/(1000/200)) // 20 frames at 200FPS = 100ms
+				if (delayFpsCounter > 100 / (1000 / 200)) // 20 frames at 200FPS = 100ms
 				{
 					lastDelayFpsCounter = delayFpsCounter;
 				}
 			}
-			else 
+			else
 			{
 				delayFpsCounter = 0; 
 			}
 
 			previousFramesCount.Enqueue(diff);
-			while(previousFramesCount.Count > 200) previousFramesCount.Dequeue();
+			while (previousFramesCount.Count > 200)
+				previousFramesCount.Dequeue();
 
 			calculatedFps = previousFramesCount.Sum();
 		}

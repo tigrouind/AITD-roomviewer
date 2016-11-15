@@ -6,7 +6,7 @@ using System;
 using System.Text;
 
 public class Box : MonoBehaviour
-{	
+{
 	private Color32 color;
 	private bool highlighted;
 	private bool alwaysOnTop;
@@ -19,7 +19,7 @@ public class Box : MonoBehaviour
 	public bool ShowAdditionalInfo;
 	public int ID;
 	public int Flags;
-    public int ColFlags;
+	public int ColFlags;
 	public int Life;
 	public int LifeMode;
 	public int TrackMode;
@@ -94,7 +94,7 @@ public class Box : MonoBehaviour
 			}
 		}
 
-		if(alwaysOnTop)
+		if (alwaysOnTop)
 		{
 			materialColor = new Color32(materialColor.r, materialColor.g, materialColor.b, 254);
 		}
@@ -151,7 +151,7 @@ public class Box : MonoBehaviour
 				sb.AppendFormat("\r\nZV_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
 				sb.AppendFormat("\r\nZV_SIZE = {0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
 				sb.AppendFormat("\r\nMOD = {0} {1} {2}", Mod.x, Mod.y, Mod.z);
-				sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", Angles.x , Angles.y, Angles.z);
+				sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", Angles.x, Angles.y, Angles.z);
 			}			
 			
 			if (Body != -1)
@@ -163,7 +163,7 @@ public class Box : MonoBehaviour
 			if (Anim != -1)
 			{
 				sb.Append("\r\nANIM = " + Anim);
-				if(Frame != -1)
+				if (Frame != -1)
 				{
 					sb.Append("\r\nFRAME = " + Frame + "/" + (TotalFrames - 1));
 				}
@@ -174,7 +174,7 @@ public class Box : MonoBehaviour
 				}
 			}
 
-			if(ShowAdditionalInfo)
+			if (ShowAdditionalInfo)
 			{
 				if (Chrono != 0)
 					sb.AppendFormat("\r\nCHRONO = {0}", TimeSpan.FromSeconds((timer - Chrono) / 60));

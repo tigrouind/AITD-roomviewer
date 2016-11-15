@@ -108,7 +108,7 @@ public class Vars : MonoBehaviour
 			compare = !compare;
 		}
 
-		if(!compare && oldcompare)
+		if (!compare && oldcompare)
 		{
 			ignoreDifferences = true;
 		}
@@ -134,7 +134,7 @@ public class Vars : MonoBehaviour
 			int oldValue = data[i].value;
 			int value;
 
-			if(compare) 
+			if (compare)
 			{
 				value = data[i].saveState;
 			}
@@ -145,16 +145,16 @@ public class Vars : MonoBehaviour
 
 			data[i].value = value;
 					
-			if(ignoreDifferences)
+			if (ignoreDifferences)
 			{
 				data[i].time = float.MinValue;
 			}
 			else if (value != oldValue)
 			{
-				if(compare)
+				if (compare)
 				{
 					data[i].time = float.MaxValue;
-				}	
+				}
 				else
 				{
 					data[i].time = currenttime;
@@ -218,7 +218,7 @@ public class Vars : MonoBehaviour
 						labelStyle.normal.background = Style.RedTexture;
 					}
 
-					if(GUILayout.Button(stringValue, labelStyle))
+					if (GUILayout.Button(stringValue, labelStyle))
 					{
 						vars[count].freeze = !vars[count].freeze;
 					}
