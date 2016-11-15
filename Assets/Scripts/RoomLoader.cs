@@ -715,6 +715,11 @@ public class RoomLoader : MonoBehaviour
 				if (!DosBoxEnabled)
 				{
 					bool result = (GetComponent<DosBox>().LinkToDosBOX(floor, room));
+
+                    //set follow mode to player
+                    cameraFollow = 2; 
+                    GetComponent<DosBox>().ResetCamera(floor, room);
+
 					Actors.SetActive(result);
 					DosBoxEnabled = result;
 				}
