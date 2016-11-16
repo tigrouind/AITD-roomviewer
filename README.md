@@ -15,16 +15,29 @@ AITD2 and AITD3 games are also supported.
 
 ## Commands
 
-- Click on the map and drag cursor to move it.
 - Mouse wheel : zoom in / out
-- Left mouse cursor : drag map
-- Right mouse cursor : show options menu
+- Left mouse button : drag map / highlight box
+- Right mouse button : show options menu
 - Up or down arrows : change floor
 - Left right arrows : change room
 - Esc : quit (only in fullscreen mode)
 
+## Shortcuts 
+
+- L : link DosBox
+- C : camera projection mode
+- F : camera follow mode
+- H : rooms visibility
+- A : areas visibility
+- T : triggers visibility
+- J : actors visibility
+- M : show additional info
+- U : show vars 
+- Page up / down : camera rotate
+- Tab : switch to model viewer
+
 Put mouse on a box to highlight it.
-Gray boxes are colliders which player cannot pass trought
+Gray boxes are colliders which player cannot passthrough
 Blue boxes are colliders that player can interact with
 Red and amber boxes are triggers. It is usually used to switch from one room to another. It can also trigger other things like enemies, sounds, scripted sequences, ...
 
@@ -53,11 +66,19 @@ Repeat room viewer installation steps with QuickBMS but select files LISTBODY.PA
 
 - Left, right arrows : change model 
 - Up, down arrows : change model folder (only difference is Edward vs Emily) 
-- Shift : hold it while pressing Left or Right to skip 10 models at once
+- Shift : hold it while pressing left or right keys to skip 10 models at once
 - Mouse wheel : zoom in / out
-- Left mouse button : click and drag cursor on model to rotate model
-- Right mouse cursor : show options menu / move model
+- Left mouse button : click on model and drag to rotate it
+- Right mouse button : show options menu / move model
+
+## Shortcuts 
+
+- N : noise material
+- G : gradient material
+- A : camera auto rotate mode
+- Tab : switch to room viewer
 
 ## Known bugs/limitations :
 
-- there is z-fighting on some models (eg : wardrobe doors, oil can, vinyl, ...)  
+- z-fighting on some models (eg : wardrobe, oil can, vinyl, ...)  
+- gradient material emulation is not 100% accurate
