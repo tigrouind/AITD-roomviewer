@@ -742,7 +742,7 @@ public class RoomLoader : MonoBehaviour
 				SceneManager.LoadScene("model");
 				break;
 
-			case KeyCode.C:
+			case KeyCode.D:
 				Camera.main.orthographic = !Camera.main.orthographic;
 				float planeSize = Mathf.Tan(Camera.main.fieldOfView * Mathf.Deg2Rad / 2.0f);
 
@@ -773,7 +773,7 @@ public class RoomLoader : MonoBehaviour
 				}
 				break;
 
-			case KeyCode.U:
+			case KeyCode.V:
 				if (DetectGame() == 1)
 				{
 					GetComponent<Vars>().enabled = !GetComponent<Vars>().enabled;
@@ -781,12 +781,12 @@ public class RoomLoader : MonoBehaviour
 				}
 				break;
 
-			case KeyCode.H:
+			case KeyCode.R:
 				showrooms = (showrooms + 1) % 4;
 				SetRoomObjectsVisibility(room);
 				break;
 
-			case KeyCode.A:
+			case KeyCode.C:
 				showareas = (showareas + 1) % 3;
 				SetRoomObjectsVisibility(room);
 				break;
@@ -796,11 +796,11 @@ public class RoomLoader : MonoBehaviour
 				SetRoomObjectsVisibility(room);
 				break;
 
-			case KeyCode.J:
+			case KeyCode.A:
 				Actors.SetActive(!Actors.activeSelf);
 				break;
 
-			case KeyCode.M:
+			case KeyCode.E:
 				GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
 				break;
 

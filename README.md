@@ -25,14 +25,14 @@ AITD2 and AITD3 games are also supported.
 ## Shortcuts 
 
 - L : link DosBox
-- C : camera projection mode
+- D : display mode
 - F : camera follow mode
-- H : rooms visibility
-- A : areas visibility
-- T : triggers visibility
-- J : actors visibility
-- M : show additional info
-- U : show vars 
+- R : room's visibility
+- C : camera area's visibility
+- T : trigger's visibility
+- A : actor's visibility
+- E : show extra info
+- V : show vars 
 - Page up / down : camera rotate
 - Tab : switch to model viewer
 
