@@ -607,7 +607,7 @@ public class RoomLoader : MonoBehaviour
 			{
 				if (GUILayout.Button("Show VARS", Style.Button) && Event.current.button == 0)
 				{
-					ProcessKey(KeyCode.U);
+					ProcessKey(KeyCode.V);
 				}
 				itemsCount++;
 			}
@@ -617,7 +617,7 @@ public class RoomLoader : MonoBehaviour
 			GUILayout.Label("Camera projection", Style.Label);
 			if (GUILayout.Button(Camera.main.orthographic ? "Orthographic" : "Perspective", Style.Option) && Event.current.button == 0)
 			{
-				ProcessKey(KeyCode.C);
+				ProcessKey(KeyCode.D);
 			}
 			GUILayout.EndHorizontal();
 			itemsCount++;
@@ -649,7 +649,7 @@ public class RoomLoader : MonoBehaviour
 			GUILayout.Label("Rooms", Style.Label);
 			if (GUILayout.Button(roomModes[showrooms], Style.Option) && Event.current.button == 0)
 			{
-				ProcessKey(KeyCode.H);
+				ProcessKey(KeyCode.R);
 			}
 			GUILayout.EndHorizontal();
 			itemsCount++;
@@ -659,7 +659,7 @@ public class RoomLoader : MonoBehaviour
 			GUILayout.Label("Cameras", Style.Label);
 			if (GUILayout.Button(areaModes[showareas], Style.Option) && Event.current.button == 0)
 			{
-				ProcessKey(KeyCode.A);
+				ProcessKey(KeyCode.C);
 			}
 			GUILayout.EndHorizontal();
 			itemsCount++;
@@ -681,7 +681,7 @@ public class RoomLoader : MonoBehaviour
 				GUILayout.Label("Actors", Style.Label);
 				if (GUILayout.Button(Actors.activeSelf ? "Yes" : "No", Style.Option) && Event.current.button == 0)
 				{
-					ProcessKey(KeyCode.J);
+					ProcessKey(KeyCode.A);
 				}
 				GUILayout.EndHorizontal();
 				itemsCount++;
@@ -694,7 +694,7 @@ public class RoomLoader : MonoBehaviour
 				GUILayout.Label("Show additional info", Style.Label);
 				if (GUILayout.Button(GetComponent<DosBox>().ShowAdditionalInfo ? "Yes" : "No", Style.Option) && Event.current.button == 0)
 				{
-					ProcessKey(KeyCode.M);
+					ProcessKey(KeyCode.E);
 				}
 				GUILayout.EndHorizontal();
 				itemsCount++;

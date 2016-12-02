@@ -60,7 +60,7 @@ public class Vars : MonoBehaviour
 		//hide table
 		if (Input.GetMouseButtonDown(1))
 		{
-			GetComponent<Vars>().enabled = false;
+			this.enabled = false;
 		}
 	}
 
