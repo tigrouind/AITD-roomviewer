@@ -235,7 +235,7 @@ public class DosBox : MonoBehaviour
 
 				if (ShowAdditionalInfo)
 				{
-					Vector3 mousePosition = GetMousePosition();
+					Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
 
 					fpsInfo = new StringBuilder();
 					fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}\nCursor position: {4} {5} {6}", TimeSpan.FromSeconds(InternalTimer / 60),
@@ -334,11 +334,11 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	private Vector3 GetMousePosition()
+	private Vector3 GetMousePosition(int room, int floor)
 	{
 		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
 		Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
-		Transform roomObject = GetComponent<RoomLoader>().GetRoom(linkfloor, linkroom);
+		Transform roomObject = GetComponent<RoomLoader>().GetRoom(floor, room);
 		if (roomObject != null)
 		{
 			mousePosition -= roomObject.position;
@@ -353,7 +353,7 @@ public class DosBox : MonoBehaviour
 		if(index != -1)
 		{
 			long offset = memoryAddress + index * ActorStructSize[dosBoxPattern];
-			Vector3 mousePosition = GetMousePosition();
+			Vector3 mousePosition = GetMousePosition(actor.Room, actor.Floor);
 
 			//offset positions (world + local + bounding box)
 			byte[] position = new byte[12];
