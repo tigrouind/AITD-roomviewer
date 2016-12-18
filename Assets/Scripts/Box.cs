@@ -29,6 +29,7 @@ public class Box : MonoBehaviour
 	public int TotalFrames;
 	public int Speed;
 	public int Room;
+	public int Floor;
 	public uint Chrono;
 	public uint RoomChrono;
 	public int TrackNumber;
@@ -146,6 +147,7 @@ public class Box : MonoBehaviour
 			
 			if (ShowAdditionalInfo)
 			{
+				sb.AppendFormat("\r\nROOM = E{0}R{1}", Floor, Room);
 				sb.AppendFormat("\r\nROOM_POS = {0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
 				sb.AppendFormat("\r\nWORLD_POS = {0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
 				sb.AppendFormat("\r\nZV_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
