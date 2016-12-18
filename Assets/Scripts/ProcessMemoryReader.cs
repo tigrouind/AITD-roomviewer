@@ -8,7 +8,9 @@ using System.Linq;
 public class ProcessMemoryReader
 {
 	const int PROCESS_QUERY_INFORMATION = 0x0400;
-	const int PROCESS_WM_READ = 0x0010;
+	const int PROCESS_VM_READ = 0x0010;
+	const int PROCESS_VM_WRITE = 0x0020;
+	const int PROCESS_VM_OPERATION = 0x0008;
 	const int MEM_COMMIT = 0x00001000;
 	const int MEM_PRIVATE = 0x20000;
 	const int PAGE_READWRITE = 0x04;
@@ -35,13 +37,16 @@ public class ProcessMemoryReader
 	private static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize, out IntPtr lpNumberOfBytesRead);
 
 	[DllImport("kernel32.dll")]
+	private static extern bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int dwSize, out IntPtr lpNumberOfBytesWritten);
+
+	[DllImport("kernel32.dll")]
 	private static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
 
 	private IntPtr processHandle;
 
 	public ProcessMemoryReader(int processId)
 	{
-		this.processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_WM_READ, false, processId);
+		this.processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, processId);
 	}
 
 	~ProcessMemoryReader()
@@ -55,6 +60,16 @@ public class ProcessMemoryReader
 		if (ReadProcessMemory(processHandle, new IntPtr(offset), buffer, count, out bytesRead))
 		{
 			return (long)bytesRead;
+		}
+		return 0;
+	}
+
+	public long Write(byte[] buffer, long offset, int count)
+	{
+		IntPtr bytesWritten;
+		if (WriteProcessMemory(processHandle, new IntPtr(offset), buffer, count, out bytesWritten))
+		{
+			return (long)bytesWritten;
 		}
 		return 0;
 	}

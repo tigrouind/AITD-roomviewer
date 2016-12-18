@@ -564,6 +564,11 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
+	public Box GetSelectedBox()
+	{
+		return SelectedBox;
+	}
+
 	#endregion
 
 	#region GUI

@@ -235,14 +235,7 @@ public class DosBox : MonoBehaviour
 
 				if (ShowAdditionalInfo)
 				{
-					Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
-					Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
-					Transform roomObject = GetComponent<RoomLoader>().GetRoom(linkfloor, linkroom);
-					if (roomObject != null)
-					{
-						mousePosition -= roomObject.position;
-					}
-					mousePosition *= 1000.0f;
+					Vector3 mousePosition = GetMousePosition();
 
 					fpsInfo = new StringBuilder();
 					fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}\nCursor position: {4} {5} {6}", TimeSpan.FromSeconds(InternalTimer / 60),
@@ -279,6 +272,19 @@ public class DosBox : MonoBehaviour
 			}
 		}
 
+		if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+		{
+			Func<bool> isAITD1 = () => GetComponent<RoomLoader>().DetectGame() == 1;		
+			if (Input.GetKeyDown(KeyCode.W) && isAITD1())
+			{
+				Box selectedBox = GetComponent<RoomLoader>().GetSelectedBox();
+				if(selectedBox != null && selectedBox.name == "Actor")
+				{
+					WarpToMouseCursor(selectedBox);
+				}
+			}
+		}
+	
 		//arrow is only active if actors are active and player is active
 		Arrow.gameObject.SetActive(Actors.activeSelf
 			&& player != null
@@ -328,6 +334,50 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	private Vector3 GetMousePosition()
+	{
+		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
+		Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
+		Transform roomObject = GetComponent<RoomLoader>().GetRoom(linkfloor, linkroom);
+		if (roomObject != null)
+		{
+			mousePosition -= roomObject.position;
+		}
+		return mousePosition * 1000.0f;
+	}
+
+	private void WarpToMouseCursor(Box actor)
+	{
+		//get object offset
+		int index = Actors.GetComponentsInChildren<Box>(true).ToList().IndexOf(actor);
+		if(index != -1)
+		{
+			long offset = memoryAddress + index * ActorStructSize[dosBoxPattern];
+			Vector3 mousePosition = GetMousePosition();
+
+			//offset positions (world + local + bounding box)
+			byte[] position = new byte[12];
+			ProcessReader.Read(position, offset + 8, position.Length);
+			int offsetX = (int)mousePosition.x - (ReadShort(position[0], position[1]) + ReadShort(position[2], position[3])) / 2;
+			int offsetZ = (int)mousePosition.z - (ReadShort(position[8], position[9]) + ReadShort(position[10], position[11])) / 2;
+
+			//bounding box
+			WriteShort(ReadShort(position[0], position[1]) + offsetX, position, 0); 
+			WriteShort(ReadShort(position[2], position[3]) + offsetX, position, 2);
+			WriteShort(ReadShort(position[8], position[9]) + offsetZ, position, 8);
+			WriteShort(ReadShort(position[10], position[11]) + offsetZ, position, 10);
+			ProcessReader.Write(position, offset + 8, position.Length);
+
+			//local + world
+			ProcessReader.Read(position, offset + 28, position.Length);
+			WriteShort(ReadShort(position[0], position[1]) + offsetX, position, 0); 
+			WriteShort(ReadShort(position[4], position[5]) + offsetZ, position, 4);
+			WriteShort(ReadShort(position[6], position[7]) + offsetX, position, 6); 
+			WriteShort(ReadShort(position[10], position[11]) + offsetZ, position, 10);
+			ProcessReader.Write(position, offset + 28, position.Length);
+		}
+	}
+
 	private uint ReadUnsignedInt(byte a, byte b, byte c, byte d)
 	{
 		unchecked
@@ -342,6 +392,12 @@ public class DosBox : MonoBehaviour
 		{
 			return (short)(a | b << 8);
 		}
+	}
+
+	private void WriteShort(int value, byte[] data, int offset)
+	{
+		data[offset + 0] = (byte)(value & 0xFF);
+		data[offset + 1] = (byte)(value >> 8);
 	}
 
 	#region Room loader
