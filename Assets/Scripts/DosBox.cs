@@ -122,9 +122,9 @@ public class DosBox : MonoBehaviour
 							//make actors appears slightly bigger than they are to be not covered by colliders
 							float delta = 1.0f;
 							box.transform.localScale = new Vector3(
-								ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k + 8], memory[k + 9]) + delta,
-								ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]) + delta,
-								ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]) + delta) / 1000.0f;
+								Mathf.Abs(ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k + 8], memory[k + 9]) + delta),
+								Mathf.Abs(ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]) + delta),
+								Mathf.Abs(ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]) + delta)) / 1000.0f;
 
 							//make sure very small actors are visible
 							box.transform.localScale = new Vector3(
@@ -171,9 +171,9 @@ public class DosBox : MonoBehaviour
 							box.BoundingPos.y = boundingy;
 							box.BoundingPos.z = boundingz;
 
-							box.BoundingSize.x = ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k + 8], memory[k + 9]);
-							box.BoundingSize.y = ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]);
-							box.BoundingSize.z = ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]);
+							box.BoundingSize.x = Mathf.Abs(ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k + 8], memory[k + 9]));
+							box.BoundingSize.y = Mathf.Abs(ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]));
+							box.BoundingSize.z = Mathf.Abs(ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]));
 							
 							box.ShowAdditionalInfo = ShowAdditionalInfo;
 
@@ -200,9 +200,10 @@ public class DosBox : MonoBehaviour
 								Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
 								Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
 
+								float minBoxScale = Mathf.Min(box.transform.localScale.x, box.transform.localScale.z);
 								Arrow.transform.localScale = new Vector3(
-									box.transform.localScale.x * 0.9f,
-									box.transform.localScale.z * 0.9f,
+									minBoxScale * 0.9f,
+									minBoxScale * 0.9f,
 									1.0f);
 
 								//player is white
@@ -396,8 +397,11 @@ public class DosBox : MonoBehaviour
 
 	private void WriteShort(int value, byte[] data, int offset)
 	{
-		data[offset + 0] = (byte)(value & 0xFF);
-		data[offset + 1] = (byte)(value >> 8);
+		unchecked
+		{
+			data[offset + 0] = (byte)(value & 0xFF);
+			data[offset + 1] = (byte)(value >> 8);
+		}
 	}
 
 	#region Room loader
