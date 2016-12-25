@@ -16,6 +16,12 @@ public class DosBox : MonoBehaviour
 	public bool ShowAdditionalInfo;
 	public ProcessMemoryReader ProcessReader;
 
+	public bool warpMenuEnabled;
+	public Box warpActor;
+	public string warpX = string.Empty;
+	public string warpY = string.Empty;
+	public string warpZ = string.Empty;
+
 	//initial player position
 	private int dosBoxPattern;
 	private byte[][][] PlayerInitialPosition = new byte[][][]
@@ -51,6 +57,7 @@ public class DosBox : MonoBehaviour
 	private int lastDelayFpsCounter;
 	private StringBuilder fpsInfo;
 	private bool allowInventory;
+
 
 	public void Start()
 	{
@@ -184,7 +191,7 @@ public class DosBox : MonoBehaviour
 								float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
 								playerInfo = new StringBuilder();
-								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}", box.BoundingPos.x, box.BoundingPos.y, box.BoundingPos.z, angle, sideAngle);
+								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}", box.LocalPosition.x, box.LocalPosition.y, box.LocalPosition.z, angle, sideAngle);
 
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
@@ -273,19 +280,6 @@ public class DosBox : MonoBehaviour
 			}
 		}
 
-		if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
-		{
-			Func<bool> isAITD1 = () => GetComponent<RoomLoader>().DetectGame() == 1;		
-			if (Input.GetKeyDown(KeyCode.W) && isAITD1())
-			{
-				Box selectedBox = GetComponent<RoomLoader>().GetSelectedBox();
-				if(selectedBox != null && selectedBox.name == "Actor")
-				{
-					WarpToMouseCursor(selectedBox);
-				}
-			}
-		}
-	
 		//arrow is only active if actors are active and player is active
 		Arrow.gameObject.SetActive(Actors.activeSelf
 			&& player != null
@@ -335,6 +329,57 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	void OnGUI()
+	{
+		if (warpMenuEnabled)
+		{
+			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 45, 400, 90);
+
+			//close menu if there is a click out side
+			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
+			{
+				warpMenuEnabled = false;
+			}
+
+			GUILayout.BeginArea(rect, Style.Panel);
+			GUILayout.BeginVertical();
+
+			//label
+			GUILayout.BeginHorizontal();
+			GUIStyle label = new GUIStyle(Style.Button);
+			label.fixedWidth = rect.width / 3.0f;
+			GUILayout.Label("X", label);
+			GUILayout.Label("Y", label);
+			GUILayout.Label("Z", label);
+			GUILayout.EndHorizontal();
+
+			//textbox
+			GUILayout.BeginHorizontal();
+			GUIStyle button = new GUIStyle(Style.Button);
+			button.normal.textColor = Color.white;
+			button.fixedWidth = rect.width / 3.0f;
+			warpX = GUILayout.TextField(warpX, button);
+			warpY = GUILayout.TextField(warpY, button);
+			warpZ = GUILayout.TextField(warpZ, button);
+			GUILayout.EndHorizontal();
+
+			//button
+			GUILayout.BeginHorizontal();
+			if (GUILayout.Button("Set position", Style.Button))
+			{
+				float x, y, z;
+				if(float.TryParse(warpX, out x) && float.TryParse(warpY, out y) && float.TryParse(warpZ, out z))
+				{
+					WarpActorToPosition(warpActor, new Vector3(x, y, z));
+				}
+			}
+
+			GUILayout.EndHorizontal();
+			GUILayout.EndVertical();
+			GUILayout.EndArea();
+		}
+	}
+
 	private Vector3 GetMousePosition(int room, int floor)
 	{
 		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
@@ -347,35 +392,40 @@ public class DosBox : MonoBehaviour
 		return mousePosition * 1000.0f;
 	}
 
-	private void WarpToMouseCursor(Box actor)
+	private void WarpActorToPosition(Box actor, Vector3 warpPosition)
 	{
 		//get object offset
 		int index = Actors.GetComponentsInChildren<Box>(true).ToList().IndexOf(actor);
 		if(index != -1)
 		{
 			long offset = memoryAddress + index * ActorStructSize[dosBoxPattern];
-			Vector3 mousePosition = GetMousePosition(actor.Room, actor.Floor);
 
 			//offset positions (world + local + bounding box)
 			byte[] position = new byte[12];
-			ProcessReader.Read(position, offset + 8, position.Length);
-			int offsetX = (int)mousePosition.x - (ReadShort(position[0], position[1]) + ReadShort(position[2], position[3])) / 2;
-			int offsetZ = (int)mousePosition.z - (ReadShort(position[8], position[9]) + ReadShort(position[10], position[11])) / 2;
+			ProcessReader.Read(position, offset + 28, 6);
+			int offsetX = (int)warpPosition.x - ReadShort(position[0], position[1]);
+			int offsetY = (int)warpPosition.y - ReadShort(position[2], position[3]);
+			int offsetZ = (int)warpPosition.z - ReadShort(position[4], position[5]);
 
 			//bounding box
+			ProcessReader.Read(position, offset + 8, 12);
 			WriteShort(ReadShort(position[0], position[1]) + offsetX, position, 0); 
 			WriteShort(ReadShort(position[2], position[3]) + offsetX, position, 2);
+			WriteShort(ReadShort(position[4], position[5]) + offsetY, position, 4); 
+			WriteShort(ReadShort(position[6], position[7]) + offsetY, position, 6);
 			WriteShort(ReadShort(position[8], position[9]) + offsetZ, position, 8);
 			WriteShort(ReadShort(position[10], position[11]) + offsetZ, position, 10);
-			ProcessReader.Write(position, offset + 8, position.Length);
+			ProcessReader.Write(position, offset + 8, 12);
 
 			//local + world
-			ProcessReader.Read(position, offset + 28, position.Length);
+			ProcessReader.Read(position, offset + 28, 12);
 			WriteShort(ReadShort(position[0], position[1]) + offsetX, position, 0); 
+			WriteShort(ReadShort(position[2], position[3]) + offsetY, position, 2); 
 			WriteShort(ReadShort(position[4], position[5]) + offsetZ, position, 4);
 			WriteShort(ReadShort(position[6], position[7]) + offsetX, position, 6); 
+			WriteShort(ReadShort(position[8], position[9]) + offsetY, position, 8); 
 			WriteShort(ReadShort(position[10], position[11]) + offsetZ, position, 10);
-			ProcessReader.Write(position, offset + 28, position.Length);
+			ProcessReader.Write(position, offset + 28, 12);
 		}
 	}
 

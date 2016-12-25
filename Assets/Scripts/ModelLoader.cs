@@ -574,6 +574,8 @@ public class ModelLoader : MonoBehaviour
 		if (menuEnabled)
 		{
 			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 5, 400, 30 * 5);
+
+			//if any click outside, hide menu
 			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
 			{
 				menuEnabled = false;

@@ -383,7 +383,7 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 
-		if (!menuEnabled)
+		if (!menuEnabled && !GetComponent<DosBox>().warpMenuEnabled)
 		{
 			//start drag
 			if (Input.GetMouseButtonDown(0))
@@ -410,9 +410,26 @@ public class RoomLoader : MonoBehaviour
 		//menu
 		if (Input.GetMouseButtonDown(1))
 		{
-			if (!GetComponent<Vars>().enabled)
+			DosBox dosBox = GetComponent<DosBox>();
+			if(menuEnabled)
 			{
-				menuEnabled = !menuEnabled;
+				menuEnabled = false;
+			}
+			else if(dosBox.warpMenuEnabled)
+			{
+				dosBox.warpMenuEnabled = false;
+			}
+			else if (DetectGame() == 1 && HighLightedBox != null && HighLightedBox.name == "Actor")
+			{
+				dosBox.warpX = HighLightedBox.LocalPosition.x.ToString();
+				dosBox.warpY = HighLightedBox.LocalPosition.y.ToString();
+				dosBox.warpZ = HighLightedBox.LocalPosition.z.ToString();
+				dosBox.warpActor = HighLightedBox;
+				dosBox.warpMenuEnabled = true;
+			}
+			else if (!GetComponent<Vars>().enabled)
+			{
+				menuEnabled = true;
 			}
 		}
 
