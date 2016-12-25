@@ -365,7 +365,7 @@ public class DosBox : MonoBehaviour
 
 			//button
 			GUILayout.BeginHorizontal();
-			if (GUILayout.Button("Set position", Style.Button))
+			if (GUILayout.Button("Set position", Style.Button) || Event.current.keyCode == KeyCode.Return)
 			{
 				float x, y, z;
 				if(float.TryParse(warpX, out x) && float.TryParse(warpY, out y) && float.TryParse(warpZ, out z))
