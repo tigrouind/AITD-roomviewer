@@ -18,9 +18,7 @@ public class DosBox : MonoBehaviour
 
 	public bool warpMenuEnabled;
 	public Box warpActor;
-	public string warpX = string.Empty;
-	public string warpY = string.Empty;
-	public string warpZ = string.Empty;
+	public string warpX, warpY, warpZ;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -115,9 +113,20 @@ public class DosBox : MonoBehaviour
 						if (roomObject != null)
 						{
 							//local position
-							int boundingx = (ReadShort(memory[k + 8], memory[k + 9]) + ReadShort(memory[k + 10], memory[k + 11])) / 2;
-							int boundingy = (ReadShort(memory[k + 12], memory[k + 13]) + ReadShort(memory[k + 14], memory[k + 15])) / 2;
-							int boundingz = (ReadShort(memory[k + 16], memory[k + 17]) + ReadShort(memory[k + 18], memory[k + 19])) / 2;
+							int boundingX1 = ReadShort(memory[k + 8], memory[k + 9]);
+							int boundingX2 = ReadShort(memory[k + 10], memory[k + 11]);
+							int boundingY1 = ReadShort(memory[k + 12], memory[k + 13]);
+							int boundingY2 = ReadShort(memory[k + 14], memory[k + 15]);
+							int boundingZ1 = ReadShort(memory[k + 16], memory[k + 17]);
+							int boundingZ2 = ReadShort(memory[k + 18], memory[k + 19]);
+							
+							FixBoundingWrap(ref boundingX1, ref boundingX2);
+							FixBoundingWrap(ref boundingY1, ref boundingY2);
+							FixBoundingWrap(ref boundingZ1, ref boundingZ2);
+
+							int boundingx = (boundingX1 + boundingX2) / 2;
+							int boundingy = (boundingY1 + boundingY2) / 2;
+							int boundingz = (boundingZ1 + boundingZ2) / 2;
 
 							//local to global position
 							int boxPositionx = boundingx + (int)(roomObject.localPosition.x * 1000.0f);
@@ -129,9 +138,9 @@ public class DosBox : MonoBehaviour
 							//make actors appears slightly bigger than they are to be not covered by colliders
 							float delta = 1.0f;
 							box.transform.localScale = new Vector3(
-								Mathf.Abs(ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k + 8], memory[k + 9]) + delta),
-								Mathf.Abs(ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]) + delta),
-								Mathf.Abs(ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]) + delta)) / 1000.0f;
+								boundingX2 - boundingX1 + delta,
+								boundingY2 - boundingY1 + delta,
+								boundingZ2 - boundingZ1 + delta) / 1000.0f;
 
 							//make sure very small actors are visible
 							box.transform.localScale = new Vector3(
@@ -178,9 +187,9 @@ public class DosBox : MonoBehaviour
 							box.BoundingPos.y = boundingy;
 							box.BoundingPos.z = boundingz;
 
-							box.BoundingSize.x = Mathf.Abs(ReadShort(memory[k + 10], memory[k + 11]) - ReadShort(memory[k + 8], memory[k + 9]));
-							box.BoundingSize.y = Mathf.Abs(ReadShort(memory[k + 14], memory[k + 15]) - ReadShort(memory[k + 12], memory[k + 13]));
-							box.BoundingSize.z = Mathf.Abs(ReadShort(memory[k + 18], memory[k + 19]) - ReadShort(memory[k + 16], memory[k + 17]));
+							box.BoundingSize.x = boundingX2 - boundingX1;
+							box.BoundingSize.y = boundingY2 - boundingY1;
+							box.BoundingSize.z = boundingZ2 - boundingZ1;
 							
 							box.ShowAdditionalInfo = ShowAdditionalInfo;
 
@@ -367,10 +376,22 @@ public class DosBox : MonoBehaviour
 			GUILayout.BeginHorizontal();
 			if (GUILayout.Button("Set position", Style.Button) || Event.current.keyCode == KeyCode.Return)
 			{
-				float x, y, z;
-				if(float.TryParse(warpX, out x) && float.TryParse(warpY, out y) && float.TryParse(warpZ, out z))
+				int x, y, z;
+				if(int.TryParse(warpX, out x) && int.TryParse(warpY, out y) && int.TryParse(warpZ, out z))
 				{
+					x = Mathf.Clamp(x, short.MinValue, short.MaxValue);
+					y = Mathf.Clamp(y, short.MinValue, short.MaxValue);
+					z = Mathf.Clamp(z, short.MinValue, short.MaxValue);
+					warpX = x.ToString();
+					warpY = y.ToString();
+					warpZ = z.ToString();
 					WarpActorToPosition(warpActor, new Vector3(x, y, z));
+				}
+				else
+				{
+					warpX = warpActor.LocalPosition.x.ToString();
+					warpY = warpActor.LocalPosition.y.ToString();
+					warpZ = warpActor.LocalPosition.z.ToString();
 				}
 			}
 
@@ -451,6 +472,21 @@ public class DosBox : MonoBehaviour
 		{
 			data[offset + 0] = (byte)(value & 0xFF);
 			data[offset + 1] = (byte)(value >> 8);
+		}
+	}
+
+	private void FixBoundingWrap(ref int a, ref int b)
+	{
+		if(a > b)
+		{
+			if((Int16.MaxValue - a) > (b - Int16.MinValue))
+			{
+				b += 65536;
+			}
+			else
+			{
+				a -= 65536;
+			}
 		}
 	}
 
