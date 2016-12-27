@@ -234,9 +234,13 @@ public class RoomLoader : MonoBehaviour
 				box.ID = ReadShort(allPointsA[i + 12], allPointsA[i + 13]);
 				box.Flags = ReadShort(allPointsA[i + 14], allPointsA[i + 15]);
 
-				if (box.Flags == 9 || box.Flags == 10) //custom trigger or exit
+				if (box.Flags == 9) //custom trigger
 				{
 					box.Color = new Color32(255, 128, 0, 50);
+				}
+				else if (box.Flags == 10) //exit
+				{
+					box.Color = new Color32(255, 255, 50, 100);
 				}
 				else if (box.Flags == 0) //room switch
 				{
