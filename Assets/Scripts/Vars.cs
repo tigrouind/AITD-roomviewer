@@ -34,6 +34,15 @@ public class Vars : MonoBehaviour
 		}
 	}
 
+	private void WriteShort(int value, byte[] data, int offset)
+	{
+		unchecked
+		{
+			data[offset + 0] = (byte)(value & 0xFF);
+			data[offset + 1] = (byte)(value >> 8);
+		}
+	}
+
 	void Update()
 	{
 		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
@@ -44,13 +53,13 @@ public class Vars : MonoBehaviour
 				if (varsMemoryAddress != -1)
 				{
 					processReader.Read(memory, varsMemoryAddress, 207 * 2);
-					CheckDifferences(memory, vars);
+					CheckDifferences(memory, vars, varsMemoryAddress);
 				}
 
 				if (cvarsMemoryAddress != -1)
 				{
 					processReader.Read(memory, cvarsMemoryAddress, 44 * 2);
-					CheckDifferences(memory, cvars);
+					CheckDifferences(memory, cvars, cvarsMemoryAddress);
 				}
 
 				ignoreDifferences = false;
@@ -126,7 +135,7 @@ public class Vars : MonoBehaviour
 		}
 	}
 
-	void CheckDifferences(byte[] memory, Var[] data)
+	void CheckDifferences(byte[] memory, Var[] data, long offset)
 	{
 		float currenttime = Time.time;
 		for (int i = 0; i < data.Length; i++)
@@ -161,6 +170,7 @@ public class Vars : MonoBehaviour
 				}
 			}
 
+			data[i].offset = offset + i * 2;
 			data[i].difference = (currenttime - data[i].time) < 3.0f;
 		}
 	}
@@ -209,18 +219,35 @@ public class Vars : MonoBehaviour
 						stringValue = value.ToString();
 
 					//highlight recently changed vars
-					if (var.freeze)
-					{
-						labelStyle.normal.background = Style.GrayTexture;
-					}
-					else if (different)
+					if (different)
 					{
 						labelStyle.normal.background = Style.RedTexture;
 					}
 
-					if (GUILayout.Button(stringValue, labelStyle))
+					if(!(pauseVarsTracking || compare))
 					{
-						vars[count].freeze = !vars[count].freeze;
+						string newValue = GUILayout.TextField(stringValue, labelStyle);
+
+						int newValueInt;
+						if (int.TryParse(newValue, out newValueInt) || newValue == string.Empty)
+						{
+							//value has been updated
+							if(newValueInt != var.value)
+							{
+								//write new value to memory
+								if(newValueInt > short.MaxValue) newValueInt = short.MaxValue;
+								if(newValueInt < short.MinValue) newValueInt = short.MinValue;
+
+								ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
+								byte[] wordValue = new byte[2];
+								WriteShort(newValueInt, wordValue, 0);
+								processReader.Write(wordValue, var.offset, wordValue.Length);
+							}
+						}
+					}
+					else
+					{
+						GUILayout.Label(stringValue, labelStyle);
 					}
 				}
 				else
@@ -246,6 +273,6 @@ public class Vars : MonoBehaviour
 		public int saveState;
 		public float time;
 		public bool difference;
-		public bool freeze;
+		public long offset;
 	}
 }
