@@ -11,10 +11,16 @@ public class ModelLoader : MonoBehaviour
 {
 	private int modelIndex = 0;
 	private int modelFolderIndex = 0;
+	private int animIndex = 0;
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 
 	private string[] modelFolders = new string[] { "GAMEDATA\\LISTBODY", "GAMEDATA\\LISTBOD2" };
+	private string[] animFolders = new string[] { "GAMEDATA\\LISTANIM", "GAMEDATA\\LISTANI2" };
 	private List<string> modelFiles = new List<string>();
+	private List<string> animFiles = new List<string>();
+	private List<Frame> animFrames;
+	private List<Transform> bones;
+	private List<Vector3> initialBonesPosition;
 
 	private int PaletteIndex;
 	public Texture2D[] PaletteTexture;
@@ -33,9 +39,15 @@ public class ModelLoader : MonoBehaviour
 	private bool displayMenuAfterDrag;
 	private bool menuEnabled;
 	private string ModelIndexString;
+	private string AnimIndexString;
 	private bool noiseEnabled = true;
 	private bool gradientEnabled = true;
 	private bool autoRotateEnabled = true;
+    private int menuItemCount;
+
+    private string LeftTextBody;
+    private string LeftTextAnim;
+    private bool enableAnimation;
 
 	public static short ReadShort(byte a, byte b)
 	{
@@ -45,20 +57,25 @@ public class ModelLoader : MonoBehaviour
 		}
 	}
 
-	void LoadBody(string filename, bool reset = true)
+	void LoadBody(string filename, bool resetcamera = true)
 	{
-		LeftText.text = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1);
+		LeftTextBody = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1);
 
 		//camera
-		if (reset)
+		if (resetcamera)
 		{
 			autoRotate = true;
 			cameraPosition = Vector2.zero;
 		}
 
 		//clear model
-		MeshFilter filter = this.gameObject.GetComponent<MeshFilter>();
+		SkinnedMeshRenderer filter = this.gameObject.GetComponent<SkinnedMeshRenderer>();
 		filter.sharedMesh = null;
+
+		//delete all bones
+		foreach (Transform child in transform) {
+  			GameObject.Destroy(child.gameObject);
+ 		}
 
 		//load data
 		byte[] allbytes = File.ReadAllBytes(filename);
@@ -82,6 +99,11 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//check if model has bones
+		bones = new List<Transform>();
+		List<Matrix4x4> bindPoses = new List<Matrix4x4>();
+		Dictionary<int, int> bonesPerVertex = new Dictionary<int, int>();
+		List<Vector3> vertexNoTransform = vertices.ToList();
+
 		if ((flags & 2) == 2)
 		{
 			//bones
@@ -89,21 +111,49 @@ public class ModelLoader : MonoBehaviour
 			i += 2;
 			i += count * 2;
 
+			Dictionary<int, Transform> bonesPerIndex = new Dictionary<int, Transform>();
+
+			bonesPerIndex.Add(255, transform);
 			for (int n = 0; n < count; n++)
 			{
 				int startindex = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
 				int numpoints = ReadShort(allbytes[i + 2], allbytes[i + 3]);
-				int boneindex = ReadShort(allbytes[i + 4], allbytes[i + 5]) / 6;
+				int vertexindex = ReadShort(allbytes[i + 4], allbytes[i + 5]) / 6;
+				int parentindex = allbytes[i + 6];
+				int boneindex = allbytes[i + 7];
+			
+				//create bone
+				Transform bone = new GameObject("BONE").transform;
+				bonesPerIndex.Add(boneindex, bone);
+
+				bone.parent = bonesPerIndex[parentindex];
+				bone.localRotation = Quaternion.identity;
+				bone.localPosition = vertexNoTransform[vertexindex];
+				bones.Add(bone);
+
+				//create pose
+				Matrix4x4 bindPose = new Matrix4x4();
+				bindPose = bone.worldToLocalMatrix * transform.localToWorldMatrix;
+				bindPoses.Add(bindPose);
 
 				//apply bone transformation
-				Vector3 position = vertices[boneindex];
+				Vector3 position = vertices[vertexindex];
 				for (int u = 0; u < numpoints; u++)
 				{
 					vertices[startindex] += position;
+					bonesPerVertex.Add(startindex, bones.Count - 1);
 					startindex++;
 				}
 
 				i += 0x10;
+			}
+		}
+		else
+		{
+			//if no bones add dummy values
+			for (int u = 0; u < vertices.Count; u++)
+			{
+				bonesPerVertex.Add(u, 0);
 			}
 		}
 
@@ -123,6 +173,7 @@ public class ModelLoader : MonoBehaviour
 		//load palette
 		Color32[] paletteColors = PaletteTexture[PaletteIndex].GetPixels32();
 
+		List<BoneWeight> boneWeights = new List<BoneWeight>();
 		List<Vector3> allVertices = new List<Vector3>();
 		List<Color32> colors = new List<Color32>();
 		List<int> indices = new List<int>();
@@ -155,6 +206,8 @@ public class ModelLoader : MonoBehaviour
                         rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
 								+ middle));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
+						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[x.z > 0 ? pointIndexA : pointIndexB], weight0 = 1 }));
+
 						i += 4;
 						break;
 					}
@@ -196,6 +249,7 @@ public class ModelLoader : MonoBehaviour
 							color.g = 255;
 							color.b = (byte)((colorIndex / 16) * 16);
 						}
+
 						//add vertices
 						List<Vector3> polyVertices = new List<Vector3>();
 						int verticesCount = allVertices.Count;
@@ -207,6 +261,7 @@ public class ModelLoader : MonoBehaviour
 							colors.Add(color);
 							allVertices.Add(vertices[pointIndex]);
 							polyVertices.Add(vertices[pointIndex]);
+							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
 						}
 
 						if (polyType == 1 && noiseEnabled)
@@ -306,6 +361,7 @@ public class ModelLoader : MonoBehaviour
 						indices.AddRange(SphereMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(SphereMesh.vertices.Select(x => x * scale + position));
 						colors.AddRange(SphereMesh.vertices.Select(x => color));
+						boneWeights.AddRange(SphereMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[pointSphereIndex], weight0 = 1 }));
 						break;
 					}
 
@@ -336,6 +392,7 @@ public class ModelLoader : MonoBehaviour
 						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x => x * pointsize + position));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
+						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[cubeIndex], weight0 = 1 }));
 						break;
 					}
 				default:
@@ -391,7 +448,153 @@ public class ModelLoader : MonoBehaviour
 		msh.RecalculateNormals();
 		msh.RecalculateBounds();
 
+		//apply bones
+		if(bones.Count > 0)
+		{
+			msh.boneWeights = boneWeights.ToArray();
+			msh.bindposes = bindPoses.ToArray();
+			GetComponent<SkinnedMeshRenderer>().bones = bones.ToArray();
+			initialBonesPosition = bones.Select(x => x.localPosition).ToList();
+		}
+
+		filter.localBounds = msh.bounds;
 		filter.sharedMesh = msh;
+	}
+
+
+
+	class Frame
+	{
+		public float Time;
+		public List<Vector4> Bones;
+	}
+
+	void LoadAnim(string filename)
+	{
+		LeftTextAnim = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + animIndex + "/" + (animFiles.Count - 1);
+
+		int i = 0;
+		byte[] allbytes = File.ReadAllBytes(filename);
+		int frameCount = ReadShort(allbytes[i + 0], allbytes[i + 1]);
+		int boneCount = ReadShort(allbytes[i + 2], allbytes[i + 3]);
+		i += 4;
+
+		animFrames = new List<Frame>();
+		for(int frame = 0 ; frame < frameCount ; frame++)
+		{
+			Frame f = new Frame();
+			f.Time = ReadShort(allbytes[i + 0], allbytes[i + 1]);
+			f.Bones = new List<Vector4>();
+			i += 8;
+			for(int bone = 0 ; bone < boneCount ; bone++)
+			{
+				int type = ReadShort(allbytes[i + 0], allbytes[i + 1]);
+				int x = ReadShort(allbytes[i + 2], allbytes[i + 3]);
+				int y = ReadShort(allbytes[i + 4], allbytes[i + 5]);
+				int z = ReadShort(allbytes[i + 6], allbytes[i + 7]);
+
+				if(type == 0) //rotate
+				{
+					f.Bones.Add(new Vector4(-x * 360 / 1024.0f, -y * 360 / 1024.0f, -z * 360 / 1024.0f, type));
+				}
+
+				else if(type == 1) //translate
+				{
+					f.Bones.Add(new Vector4(x / 1000.0f, -y / 1000.0f, z / 1000.0f, type));
+				}
+				else //scale
+				{
+					f.Bones.Add(new Vector4(x / 1024.0f + 1.0f, y / 1024.0f + 1.0f, z / 1024.0f + 1.0f, type));
+				}
+				i += 8;
+			}
+
+			animFrames.Add(f);
+		}
+	}
+
+	void AnimateModel()
+	{
+		float totaltime = animFrames.Sum(x => x.Time);
+		float time = (Time.time * 50.0f) % totaltime;
+
+		if (!enableAnimation)
+		{
+			for (int i = 0 ; i < bones.Count ; i++)
+			{			
+				bones[i].transform.localRotation = Quaternion.identity;
+				bones[i].transform.localPosition = initialBonesPosition[i];
+				bones[i].transform.localScale = Vector3.one;
+			}
+			return;
+		}
+
+		//find current frame
+		totaltime = 0.0f;
+		int frame = 0;
+		for (int i = 0 ; i < animFrames.Count ; i++)
+		{
+			totaltime += animFrames[i].Time;
+			if(time < totaltime) 
+			{
+				frame = i;
+				break;
+			}
+		}
+
+		Frame currentFrame = animFrames[frame % animFrames.Count];
+		Frame nextFrame = animFrames[(frame + 1) % animFrames.Count];
+		float framePosition = (time - (totaltime - currentFrame.Time)) / currentFrame.Time;
+
+		for (int i = 0 ; i < bones.Count; i++)
+		{			
+			if(i >= currentFrame.Bones.Count)
+			{
+				bones[i].transform.localPosition = initialBonesPosition[i];
+				bones[i].transform.localRotation = Quaternion.identity;
+				bones[i].transform.localScale = Vector3.one;
+				continue;
+			}
+
+			var currentBone = currentFrame.Bones[i];
+			var nextBone = nextFrame.Bones[i];
+
+			//interpolate
+			if (nextBone.w == 0.0f)
+			{
+				bones[i].transform.localPosition = initialBonesPosition[i];
+				bones[i].transform.localScale = Vector3.one;
+				bones[i].transform.localRotation = 
+					Quaternion.Slerp(
+						Quaternion.AngleAxis(currentBone.z, Vector3.forward) *
+						Quaternion.AngleAxis(currentBone.x, Vector3.right) * 
+						Quaternion.AngleAxis(currentBone.y, Vector3.up),
+						Quaternion.AngleAxis(nextBone.z, Vector3.forward) *
+						Quaternion.AngleAxis(nextBone.x, Vector3.right) * 
+						Quaternion.AngleAxis(nextBone.y, Vector3.up),
+						framePosition);
+			}
+			else if (nextBone.w == 1.0f)
+			{
+				bones[i].transform.localRotation = Quaternion.identity;
+				bones[i].transform.localScale = Vector3.one;
+				bones[i].transform.localPosition = initialBonesPosition[i] + 
+						Vector3.Lerp(
+							new Vector3(currentBone.x, currentBone.y, currentBone.z),
+							new Vector3(nextBone.x, nextBone.y, nextBone.z),
+							framePosition);
+			}
+			else 
+			{
+				bones[i].transform.localRotation = Quaternion.identity;
+				bones[i].transform.localPosition = initialBonesPosition[i];
+				bones[i].transform.localScale = 
+						Vector3.Lerp(
+							new Vector3(currentBone.x, currentBone.y, currentBone.z),
+							new Vector3(nextBone.x, nextBone.y, nextBone.z),
+							framePosition);
+			}
+		}
 	}
 
 	void ComputeUV(List<Vector3> polyVertices, out Vector3 forward, out Vector3 left)
@@ -421,6 +624,7 @@ public class ModelLoader : MonoBehaviour
 		//load first model
 		modelIndex = 0;
 		LoadModels(modelFolders[modelFolderIndex]);
+		LoadAnims(animFolders[modelFolderIndex]);
 	}
 
 	int DetectGame()
@@ -438,9 +642,9 @@ public class ModelLoader : MonoBehaviour
 	{
 		PaletteIndex = DetectGame() - 1;
 
-		GetComponent<Renderer>().materials[2] //noise
+		GetComponent<SkinnedMeshRenderer>().materials[2] //noise
 			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
-		GetComponent<Renderer>().materials[3] //gradient
+		GetComponent<SkinnedMeshRenderer>().materials[3] //gradient
 			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
 	}
 
@@ -460,9 +664,21 @@ public class ModelLoader : MonoBehaviour
 		}
 	}
 
+	void LoadAnims(string foldername)
+	{
+		if (Directory.Exists(foldername))
+		{
+			animFiles = Directory.GetFiles(foldername)
+				.OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();
+
+			LoadAnim(animFiles[animIndex]);
+		}
+	}
+
 	void Update()
 	{
 		int oldModelIndex = modelIndex;
+		int oldAnimIndex = animIndex;
 
 		if (Input.GetAxis("Mouse ScrollWheel") > 0)
 		{
@@ -535,12 +751,14 @@ public class ModelLoader : MonoBehaviour
 					if (menuEnabled)
 					{
 						ModelIndexString = modelIndex.ToString();
+						AnimIndexString = animIndex.ToString();
 					}
 				}
 			}
 		}
 
 		modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
+		animIndex =  Math.Min(Math.Max(animIndex, 0), animFiles.Count - 1);
 
 		//load new model if needed
 		if (oldModelIndex != modelIndex)
@@ -548,11 +766,22 @@ public class ModelLoader : MonoBehaviour
 			LoadBody(modelFiles[modelIndex]);
 		}            	
 
+		if (animFiles.Count > 0 && oldAnimIndex != animIndex)
+		{
+			LoadAnim(animFiles[animIndex]);
+		}    
+
 		//rotate model
 		if (autoRotate && autoRotateEnabled)
 		{
 			cameraRotation.x = Time.time * 100.0f;
 			cameraRotation.y = 20.0f;
+		}
+
+        //animate
+		if(animFrames != null)
+        {
+			AnimateModel();
 		}
 
 		//update model
@@ -567,14 +796,16 @@ public class ModelLoader : MonoBehaviour
 		//set camera
 		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
 		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
+
+        LeftText.text = LeftTextBody + (!enableAnimation ? string.Empty : ("\r\n" + LeftTextAnim));
 	}
 
 	void OnGUI()
 	{
 		if (menuEnabled)
 		{
-			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 5, 400, 30 * 5);
-
+			int itemsCount = 0;
+			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * menuItemCount, 400, 30 * menuItemCount);
 			//if any click outside, hide menu
 			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
 			{
@@ -588,6 +819,7 @@ public class ModelLoader : MonoBehaviour
 			{
 				ProcessKey(KeyCode.Tab);
 			}
+			itemsCount++;
 
 			//model no
 			GUILayout.BeginHorizontal();
@@ -596,21 +828,62 @@ public class ModelLoader : MonoBehaviour
 
 			if (Event.current.keyCode == KeyCode.Return)
 			{
+				int oldModelIndex = modelIndex;
 				int.TryParse(ModelIndexString, out modelIndex);
-				modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
-				ModelIndexString = modelIndex.ToString();
-				LoadBody(modelFiles[modelIndex]);
+				if(modelIndex != oldModelIndex)
+				{
+					modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
+					ModelIndexString = modelIndex.ToString();
+					LoadBody(modelFiles[modelIndex]);
+				}
 			}
 			GUILayout.EndHorizontal();
+			itemsCount++;
+
+			//anim no
+			if (animFiles.Count > 1)
+			{
+				//animate
+	            GUILayout.BeginHorizontal();
+	            GUILayout.Label("Enable animation", MenuStyle.Label);
+				if (GUILayout.Button(enableAnimation ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
+	            {
+	                ProcessKey(KeyCode.A);
+	            }
+	            GUILayout.EndHorizontal();
+				itemsCount++;
+			}
+
+			if (enableAnimation)
+			{
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Anim", MenuStyle.Label);
+				AnimIndexString = GUILayout.TextField(AnimIndexString, MenuStyle.Button);
+
+				if (Event.current.keyCode == KeyCode.Return)
+				{
+					int oldAnimIndex = animIndex;
+					int.TryParse(AnimIndexString, out animIndex);
+					if(animIndex != oldAnimIndex)
+					{
+						animIndex = Math.Min(Math.Max(animIndex, 0), animFiles.Count - 1);
+						AnimIndexString = animIndex.ToString();
+						LoadAnim(animFiles[animIndex]);
+					}
+				}
+				GUILayout.EndHorizontal();
+				itemsCount++;
+			}
 
 			//auto rotate
 			GUILayout.BeginHorizontal();
 			GUILayout.Label("Auto rotate", MenuStyle.Label);
 			if (GUILayout.Button(autoRotateEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
 			{
-				ProcessKey(KeyCode.A);
+                		ProcessKey(KeyCode.R);
 			}
 			GUILayout.EndHorizontal();
+			itemsCount++;
 
 			//noise
 			GUILayout.BeginHorizontal();
@@ -620,6 +893,7 @@ public class ModelLoader : MonoBehaviour
 				ProcessKey(KeyCode.N);
 			}
 			GUILayout.EndHorizontal();
+			itemsCount++;
 
 			//gradient
 			GUILayout.BeginHorizontal();
@@ -629,7 +903,8 @@ public class ModelLoader : MonoBehaviour
 				ProcessKey(KeyCode.G);
 			}
 			GUILayout.EndHorizontal();
-
+			itemsCount++;
+			menuItemCount = itemsCount;
 			GUILayout.EndVertical();
 			GUILayout.EndArea();
 		}
@@ -661,20 +936,43 @@ public class ModelLoader : MonoBehaviour
 				}
 				break;
 
+			case KeyCode.Space:
+				if(modelFolderIndex == 0 && modelFolders.Length > 1)
+					 modelFolderIndex = 1;
+				else 
+					 modelFolderIndex = 0;
+				LoadModels(modelFolders[modelFolderIndex]);
+				LoadAnims(animFolders[modelFolderIndex]);
+				break;
+
 			case KeyCode.UpArrow:
-				if (modelFolderIndex < (modelFolders.Length - 1))
+				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 				{
-					modelFolderIndex++;
-					LoadModels(modelFolders[modelFolderIndex]);
+					animIndex += 10;
+				}
+				else
+				{
+					animIndex++;
 				}
 				break;
 
 			case KeyCode.DownArrow:
-				if (modelFolderIndex > 0)
+				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 				{
-					modelFolderIndex--;
-					LoadModels(modelFolders[modelFolderIndex]);
+					animIndex -= 10;
 				}
+				else
+				{
+					animIndex--;
+				}
+				break;
+
+			case KeyCode.A:
+				enableAnimation = !enableAnimation;
+				if(enableAnimation && animFrames == null)
+				{
+					LoadAnim(animFiles[animIndex]);
+				} 
 				break;
 
 			case KeyCode.G:
@@ -687,7 +985,7 @@ public class ModelLoader : MonoBehaviour
 				LoadBody(modelFiles[modelIndex], false);
 				break;
 
-			case KeyCode.A:
+            		case KeyCode.R:
 				autoRotateEnabled = !autoRotateEnabled;
 				if (autoRotateEnabled)
 				{
