@@ -43,11 +43,11 @@ public class ModelLoader : MonoBehaviour
 	private bool noiseEnabled = true;
 	private bool gradientEnabled = true;
 	private bool autoRotateEnabled = true;
-    private int menuItemCount;
+	private int menuItemCount;
 
-    private string LeftTextBody;
-    private string LeftTextAnim;
-    private bool enableAnimation;
+	private string LeftTextBody;
+	private string LeftTextAnim;
+	private bool enableAnimation;
 
 	public static short ReadShort(byte a, byte b)
 	{
@@ -74,8 +74,8 @@ public class ModelLoader : MonoBehaviour
 
 		//delete all bones
 		foreach (Transform child in transform) {
-  			GameObject.Destroy(child.gameObject);
- 		}
+			GameObject.Destroy(child.gameObject);
+		}
 
 		//load data
 		byte[] allbytes = File.ReadAllBytes(filename);
@@ -121,7 +121,7 @@ public class ModelLoader : MonoBehaviour
 				int vertexindex = ReadShort(allbytes[i + 4], allbytes[i + 5]) / 6;
 				int parentindex = allbytes[i + 6];
 				int boneindex = allbytes[i + 7];
-			
+
 				//create bone
 				Transform bone = new GameObject("BONE").transform;
 				bonesPerIndex.Add(boneindex, bone);
@@ -186,7 +186,7 @@ public class ModelLoader : MonoBehaviour
 
 			switch (primitiveType)
 			{
-			//line
+				//line
 				case 0:
 					{
 						i++;
@@ -203,15 +203,15 @@ public class ModelLoader : MonoBehaviour
 						uv.AddRange(CubeMesh.uv);
 						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x =>
-                        rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
-								+ middle));
+							rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
+							+ middle));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
 						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[x.z > 0 ? pointIndexA : pointIndexB], weight0 = 1 }));
 
 						i += 4;
 						break;
 					}
-			//polygon
+					//polygon
 				case 1:
 					{
 						int numPoints = allbytes[i + 0];
@@ -272,9 +272,9 @@ public class ModelLoader : MonoBehaviour
 							foreach (Vector3 poly in polyVertices)
 							{
 								uv.Add(new Vector2(
-										Vector3.Dot(poly, left) * noisesize,
-										Vector3.Dot(poly, forward) * noisesize
-									));
+									Vector3.Dot(poly, left) * noisesize,
+									Vector3.Dot(poly, forward) * noisesize
+								));
 							}
 						}
 						else
@@ -310,7 +310,7 @@ public class ModelLoader : MonoBehaviour
 
 						break;
 					}
-			//sphere
+					//sphere
 				case 3:
 					{
 						int polyType = allbytes[i];
@@ -461,8 +461,6 @@ public class ModelLoader : MonoBehaviour
 		filter.sharedMesh = msh;
 	}
 
-
-
 	class Frame
 	{
 		public float Time;
@@ -515,19 +513,21 @@ public class ModelLoader : MonoBehaviour
 
 	void AnimateModel()
 	{
-		float totaltime = animFrames.Sum(x => x.Time);
-		float time = (Time.time * 50.0f) % totaltime;
-
 		if (!enableAnimation)
 		{
+			//reset bones transforms
 			for (int i = 0 ; i < bones.Count ; i++)
 			{			
-				bones[i].transform.localRotation = Quaternion.identity;
-				bones[i].transform.localPosition = initialBonesPosition[i];
-				bones[i].transform.localScale = Vector3.one;
+				Transform boneTransform = bones[i].transform;
+				boneTransform.localRotation = Quaternion.identity;
+				boneTransform.localPosition = initialBonesPosition[i];
+				boneTransform.localScale = Vector3.one;
 			}
 			return;
 		}
+
+		float totaltime = animFrames.Sum(x => x.Time);
+		float time = (Time.time * 50.0f) % totaltime;
 
 		//find current frame
 		totaltime = 0.0f;
@@ -547,12 +547,15 @@ public class ModelLoader : MonoBehaviour
 		float framePosition = (time - (totaltime - currentFrame.Time)) / currentFrame.Time;
 
 		for (int i = 0 ; i < bones.Count; i++)
-		{			
+		{		
+			Transform boneTransform = bones[i].transform;	
+
 			if(i >= currentFrame.Bones.Count)
 			{
-				bones[i].transform.localPosition = initialBonesPosition[i];
-				bones[i].transform.localRotation = Quaternion.identity;
-				bones[i].transform.localScale = Vector3.one;
+				//there is more bones in model than anim
+				boneTransform.localPosition = initialBonesPosition[i];
+				boneTransform.localRotation = Quaternion.identity;
+				boneTransform.localScale = Vector3.one;
 				continue;
 			}
 
@@ -562,9 +565,10 @@ public class ModelLoader : MonoBehaviour
 			//interpolate
 			if (nextBone.w == 0.0f)
 			{
-				bones[i].transform.localPosition = initialBonesPosition[i];
-				bones[i].transform.localScale = Vector3.one;
-				bones[i].transform.localRotation = 
+				//rotation
+				boneTransform.localPosition = initialBonesPosition[i];
+				boneTransform.localScale = Vector3.one;
+				boneTransform.localRotation = 
 					Quaternion.Slerp(
 						Quaternion.AngleAxis(currentBone.z, Vector3.forward) *
 						Quaternion.AngleAxis(currentBone.x, Vector3.right) * 
@@ -576,23 +580,25 @@ public class ModelLoader : MonoBehaviour
 			}
 			else if (nextBone.w == 1.0f)
 			{
-				bones[i].transform.localRotation = Quaternion.identity;
-				bones[i].transform.localScale = Vector3.one;
-				bones[i].transform.localPosition = initialBonesPosition[i] + 
-						Vector3.Lerp(
-							new Vector3(currentBone.x, currentBone.y, currentBone.z),
-							new Vector3(nextBone.x, nextBone.y, nextBone.z),
-							framePosition);
+				//position
+				boneTransform.localRotation = Quaternion.identity;
+				boneTransform.localScale = Vector3.one;
+				boneTransform.localPosition = initialBonesPosition[i] + 
+					Vector3.Lerp(
+						new Vector3(currentBone.x, currentBone.y, currentBone.z),
+						new Vector3(nextBone.x, nextBone.y, nextBone.z),
+						framePosition);
 			}
 			else 
 			{
-				bones[i].transform.localRotation = Quaternion.identity;
-				bones[i].transform.localPosition = initialBonesPosition[i];
-				bones[i].transform.localScale = 
-						Vector3.Lerp(
-							new Vector3(currentBone.x, currentBone.y, currentBone.z),
-							new Vector3(nextBone.x, nextBone.y, nextBone.z),
-							framePosition);
+				//scaling
+				boneTransform.localRotation = Quaternion.identity;
+				boneTransform.localPosition = initialBonesPosition[i];
+				boneTransform.localScale = 
+					Vector3.Lerp(
+						new Vector3(currentBone.x, currentBone.y, currentBone.z),
+						new Vector3(nextBone.x, nextBone.y, nextBone.z),
+						framePosition);
 			}
 		}
 	}
@@ -734,7 +740,7 @@ public class ModelLoader : MonoBehaviour
 				{
 					Vector3 cameraDistance = new Vector3(0.0f, 0.0f, cameraZoom);
 					Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraDistance)
-					                                    - Camera.main.ScreenToWorldPoint(newMousePosition + cameraDistance);
+						- Camera.main.ScreenToWorldPoint(newMousePosition + cameraDistance);
 					displayMenuAfterDrag = false;
 					cameraPosition += mouseDelta;
 					mousePosition = newMousePosition;
@@ -778,9 +784,9 @@ public class ModelLoader : MonoBehaviour
 			cameraRotation.y = 20.0f;
 		}
 
-        //animate
+		//animate
 		if(animFrames != null)
-        {
+		{
 			AnimateModel();
 		}
 
@@ -791,13 +797,13 @@ public class ModelLoader : MonoBehaviour
 
 		transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
 		transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
-		* Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
+			* Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
 
 		//set camera
 		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
 		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
 
-        LeftText.text = LeftTextBody + (!enableAnimation ? string.Empty : ("\r\n" + LeftTextAnim));
+		LeftText.text = LeftTextBody + (!enableAnimation ? string.Empty : ("\r\n" + LeftTextAnim));
 	}
 
 	void OnGUI()
@@ -844,13 +850,13 @@ public class ModelLoader : MonoBehaviour
 			if (animFiles.Count > 1)
 			{
 				//animate
-	            GUILayout.BeginHorizontal();
-	            GUILayout.Label("Enable animation", MenuStyle.Label);
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Enable animation", MenuStyle.Label);
 				if (GUILayout.Button(enableAnimation ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
-	            {
-	                ProcessKey(KeyCode.A);
-	            }
-	            GUILayout.EndHorizontal();
+				{
+					ProcessKey(KeyCode.A);
+				}
+				GUILayout.EndHorizontal();
 				itemsCount++;
 			}
 
@@ -880,7 +886,7 @@ public class ModelLoader : MonoBehaviour
 			GUILayout.Label("Auto rotate", MenuStyle.Label);
 			if (GUILayout.Button(autoRotateEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
 			{
-                		ProcessKey(KeyCode.R);
+				ProcessKey(KeyCode.R);
 			}
 			GUILayout.EndHorizontal();
 			itemsCount++;
@@ -938,9 +944,9 @@ public class ModelLoader : MonoBehaviour
 
 			case KeyCode.Space:
 				if(modelFolderIndex == 0 && modelFolders.Length > 1)
-					 modelFolderIndex = 1;
+					modelFolderIndex = 1;
 				else 
-					 modelFolderIndex = 0;
+					modelFolderIndex = 0;
 				LoadModels(modelFolders[modelFolderIndex]);
 				LoadAnims(animFolders[modelFolderIndex]);
 				break;
@@ -985,7 +991,7 @@ public class ModelLoader : MonoBehaviour
 				LoadBody(modelFiles[modelIndex], false);
 				break;
 
-            		case KeyCode.R:
+			case KeyCode.R:
 				autoRotateEnabled = !autoRotateEnabled;
 				if (autoRotateEnabled)
 				{
