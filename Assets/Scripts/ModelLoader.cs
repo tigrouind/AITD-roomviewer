@@ -746,19 +746,19 @@ public class ModelLoader : MonoBehaviour
 					mousePosition = newMousePosition;
 				}
 			}
+		}
 
-			//end drag (pan)
-			if (Input.GetMouseButtonUp(1))
+		//end drag (pan)
+		if (Input.GetMouseButtonUp(1))
+		{
+			//show/hide menu
+			if (displayMenuAfterDrag)
 			{
-				//show/hide menu
-				if (displayMenuAfterDrag)
+				menuEnabled = !menuEnabled;
+				if (menuEnabled)
 				{
-					menuEnabled = !menuEnabled;
-					if (menuEnabled)
-					{
-						ModelIndexString = modelIndex.ToString();
-						AnimIndexString = animIndex.ToString();
-					}
+					ModelIndexString = modelIndex.ToString();
+					AnimIndexString = animIndex.ToString();
 				}
 			}
 		}
@@ -848,7 +848,7 @@ public class ModelLoader : MonoBehaviour
 			itemsCount++;
 
 			//anim no
-			if (animFiles.Count > 1)
+			if (animFiles.Count >= 1)
 			{
 				//animate
 				GUILayout.BeginHorizontal();
