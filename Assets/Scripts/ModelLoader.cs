@@ -769,11 +769,13 @@ public class ModelLoader : MonoBehaviour
 		//load new model if needed
 		if (oldModelIndex != modelIndex)
 		{
+			ModelIndexString = modelIndex.ToString();
 			LoadBody(modelFiles[modelIndex]);
 		}            	
 
 		if (animFiles.Count > 0 && oldAnimIndex != animIndex)
 		{
+			AnimIndexString = animIndex.ToString();
 			LoadAnim(animFiles[animIndex]);
 		}    
 
@@ -833,12 +835,11 @@ public class ModelLoader : MonoBehaviour
 			ModelIndexString = GUILayout.TextField(ModelIndexString, MenuStyle.Button);
 
 			if (Event.current.keyCode == KeyCode.Return)
-			{
-				int oldModelIndex = modelIndex;
-				int.TryParse(ModelIndexString, out modelIndex);
-				if(modelIndex != oldModelIndex)
+			{				
+				int newModelIndex;
+				if(int.TryParse(ModelIndexString, out newModelIndex))
 				{
-					modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
+					modelIndex = Math.Min(Math.Max(newModelIndex, 0), modelFiles.Count - 1);
 					ModelIndexString = modelIndex.ToString();
 					LoadBody(modelFiles[modelIndex]);
 				}
@@ -868,11 +869,10 @@ public class ModelLoader : MonoBehaviour
 
 				if (Event.current.keyCode == KeyCode.Return)
 				{
-					int oldAnimIndex = animIndex;
-					int.TryParse(AnimIndexString, out animIndex);
-					if(animIndex != oldAnimIndex)
+					int newAnimIndex;
+					if(int.TryParse(AnimIndexString, out newAnimIndex) && newAnimIndex != animIndex)
 					{
-						animIndex = Math.Min(Math.Max(animIndex, 0), animFiles.Count - 1);
+						animIndex = Math.Min(Math.Max(newAnimIndex, 0), animFiles.Count - 1);
 						AnimIndexString = animIndex.ToString();
 						LoadAnim(animFiles[animIndex]);
 					}
