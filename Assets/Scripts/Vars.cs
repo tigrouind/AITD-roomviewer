@@ -21,6 +21,8 @@ public class Vars : MonoBehaviour
 	private bool oldcompare;
 	private bool ignoreDifferences;
 
+	private string focusedControlName;
+
 	public void OnEnable()
 	{
 		ignoreDifferences = !compare;
@@ -52,12 +54,14 @@ public class Vars : MonoBehaviour
 			{
 				if (varsMemoryAddress != -1)
 				{
+					ProcessInput(vars);
 					processReader.Read(memory, varsMemoryAddress, 207 * 2);
 					CheckDifferences(memory, vars, varsMemoryAddress);
 				}
 
 				if (cvarsMemoryAddress != -1)
 				{
+					ProcessInput(cvars);
 					processReader.Read(memory, cvarsMemoryAddress, 44 * 2);
 					CheckDifferences(memory, cvars, cvarsMemoryAddress);
 				}
@@ -175,6 +179,32 @@ public class Vars : MonoBehaviour
 		}
 	}
 
+	void ProcessInput(Var[] data)
+	{
+		for (int i = 0; i < data.Length; i++)
+		{			
+			if (data[i].text != null && data[i].lostFocus)
+			{
+				//if a certain amount of time elapsed, write value to memory
+				int newValueInt;
+				if (int.TryParse(data[i].text, out newValueInt) || data[i].text == string.Empty)
+				{
+					if (newValueInt > short.MaxValue) newValueInt = short.MaxValue;
+					if (newValueInt < short.MinValue) newValueInt = short.MinValue;
+
+					//write new value to memory
+					ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
+					byte[] wordValue = new byte[2];
+					WriteShort(newValueInt, wordValue, 0);
+					processReader.Write(wordValue, data[i].offset, wordValue.Length);
+				}
+
+				data[i].text = null;
+				data[i].lostFocus = false;
+			}
+		}
+	}
+
 	void DisplayTable(Rect area, int columns, int rows, Var[] vars, string title)
 	{
 		//setup style
@@ -215,7 +245,9 @@ public class Vars : MonoBehaviour
 					int value = var.value;
 					bool different = var.difference;
 
-					if (value != 0 || different)
+					if(var.text != null)
+						stringValue = var.text;
+					else if (value != 0 || different)
 						stringValue = value.ToString();
 
 					//highlight recently changed vars
@@ -226,23 +258,14 @@ public class Vars : MonoBehaviour
 
 					if(!(pauseVarsTracking || compare))
 					{
+						string controlName = var.offset.ToString();
+						GUI.SetNextControlName(controlName);
 						string newValue = GUILayout.TextField(stringValue, labelStyle);
 
-						int newValueInt;
-						if (int.TryParse(newValue, out newValueInt) || newValue == string.Empty)
+						//textbox value has changed
+						if(newValue != stringValue)
 						{
-							//value has been updated
-							if(newValueInt != var.value)
-							{
-								//write new value to memory
-								if(newValueInt > short.MaxValue) newValueInt = short.MaxValue;
-								if(newValueInt < short.MinValue) newValueInt = short.MinValue;
-
-								ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
-								byte[] wordValue = new byte[2];
-								WriteShort(newValueInt, wordValue, 0);
-								processReader.Write(wordValue, var.offset, wordValue.Length);
-							}
+							vars[count].text = newValue;
 						}
 					}
 					else
@@ -259,6 +282,26 @@ public class Vars : MonoBehaviour
 			}
 			GUILayout.EndHorizontal();
 		}
+
+		//check if a control has lost focus 
+		string newFocusedControlName = GUI.GetNameOfFocusedControl();
+		if(focusedControlName != newFocusedControlName)
+		{
+			for (int i = 0; i < vars.Length; i++)
+			{
+				Var var = vars[i];
+				string controlName = var.offset.ToString();
+
+				//control lost focus
+				if(controlName == focusedControlName)
+				{
+					vars[i].lostFocus = true;
+				}
+			}
+
+			focusedControlName = newFocusedControlName;
+		}
+
 	}
 
 	public void SearchForPatterns(ProcessMemoryReader reader)
@@ -274,5 +317,7 @@ public class Vars : MonoBehaviour
 		public float time;
 		public bool difference;
 		public long offset;
+		public string text;
+		public bool lostFocus;
 	}
 }
