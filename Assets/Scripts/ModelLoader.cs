@@ -219,36 +219,7 @@ public class ModelLoader : MonoBehaviour
 						int colorIndex = allbytes[i + 2];
 						i += 3;
 
-						Color32 color = paletteColors[colorIndex];
-
-						if (polyType == 1 && noiseEnabled)
-						{
-							//noise
-							color.a = 254;
-							color.r = (byte)((colorIndex % 16) * 16);
-							color.g = (byte)((colorIndex / 16) * 16);
-						}
-						else if (polyType == 2)
-						{
-							//transparency
-							color.a = 128;
-						}
-						else if ((polyType == 3 || polyType == 6) && gradientEnabled)
-						{
-							//horizontal gradient
-							color.a = 253;
-							color.r = 255;
-							color.g = 0;
-							color.b = (byte)((colorIndex / 16) * 16);
-						}
-						else if ((polyType == 4 || polyType == 5) && gradientEnabled)
-						{
-							//vertical gradient
-							color.a = 253;
-							color.r = 0;
-							color.g = 255;
-							color.b = (byte)((colorIndex / 16) * 16);
-						}
+						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
 
 						//add vertices
 						List<Vector3> polyVertices = new List<Vector3>();
@@ -316,37 +287,8 @@ public class ModelLoader : MonoBehaviour
 						int polyType = allbytes[i];
 						i++;
 						int colorIndex = allbytes[i];
-						Color32 color = paletteColors[colorIndex];
+						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
 						i += 2;
-
-						if (polyType == 1 && noiseEnabled)
-						{
-							//noise
-							color.a = 254;
-							color.r = (byte)((colorIndex % 16) * 16);
-							color.g = (byte)((colorIndex / 16) * 16);
-						}
-						else if (polyType == 2)
-						{
-							//transparency
-							color.a = 128;
-						}
-						else if ((polyType == 3 || polyType == 6) && gradientEnabled)
-						{
-							//horizontal gradient
-							color.a = 253;
-							color.r = 255;
-							color.g = 0;
-							color.b = (byte)((colorIndex / 16) * 16);
-						}
-						else if ((polyType == 4 || polyType == 5) && gradientEnabled)
-						{
-							//vertical gradient
-							color.a = 253;
-							color.r = 0;
-							color.g = 255;
-							color.b = (byte)((colorIndex / 16) * 16);
-						}
 
 						int size = ReadShort(allbytes[i + 0], allbytes[i + 1]);
 						i += 2;
@@ -459,6 +401,42 @@ public class ModelLoader : MonoBehaviour
 
 		filter.localBounds = msh.bounds;
 		filter.sharedMesh = msh;
+	}
+
+	Color32 GetPaletteColor(Color32[] paletteColors, int colorIndex, int polyType)
+	{
+		Color32 color = paletteColors[colorIndex];
+
+		if (polyType == 1 && noiseEnabled)
+		{
+			//noise
+			color.a = 254;
+			color.r = (byte)((colorIndex % 16) * 16);
+			color.g = (byte)((colorIndex / 16) * 16);
+		}
+		else if (polyType == 2)
+		{
+			//transparency
+			color.a = 128;
+		}
+		else if ((polyType == 3 || polyType == 6) && gradientEnabled)
+		{
+			//horizontal gradient
+			color.a = 253;
+			color.r = 255;
+			color.g = 0;
+			color.b = (byte)((colorIndex / 16) * 16);
+		}
+		else if ((polyType == 4 || polyType == 5) && gradientEnabled)
+		{
+			//vertical gradient
+			color.a = 253;
+			color.r = 0;
+			color.g = 255;
+			color.b = (byte)((colorIndex / 16) * 16);
+		}
+
+		return color;
 	}
 
 	class Frame
