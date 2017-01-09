@@ -60,6 +60,7 @@ public class ModelLoader : MonoBehaviour
 	void LoadBody(string filename, bool resetcamera = true)
 	{
 		LeftTextBody = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1);
+		RefreshLeftText();
 
 		//camera
 		if (resetcamera)
@@ -211,7 +212,7 @@ public class ModelLoader : MonoBehaviour
 						i += 4;
 						break;
 					}
-					//polygon
+				//polygon
 				case 1:
 					{
 						int numPoints = allbytes[i + 0];
@@ -281,7 +282,7 @@ public class ModelLoader : MonoBehaviour
 
 						break;
 					}
-					//sphere
+				//sphere
 				case 3:
 					{
 						int polyType = allbytes[i];
@@ -448,6 +449,7 @@ public class ModelLoader : MonoBehaviour
 	void LoadAnim(string filename)
 	{
 		LeftTextAnim = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + animIndex + "/" + (animFiles.Count - 1);
+		RefreshLeftText();
 
 		int i = 0;
 		byte[] allbytes = File.ReadAllBytes(filename);
@@ -491,19 +493,6 @@ public class ModelLoader : MonoBehaviour
 
 	void AnimateModel()
 	{
-		if (!enableAnimation)
-		{
-			//reset bones transforms
-			for (int i = 0 ; i < bones.Count ; i++)
-			{			
-				Transform boneTransform = bones[i].transform;
-				boneTransform.localRotation = Quaternion.identity;
-				boneTransform.localPosition = initialBonesPosition[i];
-				boneTransform.localScale = Vector3.one;
-			}
-			return;
-		}
-
 		float totaltime = animFrames.Sum(x => x.Time);
 		float time = (Time.time * 50.0f) % totaltime;
 
@@ -600,7 +589,7 @@ public class ModelLoader : MonoBehaviour
 
 	void Start()
 	{
-		if (!Directory.Exists(modelFolders[1]))
+		if(!Directory.Exists(modelFolders[1]))
 		{
 			Array.Resize(ref modelFolders, 1);
 		}
@@ -655,7 +644,10 @@ public class ModelLoader : MonoBehaviour
 			animFiles = Directory.GetFiles(foldername)
 				.OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();
 
-			LoadAnim(animFiles[animIndex]);
+			if(enableAnimation)
+			{
+				LoadAnim(animFiles[animIndex]);
+			}
 		}
 	}
 
@@ -745,7 +737,7 @@ public class ModelLoader : MonoBehaviour
 		animIndex =  Math.Min(Math.Max(animIndex, 0), animFiles.Count - 1);
 
 		//load new model if needed
-		if (oldModelIndex != modelIndex)
+		if (modelFiles.Count > 0 && oldModelIndex != modelIndex)
 		{
 			ModelIndexString = modelIndex.ToString();
 			LoadBody(modelFiles[modelIndex]);
@@ -782,8 +774,15 @@ public class ModelLoader : MonoBehaviour
 		//set camera
 		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
 		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
+	}
 
-		LeftText.text = LeftTextBody + (!enableAnimation ? string.Empty : ("\r\n" + LeftTextAnim));
+	void RefreshLeftText()
+	{
+		LeftText.text = LeftTextBody;
+		if(enableAnimation)
+		{
+			LeftText.text += "\r\n" + LeftTextAnim; 
+		}
 	}
 
 	void OnGUI()
@@ -808,25 +807,28 @@ public class ModelLoader : MonoBehaviour
 			itemsCount++;
 
 			//model no
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Model", MenuStyle.Label);
-			ModelIndexString = GUILayout.TextField(ModelIndexString, MenuStyle.Button);
+			if(modelFiles.Count > 0)
+			{
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Model", MenuStyle.Label);
+				ModelIndexString = GUILayout.TextField(ModelIndexString, MenuStyle.Button);
 
-			if (Event.current.keyCode == KeyCode.Return)
-			{				
-				int newModelIndex;
-				if(int.TryParse(ModelIndexString, out newModelIndex))
-				{
-					modelIndex = Math.Min(Math.Max(newModelIndex, 0), modelFiles.Count - 1);
-					ModelIndexString = modelIndex.ToString();
-					LoadBody(modelFiles[modelIndex]);
+				if (Event.current.keyCode == KeyCode.Return)
+				{				
+					int newModelIndex;
+					if(int.TryParse(ModelIndexString, out newModelIndex))
+					{
+						modelIndex = Math.Min(Math.Max(newModelIndex, 0), modelFiles.Count - 1);
+						ModelIndexString = modelIndex.ToString();
+						LoadBody(modelFiles[modelIndex]);
+					}
 				}
+				GUILayout.EndHorizontal();
+				itemsCount++;
 			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
 
 			//anim no
-			if (animFiles.Count >= 1)
+			if (animFiles.Count > 0)
 			{
 				//animate
 				GUILayout.BeginHorizontal();
@@ -921,42 +923,50 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.Space:
-				if(modelFolderIndex == 0 && modelFolders.Length > 1)
-					modelFolderIndex = 1;
-				else 
-					modelFolderIndex = 0;
+				modelFolderIndex = (modelFolderIndex + 1) % modelFolders.Length;
 				LoadModels(modelFolders[modelFolderIndex]);
 				LoadAnims(animFolders[modelFolderIndex]);
 				break;
 
 			case KeyCode.UpArrow:
-				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+				if(enableAnimation)
 				{
-					animIndex += 10;
-				}
-				else
-				{
-					animIndex++;
+					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+					{
+						animIndex += 10;
+					}
+					else
+					{
+						animIndex++;
+					}
 				}
 				break;
 
 			case KeyCode.DownArrow:
-				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+				if(enableAnimation)
 				{
-					animIndex -= 10;
-				}
-				else
-				{
-					animIndex--;
+					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+					{
+						animIndex -= 10;
+					}
+					else
+					{
+						animIndex--;
+					}
 				}
 				break;
 
 			case KeyCode.A:
 				enableAnimation = !enableAnimation;
-				if(enableAnimation && animFrames == null)
+				if(enableAnimation)
 				{
 					LoadAnim(animFiles[animIndex]);
-				} 
+				}
+				else
+				{
+					animFrames = null;
+					LoadBody(modelFiles[modelIndex], false);
+				}
 				break;
 
 			case KeyCode.G:
