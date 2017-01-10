@@ -97,11 +97,12 @@ public class Vars : MonoBehaviour
 
 		//buttons
 		GUIStyle button = new GUIStyle(Style.Button);
+		button.fixedWidth = areaC.width / 3.0f;	
+
 		GUIStyle buttonToggled = new GUIStyle(button);
 		buttonToggled.normal = buttonToggled.active; 
 		buttonToggled.hover = buttonToggled.active;
-
-		button.fixedWidth = areaC.width / 3.0f;		
+			
 		GUILayout.BeginArea(areaC, panel);
 		GUILayout.BeginVertical();
 		GUILayout.BeginHorizontal();
