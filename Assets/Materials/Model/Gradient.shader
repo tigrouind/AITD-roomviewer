@@ -36,11 +36,12 @@
 
 			fixed4 frag (vertOutput output) : SV_Target
 			{
-				float2 paletteuv = output.color.b + 1.0/32.0;
+				float palette = output.color.b + 1.0/32.0;
 				float2 screen = output.uv.xy / output.uv.z + float2(1.0, 1.0);
-				float gradient = screen.x * output.color.r + screen.y * output.color.g;
+				//vertical or horizontal gradient
+				float gradient = dot(screen, output.color.rg); 
 				gradient = abs(((gradient*3.0)%2.0) - 1.0);
-				return tex2D (_Palette, float2(gradient, paletteuv.y));
+				return tex2D (_Palette, float2(gradient, palette));
 			}
 			ENDCG
 		}
