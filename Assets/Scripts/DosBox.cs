@@ -89,7 +89,7 @@ public class DosBox : MonoBehaviour
 
 					int trackModeOffset = TrackModeOffsets[dosBoxPattern];
 					int trackMode = ReadShort(memory[k + trackModeOffset], memory[k + trackModeOffset + 1]); 
-					bool isActive = objectid != -1;
+					bool isActive = objectid >= 0;
 
 					if (isActive)
 					{
