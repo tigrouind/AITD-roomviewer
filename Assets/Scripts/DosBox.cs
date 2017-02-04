@@ -19,6 +19,7 @@ public class DosBox : MonoBehaviour
 	public bool warpMenuEnabled;
 	public Box warpActor;
 	public string warpX, warpY, warpZ;
+	private bool updateWorldPos = true;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -342,7 +343,7 @@ public class DosBox : MonoBehaviour
 	{
 		if (warpMenuEnabled)
 		{
-			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 45, 400, 90);
+			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 4, 400, 30 * 4);
 
 			//close menu if there is a click out side
 			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
@@ -370,6 +371,14 @@ public class DosBox : MonoBehaviour
 			warpX = GUILayout.TextField(warpX, button);
 			warpY = GUILayout.TextField(warpY, button);
 			warpZ = GUILayout.TextField(warpZ, button);
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Update world position", Style.Label);
+			if (GUILayout.Button(updateWorldPos ? "Yes" : "No", Style.Option))
+			{
+				updateWorldPos = !updateWorldPos;
+			}
 			GUILayout.EndHorizontal();
 
 			//button
@@ -438,15 +447,18 @@ public class DosBox : MonoBehaviour
 			WriteShort(ReadShort(position[10], position[11]) + offsetZ, position, 10);
 			ProcessReader.Write(position, offset + 8, 12);
 
-			//local + world
-			ProcessReader.Read(position, offset + 28, 12);
-			WriteShort(ReadShort(position[0], position[1]) + offsetX, position, 0); 
-			WriteShort(ReadShort(position[2], position[3]) + offsetY, position, 2); 
-			WriteShort(ReadShort(position[4], position[5]) + offsetZ, position, 4);
-			WriteShort(ReadShort(position[6], position[7]) + offsetX, position, 6); 
-			WriteShort(ReadShort(position[8], position[9]) + offsetY, position, 8); 
-			WriteShort(ReadShort(position[10], position[11]) + offsetZ, position, 10);
-			ProcessReader.Write(position, offset + 28, 12);
+			if(updateWorldPos)
+			{
+				//local + world
+				ProcessReader.Read(position, offset + 28, 12);
+				WriteShort(ReadShort(position[0], position[1]) + offsetX, position, 0); 
+				WriteShort(ReadShort(position[2], position[3]) + offsetY, position, 2); 
+				WriteShort(ReadShort(position[4], position[5]) + offsetZ, position, 4);
+				WriteShort(ReadShort(position[6], position[7]) + offsetX, position, 6); 
+				WriteShort(ReadShort(position[8], position[9]) + offsetY, position, 8); 
+				WriteShort(ReadShort(position[10], position[11]) + offsetZ, position, 10);
+				ProcessReader.Write(position, offset + 28, 12);
+			}
 		}
 	}
 
