@@ -44,7 +44,6 @@ public class ModelLoader : MonoBehaviour
 	private bool gradientEnabled = true;
 	private bool autoRotateEnabled = true;
 	private int menuItemCount;
-	private bool offsetAnimEnabled;
 
 	private string LeftTextBody;
 	private string LeftTextAnim;
@@ -85,8 +84,8 @@ public class ModelLoader : MonoBehaviour
 
 		//header
 		int flags = ReadShort(allbytes[i + 0], allbytes[i + 1]);
-		i += 14; //2 + 2*6 = XYZ model bouding box
-		i += ReadShort(allbytes[i + 0], allbytes[i + 1]) + 2;	//skip header
+		i += 0xE;
+		i += ReadShort(allbytes[i + 0], allbytes[i + 1]) + 2;
 
 		//vertexes
 		int count = ReadShort(allbytes[i + 0], allbytes[i + 1]);
@@ -111,7 +110,7 @@ public class ModelLoader : MonoBehaviour
 			//bones
 			count = ReadShort(allbytes[i + 0], allbytes[i + 1]);
 			i += 2;
-			i += count * 2; //skip bones indexes
+			i += count * 2;
 
 			Dictionary<int, Transform> bonesPerIndex = new Dictionary<int, Transform>();
 
@@ -123,7 +122,6 @@ public class ModelLoader : MonoBehaviour
 				int vertexindex = ReadShort(allbytes[i + 4], allbytes[i + 5]) / 6;
 				int parentindex = allbytes[i + 6];
 				int boneindex = allbytes[i + 7];
-				i += 8;
 
 				//create bone
 				Transform bone = new GameObject("BONE").transform;
@@ -148,7 +146,7 @@ public class ModelLoader : MonoBehaviour
 					startindex++;
 				}
 
-				i += 8; //empty bytes to copy animation data
+				i += 0x10;
 			}
 		}
 		else
@@ -446,7 +444,6 @@ public class ModelLoader : MonoBehaviour
 	{
 		public float Time;
 		public List<Vector4> Bones;
-		public Vector3 Offset;
 	}
 
 	void LoadAnim(string filename)
@@ -466,10 +463,6 @@ public class ModelLoader : MonoBehaviour
 			Frame f = new Frame();
 			f.Time = ReadShort(allbytes[i + 0], allbytes[i + 1]);
 			f.Bones = new List<Vector4>();
-			f.Offset = new Vector3(
-				ReadShort(allbytes[i + 2], allbytes[i + 3]) / 1000.0f, 
-				ReadShort(allbytes[i + 4], allbytes[i + 5]) / 1000.0f, 
-				ReadShort(allbytes[i + 6], allbytes[i + 7]) / 1000.0f);
 			i += 8;
 			for(int bone = 0 ; bone < boneCount ; bone++)
 			{
@@ -574,16 +567,6 @@ public class ModelLoader : MonoBehaviour
 						new Vector3(nextBone.x, nextBone.y, nextBone.z),
 						framePosition);
 			}
-		}
-
-		if (offsetAnimEnabled)
-		{
-			Vector3 a = animFrames.Take(frame % animFrames.Count).Aggregate(Vector3.zero, (x, y) => x + y.Offset);
-			Vector3 b = animFrames.Take((frame % animFrames.Count) + 1).Aggregate(Vector3.zero, (x, y) => x + y.Offset);
-			Vector3 c = animFrames.Aggregate(Vector3.zero, (x, y) => x + y.Offset);
-
-			bones[0].transform.position += transform.rotation *
-				(Vector3.Lerp(a, b, framePosition) - c / 2.0f);
 		}
 	}
 
@@ -876,15 +859,6 @@ public class ModelLoader : MonoBehaviour
 				}
 				GUILayout.EndHorizontal();
 				itemsCount++;
-
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Animation movement", MenuStyle.Label);
-				if (GUILayout.Button(offsetAnimEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
-				{
-					ProcessKey(KeyCode.M);
-				}
-				GUILayout.EndHorizontal();
-				itemsCount++;
 			}
 
 			//auto rotate
@@ -986,20 +960,12 @@ public class ModelLoader : MonoBehaviour
 				enableAnimation = !enableAnimation;
 				if(enableAnimation)
 				{
-					autoRotateEnabled = false;
 					LoadAnim(animFiles[animIndex]);
 				}
 				else
 				{
 					animFrames = null;
 					LoadBody(modelFiles[modelIndex], false);
-				}
-				break;
-
-			case KeyCode.M:
-				if(enableAnimation)
-				{
-					offsetAnimEnabled = !offsetAnimEnabled;
 				}
 				break;
 
