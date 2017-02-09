@@ -15,11 +15,16 @@ public class DosBox : MonoBehaviour
 	public MenuStyle Style;
 	public bool ShowAdditionalInfo;
 	public ProcessMemoryReader ProcessReader;
+	private int menuItemsCount;
 
 	public bool warpMenuEnabled;
 	public Box warpActor;
-	public string warpX, warpY, warpZ;
-	private bool updateWorldPos = true;
+	public string localPosX, localPosY, localPosZ;
+	public string worldPosX, worldPosY, worldPosZ;
+	public string boundingPosX, boundingPosY, boundingPosZ;
+
+	public string angle;
+	private bool updateWorldPos;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -343,7 +348,8 @@ public class DosBox : MonoBehaviour
 	{
 		if (warpMenuEnabled)
 		{
-			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * 4, 400, 30 * 4);
+			int itemsCount = 0;
+			Rect rect = new Rect((Screen.width / 2) - 250, (Screen.height / 2) - 15 * menuItemsCount, 500, 30 * menuItemsCount);
 
 			//close menu if there is a click out side
 			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
@@ -354,60 +360,146 @@ public class DosBox : MonoBehaviour
 			GUILayout.BeginArea(rect, Style.Panel);
 			GUILayout.BeginVertical();
 
-			//label
-			GUILayout.BeginHorizontal();
+			//angle
+            GUILayout.BeginHorizontal();
 			GUIStyle label = new GUIStyle(Style.Button);
-			label.fixedWidth = rect.width / 3.0f;
-			GUILayout.Label("X", label);
-			GUILayout.Label("Y", label);
-			GUILayout.Label("Z", label);
-			GUILayout.EndHorizontal();
+            label.fixedWidth = rect.width * 0.5f;
+			GUILayout.Label("Angle", label);
 
-			//textbox
-			GUILayout.BeginHorizontal();
-			GUIStyle button = new GUIStyle(Style.Button);
-			button.normal.textColor = Color.white;
-			button.fixedWidth = rect.width / 3.0f;
-			warpX = GUILayout.TextField(warpX, button);
-			warpY = GUILayout.TextField(warpY, button);
-			warpZ = GUILayout.TextField(warpZ, button);
-			GUILayout.EndHorizontal();
+            GUIStyle button = new GUIStyle(Style.Button);
+            button.normal.textColor = Color.white;
+            button.fixedWidth = rect.width * 0.5f;
+			angle = GUILayout.TextField(angle, button);
+            GUILayout.EndHorizontal();
+            itemsCount++;
 
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Update world position", Style.Label);
-			if (GUILayout.Button(updateWorldPos ? "Yes" : "No", Style.Option))
-			{
-				updateWorldPos = !updateWorldPos;
-			}
-			GUILayout.EndHorizontal();
+            //positions
+            if (updateWorldPos)
+            {                
+                GUIPositionTextFieldAndLabel("Bounding position", ref boundingPosX, ref boundingPosY, ref boundingPosZ, rect.width);
+                GUIPositionTextFieldAndLabel("Local position", ref localPosX, ref localPosY, ref localPosZ, rect.width);
+                GUIPositionTextFieldAndLabel("World position", ref worldPosX, ref worldPosY, ref worldPosZ, rect.width);
+                itemsCount += 3;
+            }
+            else
+            {
+                GUIPositionTextFieldAndLabel("Position", ref localPosX, ref localPosY, ref localPosZ, rect.width);
+                itemsCount++;    
+            }
+
+            //advanced mode
+            GUILayout.BeginHorizontal();
+            label = new GUIStyle(Style.Button);
+            label.fixedWidth = rect.width * 0.5f;
+            GUILayout.Label("Advanced mode", label);
+
+            button = new GUIStyle(Style.Button);
+            button.fixedWidth = rect.width * 0.5f;
+            if (GUILayout.Button(updateWorldPos ? "Yes" : "No", button))
+            {
+                updateWorldPos = !updateWorldPos;
+            }
+            GUILayout.EndHorizontal();
+            itemsCount++;
 
 			//button
 			GUILayout.BeginHorizontal();
 			if (GUILayout.Button("Set position", Style.Button) || Event.current.keyCode == KeyCode.Return)
 			{
-				int x, y, z;
-				if(int.TryParse(warpX, out x) && int.TryParse(warpY, out y) && int.TryParse(warpZ, out z))
-				{
-					x = Mathf.Clamp(x, short.MinValue, short.MaxValue);
-					y = Mathf.Clamp(y, short.MinValue, short.MaxValue);
-					z = Mathf.Clamp(z, short.MinValue, short.MaxValue);
-					warpX = x.ToString();
-					warpY = y.ToString();
-					warpZ = z.ToString();
-					WarpActorToPosition(warpActor, new Vector3(x, y, z));
-				}
-				else
-				{
-					warpX = warpActor.LocalPosition.x.ToString();
-					warpY = warpActor.LocalPosition.y.ToString();
-					warpZ = warpActor.LocalPosition.z.ToString();
-				}
+                //parse angle
+                int angleInt;
+                TryParseAngle(ref angle, out angleInt, (int)((warpActor.Angles.y * 1024.0f) / 360.0f));
+                SetActorAngle(warpActor, angleInt);
+
+                Vector3 bound, local, world;
+                TryParsePosition(ref boundingPosX, ref boundingPosY, ref boundingPosZ, out bound, warpActor.BoundingPos);
+                TryParsePosition(ref localPosX, ref localPosY, ref localPosZ, out local, warpActor.LocalPosition);
+                TryParsePosition(ref worldPosX, ref worldPosY, ref worldPosZ, out world, warpActor.WorldPosition);
+
+                if (!updateWorldPos)
+                {
+                    //apply offset to world/bound
+                    Vector3 offset = local - warpActor.LocalPosition;
+                    world = warpActor.WorldPosition + offset;
+                    bound = warpActor.BoundingPos + offset;
+
+                    //update gui
+                    worldPosX = world.x.ToString();
+                    worldPosY = world.y.ToString();
+                    worldPosZ = world.z.ToString();
+                    boundingPosX = bound.x.ToString();
+                    boundingPosY = bound.y.ToString();
+                    boundingPosZ = bound.z.ToString();
+                }
+
+                SetActorToPosition(warpActor, bound, local, world);
 			}
+			itemsCount++;
 
 			GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
 			GUILayout.EndArea();
+
+			menuItemsCount = itemsCount;
 		}
+	}
+
+    private void TryParsePosition(ref string posX, ref string posY, ref string posZ, out Vector3 intValue, Vector3 defaultValue)
+    {
+        int x, y, z;
+        TryParsePosition(ref posX, out x, (int)defaultValue.x);
+        TryParsePosition(ref posY, out y, (int)defaultValue.y);
+        TryParsePosition(ref posZ, out z, (int)defaultValue.z);
+
+        intValue = new Vector3(x, y, z);
+    }
+
+    private void TryParseAngle(ref string valueText, out int intValue, int defaultValue)
+    {
+        float floatValue;
+        if(float.TryParse(valueText, out floatValue))
+        {
+            floatValue = floatValue >= 0.0f ? floatValue % 360.0f : 360.0f - ((-floatValue) % 360.0f);
+            intValue = (int)((floatValue * 1024.0f) / 360.0f) ;
+        }
+        else
+        {
+            intValue = defaultValue;
+        }
+
+        valueText = (intValue * 360 / 1024.0f).ToString("N1");
+    }
+
+
+	private void TryParsePosition(ref string valueText, out int intValue, int defaultValue)
+	{
+		if(int.TryParse(valueText, out intValue))
+		{
+			intValue = Mathf.Clamp(intValue, short.MinValue, short.MaxValue);			
+		}
+		else
+		{
+            intValue = defaultValue;
+		}
+
+        valueText = intValue.ToString();
+	}
+
+	private void GUIPositionTextFieldAndLabel(string text, ref string warpX, ref string warpY, ref string warpZ, float width)
+	{
+		GUILayout.BeginHorizontal();
+		GUIStyle label = new GUIStyle(Style.Button);
+		label.fixedWidth = width * 0.5f;
+		GUILayout.Label(text, label);
+
+		//button
+		GUIStyle button = new GUIStyle(Style.Button);
+		button.normal.textColor = Color.white;
+		button.fixedWidth = width * 1.0f / 6.0f;
+		warpX = GUILayout.TextField(warpX, button);
+		warpY = GUILayout.TextField(warpY, button);
+		warpZ = GUILayout.TextField(warpZ, button);
+		GUILayout.EndHorizontal();
 	}
 
 	private Vector3 GetMousePosition(int room, int floor)
@@ -422,7 +514,19 @@ public class DosBox : MonoBehaviour
 		return mousePosition * 1000.0f;
 	}
 
-	private void WarpActorToPosition(Box actor, Vector3 warpPosition)
+	private void SetActorAngle(Box actor, int angle)
+	{
+		int index = Actors.GetComponentsInChildren<Box>(true).ToList().IndexOf(actor);
+		if (index != -1)
+		{
+			long offset = memoryAddress + index * ActorStructSize[dosBoxPattern];
+			byte[] position = new byte[2];
+			WriteShort((int)angle, position, 0);
+			ProcessReader.Write(position, offset + 42, 2);
+		}
+	}
+
+	private void SetActorToPosition(Box actor, Vector3 boundingPosition, Vector3 localPosition, Vector3 worldPosition)
 	{
 		//get object offset
 		int index = Actors.GetComponentsInChildren<Box>(true).ToList().IndexOf(actor);
@@ -430,35 +534,27 @@ public class DosBox : MonoBehaviour
 		{
 			long offset = memoryAddress + index * ActorStructSize[dosBoxPattern];
 
-			//offset positions (world + local + bounding box)
-			byte[] position = new byte[12];
-			ProcessReader.Read(position, offset + 28, 6);
-			int offsetX = (int)warpPosition.x - ReadShort(position[0], position[1]);
-			int offsetY = (int)warpPosition.y - ReadShort(position[2], position[3]);
-			int offsetZ = (int)warpPosition.z - ReadShort(position[4], position[5]);
+            //update to memory
+            //bounding
+            Vector3 boundOffset = boundingPosition - actor.BoundingPos;
+            byte[] buffer = new byte[12];
+            ProcessReader.Read(buffer, offset + 8, 12);
+            WriteShort(ReadShort(buffer[0], buffer[1]) + (int)boundOffset.x, buffer, 0); 
+            WriteShort(ReadShort(buffer[2], buffer[3]) + (int)boundOffset.x, buffer, 2);
+            WriteShort(ReadShort(buffer[4], buffer[5]) + (int)boundOffset.y, buffer, 4); 
+            WriteShort(ReadShort(buffer[6], buffer[7]) + (int)boundOffset.y, buffer, 6);
+            WriteShort(ReadShort(buffer[8], buffer[9]) + (int)boundOffset.z, buffer, 8);
+            WriteShort(ReadShort(buffer[10], buffer[11]) + (int)boundOffset.z, buffer, 10);
+            ProcessReader.Write(buffer, offset + 8, 12);
 
-			//bounding box
-			ProcessReader.Read(position, offset + 8, 12);
-			WriteShort(ReadShort(position[0], position[1]) + offsetX, position, 0); 
-			WriteShort(ReadShort(position[2], position[3]) + offsetX, position, 2);
-			WriteShort(ReadShort(position[4], position[5]) + offsetY, position, 4); 
-			WriteShort(ReadShort(position[6], position[7]) + offsetY, position, 6);
-			WriteShort(ReadShort(position[8], position[9]) + offsetZ, position, 8);
-			WriteShort(ReadShort(position[10], position[11]) + offsetZ, position, 10);
-			ProcessReader.Write(position, offset + 8, 12);
-
-			if(updateWorldPos)
-			{
-				//local + world
-				ProcessReader.Read(position, offset + 28, 12);
-				WriteShort(ReadShort(position[0], position[1]) + offsetX, position, 0); 
-				WriteShort(ReadShort(position[2], position[3]) + offsetY, position, 2); 
-				WriteShort(ReadShort(position[4], position[5]) + offsetZ, position, 4);
-				WriteShort(ReadShort(position[6], position[7]) + offsetX, position, 6); 
-				WriteShort(ReadShort(position[8], position[9]) + offsetY, position, 8); 
-				WriteShort(ReadShort(position[10], position[11]) + offsetZ, position, 10);
-				ProcessReader.Write(position, offset + 28, 12);
-			}
+            //local+world
+			WriteShort((int)localPosition.x, buffer, 0); 
+			WriteShort((int)localPosition.y, buffer, 2); 
+			WriteShort((int)localPosition.z, buffer, 4);
+			WriteShort((int)worldPosition.x, buffer, 6); 
+			WriteShort((int)worldPosition.y, buffer, 8); 
+			WriteShort((int)worldPosition.z, buffer, 10);
+			ProcessReader.Write(buffer, offset + 28, 12);
 		}
 	}
 
