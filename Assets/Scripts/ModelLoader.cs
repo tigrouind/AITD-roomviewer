@@ -957,15 +957,18 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.A:
-				enableAnimation = !enableAnimation;
-				if(enableAnimation)
+				if (animFiles.Count > 0)
 				{
-					LoadAnim(animFiles[animIndex]);
-				}
-				else
-				{
-					animFrames = null;
-					LoadBody(modelFiles[modelIndex], false);
+					enableAnimation = !enableAnimation;
+					if (enableAnimation)
+					{
+						LoadAnim(animFiles[animIndex]);
+					}
+					else
+					{
+						animFrames = null;
+						LoadBody(modelFiles[modelIndex], false);
+					}
 				}
 				break;
 

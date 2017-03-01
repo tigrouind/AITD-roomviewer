@@ -7,12 +7,13 @@ AITD2 and AITD3 games are also supported.
 
 ## Instructions 
 1. Extract AITD room viewer archive somewhere (eg : on your desktop)
-2. Make sure you have original version of the game installed on your computer.
-3. Download [QuickBMS](http://aluigi.altervista.org/quickbms.htm) and [alonedark.bms] (http://aluigi.altervista.org/bms/alonedark.bms) script ([alternative link](https://github.com/tigrouind/AITD-roomviewer/releases/download/1.1.14/alonedark.bms)).
-4. Start QuickBMS
+2. Create a folder named "GAMEDATA" inside AITD room viewer folder
+3. Make sure you have original version of the game installed on your computer.
+4. Download [QuickBMS](http://aluigi.altervista.org/quickbms.htm) and [alonedark.bms] (http://aluigi.altervista.org/bms/alonedark.bms) script ([alternative link](https://github.com/tigrouind/AITD-roomviewer/releases/download/1.1.14/alonedark.bms)).
+5. Start QuickBMS
  - Select "alonedark.bms" script
  - Select all files named ETAGE00.PAK, ETAGE01.PAK, ETAGE02.PAK, ... from AITD original game folder (use ctrl + left click)
- - Select as output folder the folder "GAMEDATA" (which is inside "AITD room viewer" folder).
+ - Select as output folder the folder "GAMEDATA" you created previously.
 
 ## Commands
 
@@ -62,6 +63,7 @@ Note : once game is linked, you can start another new game, or load a saved game
 ## Installation 
 
 Repeat room viewer installation steps with QuickBMS but select files LISTBODY.PAK and LISTBOD2.PAK. 
+If you want to be able to view animations, unpack files LISTANIM.PAK and LISTANI2.PAK.
 
 ## Commands 
 
