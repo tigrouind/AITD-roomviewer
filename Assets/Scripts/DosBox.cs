@@ -25,6 +25,7 @@ public class DosBox : MonoBehaviour
 
 	public string angle;
 	private bool updateWorldPos;
+	private float lastKeyPressed;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -295,11 +296,87 @@ public class DosBox : MonoBehaviour
 			}
 		}
 
+		if(warpActor != null)
+		{
+			bool enoughTimeElapsed = (Time.time - lastKeyPressed) > 0.1f;
+
+			if (Input.GetKey(KeyCode.Keypad3) && enoughTimeElapsed)
+			{				
+				RotateActor(-1);
+			}
+
+			if (Input.GetKey(KeyCode.Keypad9) && enoughTimeElapsed)
+			{				
+				RotateActor(1);
+			}
+
+			if (Input.GetKey(KeyCode.Keypad4) && enoughTimeElapsed)
+			{
+				MoveActor(new Vector3(-1.0f, 0.0f, 0.0f));
+			}
+
+			if (Input.GetKey(KeyCode.Keypad6) && enoughTimeElapsed)
+			{
+				MoveActor(new Vector3(1.0f, 0.0f, 0.0f));
+			}
+
+			if (Input.GetKey(KeyCode.Keypad2) && enoughTimeElapsed)
+			{
+				MoveActor(new Vector3(0.0f, 0.0f,-1.0f));
+			}
+
+			if (Input.GetKey(KeyCode.Keypad8) && enoughTimeElapsed)
+			{
+				MoveActor(new Vector3(00.0f, 0.0f, 1.0f));
+			}
+
+			if (Input.GetKeyUp(KeyCode.Keypad4) ||
+			    Input.GetKeyUp(KeyCode.Keypad8) ||
+				Input.GetKeyUp(KeyCode.Keypad6) ||
+				Input.GetKeyUp(KeyCode.Keypad2) ||
+				Input.GetKeyUp(KeyCode.Keypad3) || 
+				Input.GetKeyUp(KeyCode.Keypad9) || 
+				Input.GetKey(KeyCode.Keypad0))
+			{
+				lastKeyPressed = 0.0f;
+			}
+		}
+
 		//arrow is only active if actors are active and player is active
 		Arrow.gameObject.SetActive(Actors.activeSelf
 			&& player != null
 			&& player.activeSelf
 			&& player.transform.localScale.magnitude > 0.01f);	
+	}
+
+	void RotateActor(int offset)
+	{
+		int angleInt = (int)((warpActor.Angles.y * 1024.0f) / 360.0f);
+		int newAngle = angleInt + offset;
+		SetActorAngle(warpActor, (newAngle + 1024) % 1024);
+		angle = (newAngle * 360.0f / 1024.0f).ToString("N1");
+		lastKeyPressed = Time.time;
+	}
+
+	void MoveActor(Vector3 offset)
+	{
+		Vector3 local = warpActor.LocalPosition + offset;
+		Vector3 world = warpActor.WorldPosition + offset;
+		Vector3 bound = warpActor.BoundingPos + offset;
+
+		SetActorToPosition(warpActor, bound, local, world);
+
+		//update gui
+		localPosX = local.x.ToString();
+		localPosY = local.y.ToString();
+		localPosZ = local.z.ToString();
+		worldPosX = world.x.ToString();
+		worldPosY = world.y.ToString();
+		worldPosZ = world.z.ToString();
+		boundingPosX = bound.x.ToString();
+		boundingPosY = bound.y.ToString();
+		boundingPosZ = bound.z.ToString();
+		lastKeyPressed = Time.time;
 	}
 
 	void FixedUpdate()
