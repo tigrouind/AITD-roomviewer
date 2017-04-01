@@ -13,6 +13,7 @@ public class ModelLoader : MonoBehaviour
 	private int modelFolderIndex = 0;
 	private int animIndex = 0;
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
+	private VarParser varParser = new VarParser(); 
 
 	private string[] modelFolders = new string[] { "GAMEDATA\\LISTBODY", "GAMEDATA\\LISTBOD2" };
 	private string[] animFolders = new string[] { "GAMEDATA\\LISTANIM", "GAMEDATA\\LISTANI2" };
@@ -59,7 +60,8 @@ public class ModelLoader : MonoBehaviour
 
 	void LoadBody(string filename, bool resetcamera = true)
 	{
-		LeftTextBody = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1);
+		string varName = varParser.GetText("BODYS", modelIndex, string.Empty, false);
+		LeftTextBody = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
 		RefreshLeftText();
 
 		//camera
@@ -448,7 +450,8 @@ public class ModelLoader : MonoBehaviour
 
 	void LoadAnim(string filename)
 	{
-		LeftTextAnim = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + animIndex + "/" + (animFiles.Count - 1);
+		string varName = varParser.GetText("ANIMS", animIndex, string.Empty, false);
+		LeftTextAnim = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + animIndex + "/" + (animFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
 		RefreshLeftText();
 
 		int i = 0;
@@ -589,6 +592,13 @@ public class ModelLoader : MonoBehaviour
 
 	void Start()
 	{
+		//parse vars.txt file
+		string varPath = @"GAMEDATA\vars.txt"; 
+		if (File.Exists(varPath))
+		{
+			varParser.Parse(varPath);
+		}
+
 		if(!Directory.Exists(modelFolders[1]))
 		{
 			Array.Resize(ref modelFolders, 1);
