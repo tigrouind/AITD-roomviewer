@@ -351,7 +351,7 @@ public class DosBox : MonoBehaviour
 
 	void RotateActor(int offset)
 	{
-		int angleInt = (int)((warpActor.Angles.y * 1024.0f) / 360.0f);
+		int angleInt = Mathf.RoundToInt((warpActor.Angles.y * 1024.0f) / 360.0f);
 		int newAngle = angleInt + offset;
 		SetActorAngle(warpActor, (newAngle + 1024) % 1024);
 		angle = (newAngle * 360.0f / 1024.0f).ToString("N1");
@@ -485,7 +485,7 @@ public class DosBox : MonoBehaviour
 			{
                 //parse angle
                 int angleInt;
-                TryParseAngle(ref angle, out angleInt, (int)((warpActor.Angles.y * 1024.0f) / 360.0f));
+                TryParseAngle(ref angle, out angleInt, Mathf.RoundToInt((warpActor.Angles.y * 1024.0f) / 360.0f));
                 SetActorAngle(warpActor, angleInt);
 
                 Vector3 bound, local, world;
@@ -537,7 +537,7 @@ public class DosBox : MonoBehaviour
         if(float.TryParse(valueText, out floatValue))
         {
             floatValue = floatValue >= 0.0f ? floatValue % 360.0f : 360.0f - ((-floatValue) % 360.0f);
-            intValue = (int)((floatValue * 1024.0f) / 360.0f) ;
+            intValue = Mathf.RoundToInt((floatValue * 1024.0f) / 360.0f) ;
         }
         else
         {
@@ -598,7 +598,7 @@ public class DosBox : MonoBehaviour
 		{
 			long offset = memoryAddress + index * ActorStructSize[dosBoxPattern];
 			byte[] position = new byte[2];
-			WriteShort((int)angle, position, 0);
+			WriteShort(angle, position, 0);
 			ProcessReader.Write(position, offset + 42, 2);
 		}
 	}
