@@ -340,6 +340,15 @@ public class DosBox : MonoBehaviour
 			{
 				lastKeyPressed = 0.0f;
 			}
+
+			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+			{
+				Func<bool> isAITD1 = () => GetComponent<RoomLoader>().DetectGame() == 1;		
+				if (Input.GetKeyDown(KeyCode.W) && isAITD1())
+				{
+					MoveActor(GetMousePosition(warpActor.Room, warpActor.Floor) - warpActor.LocalPosition);
+				}
+			}
 		}
 
 		//arrow is only active if actors are active and player is active
