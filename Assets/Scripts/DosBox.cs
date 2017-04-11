@@ -300,12 +300,12 @@ public class DosBox : MonoBehaviour
 		{
 			bool enoughTimeElapsed = (Time.time - lastKeyPressed) > 0.1f;
 
-			if (Input.GetKey(KeyCode.Keypad7) && enoughTimeElapsed)
+			if (Input.GetKey(KeyCode.Keypad9) && enoughTimeElapsed)
 			{				
 				RotateActor(-1);
 			}
 
-			if (Input.GetKey(KeyCode.Keypad9) && enoughTimeElapsed)
+			if (Input.GetKey(KeyCode.Keypad7) && enoughTimeElapsed)
 			{				
 				RotateActor(1);
 			}
