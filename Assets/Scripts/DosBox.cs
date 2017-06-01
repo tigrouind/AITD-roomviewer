@@ -57,12 +57,15 @@ public class DosBox : MonoBehaviour
 	//fps
 	private int oldFramesCount;
 	private Queue<int> previousFramesCount = new Queue<int>();
-	private float calculatedFps;
+	private int calculatedFps;
+
 	private int delayFpsCounter;
 	private int lastDelayFpsCounter;
 	private StringBuilder fpsInfo;
 	private bool allowInventory;
 
+	private Vector3 lastPlayerPositionFixedUpdate;
+	private float calculatedPlayerSpeed;
 
 	public void Start()
 	{
@@ -262,8 +265,8 @@ public class DosBox : MonoBehaviour
 					Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
 
 					fpsInfo = new StringBuilder();
-					fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}\nCursor position: {4} {5} {6}", TimeSpan.FromSeconds(InternalTimer / 60),
-						calculatedFps, lastDelayFpsCounter * 1000 / 200, allowInventory ? "Yes" : "No", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z));
+					fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}\nCursor position: {4} {5} {6}\nPlayer speed: {7}", TimeSpan.FromSeconds(InternalTimer / 60),
+						calculatedFps, lastDelayFpsCounter * 1000 / 200, allowInventory ? "Yes" : "No", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z), Mathf.RoundToInt(calculatedPlayerSpeed));
 				}
 				else
 				{
@@ -427,6 +430,32 @@ public class DosBox : MonoBehaviour
 				previousFramesCount.Dequeue();
 
 			calculatedFps = previousFramesCount.Sum();
+
+			//playerspeed
+			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
+			{
+				int i = 0;
+				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+				{
+					int k = i * ActorStructSize[dosBoxPattern];
+					int objectid = ReadShort(memory[k + 0], memory[k + 1]);
+					if (objectid == lastValidPlayerIndex)
+					{
+						int boundingX1 = ReadShort(memory[k + 8], memory[k + 9]);
+						int boundingX2 = ReadShort(memory[k + 10], memory[k + 11]);
+						int boundingZ1 = ReadShort(memory[k + 16], memory[k + 17]);
+						int boundingZ2 = ReadShort(memory[k + 18], memory[k + 19]);
+
+						Vector3 position = new Vector3((boundingX1 + boundingX2) / 2.0f, 0.0f, (boundingZ1 + boundingZ2) / 2.0f);
+						if (position != lastPlayerPositionFixedUpdate)
+						{
+							calculatedPlayerSpeed = (position - lastPlayerPositionFixedUpdate).magnitude;
+							lastPlayerPositionFixedUpdate = position;	
+						}
+					}
+					i++;
+				}
+			}
 		}
 	}
 
