@@ -1,10 +1,9 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Vars : MonoBehaviour
 {
-	public MenuStyle Style;
-
 	private bool pauseVarsTracking;
 
 	private byte[] memory = new byte[512];
@@ -21,11 +20,23 @@ public class Vars : MonoBehaviour
 	private bool oldcompare;
 	private bool ignoreDifferences;
 
-	private string focusedControlName;
+	public RectTransform Panel;
+	public RectTransform TabA;
+	public RectTransform TabB;
+	public RectTransform TableHeaderPrefab;
+	public InputField TableCellPrefab;
 
 	public void OnEnable()
 	{
 		ignoreDifferences = !compare;
+		BuildTables();
+		UpdateCellSize();
+		Panel.gameObject.SetActive(true);
+	}
+
+	public void OnDisable()
+	{
+		Panel.gameObject.SetActive(false);
 	}
 
 	private short ReadShort(byte a, byte b)
@@ -54,14 +65,12 @@ public class Vars : MonoBehaviour
 			{
 				if (varsMemoryAddress != -1)
 				{
-					ProcessInput(vars);
 					processReader.Read(memory, varsMemoryAddress, 207 * 2);
 					CheckDifferences(memory, vars, varsMemoryAddress);
 				}
 
 				if (cvarsMemoryAddress != -1)
 				{
-					ProcessInput(cvars);
 					processReader.Read(memory, cvarsMemoryAddress, 44 * 2);
 					CheckDifferences(memory, cvars, cvarsMemoryAddress);
 				}
@@ -75,61 +84,55 @@ public class Vars : MonoBehaviour
 		{
 			this.enabled = false;
 		}
+
+		UpdateCellSize();
 	}
 
-	void OnGUI()
+	void UpdateCellSize()
 	{
-		GUIStyle panel = new GUIStyle(Style.Panel);
-		panel.normal.background = Style.BlackTexture;
-		Rect screen = new Rect(0, 0, Screen.width, Screen.height - 30 * 1);
-		Rect areaA = new Rect(0, 0, screen.width, screen.height * 22.0f / 28.0f);
-		Rect areaB = new Rect(0, screen.height * 22.0f / 28.0f, screen.width, screen.height * 6.0f / 28.0f);
-		Rect areaC = new Rect(0, screen.height, screen.width, 30 * 1);
+		//set cell size
+		Vector2 cellSize = new Vector2(Screen.width / 21.0f, (Screen.height - 30.0f) / 16.0f);
+		TabA.GetComponent<GridLayoutGroup>().cellSize = cellSize;
+		TabB.GetComponent<GridLayoutGroup>().cellSize = cellSize;	
+	}
 
-		//table
-		GUILayout.BeginArea(areaA, panel);
-		DisplayTable(areaA, 10, 21, vars, "VARS");
-		GUILayout.EndArea();
+	void BuildTables()
+	{
+		BuildTable(TabA, 207, vars);
+		BuildTable(TabB, 44, cvars);
+	}
 
-		GUILayout.BeginArea(areaB, panel);
-		DisplayTable(areaB, 10, 5, cvars, "CVARS");
-		GUILayout.EndArea();
-
-		//buttons
-		GUIStyle button = new GUIStyle(Style.Button);
-		button.fixedWidth = areaC.width / 3.0f;	
-
-		GUIStyle buttonToggled = new GUIStyle(button);
-		buttonToggled.normal = buttonToggled.active; 
-		buttonToggled.hover = buttonToggled.active;
-			
-		GUILayout.BeginArea(areaC, panel);
-		GUILayout.BeginVertical();
-		GUILayout.BeginHorizontal();
-		if (GUILayout.Button("Freeze", pauseVarsTracking ? buttonToggled : button) && Event.current.button == 0)
+	void BuildTable(RectTransform tab, int numberOfCells, Var[] data)
+	{
+		if (tab.childCount == 0)
 		{
-			pauseVarsTracking = !pauseVarsTracking;
-		}
+			//empty
+			GameObject empty = new GameObject(string.Empty, typeof(RectTransform));
+			empty.transform.SetParent(tab.transform);
 
-		if (GUILayout.Button("Save state", button))
-		{
-			SaveState(vars);
-			SaveState(cvars);
-		}
+			for (int i = 0; i < 20; i++)
+			{
+				RectTransform header = Instantiate(TableHeaderPrefab);
+				header.transform.SetParent(tab.transform);
+				header.GetComponentInChildren<Text>().text = i.ToString();
+			}
 
-		if (GUILayout.Button("Compare", compare ? buttonToggled : button) && Event.current.button == 0)
-		{
-			compare = !compare;
-		}
+			for (int i = 0; i < numberOfCells; i++)
+			{
+				if (i % 20 == 0)
+				{
+					RectTransform header = Instantiate(TableHeaderPrefab);
+					header.transform.SetParent(tab.transform);
+					header.GetComponentInChildren<Text>().text = i.ToString();
+				}
 
-		if (!compare && oldcompare)
-		{
-			ignoreDifferences = true;
+				InputField cell = Instantiate(TableCellPrefab);
+				cell.transform.SetParent(tab.transform);
+				int cellIndex = i;
+				cell.onEndEdit.AddListener((value) => OnCellChange(cell, data, cellIndex));
+				data[i].inputField = cell;
+			}
 		}
-		oldcompare = compare;
-		GUILayout.EndHorizontal();
-		GUILayout.EndVertical();
-		GUILayout.EndArea();
 	}
 
 	void SaveState(Var[] data)
@@ -174,136 +177,81 @@ public class Vars : MonoBehaviour
 					data[i].time = currenttime;
 				}
 			}
+				
+			data[i].memoryAddress = offset + i * 2;
 
-			data[i].offset = offset + i * 2;
-			data[i].difference = (currenttime - data[i].time) < 3.0f;
+			//Check differences
+			bool difference = (currenttime - data[i].time) < 3.0f;
+
+			InputField inputField = data[i].inputField;
+
+			string newText = string.Empty;
+			if (value != 0 || difference)
+			{
+				newText = value.ToString();
+			}
+
+			if (inputField.text != newText && !inputField.isFocused)
+			{
+				inputField.text = newText;
+			}
+
+			Image image = inputField.GetComponent<Image>();
+			Text text = inputField.GetComponentInChildren<Text>();
+			if (difference)
+			{
+				image.color = Color.red;
+				text.color = Color.white;
+			}
+			else
+			{
+				image.color = Color.white;
+				text.color = Color.black;
+			}
 		}
 	}
 
-	void ProcessInput(Var[] data)
+	void OnCellChange(InputField cell, Var[] data, int cellIndex)
 	{
-		for (int i = 0; i < data.Length; i++)
-		{			
-			if (data[i].text != null && data[i].lostFocus)
+		int newValueInt;
+		if (int.TryParse(cell.text, out newValueInt) || cell.text == string.Empty)
+		{
+			if (newValueInt > short.MaxValue) newValueInt = short.MaxValue;
+			if (newValueInt < short.MinValue) newValueInt = short.MinValue;
+
+			if (newValueInt != data[cellIndex].value)
 			{
-				//if a certain amount of time elapsed, write value to memory
-				int newValueInt;
-				if (int.TryParse(data[i].text, out newValueInt) || data[i].text == string.Empty)
-				{
-					if (newValueInt > short.MaxValue) newValueInt = short.MaxValue;
-					if (newValueInt < short.MinValue) newValueInt = short.MinValue;
-
-					//write new value to memory
-					ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
-					byte[] wordValue = new byte[2];
-					WriteShort(newValueInt, wordValue, 0);
-					processReader.Write(wordValue, data[i].offset, wordValue.Length);
-				}
-
-				data[i].text = null;
-				data[i].lostFocus = false;
+				//write new value to memory
+				ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
+				byte[] wordValue = new byte[2];
+				WriteShort(newValueInt, wordValue, 0);
+				processReader.Write(wordValue, data[cellIndex].memoryAddress, wordValue.Length);
 			}
 		}
 	}
 
-	void DisplayTable(Rect area, int columns, int rows, Var[] vars, string title)
+	public void FreezeClick()
 	{
-		//setup style
-		GUIStyle labelStyle = new GUIStyle(Style.Label);
-		labelStyle.fixedWidth = area.width / (columns + 1);
-		labelStyle.fixedHeight = area.height / ((float)(rows + 1));
-		labelStyle.alignment = TextAnchor.MiddleCenter;
-
-		GUIStyle headerStyle = new GUIStyle(labelStyle);
-		headerStyle.normal.textColor = Color.black;
-		headerStyle.normal.background = Style.GreenTexture;
-
-		//header
-		GUILayout.BeginHorizontal();
-		GUILayout.Label(title, headerStyle);
-		for (int i = 0; i < columns; i++)
-		{
-			GUILayout.Label(i.ToString(), headerStyle);
-		}
-		GUILayout.EndHorizontal();
-
-		//body
-		int count = 0;
-		for (int j = 0; j < rows; j++)
-		{
-			GUILayout.BeginHorizontal();
-			headerStyle.alignment = TextAnchor.MiddleRight;
-			GUILayout.Label(j.ToString(), headerStyle);
-
-			for (int i = 0; i < columns; i++)
-			{
-				labelStyle.normal.background = null;
-
-				string stringValue = string.Empty;
-				if (count < vars.Length)
-				{
-					Var var = vars[count];
-					int value = var.value;
-					bool different = var.difference;
-
-					if(var.text != null)
-						stringValue = var.text;
-					else if (value != 0 || different)
-						stringValue = value.ToString();
-
-					//highlight recently changed vars
-					if (different)
-					{
-						labelStyle.normal.background = Style.RedTexture;
-					}
-
-					if(!(pauseVarsTracking || compare))
-					{
-						string controlName = var.offset.ToString();
-						GUI.SetNextControlName(controlName);
-						string newValue = GUILayout.TextField(stringValue, labelStyle);
-
-						//textbox value has changed
-						if(newValue != stringValue)
-						{
-							vars[count].text = newValue;
-						}
-					}
-					else
-					{
-						GUILayout.Label(stringValue, labelStyle);
-					}
-				}
-				else
-				{
-					GUILayout.Label(stringValue, labelStyle);
-				}
-
-				count++;
-			}
-			GUILayout.EndHorizontal();
-		}
-
-		//check if a control has lost focus 
-		string newFocusedControlName = GUI.GetNameOfFocusedControl();
-		if(focusedControlName != newFocusedControlName)
-		{
-			for (int i = 0; i < vars.Length; i++)
-			{
-				Var var = vars[i];
-				string controlName = var.offset.ToString();
-
-				//control lost focus
-				if(controlName == focusedControlName)
-				{
-					vars[i].lostFocus = true;
-				}
-			}
-
-			focusedControlName = newFocusedControlName;
-		}
-
+		pauseVarsTracking = !pauseVarsTracking;
 	}
+
+	public void SaveStateClick()
+	{
+		SaveState(vars);
+		SaveState(cvars);
+	}
+
+	public void CompareClick()
+	{
+		compare = !compare;
+
+		if (!compare && oldcompare)
+		{
+			ignoreDifferences = true;
+		}
+		oldcompare = compare;
+	}
+
 
 	public void SearchForPatterns(ProcessMemoryReader reader)
 	{
@@ -314,11 +262,9 @@ public class Vars : MonoBehaviour
 	public struct Var
 	{
 		public int value;
-		public int saveState;
-		public float time;
-		public bool difference;
-		public long offset;
-		public string text;
-		public bool lostFocus;
+		public int saveState; //value set there when using SaveState button
+		public float time;  //time since last difference
+		public long memoryAddress;
+		public InputField inputField;
 	}
 }

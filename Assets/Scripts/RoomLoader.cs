@@ -15,15 +15,8 @@ public class RoomLoader : MonoBehaviour
 	private int room = 0;
 	private int[] cameraColors = new [] { 0xFF8080, 0x789CF0, 0xB0DE6F, 0xCC66C0, 0x5DBAAB, 0xF2BA79, 0x8E71E3, 0x6ED169, 0xBF6080, 0x7CCAF7 };
 	private Vector3 mousePosition;
-	private float cameraRotation;
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
-
-	private int showrooms = 2;
-	private bool showtriggers = true;
-	private int showareas = 0;
-	private int cameraFollow = 1;
-	private int menuItemsCount;
 
 	public GUIText LeftText;
 	public GUIText BottomText;
@@ -36,6 +29,18 @@ public class RoomLoader : MonoBehaviour
 
 	private bool DosBoxEnabled;
 	public GameObject Actors;
+
+	public RectTransform Panel;
+	public Button ShowVars;
+	public ToggleButton LinkToDOSBox;
+	public ToggleButton ShowAdditionalInfo;
+	public ToggleButton ShowActors;
+	public Slider CameraRotation;
+	public ToggleButton ShowTriggers;
+	public ToggleButton ShowRooms;
+	public ToggleButton ShowAreas;
+	public ToggleButton CameraFollow;
+	public ToggleButton CameraMode;
 
 	private short ReadShort(byte a, byte b)
 	{
@@ -54,7 +59,7 @@ public class RoomLoader : MonoBehaviour
 	}
 
 	void Start()
-	{
+	{		
 		Directory.CreateDirectory("GAMEDATA");
 
 		//check existing ETAGEXX folders
@@ -66,6 +71,7 @@ public class RoomLoader : MonoBehaviour
 		floor = floors.FirstOrDefault();
 
 		RefreshRooms();
+		ToggleMenuDOSBoxOptions(false);
 	}
 
 	void RefreshRooms()
@@ -81,7 +87,7 @@ public class RoomLoader : MonoBehaviour
 
 		SetRoomObjectsVisibility(room);
 
-		if (cameraFollow == 1) //room
+		if (CameraFollow.Value == 1) //room
 		{
 			CenterCamera(room);
 		}
@@ -103,9 +109,10 @@ public class RoomLoader : MonoBehaviour
 
 	void SetRoomObjectsVisibility(int room)
 	{
-		bool showallrooms = showrooms == 3 || showrooms == 2;
-		bool showallroomstransparent = showrooms == 2;
-		bool showcolliders = showrooms != 0;
+		bool showallrooms = ShowRooms.Value == 3 || ShowRooms.Value == 2;
+		bool showallroomstransparent = ShowRooms.Value == 2;
+		bool showcolliders = ShowRooms.Value != 0;
+		bool showtiggers = ShowTriggers.BoolValue;
 
 		int roomIndex = 0;
 		foreach (Transform roomTransform in transform.Cast<Transform>().Where(x => x.name != "DELETED"))
@@ -116,12 +123,12 @@ public class RoomLoader : MonoBehaviour
 			{
 				if (box.name == "Trigger")
 				{
-					box.gameObject.SetActive(showtriggers && currentRoom);
+					box.gameObject.SetActive(showtiggers && currentRoom);
 				}
 
 				if (box.name == "Camera")
 				{
-					box.gameObject.SetActive(showareas == 2 || (showareas == 1 && currentRoom));
+					box.gameObject.SetActive(ShowAreas.Value == 2 || (ShowAreas.Value == 1 && currentRoom));
 				}
 
 				if (box.name == "Collider")
@@ -425,16 +432,19 @@ public class RoomLoader : MonoBehaviour
 			}
 			else if (DetectGame() == 1 && HighLightedBox != null && HighLightedBox.name == "Actor")
 			{
-                dosBox.angle = HighLightedBox.Angles.y.ToString("N1");
-                dosBox.boundingPosX = HighLightedBox.BoundingPos.x.ToString();
-                dosBox.boundingPosY = HighLightedBox.BoundingPos.y.ToString();
-                dosBox.boundingPosZ = HighLightedBox.BoundingPos.z.ToString();
-				dosBox.localPosX = HighLightedBox.LocalPosition.x.ToString();
-                dosBox.localPosY = HighLightedBox.LocalPosition.y.ToString();
-                dosBox.localPosZ = HighLightedBox.LocalPosition.z.ToString();
-                dosBox.worldPosX = HighLightedBox.WorldPosition.x.ToString();
-                dosBox.worldPosY = HighLightedBox.WorldPosition.y.ToString();
-                dosBox.worldPosZ = HighLightedBox.WorldPosition.z.ToString();               
+                dosBox.angle.text = HighLightedBox.Angles.y.ToString("N1");
+                dosBox.boundingPosX.text = HighLightedBox.BoundingPos.x.ToString();
+				dosBox.boundingPosY.text = HighLightedBox.BoundingPos.y.ToString();
+				dosBox.boundingPosZ.text = HighLightedBox.BoundingPos.z.ToString();
+				dosBox.localPosX.text = HighLightedBox.LocalPosition.x.ToString();
+				dosBox.localPosY.text = HighLightedBox.LocalPosition.y.ToString();
+				dosBox.localPosZ.text = HighLightedBox.LocalPosition.z.ToString();
+				dosBox.worldPosX.text = HighLightedBox.WorldPosition.x.ToString();
+				dosBox.worldPosY.text = HighLightedBox.WorldPosition.y.ToString();
+				dosBox.worldPosZ.text = HighLightedBox.WorldPosition.z.ToString();
+				dosBox.positionX.text = HighLightedBox.LocalPosition.x.ToString();
+				dosBox.positionY.text = HighLightedBox.LocalPosition.y.ToString();
+				dosBox.positionZ.text = HighLightedBox.LocalPosition.z.ToString();
 
 				dosBox.warpActor = HighLightedBox;
 				dosBox.warpMenuEnabled = true;
@@ -443,6 +453,17 @@ public class RoomLoader : MonoBehaviour
 			{
 				menuEnabled = true;
 			}
+		}
+
+		if (Input.GetMouseButtonUp(0)
+			&& !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
+		{
+			menuEnabled = false;
+		}
+
+		if (menuEnabled != Panel.gameObject.activeSelf)
+		{
+			Panel.gameObject.SetActive(menuEnabled);
 		}
 
 		RefreshHighLightedBox();
@@ -565,7 +586,7 @@ public class RoomLoader : MonoBehaviour
 
 	public void RefreshRooms(int newfloor, int newroom)
 	{
-		if (cameraFollow == 1 || cameraFollow == 2) //room or player
+		if (CameraFollow.Value == 1 || CameraFollow.Value == 2) //room or player
 		{
 			if (floors.Contains(newfloor))
 			{
@@ -587,7 +608,7 @@ public class RoomLoader : MonoBehaviour
 
 	public void CenterCamera(Vector2 position)
 	{
-		if (cameraFollow == 2) //follow player
+		if (CameraFollow.Value == 2) //follow player
 		{
 			Camera.main.transform.position = new Vector3(position.x, Camera.main.transform.position.y, position.y);
 		}
@@ -602,143 +623,24 @@ public class RoomLoader : MonoBehaviour
 
 	#region GUI
 
-	private string[] roomModes = new string[] { "No", "Current room", "Current room / All", "All"  };
-	private string[] areaModes = new string[] { "No", "Current room", "All" };
-	private string[] cameraModes = new string[] { "Nothing", "Current room", "Player" };
 	private bool menuEnabled;
-	public MenuStyle Style;
 
-	void OnGUI()
+	public void SetCameraRotation(Slider slider)
 	{
-		if (menuEnabled)
-		{
-			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * menuItemsCount, 400, 30 * menuItemsCount);
-			int itemsCount = 0;
+		Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, slider.value * 22.5f);
+	}
 
-			//close menu if there is a click out side
-			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
-			{
-				menuEnabled = false;
-			}
-
-			GUILayout.BeginArea(rect, Style.Panel);
-			GUILayout.BeginVertical();
-
-			//dosbox
-			if (GUILayout.Button(!DosBoxEnabled ? "Link to DOSBOX" : "Unlink DOSBOX", Style.Button) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.L);
-			}
-			itemsCount++;
-
-			if (GUILayout.Button("Model viewer", Style.Button) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.Tab);
-			}
-			itemsCount++;
-
-			if (DosBoxEnabled && DetectGame() == 1)
-			{
-				if (GUILayout.Button("Show VARS", Style.Button) && Event.current.button == 0)
-				{
-					ProcessKey(KeyCode.V);
-				}
-				itemsCount++;
-			}
-
-			//camera
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Camera projection", Style.Label);
-			if (GUILayout.Button(Camera.main.orthographic ? "Orthographic" : "Perspective", Style.Option) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.D);
-			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
-
-			//follow
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Camera follow", Style.Label);
-			if (GUILayout.Button(cameraModes[cameraFollow], Style.Option) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.F);
-			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
-
-			//camera rotate
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Camera rotation", Style.Label);
-			float rotation = Mathf.Round(GUILayout.HorizontalSlider(cameraRotation, -8.0f, 8.0f, Style.Slider, Style.Thumb));
-			if (Event.current.button == 0)
-			{
-				cameraRotation = rotation;
-				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
-			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
-
-			//rooms
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Rooms", Style.Label);
-			if (GUILayout.Button(roomModes[showrooms], Style.Option) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.R);
-			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
-
-			//areas
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Cameras", Style.Label);
-			if (GUILayout.Button(areaModes[showareas], Style.Option) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.C);
-			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
-
-			//triggers
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Triggers", Style.Label);
-			if (GUILayout.Button(showtriggers ? "Yes" : "No", Style.Option) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.T);
-			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
-
-			//actors
-			if (DosBoxEnabled)
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Actors", Style.Label);
-				if (GUILayout.Button(Actors.activeSelf ? "Yes" : "No", Style.Option) && Event.current.button == 0)
-				{
-					ProcessKey(KeyCode.A);
-				}
-				GUILayout.EndHorizontal();
-				itemsCount++;
-			}
-
-			if (DosBoxEnabled && DetectGame() == 1)
-			{
-				//show fps info
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Show additional info", Style.Label);
-				if (GUILayout.Button(GetComponent<DosBox>().ShowAdditionalInfo ? "Yes" : "No", Style.Option) && Event.current.button == 0)
-				{
-					ProcessKey(KeyCode.E);
-				}
-				GUILayout.EndHorizontal();
-				itemsCount++;
-			}
-
-			GUILayout.EndVertical();
-			GUILayout.EndArea();
-
-			menuItemsCount = itemsCount;
-		}
+	private void ToggleMenuDOSBoxOptions(bool enabled)
+	{
+		ShowVars.transform.gameObject.SetActive(enabled);
+		ShowActors.transform.parent.gameObject.SetActive(enabled);
+		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled);
+	}
+		
+	public void ProcessKey(string keyCode)
+	{
+		KeyCode keyCodeEnum = (KeyCode)Enum.Parse(typeof(KeyCode), keyCode, true);
+		ProcessKey(keyCodeEnum);
 	}
 
 	public void ProcessKey(KeyCode keyCode)
@@ -751,7 +653,7 @@ public class RoomLoader : MonoBehaviour
 					bool result = (GetComponent<DosBox>().LinkToDosBOX(floor, room));
 
 					//set follow mode to player
-					cameraFollow = 2; 
+					CameraFollow.Value = 2; 
 					GetComponent<DosBox>().ResetCamera(floor, room);
 
 					Actors.SetActive(result);
@@ -760,15 +662,17 @@ public class RoomLoader : MonoBehaviour
 				else
 				{
 					//follow player => room
-					if (cameraFollow == 2)
+					if (CameraFollow.Value == 2)
 					{
-						cameraFollow = 1;
+						CameraFollow.Value = 1;
 					}
 					GetComponent<DosBox>().UnlinkDosBox();
 
 					Actors.SetActive(false);
 					DosBoxEnabled = false;
 				}
+				LinkToDOSBox.BoolValue = DosBoxEnabled;
+				ToggleMenuDOSBoxOptions(DosBoxEnabled);
 				menuEnabled = false; //hide menu
 				break;
 
@@ -778,6 +682,7 @@ public class RoomLoader : MonoBehaviour
 
 			case KeyCode.D:
 				Camera.main.orthographic = !Camera.main.orthographic;
+				CameraMode.BoolValue = Camera.main.orthographic;
 				float planeSize = Mathf.Tan(Camera.main.fieldOfView * Mathf.Deg2Rad / 2.0f);
 
 				if (Camera.main.orthographic)
@@ -795,12 +700,12 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.F:
-				cameraFollow = (cameraFollow + 1) % (!DosBoxEnabled ? 2 : 3);
-				if (cameraFollow == 1) //room
+				CameraFollow.Value = (CameraFollow.Value + 1) % (!DosBoxEnabled ? 2 : 3);
+				if (CameraFollow.Value == 1) //room
 				{
 					CenterCamera(room);
 				}
-				else if (cameraFollow == 2) //player
+				else if (CameraFollow.Value == 2) //player
 				{
 					//make sure camear snap back
 					GetComponent<DosBox>().ResetCamera(floor, room);
@@ -816,26 +721,28 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.R:
-				showrooms = (showrooms + 1) % 4;
+				ShowRooms.Value = (ShowRooms.Value + 1) % 4;
 				SetRoomObjectsVisibility(room);
 				break;
 
 			case KeyCode.C:
-				showareas = (showareas + 1) % 3;
+				ShowAreas.Value = (ShowAreas.Value + 1) % 3;
 				SetRoomObjectsVisibility(room);
 				break;
 
 			case KeyCode.T:
-				showtriggers = !showtriggers;
+				ShowTriggers.BoolValue = !ShowTriggers.BoolValue;
 				SetRoomObjectsVisibility(room);
 				break;
 
 			case KeyCode.A:
-				Actors.SetActive(!Actors.activeSelf);
+				ShowActors.BoolValue = !ShowActors.BoolValue;
+				Actors.SetActive(ShowActors.BoolValue);
 				break;
 
 			case KeyCode.E:
 				GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
+				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
 				break;
 
 			case KeyCode.Escape:
@@ -844,13 +751,11 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.PageUp:
-				cameraRotation = Math.Min(cameraRotation + 1, 8);
-				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
+				CameraRotation.value = Math.Min(CameraRotation.value + 1, 8);
 				break;
 
 			case KeyCode.PageDown:
-				cameraRotation = Math.Max(cameraRotation - 1, -8);
-				Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, cameraRotation * 22.5f);
+				CameraRotation.value = Math.Max(CameraRotation.value - 1, -8);
 				break;
 
 			case KeyCode.DownArrow:

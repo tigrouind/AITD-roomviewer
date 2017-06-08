@@ -6,12 +6,14 @@ using System.Linq;
 using System.Globalization;
 using System;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class ModelLoader : MonoBehaviour
 {
 	private int modelIndex = 0;
-	private int modelFolderIndex = 0;
 	private int animIndex = 0;
+	private int modelFolderIndex = 0;
+
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private VarParser varParser = new VarParser(); 
 
@@ -28,7 +30,6 @@ public class ModelLoader : MonoBehaviour
 	public GUIText LeftText;
 	public Mesh SphereMesh;
 	public Mesh CubeMesh;
-	public MenuStyle MenuStyle;
 
 	private Vector2 cameraRotation = new Vector2();
 	private Vector2 cameraPosition = new Vector2();
@@ -39,16 +40,16 @@ public class ModelLoader : MonoBehaviour
 	private bool autoRotate;
 	private bool displayMenuAfterDrag;
 	private bool menuEnabled;
-	private string ModelIndexString;
-	private string AnimIndexString;
-	private bool noiseEnabled = true;
-	private bool gradientEnabled = true;
-	private bool autoRotateEnabled = true;
-	private int menuItemCount;
-
 	private string LeftTextBody;
 	private string LeftTextAnim;
-	private bool enableAnimation;
+
+	public RectTransform Panel;
+	public InputField ModelInput;
+	public InputField AnimationInput;
+	public ToggleButton AutoRotate;
+	public ToggleButton GradientMaterial;
+	public ToggleButton NoiseMaterial;
+	public ToggleButton EnableAnimation;
 
 	public static short ReadShort(byte a, byte b)
 	{
@@ -238,7 +239,7 @@ public class ModelLoader : MonoBehaviour
 							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
 						}
 
-						if (polyType == 1 && noiseEnabled)
+						if (polyType == 1 && NoiseMaterial.BoolValue)
 						{
 							Vector3 forward, left;
 							ComputeUV(polyVertices, out forward, out left);
@@ -410,7 +411,7 @@ public class ModelLoader : MonoBehaviour
 	{
 		Color32 color = paletteColors[colorIndex];
 
-		if (polyType == 1 && noiseEnabled)
+		if (polyType == 1 && NoiseMaterial.BoolValue)
 		{
 			//noise
 			color.a = 254;
@@ -422,7 +423,7 @@ public class ModelLoader : MonoBehaviour
 			//transparency
 			color.a = 128;
 		}
-		else if ((polyType == 3 || polyType == 6) && gradientEnabled)
+		else if ((polyType == 3 || polyType == 6) && GradientMaterial.BoolValue)
 		{
 			//horizontal gradient
 			color.a = 253;
@@ -430,7 +431,7 @@ public class ModelLoader : MonoBehaviour
 			color.g = 0;
 			color.b = (byte)((colorIndex / 16) * 16);
 		}
-		else if ((polyType == 4 || polyType == 5) && gradientEnabled)
+		else if ((polyType == 4 || polyType == 5) && GradientMaterial.BoolValue)
 		{
 			//vertical gradient
 			color.a = 253;
@@ -608,6 +609,7 @@ public class ModelLoader : MonoBehaviour
 		modelIndex = 0;
 		LoadModels(modelFolders[modelFolderIndex]);
 		LoadAnims(animFolders[modelFolderIndex]);
+		ToggleAnimationMenuItems(false);
 	}
 
 	int DetectGame()
@@ -654,7 +656,7 @@ public class ModelLoader : MonoBehaviour
 			animFiles = Directory.GetFiles(foldername)
 				.OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();
 
-			if(enableAnimation)
+			if(EnableAnimation.BoolValue)
 			{
 				LoadAnim(animFiles[animIndex]);
 			}
@@ -737,11 +739,19 @@ public class ModelLoader : MonoBehaviour
 				menuEnabled = !menuEnabled;
 				if (menuEnabled)
 				{
-					ModelIndexString = modelIndex.ToString();
-					AnimIndexString = animIndex.ToString();
+					ModelInput.text = modelIndex.ToString();
+					AnimationInput.text = animIndex.ToString();
 				}
 			}
 		}
+			
+		if (Input.GetMouseButtonUp(0)
+		    && !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
+		{
+			menuEnabled = false;
+		}
+
+		Panel.gameObject.SetActive(menuEnabled);
 
 		modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
 		animIndex =  Math.Min(Math.Max(animIndex, 0), animFiles.Count - 1);
@@ -749,18 +759,18 @@ public class ModelLoader : MonoBehaviour
 		//load new model if needed
 		if (modelFiles.Count > 0 && oldModelIndex != modelIndex)
 		{
-			ModelIndexString = modelIndex.ToString();
+			ModelInput.text = modelIndex.ToString();
 			LoadBody(modelFiles[modelIndex]);
 		}            	
 
 		if (animFiles.Count > 0 && oldAnimIndex != animIndex)
 		{
-			AnimIndexString = animIndex.ToString();
+			AnimationInput.text = animIndex.ToString();
 			LoadAnim(animFiles[animIndex]);
 		}    
 
 		//rotate model
-		if (autoRotate && autoRotateEnabled)
+		if (autoRotate && AutoRotate.BoolValue)
 		{
 			cameraRotation.x = Time.time * 100.0f;
 			cameraRotation.y = 20.0f;
@@ -789,123 +799,45 @@ public class ModelLoader : MonoBehaviour
 	void RefreshLeftText()
 	{
 		LeftText.text = LeftTextBody;
-		if(enableAnimation)
+		if(EnableAnimation.BoolValue)
 		{
 			LeftText.text += "\r\n" + LeftTextAnim; 
 		}
 	}
 
-	void OnGUI()
+	public void ToggleAnimationMenuItems(bool enabled)
 	{
-		if (menuEnabled)
+		AnimationInput.transform.parent.gameObject.SetActive(enabled);
+	}
+
+	public void ModelIndexInputChanged()
+	{
+		int newModelIndex;
+		if(int.TryParse(ModelInput.text, out newModelIndex) && newModelIndex != modelIndex)
 		{
-			int itemsCount = 0;
-			Rect rect = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 15 * menuItemCount, 400, 30 * menuItemCount);
-			//if any click outside, hide menu
-			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
-			{
-				menuEnabled = false;
-			}
-
-			GUILayout.BeginArea(rect, MenuStyle.Panel);
-			GUILayout.BeginVertical();
-
-			if (GUILayout.Button("Room viewer", MenuStyle.Button) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.Tab);
-			}
-			itemsCount++;
-
-			//model no
-			if(modelFiles.Count > 0)
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Model", MenuStyle.Label);
-				ModelIndexString = GUILayout.TextField(ModelIndexString, MenuStyle.Button);
-
-				if (Event.current.keyCode == KeyCode.Return)
-				{				
-					int newModelIndex;
-					if(int.TryParse(ModelIndexString, out newModelIndex))
-					{
-						modelIndex = Math.Min(Math.Max(newModelIndex, 0), modelFiles.Count - 1);
-						ModelIndexString = modelIndex.ToString();
-						LoadBody(modelFiles[modelIndex]);
-					}
-				}
-				GUILayout.EndHorizontal();
-				itemsCount++;
-			}
-
-			//anim no
-			if (animFiles.Count > 0)
-			{
-				//animate
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Enable animation", MenuStyle.Label);
-				if (GUILayout.Button(enableAnimation ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
-				{
-					ProcessKey(KeyCode.A);
-				}
-				GUILayout.EndHorizontal();
-				itemsCount++;
-			}
-
-			if (enableAnimation)
-			{
-				GUILayout.BeginHorizontal();
-				GUILayout.Label("Anim", MenuStyle.Label);
-				AnimIndexString = GUILayout.TextField(AnimIndexString, MenuStyle.Button);
-
-				if (Event.current.keyCode == KeyCode.Return)
-				{
-					int newAnimIndex;
-					if(int.TryParse(AnimIndexString, out newAnimIndex) && newAnimIndex != animIndex)
-					{
-						animIndex = Math.Min(Math.Max(newAnimIndex, 0), animFiles.Count - 1);
-						AnimIndexString = animIndex.ToString();
-						LoadAnim(animFiles[animIndex]);
-					}
-				}
-				GUILayout.EndHorizontal();
-				itemsCount++;
-			}
-
-			//auto rotate
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Auto rotate", MenuStyle.Label);
-			if (GUILayout.Button(autoRotateEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.R);
-			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
-
-			//noise
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Noise material", MenuStyle.Label);
-			if (GUILayout.Button(noiseEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.N);
-			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
-
-			//gradient
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Gradient material", MenuStyle.Label);
-			if (GUILayout.Button(gradientEnabled ? "Yes" : "No", MenuStyle.Option) && Event.current.button == 0)
-			{
-				ProcessKey(KeyCode.G);
-			}
-			GUILayout.EndHorizontal();
-			itemsCount++;
-			menuItemCount = itemsCount;
-			GUILayout.EndVertical();
-			GUILayout.EndArea();
+			modelIndex = Math.Min(Math.Max(newModelIndex, 0), modelFiles.Count - 1);
+			ModelInput.text = modelIndex.ToString();
+			LoadBody(modelFiles[modelIndex]);
 		}
 	}
 
+	public void AnimationIndexInputChanged()
+	{
+		int newAnimIndex;
+		if(int.TryParse(AnimationInput.text, out newAnimIndex) && newAnimIndex != animIndex)
+		{
+			animIndex = Math.Min(Math.Max(newAnimIndex, 0), animFiles.Count - 1);
+			AnimationInput.text = animIndex.ToString();
+			LoadAnim(animFiles[animIndex]);
+		}
+	}
+
+	public void ProcessKey(string keyCode)
+	{
+		KeyCode keyCodeEnum = (KeyCode)Enum.Parse(typeof(KeyCode), keyCode, true);
+		ProcessKey(keyCodeEnum);
+	}
+		
 	void ProcessKey(KeyCode code)
 	{
 		switch (code)
@@ -939,7 +871,7 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.UpArrow:
-				if(enableAnimation)
+				if(EnableAnimation.BoolValue)
 				{
 					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 					{
@@ -953,7 +885,7 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.DownArrow:
-				if(enableAnimation)
+				if(EnableAnimation.BoolValue)
 				{
 					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 					{
@@ -969,8 +901,9 @@ public class ModelLoader : MonoBehaviour
 			case KeyCode.A:
 				if (animFiles.Count > 0)
 				{
-					enableAnimation = !enableAnimation;
-					if (enableAnimation)
+					EnableAnimation.BoolValue = !EnableAnimation.BoolValue;
+					ToggleAnimationMenuItems(EnableAnimation.BoolValue);
+					if (EnableAnimation.BoolValue)
 					{
 						LoadAnim(animFiles[animIndex]);
 					}
@@ -983,18 +916,18 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.G:
-				gradientEnabled = !gradientEnabled;
+				GradientMaterial.BoolValue = !GradientMaterial.BoolValue;
 				LoadBody(modelFiles[modelIndex], false);
 				break;
 
 			case KeyCode.N:
-				noiseEnabled = !noiseEnabled;
+				NoiseMaterial.BoolValue = !NoiseMaterial.BoolValue;
 				LoadBody(modelFiles[modelIndex], false);
 				break;
 
 			case KeyCode.R:
-				autoRotateEnabled = !autoRotateEnabled;
-				if (autoRotateEnabled)
+				AutoRotate.BoolValue = !AutoRotate.BoolValue;
+				if (AutoRotate.BoolValue)
 				{
 					autoRotate = true;
 				}

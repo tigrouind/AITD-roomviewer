@@ -4,6 +4,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine.UI;
 
 public class DosBox : MonoBehaviour
 {
@@ -12,20 +13,21 @@ public class DosBox : MonoBehaviour
 	public Arrow Arrow;
 	public Box BoxPrefab;
 	public uint InternalTimer;
-	public MenuStyle Style;
 	public bool ShowAdditionalInfo;
 	public ProcessMemoryReader ProcessReader;
-	private int menuItemsCount;
 
 	public bool warpMenuEnabled;
 	public Box warpActor;
-	public string localPosX, localPosY, localPosZ;
-	public string worldPosX, worldPosY, worldPosZ;
-	public string boundingPosX, boundingPosY, boundingPosZ;
+	public InputField positionX, positionY, positionZ;
+	public InputField localPosX, localPosY, localPosZ;
+	public InputField worldPosX, worldPosY, worldPosZ;
+	public InputField boundingPosX, boundingPosY, boundingPosZ;
+	public RectTransform Panel;
 
-	public string angle;
-	private bool updateWorldPos;
-	private float lastKeyPressed;
+	public InputField angle;
+	public ToggleButton AdvancedMode;
+
+	private float lastTimeKeyPressed;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -76,6 +78,7 @@ public class DosBox : MonoBehaviour
 			box.transform.parent = Actors.transform;
 			box.name = "Actor";
 		}
+		ToggleAdvanceMode(false);
 	}
 
 	public void Update()
@@ -284,6 +287,14 @@ public class DosBox : MonoBehaviour
 				GetComponent<RoomLoader>().ProcessKey(KeyCode.L);
 			}
 		}
+				
+		if (Input.GetMouseButtonUp(0)
+			&& !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
+		{
+			warpMenuEnabled = false;
+		}
+
+		Panel.gameObject.SetActive(warpMenuEnabled);
 
 		if (ProcessReader != null)
 		{
@@ -301,7 +312,7 @@ public class DosBox : MonoBehaviour
 
 		if(warpActor != null)
 		{
-			bool enoughTimeElapsed = (Time.time - lastKeyPressed) > 0.1f;
+			bool enoughTimeElapsed = (Time.time - lastTimeKeyPressed) > 0.1f;
 
 			if (Input.GetKey(KeyCode.Keypad9) && enoughTimeElapsed)
 			{				
@@ -341,7 +352,7 @@ public class DosBox : MonoBehaviour
 				Input.GetKeyUp(KeyCode.Keypad9) || 
 				Input.GetKey(KeyCode.Keypad0))
 			{
-				lastKeyPressed = 0.0f;
+				lastTimeKeyPressed = 0.0f;
 			}
 
 			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
@@ -361,13 +372,56 @@ public class DosBox : MonoBehaviour
 			&& player.transform.localScale.magnitude > 0.01f);	
 	}
 
+	public void SetPosition()
+	{
+		//parse angle
+		int angleInt;
+		TryParseAngle(ref angle, out angleInt, Mathf.RoundToInt((warpActor.Angles.y * 1024.0f) / 360.0f));
+		SetActorAngle(warpActor, angleInt);
+
+		Vector3 bound, local, world;
+
+		if (!AdvancedMode.BoolValue)
+		{
+			TryParsePosition(ref positionX, ref positionY, ref positionZ, out local, warpActor.LocalPosition);
+
+			//apply offset to world/bound
+			Vector3 offset = local - warpActor.LocalPosition;
+			world = warpActor.WorldPosition + offset;
+			bound = warpActor.BoundingPos + offset;
+		}
+		else
+		{
+			TryParsePosition(ref boundingPosX, ref boundingPosY, ref boundingPosZ, out bound, warpActor.BoundingPos);
+			TryParsePosition(ref localPosX, ref localPosY, ref localPosZ, out local, warpActor.LocalPosition);
+			TryParsePosition(ref worldPosX, ref worldPosY, ref worldPosZ, out world, warpActor.WorldPosition);
+		}
+
+		UpdatePositionInputFields(local, world, bound);
+		SetActorToPosition(warpActor, bound, local, world);
+	}
+
+	public void SetAdvancedMode()
+	{
+		AdvancedMode.BoolValue = !AdvancedMode.BoolValue;
+		ToggleAdvanceMode(AdvancedMode.BoolValue);
+	}
+
+	public void ToggleAdvanceMode(bool enabled)
+	{
+		positionX.transform.parent.gameObject.SetActive(!enabled);
+		localPosX.transform.parent.gameObject.SetActive(enabled);
+		worldPosX.transform.parent.gameObject.SetActive(enabled);
+		boundingPosX.transform.parent.gameObject.SetActive(enabled);
+	}
+
 	void RotateActor(int offset)
 	{
 		int angleInt = Mathf.RoundToInt((warpActor.Angles.y * 1024.0f) / 360.0f);
 		int newAngle = angleInt + offset;
 		SetActorAngle(warpActor, (newAngle + 1024) % 1024);
-		angle = (newAngle * 360.0f / 1024.0f).ToString("N1");
-		lastKeyPressed = Time.time;
+		angle.text = (newAngle * 360.0f / 1024.0f).ToString("N1");
+		lastTimeKeyPressed = Time.time;
 	}
 
 	void MoveActor(Vector3 offset)
@@ -378,17 +432,22 @@ public class DosBox : MonoBehaviour
 
 		SetActorToPosition(warpActor, bound, local, world);
 
+		UpdatePositionInputFields(local, world, bound);
+		lastTimeKeyPressed = Time.time;
+	}
+
+	void UpdatePositionInputFields(Vector3 local, Vector3 world, Vector3 bound)
+	{
 		//update gui
-		localPosX = local.x.ToString();
-		localPosY = local.y.ToString();
-		localPosZ = local.z.ToString();
-		worldPosX = world.x.ToString();
-		worldPosY = world.y.ToString();
-		worldPosZ = world.z.ToString();
-		boundingPosX = bound.x.ToString();
-		boundingPosY = bound.y.ToString();
-		boundingPosZ = bound.z.ToString();
-		lastKeyPressed = Time.time;
+		localPosX.text = positionX.text = local.x.ToString();
+		localPosY.text = positionY.text = local.y.ToString();
+		localPosZ.text = positionZ.text = local.z.ToString();
+		worldPosX.text = world.x.ToString();
+		worldPosY.text = world.y.ToString();
+		worldPosZ.text = world.z.ToString();
+		boundingPosX.text = bound.x.ToString();
+		boundingPosY.text = bound.y.ToString();
+		boundingPosZ.text = bound.z.ToString();
 	}
 
 	void FixedUpdate()
@@ -457,107 +516,7 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	void OnGUI()
-	{
-		if (warpMenuEnabled)
-		{
-			int itemsCount = 0;
-			Rect rect = new Rect((Screen.width / 2) - 250, (Screen.height / 2) - 15 * menuItemsCount, 500, 30 * menuItemsCount);
-
-			//close menu if there is a click out side
-			if (Input.GetMouseButtonDown(0) && !rect.Contains(Input.mousePosition))
-			{
-				warpMenuEnabled = false;
-			}
-
-			GUILayout.BeginArea(rect, Style.Panel);
-			GUILayout.BeginVertical();
-
-			//angle
-            GUILayout.BeginHorizontal();
-			GUIStyle label = new GUIStyle(Style.Button);
-            label.fixedWidth = rect.width * 0.5f;
-			GUILayout.Label("Angle", label);
-
-            GUIStyle button = new GUIStyle(Style.Button);
-            button.normal.textColor = Color.white;
-            button.fixedWidth = rect.width * 0.5f;
-			angle = GUILayout.TextField(angle, button);
-            GUILayout.EndHorizontal();
-            itemsCount++;
-
-            //positions
-            if (updateWorldPos)
-            {                
-                GUIPositionTextFieldAndLabel("Bounding position", ref boundingPosX, ref boundingPosY, ref boundingPosZ, rect.width);
-                GUIPositionTextFieldAndLabel("Local position", ref localPosX, ref localPosY, ref localPosZ, rect.width);
-                GUIPositionTextFieldAndLabel("World position", ref worldPosX, ref worldPosY, ref worldPosZ, rect.width);
-                itemsCount += 3;
-            }
-            else
-            {
-                GUIPositionTextFieldAndLabel("Position", ref localPosX, ref localPosY, ref localPosZ, rect.width);
-                itemsCount++;    
-            }
-
-            //advanced mode
-            GUILayout.BeginHorizontal();
-            label = new GUIStyle(Style.Button);
-            label.fixedWidth = rect.width * 0.5f;
-            GUILayout.Label("Advanced mode", label);
-
-            button = new GUIStyle(Style.Button);
-            button.fixedWidth = rect.width * 0.5f;
-            if (GUILayout.Button(updateWorldPos ? "Yes" : "No", button))
-            {
-                updateWorldPos = !updateWorldPos;
-            }
-            GUILayout.EndHorizontal();
-            itemsCount++;
-
-			//button
-			GUILayout.BeginHorizontal();
-			if (GUILayout.Button("Set position", Style.Button) || Event.current.keyCode == KeyCode.Return)
-			{
-                //parse angle
-                int angleInt;
-                TryParseAngle(ref angle, out angleInt, Mathf.RoundToInt((warpActor.Angles.y * 1024.0f) / 360.0f));
-                SetActorAngle(warpActor, angleInt);
-
-                Vector3 bound, local, world;
-                TryParsePosition(ref boundingPosX, ref boundingPosY, ref boundingPosZ, out bound, warpActor.BoundingPos);
-                TryParsePosition(ref localPosX, ref localPosY, ref localPosZ, out local, warpActor.LocalPosition);
-                TryParsePosition(ref worldPosX, ref worldPosY, ref worldPosZ, out world, warpActor.WorldPosition);
-
-                if (!updateWorldPos)
-                {
-                    //apply offset to world/bound
-                    Vector3 offset = local - warpActor.LocalPosition;
-                    world = warpActor.WorldPosition + offset;
-                    bound = warpActor.BoundingPos + offset;
-
-                    //update gui
-                    worldPosX = world.x.ToString();
-                    worldPosY = world.y.ToString();
-                    worldPosZ = world.z.ToString();
-                    boundingPosX = bound.x.ToString();
-                    boundingPosY = bound.y.ToString();
-                    boundingPosZ = bound.z.ToString();
-                }
-
-                SetActorToPosition(warpActor, bound, local, world);
-			}
-			itemsCount++;
-
-			GUILayout.EndHorizontal();
-			GUILayout.EndVertical();
-			GUILayout.EndArea();
-
-			menuItemsCount = itemsCount;
-		}
-	}
-
-    private void TryParsePosition(ref string posX, ref string posY, ref string posZ, out Vector3 intValue, Vector3 defaultValue)
+	private void TryParsePosition(ref InputField posX, ref InputField posY, ref InputField posZ, out Vector3 intValue, Vector3 defaultValue)
     {
         int x, y, z;
         TryParsePosition(ref posX, out x, (int)defaultValue.x);
@@ -567,10 +526,10 @@ public class DosBox : MonoBehaviour
         intValue = new Vector3(x, y, z);
     }
 
-    private void TryParseAngle(ref string valueText, out int intValue, int defaultValue)
+	private void TryParseAngle(ref InputField inputField, out int intValue, int defaultValue)
     {
         float floatValue;
-        if(float.TryParse(valueText, out floatValue))
+		if(float.TryParse(inputField.text, out floatValue))
         {
             floatValue = floatValue >= 0.0f ? floatValue % 360.0f : 360.0f - ((-floatValue) % 360.0f);
             intValue = Mathf.RoundToInt((floatValue * 1024.0f) / 360.0f) ;
@@ -580,13 +539,13 @@ public class DosBox : MonoBehaviour
             intValue = defaultValue;
         }
 
-        valueText = (intValue * 360 / 1024.0f).ToString("N1");
+		inputField.text = (intValue * 360 / 1024.0f).ToString("N1");
     }
 
 
-	private void TryParsePosition(ref string valueText, out int intValue, int defaultValue)
+	private void TryParsePosition(ref InputField inputField, out int intValue, int defaultValue)
 	{
-		if(int.TryParse(valueText, out intValue))
+		if(int.TryParse(inputField.text, out intValue))
 		{
 			intValue = Mathf.Clamp(intValue, short.MinValue, short.MaxValue);			
 		}
@@ -595,24 +554,7 @@ public class DosBox : MonoBehaviour
             intValue = defaultValue;
 		}
 
-        valueText = intValue.ToString();
-	}
-
-	private void GUIPositionTextFieldAndLabel(string text, ref string warpX, ref string warpY, ref string warpZ, float width)
-	{
-		GUILayout.BeginHorizontal();
-		GUIStyle label = new GUIStyle(Style.Button);
-		label.fixedWidth = width * 0.5f;
-		GUILayout.Label(text, label);
-
-		//button
-		GUIStyle button = new GUIStyle(Style.Button);
-		button.normal.textColor = Color.white;
-		button.fixedWidth = width * 1.0f / 6.0f;
-		warpX = GUILayout.TextField(warpX, button);
-		warpY = GUILayout.TextField(warpY, button);
-		warpZ = GUILayout.TextField(warpZ, button);
-		GUILayout.EndHorizontal();
+		inputField.text = intValue.ToString();
 	}
 
 	private Vector3 GetMousePosition(int room, int floor)
