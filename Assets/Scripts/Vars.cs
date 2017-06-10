@@ -196,17 +196,14 @@ public class Vars : MonoBehaviour
 				inputField.text = newText;
 			}
 
-			Image image = inputField.GetComponent<Image>();
-			Text text = inputField.GetComponentInChildren<Text>();
 			if (difference)
 			{
-				image.color = Color.red;
-				text.color = Color.white;
+				var colors = inputField.colors;
+				SetInputFieldColor(inputField, new Color32(240, 68, 77, 255));
 			}
 			else
 			{
-				image.color = Color.white;
-				text.color = Color.black;
+				SetInputFieldColor(inputField, new Color32(0, 0, 0, 0));
 			}
 		}
 	}
@@ -230,9 +227,32 @@ public class Vars : MonoBehaviour
 		}
 	}
 
-	public void FreezeClick()
+	public void FreezeClick(Button button)
 	{
 		pauseVarsTracking = !pauseVarsTracking;
+		ToggleButtonState(button, pauseVarsTracking);
+	}
+
+	private void SetInputFieldColor(InputField inputField, Color32 color)
+	{
+		var colors = inputField.colors;
+		colors.normalColor = color;
+		inputField.colors = colors;
+	}
+
+	private void SetButtonColor(Button button, Color32 normalColor, Color32 highlightedColor)
+	{
+		var colors = button.colors;
+		colors.normalColor = normalColor;
+		colors.highlightedColor = highlightedColor;
+		button.colors = colors;
+	}
+
+	public void ToggleButtonState(Button button, bool enabled)
+	{ 
+		Text text = button.GetComponentInChildren<Text>();
+		text.color = enabled ? Color.red : (Color)new Color32(50, 50, 50, 255);
+		SetButtonColor(button, enabled ? new Color32(255, 174, 174, 255) : new Color32(43, 193, 118, 255), enabled ? new Color32(255, 174, 174, 255) : new Color32(178, 255, 207, 255));
 	}
 
 	public void SaveStateClick()
@@ -241,7 +261,7 @@ public class Vars : MonoBehaviour
 		SaveState(cvars);
 	}
 
-	public void CompareClick()
+	public void CompareClick(Button button)
 	{
 		compare = !compare;
 
@@ -250,6 +270,7 @@ public class Vars : MonoBehaviour
 			ignoreDifferences = true;
 		}
 		oldcompare = compare;
+		ToggleButtonState(button, compare);
 	}
 
 

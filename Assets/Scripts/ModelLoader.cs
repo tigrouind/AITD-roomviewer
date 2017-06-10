@@ -808,6 +808,7 @@ public class ModelLoader : MonoBehaviour
 	public void ToggleAnimationMenuItems(bool enabled)
 	{
 		AnimationInput.transform.parent.gameObject.SetActive(enabled);
+		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 
 	public void ModelIndexInputChanged()

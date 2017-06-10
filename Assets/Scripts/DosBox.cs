@@ -409,10 +409,11 @@ public class DosBox : MonoBehaviour
 
 	public void ToggleAdvanceMode(bool enabled)
 	{
-		positionX.transform.parent.gameObject.SetActive(!enabled);
-		localPosX.transform.parent.gameObject.SetActive(enabled);
-		worldPosX.transform.parent.gameObject.SetActive(enabled);
-		boundingPosX.transform.parent.gameObject.SetActive(enabled);
+		positionX.transform.parent.parent.gameObject.SetActive(!enabled);
+		localPosX.transform.parent.parent.gameObject.SetActive(enabled);
+		worldPosX.transform.parent.parent.gameObject.SetActive(enabled);
+		boundingPosX.transform.parent.parent.gameObject.SetActive(enabled);
+		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 
 	void RotateActor(int offset)

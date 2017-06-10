@@ -635,6 +635,7 @@ public class RoomLoader : MonoBehaviour
 		ShowVars.transform.gameObject.SetActive(enabled);
 		ShowActors.transform.parent.gameObject.SetActive(enabled);
 		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled);
+		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 		
 	public void ProcessKey(string keyCode)
