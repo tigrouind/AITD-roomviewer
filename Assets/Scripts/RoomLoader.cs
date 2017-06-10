@@ -432,21 +432,7 @@ public class RoomLoader : MonoBehaviour
 			}
 			else if (DetectGame() == 1 && HighLightedBox != null && HighLightedBox.name == "Actor")
 			{
-				warpDialog.angle.text = HighLightedBox.Angles.y.ToString("N1");
-				warpDialog.boundingPosX.text = HighLightedBox.BoundingPos.x.ToString();
-				warpDialog.boundingPosY.text = HighLightedBox.BoundingPos.y.ToString();
-				warpDialog.boundingPosZ.text = HighLightedBox.BoundingPos.z.ToString();
-				warpDialog.localPosX.text = HighLightedBox.LocalPosition.x.ToString();
-				warpDialog.localPosY.text = HighLightedBox.LocalPosition.y.ToString();
-				warpDialog.localPosZ.text = HighLightedBox.LocalPosition.z.ToString();
-				warpDialog.worldPosX.text = HighLightedBox.WorldPosition.x.ToString();
-				warpDialog.worldPosY.text = HighLightedBox.WorldPosition.y.ToString();
-				warpDialog.worldPosZ.text = HighLightedBox.WorldPosition.z.ToString();
-				warpDialog.positionX.text = HighLightedBox.LocalPosition.x.ToString();
-				warpDialog.positionY.text = HighLightedBox.LocalPosition.y.ToString();
-				warpDialog.positionZ.text = HighLightedBox.LocalPosition.z.ToString();
-
-				warpDialog.warpActor = HighLightedBox;
+				warpDialog.LoadActor(HighLightedBox);
 				warpDialog.warpMenuEnabled = true;
 			}
 			else if (!GetComponent<Vars>().enabled)

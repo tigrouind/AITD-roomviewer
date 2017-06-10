@@ -97,6 +97,24 @@ public class WarpDialog : MonoBehaviour
 		}
 	}
 
+	public void LoadActor(Box actor)
+	{
+		angle.text = actor.Angles.y.ToString("N1");
+		boundingPosX.text = actor.BoundingPos.x.ToString();
+		boundingPosY.text = actor.BoundingPos.y.ToString();
+		boundingPosZ.text = actor.BoundingPos.z.ToString();
+		localPosX.text = actor.LocalPosition.x.ToString();
+		localPosY.text = actor.LocalPosition.y.ToString();
+		localPosZ.text = actor.LocalPosition.z.ToString();
+		worldPosX.text = actor.WorldPosition.x.ToString();
+		worldPosY.text = actor.WorldPosition.y.ToString();
+		worldPosZ.text = actor.WorldPosition.z.ToString();
+		positionX.text = actor.LocalPosition.x.ToString();
+		positionY.text = actor.LocalPosition.y.ToString();
+		positionZ.text = actor.LocalPosition.z.ToString();
+		warpActor = actor;
+	}
+
 	public void SetPositionClick()
 	{
 		//parse angle
