@@ -199,7 +199,8 @@ public class DosBox : MonoBehaviour
 								float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
 								playerInfo = new StringBuilder();
-								playerInfo.AppendFormat("Position: {0} {1} {2}\nAngle: {3:N1} {4:N1}", box.LocalPosition.x, box.LocalPosition.y, box.LocalPosition.z, angle, sideAngle);
+								playerInfo.AppendFormat("Position: {0} {1} {2}\n", box.LocalPosition.x, box.LocalPosition.y, box.LocalPosition.z);
+								playerInfo.AppendFormat("Angle: {0:N1} {1:N1}", angle, sideAngle);
 
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
@@ -254,8 +255,12 @@ public class DosBox : MonoBehaviour
 					Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
 
 					fpsInfo = new StringBuilder();
-					fpsInfo.AppendFormat("Timer: {0}\nFps: {1}\nDelay: {2} ms\nAllow inventory: {3}\nCursor position: {4} {5} {6}\nLast player offset: {7}", TimeSpan.FromSeconds(InternalTimer / 60),
-						calculatedFps, lastDelayFpsCounter * 1000 / 200, allowInventory ? "Yes" : "No", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z), Mathf.RoundToInt(lastPlayerOffset));
+					fpsInfo.AppendFormat("Timer: {0}\n", TimeSpan.FromSeconds(InternalTimer / 60));
+					fpsInfo.AppendFormat("Fps: {0}\n", calculatedFps);
+					fpsInfo.AppendFormat("Delay: {0} ms\n", lastDelayFpsCounter * 1000 / 200);
+					fpsInfo.AppendFormat("Allow inventory: {0}\n", allowInventory ? "Yes" : "No");
+					fpsInfo.AppendFormat("Cursor position: {0} {1} {2}\n", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z));
+					fpsInfo.AppendFormat("Last player offset: {0}\n", Mathf.RoundToInt(lastPlayerOffset));
 				}
 				else
 				{
