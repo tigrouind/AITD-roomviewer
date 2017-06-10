@@ -5870,8 +5870,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2046595782}
-        m_MethodName: SetAdvancedMode
+      - m_Target: {fileID: 2046595784}
+        m_MethodName: AdvancedModeClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8760,6 +8760,7 @@ GameObject:
   - component: {fileID: 2046595780}
   - component: {fileID: 2046595782}
   - component: {fileID: 2046595783}
+  - component: {fileID: 2046595784}
   m_Layer: 0
   m_Name: Room
   m_TagString: Untagged
@@ -8824,23 +8825,6 @@ MonoBehaviour:
   BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}
   InternalTimer: 0
   ShowAdditionalInfo: 0
-  warpMenuEnabled: 0
-  warpActor: {fileID: 0}
-  positionX: {fileID: 66301100}
-  positionY: {fileID: 2040545188}
-  positionZ: {fileID: 1759531760}
-  localPosX: {fileID: 1204357254}
-  localPosY: {fileID: 201509705}
-  localPosZ: {fileID: 1471388993}
-  worldPosX: {fileID: 1393189298}
-  worldPosY: {fileID: 1506715096}
-  worldPosZ: {fileID: 1731514698}
-  boundingPosX: {fileID: 1116547606}
-  boundingPosY: {fileID: 1745767547}
-  boundingPosZ: {fileID: 507558541}
-  Panel: {fileID: 1169686806}
-  angle: {fileID: 403601460}
-  AdvancedMode: {fileID: 1473070841}
 --- !u!114 &2046595783
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8859,6 +8843,35 @@ MonoBehaviour:
     type: 2}
   TableCellPrefab: {fileID: 114865508593359602, guid: b49839ce4ba4a0c4fbec5b7e95a508d5,
     type: 2}
+--- !u!114 &2046595784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2046595779}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8568e342ebe3f0046b99956199c31d5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Actors: {fileID: 1100510531}
+  warpMenuEnabled: 0
+  warpActor: {fileID: 0}
+  positionX: {fileID: 66301100}
+  positionY: {fileID: 2040545188}
+  positionZ: {fileID: 1759531760}
+  localPosX: {fileID: 1204357254}
+  localPosY: {fileID: 201509705}
+  localPosZ: {fileID: 1471388993}
+  worldPosX: {fileID: 1393189298}
+  worldPosY: {fileID: 1506715096}
+  worldPosZ: {fileID: 1731514698}
+  boundingPosX: {fileID: 1116547606}
+  boundingPosY: {fileID: 1745767547}
+  boundingPosZ: {fileID: 507558541}
+  Panel: {fileID: 1169686806}
+  angle: {fileID: 403601460}
+  AdvancedMode: {fileID: 1473070841}
 --- !u!1 &2068823879
 GameObject:
   m_ObjectHideFlags: 0
@@ -9119,8 +9132,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2046595782}
-        m_MethodName: SetPosition
+      - m_Target: {fileID: 2046595784}
+        m_MethodName: SetPositionClick
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -16,19 +16,6 @@ public class DosBox : MonoBehaviour
 	public bool ShowAdditionalInfo;
 	public ProcessMemoryReader ProcessReader;
 
-	public bool warpMenuEnabled;
-	public Box warpActor;
-	public InputField positionX, positionY, positionZ;
-	public InputField localPosX, localPosY, localPosZ;
-	public InputField worldPosX, worldPosY, worldPosZ;
-	public InputField boundingPosX, boundingPosY, boundingPosZ;
-	public RectTransform Panel;
-
-	public InputField angle;
-	public ToggleButton AdvancedMode;
-
-	private float lastTimeKeyPressed;
-
 	//initial player position
 	private int dosBoxPattern;
 	private byte[][][] PlayerInitialPosition = new byte[][][]
@@ -78,7 +65,6 @@ public class DosBox : MonoBehaviour
 			box.transform.parent = Actors.transform;
 			box.name = "Actor";
 		}
-		ToggleAdvanceMode(false);
 	}
 
 	public void Update()
@@ -287,14 +273,6 @@ public class DosBox : MonoBehaviour
 				GetComponent<RoomLoader>().ProcessKey(KeyCode.L);
 			}
 		}
-				
-		if (Input.GetMouseButtonUp(0)
-			&& !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
-		{
-			warpMenuEnabled = false;
-		}
-
-		Panel.gameObject.SetActive(warpMenuEnabled);
 
 		if (ProcessReader != null)
 		{
@@ -310,145 +288,11 @@ public class DosBox : MonoBehaviour
 			}
 		}
 
-		if(warpActor != null)
-		{
-			bool enoughTimeElapsed = (Time.time - lastTimeKeyPressed) > 0.1f;
-
-			if (Input.GetKey(KeyCode.Keypad9) && enoughTimeElapsed)
-			{				
-				RotateActor(-1);
-			}
-
-			if (Input.GetKey(KeyCode.Keypad7) && enoughTimeElapsed)
-			{				
-				RotateActor(1);
-			}
-
-			if (Input.GetKey(KeyCode.Keypad4) && enoughTimeElapsed)
-			{
-				MoveActor(new Vector3(-1.0f, 0.0f, 0.0f));
-			}
-
-			if (Input.GetKey(KeyCode.Keypad6) && enoughTimeElapsed)
-			{
-				MoveActor(new Vector3(1.0f, 0.0f, 0.0f));
-			}
-
-			if (Input.GetKey(KeyCode.Keypad2) && enoughTimeElapsed)
-			{
-				MoveActor(new Vector3(0.0f, 0.0f,-1.0f));
-			}
-
-			if (Input.GetKey(KeyCode.Keypad8) && enoughTimeElapsed)
-			{
-				MoveActor(new Vector3(00.0f, 0.0f, 1.0f));
-			}
-
-			if (Input.GetKeyUp(KeyCode.Keypad4) ||
-			    Input.GetKeyUp(KeyCode.Keypad8) ||
-				Input.GetKeyUp(KeyCode.Keypad6) ||
-				Input.GetKeyUp(KeyCode.Keypad2) ||
-				Input.GetKeyUp(KeyCode.Keypad7) || 
-				Input.GetKeyUp(KeyCode.Keypad9) || 
-				Input.GetKey(KeyCode.Keypad0))
-			{
-				lastTimeKeyPressed = 0.0f;
-			}
-
-			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
-			{
-				Func<bool> isAITD1 = () => GetComponent<RoomLoader>().DetectGame() == 1;		
-				if (Input.GetKeyDown(KeyCode.W) && isAITD1())
-				{
-					MoveActor(GetMousePosition(warpActor.Room, warpActor.Floor) - warpActor.LocalPosition);
-				}
-			}
-		}
-
 		//arrow is only active if actors are active and player is active
 		Arrow.gameObject.SetActive(Actors.activeSelf
 			&& player != null
 			&& player.activeSelf
 			&& player.transform.localScale.magnitude > 0.01f);	
-	}
-
-	public void SetPosition()
-	{
-		//parse angle
-		int angleInt;
-		TryParseAngle(ref angle, out angleInt, Mathf.RoundToInt((warpActor.Angles.y * 1024.0f) / 360.0f));
-		SetActorAngle(warpActor, angleInt);
-
-		Vector3 bound, local, world;
-
-		if (!AdvancedMode.BoolValue)
-		{
-			TryParsePosition(ref positionX, ref positionY, ref positionZ, out local, warpActor.LocalPosition);
-
-			//apply offset to world/bound
-			Vector3 offset = local - warpActor.LocalPosition;
-			world = warpActor.WorldPosition + offset;
-			bound = warpActor.BoundingPos + offset;
-		}
-		else
-		{
-			TryParsePosition(ref boundingPosX, ref boundingPosY, ref boundingPosZ, out bound, warpActor.BoundingPos);
-			TryParsePosition(ref localPosX, ref localPosY, ref localPosZ, out local, warpActor.LocalPosition);
-			TryParsePosition(ref worldPosX, ref worldPosY, ref worldPosZ, out world, warpActor.WorldPosition);
-		}
-
-		UpdatePositionInputFields(local, world, bound);
-		SetActorToPosition(warpActor, bound, local, world);
-	}
-
-	public void SetAdvancedMode()
-	{
-		AdvancedMode.BoolValue = !AdvancedMode.BoolValue;
-		ToggleAdvanceMode(AdvancedMode.BoolValue);
-	}
-
-	public void ToggleAdvanceMode(bool enabled)
-	{
-		positionX.transform.parent.parent.gameObject.SetActive(!enabled);
-		localPosX.transform.parent.parent.gameObject.SetActive(enabled);
-		worldPosX.transform.parent.parent.gameObject.SetActive(enabled);
-		boundingPosX.transform.parent.parent.gameObject.SetActive(enabled);
-		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
-	}
-
-	void RotateActor(int offset)
-	{
-		int angleInt = Mathf.RoundToInt((warpActor.Angles.y * 1024.0f) / 360.0f);
-		int newAngle = angleInt + offset;
-		SetActorAngle(warpActor, (newAngle + 1024) % 1024);
-		angle.text = (newAngle * 360.0f / 1024.0f).ToString("N1");
-		lastTimeKeyPressed = Time.time;
-	}
-
-	void MoveActor(Vector3 offset)
-	{
-		Vector3 local = warpActor.LocalPosition + offset;
-		Vector3 world = warpActor.WorldPosition + offset;
-		Vector3 bound = warpActor.BoundingPos + offset;
-
-		SetActorToPosition(warpActor, bound, local, world);
-
-		UpdatePositionInputFields(local, world, bound);
-		lastTimeKeyPressed = Time.time;
-	}
-
-	void UpdatePositionInputFields(Vector3 local, Vector3 world, Vector3 bound)
-	{
-		//update gui
-		localPosX.text = positionX.text = local.x.ToString();
-		localPosY.text = positionY.text = local.y.ToString();
-		localPosZ.text = positionZ.text = local.z.ToString();
-		worldPosX.text = world.x.ToString();
-		worldPosY.text = world.y.ToString();
-		worldPosZ.text = world.z.ToString();
-		boundingPosX.text = bound.x.ToString();
-		boundingPosY.text = bound.y.ToString();
-		boundingPosZ.text = bound.z.ToString();
 	}
 
 	void FixedUpdate()
@@ -516,49 +360,8 @@ public class DosBox : MonoBehaviour
 			}
 		}
 	}
-
-	private void TryParsePosition(ref InputField posX, ref InputField posY, ref InputField posZ, out Vector3 intValue, Vector3 defaultValue)
-    {
-        int x, y, z;
-        TryParsePosition(ref posX, out x, (int)defaultValue.x);
-        TryParsePosition(ref posY, out y, (int)defaultValue.y);
-        TryParsePosition(ref posZ, out z, (int)defaultValue.z);
-
-        intValue = new Vector3(x, y, z);
-    }
-
-	private void TryParseAngle(ref InputField inputField, out int intValue, int defaultValue)
-    {
-        float floatValue;
-		if(float.TryParse(inputField.text, out floatValue))
-        {
-            floatValue = floatValue >= 0.0f ? floatValue % 360.0f : 360.0f - ((-floatValue) % 360.0f);
-            intValue = Mathf.RoundToInt((floatValue * 1024.0f) / 360.0f) ;
-        }
-        else
-        {
-            intValue = defaultValue;
-        }
-
-		inputField.text = (intValue * 360 / 1024.0f).ToString("N1");
-    }
-
-
-	private void TryParsePosition(ref InputField inputField, out int intValue, int defaultValue)
-	{
-		if(int.TryParse(inputField.text, out intValue))
-		{
-			intValue = Mathf.Clamp(intValue, short.MinValue, short.MaxValue);			
-		}
-		else
-		{
-            intValue = defaultValue;
-		}
-
-		inputField.text = intValue.ToString();
-	}
-
-	private Vector3 GetMousePosition(int room, int floor)
+	
+	public Vector3 GetMousePosition(int room, int floor)
 	{
 		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
 		Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
@@ -568,50 +371,6 @@ public class DosBox : MonoBehaviour
 			mousePosition -= roomObject.position;
 		}
 		return mousePosition * 1000.0f;
-	}
-
-	private void SetActorAngle(Box actor, int angle)
-	{
-		int index = Actors.GetComponentsInChildren<Box>(true).ToList().IndexOf(actor);
-		if (index != -1)
-		{
-			long offset = memoryAddress + index * ActorStructSize[dosBoxPattern];
-			byte[] position = new byte[2];
-			WriteShort(angle, position, 0);
-			ProcessReader.Write(position, offset + 42, 2);
-		}
-	}
-
-	private void SetActorToPosition(Box actor, Vector3 boundingPosition, Vector3 localPosition, Vector3 worldPosition)
-	{
-		//get object offset
-		int index = Actors.GetComponentsInChildren<Box>(true).ToList().IndexOf(actor);
-		if(index != -1)
-		{
-			long offset = memoryAddress + index * ActorStructSize[dosBoxPattern];
-
-            //update to memory
-            //bounding
-            Vector3 boundOffset = boundingPosition - actor.BoundingPos;
-            byte[] buffer = new byte[12];
-            ProcessReader.Read(buffer, offset + 8, 12);
-            WriteShort(ReadShort(buffer[0], buffer[1]) + (int)boundOffset.x, buffer, 0); 
-            WriteShort(ReadShort(buffer[2], buffer[3]) + (int)boundOffset.x, buffer, 2);
-            WriteShort(ReadShort(buffer[4], buffer[5]) + (int)boundOffset.y, buffer, 4); 
-            WriteShort(ReadShort(buffer[6], buffer[7]) + (int)boundOffset.y, buffer, 6);
-            WriteShort(ReadShort(buffer[8], buffer[9]) + (int)boundOffset.z, buffer, 8);
-            WriteShort(ReadShort(buffer[10], buffer[11]) + (int)boundOffset.z, buffer, 10);
-            ProcessReader.Write(buffer, offset + 8, 12);
-
-            //local+world
-			WriteShort((int)localPosition.x, buffer, 0); 
-			WriteShort((int)localPosition.y, buffer, 2); 
-			WriteShort((int)localPosition.z, buffer, 4);
-			WriteShort((int)worldPosition.x, buffer, 6); 
-			WriteShort((int)worldPosition.y, buffer, 8); 
-			WriteShort((int)worldPosition.z, buffer, 10);
-			ProcessReader.Write(buffer, offset + 28, 12);
-		}
 	}
 
 	private uint ReadUnsignedInt(byte a, byte b, byte c, byte d)
@@ -728,6 +487,11 @@ public class DosBox : MonoBehaviour
 		lastPlayerPosition = Vector3.zero;
 		linkfloor = floor;
 		linkroom = room;
+	}
+
+	public long GetActorMemoryAddress(int index)
+	{
+		return memoryAddress + index * ActorStructSize[dosBoxPattern];
 	}
 
 	#endregion

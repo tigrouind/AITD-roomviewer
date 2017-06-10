@@ -394,7 +394,7 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 
-		if (!menuEnabled && !GetComponent<DosBox>().warpMenuEnabled)
+		if (!menuEnabled && !GetComponent<WarpDialog>().warpMenuEnabled)
 		{
 			//start drag
 			if (Input.GetMouseButtonDown(0))
@@ -421,33 +421,33 @@ public class RoomLoader : MonoBehaviour
 		//menu
 		if (Input.GetMouseButtonDown(1))
 		{
-			DosBox dosBox = GetComponent<DosBox>();
+			WarpDialog warpDialog = GetComponent<WarpDialog>();
 			if(menuEnabled)
 			{
 				menuEnabled = false;
 			}
-			else if(dosBox.warpMenuEnabled)
+			else if(warpDialog.warpMenuEnabled)
 			{
-				dosBox.warpMenuEnabled = false;
+				warpDialog.warpMenuEnabled = false;
 			}
 			else if (DetectGame() == 1 && HighLightedBox != null && HighLightedBox.name == "Actor")
 			{
-                dosBox.angle.text = HighLightedBox.Angles.y.ToString("N1");
-                dosBox.boundingPosX.text = HighLightedBox.BoundingPos.x.ToString();
-				dosBox.boundingPosY.text = HighLightedBox.BoundingPos.y.ToString();
-				dosBox.boundingPosZ.text = HighLightedBox.BoundingPos.z.ToString();
-				dosBox.localPosX.text = HighLightedBox.LocalPosition.x.ToString();
-				dosBox.localPosY.text = HighLightedBox.LocalPosition.y.ToString();
-				dosBox.localPosZ.text = HighLightedBox.LocalPosition.z.ToString();
-				dosBox.worldPosX.text = HighLightedBox.WorldPosition.x.ToString();
-				dosBox.worldPosY.text = HighLightedBox.WorldPosition.y.ToString();
-				dosBox.worldPosZ.text = HighLightedBox.WorldPosition.z.ToString();
-				dosBox.positionX.text = HighLightedBox.LocalPosition.x.ToString();
-				dosBox.positionY.text = HighLightedBox.LocalPosition.y.ToString();
-				dosBox.positionZ.text = HighLightedBox.LocalPosition.z.ToString();
+				warpDialog.angle.text = HighLightedBox.Angles.y.ToString("N1");
+				warpDialog.boundingPosX.text = HighLightedBox.BoundingPos.x.ToString();
+				warpDialog.boundingPosY.text = HighLightedBox.BoundingPos.y.ToString();
+				warpDialog.boundingPosZ.text = HighLightedBox.BoundingPos.z.ToString();
+				warpDialog.localPosX.text = HighLightedBox.LocalPosition.x.ToString();
+				warpDialog.localPosY.text = HighLightedBox.LocalPosition.y.ToString();
+				warpDialog.localPosZ.text = HighLightedBox.LocalPosition.z.ToString();
+				warpDialog.worldPosX.text = HighLightedBox.WorldPosition.x.ToString();
+				warpDialog.worldPosY.text = HighLightedBox.WorldPosition.y.ToString();
+				warpDialog.worldPosZ.text = HighLightedBox.WorldPosition.z.ToString();
+				warpDialog.positionX.text = HighLightedBox.LocalPosition.x.ToString();
+				warpDialog.positionY.text = HighLightedBox.LocalPosition.y.ToString();
+				warpDialog.positionZ.text = HighLightedBox.LocalPosition.z.ToString();
 
-				dosBox.warpActor = HighLightedBox;
-				dosBox.warpMenuEnabled = true;
+				warpDialog.warpActor = HighLightedBox;
+				warpDialog.warpMenuEnabled = true;
 			}
 			else if (!GetComponent<Vars>().enabled)
 			{
