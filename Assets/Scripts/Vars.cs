@@ -146,8 +146,8 @@ public class Vars : MonoBehaviour
 				cell.onEndEdit.AddListener((value) => OnCellChange(cell, data, cellIndex));
 
 				UIPointerHandler pointerHandler = cell.GetComponent<UIPointerHandler>();
-				pointerHandler.PointerEnter.AddListener((value) => OnPointerEnter(sectionName, cellIndex));
-				pointerHandler.PointerExit.AddListener((value) => OnPointerExit());
+				pointerHandler.PointerEnter.AddListener((value) => OnCellPointerEnter(sectionName, cellIndex));
+				pointerHandler.PointerExit.AddListener((value) => OnCellPointerExit());
 				data[i].inputField = cell;
 			}
 		}
@@ -199,7 +199,7 @@ public class Vars : MonoBehaviour
 			data[i].memoryAddress = offset + i * 2;
 
 			//Check differences
-			bool difference = (currenttime - data[i].time) < 3.0f;
+			bool difference = (currenttime - data[i].time) < 5.0f;
 
 			InputField inputField = data[i].inputField;
 
@@ -216,7 +216,6 @@ public class Vars : MonoBehaviour
 
 			if (difference)
 			{
-				var colors = inputField.colors;
 				SetInputFieldColor(inputField, new Color32(240, 68, 77, 255));
 			}
 			else
@@ -226,12 +225,12 @@ public class Vars : MonoBehaviour
 		}
 	}
 
-	void OnPointerEnter(string sectionName, int cellIndex)
+	void OnCellPointerEnter(string sectionName, int cellIndex)
 	{
 		VarText.text = varParser.GetText(sectionName, cellIndex);
 	}
 
-	void OnPointerExit()
+	void OnCellPointerExit()
 	{
 		VarText.text = string.Empty;
 	}
