@@ -7,6 +7,7 @@ using System.Globalization;
 using System;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Text;
 
 public class ModelLoader : MonoBehaviour
 {
@@ -50,6 +51,7 @@ public class ModelLoader : MonoBehaviour
 	public ToggleButton GradientMaterial;
 	public ToggleButton NoiseMaterial;
 	public ToggleButton EnableAnimation;
+	public ToggleButton ShowAdditionalInfo;
 
 	public static short ReadShort(byte a, byte b)
 	{
@@ -61,7 +63,7 @@ public class ModelLoader : MonoBehaviour
 
 	void LoadBody(string filename, bool resetcamera = true)
 	{
-		string varName = varParser.GetText("BODYS", modelIndex, string.Empty, false);
+		string varName = varParser.GetText("BODYS", modelIndex);
 		LeftTextBody = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
 		RefreshLeftText();
 
@@ -446,14 +448,16 @@ public class ModelLoader : MonoBehaviour
 	class Frame
 	{
 		public float Time;
+		public float OffsetX;
+		public float OffsetY;
+		public float OffsetZ;
 		public List<Vector4> Bones;
 	}
 
 	void LoadAnim(string filename)
 	{
-		string varName = varParser.GetText("ANIMS", animIndex, string.Empty, false);
+		string varName = varParser.GetText("ANIMS", animIndex);
 		LeftTextAnim = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + animIndex + "/" + (animFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
-		RefreshLeftText();
 
 		int i = 0;
 		byte[] allbytes = File.ReadAllBytes(filename);
@@ -466,6 +470,10 @@ public class ModelLoader : MonoBehaviour
 		{
 			Frame f = new Frame();
 			f.Time = ReadShort(allbytes[i + 0], allbytes[i + 1]);
+			f.OffsetX = ReadShort(allbytes[i + 2], allbytes[i + 3]);
+			f.OffsetY = ReadShort(allbytes[i + 4], allbytes[i + 5]);
+			f.OffsetZ = ReadShort(allbytes[i + 6], allbytes[i + 7]);
+
 			f.Bones = new List<Vector4>();
 			i += 8;
 			for(int bone = 0 ; bone < boneCount ; bone++)
@@ -493,6 +501,8 @@ public class ModelLoader : MonoBehaviour
 
 			animFrames.Add(f);
 		}
+
+		RefreshLeftText();
 	}
 
 	void AnimateModel()
@@ -798,16 +808,30 @@ public class ModelLoader : MonoBehaviour
 
 	void RefreshLeftText()
 	{
-		LeftText.text = LeftTextBody;
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.Append(LeftTextBody);
 		if(EnableAnimation.BoolValue)
 		{
-			LeftText.text += "\r\n" + LeftTextAnim; 
+			stringBuilder.Append("\r\n" + LeftTextAnim); 
+			if(ShowAdditionalInfo.BoolValue && animFrames != null)
+			{
+				int index = 0;
+				stringBuilder.Append("\r\n\r\n"); 
+				foreach(Frame frame in animFrames)
+				{
+					stringBuilder.AppendFormat("Frame {0}: <color=#00c864>{1} {2} {3} {4}</color>\r\n", index, frame.Time, frame.OffsetX, frame.OffsetY, -frame.OffsetZ);
+					index++;
+				}
+			}
 		}
+
+		LeftText.text = stringBuilder.ToString();
 	}
 
 	public void ToggleAnimationMenuItems(bool enabled)
 	{
 		AnimationInput.transform.parent.gameObject.SetActive(enabled);
+		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled);
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 
@@ -914,6 +938,11 @@ public class ModelLoader : MonoBehaviour
 						LoadBody(modelFiles[modelIndex], false);
 					}
 				}
+				break;
+
+			case KeyCode.E:
+				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+				RefreshLeftText();
 				break;
 
 			case KeyCode.G:
