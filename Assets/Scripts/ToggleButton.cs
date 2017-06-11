@@ -43,19 +43,11 @@ public class ToggleButton : MonoBehaviour
 		RefreshText();
 	}
 
-	public void RefreshText()
+	void RefreshText()
 	{
 		if (Items.Length > 0)
 		{
-			Button btn = GetComponent<Button>();
-			btn.GetComponentInChildren<Text>().text = Items[Value];
+			GetComponentInChildren<Text>().text = Items[Value];
 		}
-	}
-
-	
-	// Update is called once per frame
-	void Update () 
-	{
-		
 	}
 }
