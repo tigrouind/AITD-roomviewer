@@ -54,7 +54,8 @@ public class DosBox : MonoBehaviour
 	private bool allowInventory;
 
 	private Vector3 lastPlayerPositionFixedUpdate;
-	private float lastPlayerOffset;
+	private int lastPlayerOffset;
+	private int lastPlayerMod;
 
 	public void Start()
 	{
@@ -260,7 +261,8 @@ public class DosBox : MonoBehaviour
 					fpsInfo.AppendFormat("Delay: {0} ms\n", lastDelayFpsCounter * 1000 / 200);
 					fpsInfo.AppendFormat("Allow inventory: {0}\n", allowInventory ? "Yes" : "No");
 					fpsInfo.AppendFormat("Cursor position: {0} {1} {2}\n", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z));
-					fpsInfo.AppendFormat("Last player offset: {0}\n", Mathf.RoundToInt(lastPlayerOffset));
+					fpsInfo.AppendFormat("Last player offset: {0}\n", lastPlayerOffset);
+					fpsInfo.AppendFormat("Last player mod: {0}\n", lastPlayerMod);
 				}
 				else
 				{
@@ -357,8 +359,18 @@ public class DosBox : MonoBehaviour
 						Vector3 position = new Vector3((boundingX1 + boundingX2) / 2.0f, 0.0f, (boundingZ1 + boundingZ2) / 2.0f);
 						if (position != lastPlayerPositionFixedUpdate)
 						{
-							lastPlayerOffset = (position - lastPlayerPositionFixedUpdate).magnitude;
+							lastPlayerOffset = Mathf.FloorToInt((position - lastPlayerPositionFixedUpdate).magnitude);
 							lastPlayerPositionFixedUpdate = position;	
+						}
+
+						int modx = ReadShort(memory[k + 90], memory[k + 91]);
+						int mody = ReadShort(memory[k + 92], memory[k + 93]);
+						int modz = ReadShort(memory[k + 94], memory[k + 95]);
+						Vector3 mod = new Vector3(modx, mody, modz);
+
+						if(mod != Vector3.zero)
+						{
+							lastPlayerMod = Mathf.FloorToInt(mod.magnitude);
 						}
 					}
 				}
