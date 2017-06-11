@@ -8,45 +8,19 @@ public class VarParser
 	readonly Dictionary<string, Dictionary<int, string>> sections 
 		= new Dictionary<string, Dictionary<int, string>>();
 	
-	public string GetText(string sectionName, string value, string defaultText = null, bool nospaces = true)
-	{
-		int parsedNumber;
-		if(int.TryParse(value, out parsedNumber))
-		{
-			return GetText(sectionName, parsedNumber, defaultText, nospaces);
-		}
-		
-		if (defaultText != null)
-		 	return defaultText;
-		
-		return value;
-	}
-	
-	public string GetText(string sectionName, int value, string defaultText = null, bool nospaces = true)
-	{
-		string text;
-		Dictionary<int, string> section;
-		
+	public string GetText(string sectionName, int value)
+	{		
+		Dictionary<int, string> section;		
 		if (sections.TryGetValue(sectionName, out section))
 	    {
+			string text;
  		   	if(section.TryGetValue(value, out text))
-			{	
- 		   		if(nospaces)
- 		   		{	
-					text = Regex.Replace(text, @"-", " ");	 		   			
- 		   			text = Regex.Replace(text, @"/", " or ");
- 		   			text = Regex.Replace(text, @"[^A-Za-z0-9 ]", string.Empty);
-					text = Regex.Replace(text, @"\s+", "_");
- 		   		}
- 		   		
+			{			   		
 				return text;
 			}
 		}
 						
-		if (defaultText != null)
-		 	return defaultText;
-		
-		return value.ToString();
+		return string.Empty;
 	}
 	
 	public void Parse(string filePath)
@@ -60,22 +34,22 @@ public class VarParser
 		{				
 			//check if new section 
 			Match sectionMatch = section.Match(line);
-			if(sectionMatch.Success)
+			if (sectionMatch.Success)
 			{
 				currentSection = new Dictionary<int, string>();
 				sections.Add(sectionMatch.Value.Trim(), currentSection);
 			}
-			else if(currentSection != null)
+			else if (currentSection != null)
 			{
-				 //parse line if inside section
+				//parse line if inside section
 				Match itemMatch = item.Match(line);
-				if(itemMatch.Success)
+				if (itemMatch.Success)
 				{						
 					int lineNumber = int.Parse(itemMatch.Groups["linenumber"].Value);
 					string nextNumberString = itemMatch.Groups["next"].Value.Trim();
 					int nextNumber;
 					
-					if(!string.IsNullOrEmpty(nextNumberString))
+					if (!string.IsNullOrEmpty(nextNumberString))
 					{																										
 						nextNumber = int.Parse(nextNumberString);
 					}
@@ -85,7 +59,7 @@ public class VarParser
 					}
 											
 					string text = itemMatch.Groups["text"].Value.Trim();
-					if(!string.IsNullOrEmpty(text))
+					if (!string.IsNullOrEmpty(text))
 					{
 						for(int i = lineNumber; i <= nextNumber ; i++)
 						{								

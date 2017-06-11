@@ -1,6 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
+using UnityEngine.EventSystems;
 
 public class Vars : MonoBehaviour
 {
@@ -9,6 +11,7 @@ public class Vars : MonoBehaviour
 	private byte[] memory = new byte[512];
 	private Var[] vars = new Var[207];
 	private Var[] cvars = new Var[44];
+	private VarParser varParser = new VarParser(); 
 
 	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 };
 	private long varsMemoryAddress = -1;
@@ -25,6 +28,17 @@ public class Vars : MonoBehaviour
 	public RectTransform TabB;
 	public RectTransform TableHeaderPrefab;
 	public InputField TableCellPrefab;
+	public Text VarText;
+
+	public void Start()
+	{
+		//parse vars.txt file
+		string varPath = @"GAMEDATA\vars.txt"; 
+		if (File.Exists(varPath))
+		{
+			varParser.Parse(varPath);
+		}
+	}
 
 	public void OnEnable()
 	{
@@ -91,18 +105,18 @@ public class Vars : MonoBehaviour
 	void UpdateCellSize()
 	{
 		//set cell size
-		Vector2 cellSize = new Vector2(Screen.width / 21.0f, (Screen.height - 30.0f) / 16.0f);
+		Vector2 cellSize = new Vector2(Screen.width / 21.0f, (Screen.height - 60.0f) / 16.0f);
 		TabA.GetComponent<GridLayoutGroup>().cellSize = cellSize;
 		TabB.GetComponent<GridLayoutGroup>().cellSize = cellSize;	
 	}
 
 	void BuildTables()
 	{
-		BuildTable(TabA, 207, vars);
-		BuildTable(TabB, 44, cvars);
+		BuildTable(TabA, "VARS", vars);
+		BuildTable(TabB, "C_VARS", cvars);
 	}
 
-	void BuildTable(RectTransform tab, int numberOfCells, Var[] data)
+	void BuildTable(RectTransform tab, string sectionName, Var[] data)
 	{
 		if (tab.childCount == 0)
 		{
@@ -117,7 +131,7 @@ public class Vars : MonoBehaviour
 				header.GetComponentInChildren<Text>().text = i.ToString();
 			}
 
-			for (int i = 0; i < numberOfCells; i++)
+			for (int i = 0; i < data.Length; i++)
 			{
 				if (i % 20 == 0)
 				{
@@ -130,6 +144,10 @@ public class Vars : MonoBehaviour
 				cell.transform.SetParent(tab.transform);
 				int cellIndex = i;
 				cell.onEndEdit.AddListener((value) => OnCellChange(cell, data, cellIndex));
+
+				UIPointerHandler pointerHandler = cell.GetComponent<UIPointerHandler>();
+				pointerHandler.PointerEnter.AddListener((value) => OnPointerEnter(sectionName, cellIndex));
+				pointerHandler.PointerExit.AddListener((value) => OnPointerExit());
 				data[i].inputField = cell;
 			}
 		}
@@ -206,6 +224,16 @@ public class Vars : MonoBehaviour
 				SetInputFieldColor(inputField, new Color32(0, 0, 0, 0));
 			}
 		}
+	}
+
+	void OnPointerEnter(string sectionName, int cellIndex)
+	{
+		VarText.text = varParser.GetText(sectionName, cellIndex);
+	}
+
+	void OnPointerExit()
+	{
+		VarText.text = string.Empty;
 	}
 
 	void OnCellChange(InputField cell, Var[] data, int cellIndex)

@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 222798845289937860}
   - component: {fileID: 114737464363747540}
   - component: {fileID: 114865508593359602}
+  - component: {fileID: 114164036856648614}
   m_Layer: 5
   m_Name: TableCell
   m_TagString: Untagged
@@ -46,6 +47,27 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &114164036856648614
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1484422808789470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f38812943fe6160469d00833db7eec00, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PointerEnter:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: PointerEventHandler, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  PointerExit:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: PointerEventHandler, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
 --- !u!114 &114303513920774196
 MonoBehaviour:
   m_ObjectHideFlags: 1
