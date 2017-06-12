@@ -11,11 +11,6 @@ public class Box : MonoBehaviour
 	private bool highlighted;
 	private bool alwaysOnTop;
 
-	private static Dictionary<Color32, Material> materialsCache = new Dictionary<Color32, Material>();
-	public Material TransparentMaterial;
-	public Material OpaqueMaterial;
-	public Material AlwaysOnTopMaterial;
-
 	public bool ShowAdditionalInfo;
 	public int ID;
 	public int Flags;
@@ -103,34 +98,9 @@ public class Box : MonoBehaviour
 		Renderer renderer = this.GetComponent<Renderer>();
 		if ((renderer.sharedMaterial == null || renderer.sharedMaterial.color != materialColor))
 		{				
-			renderer.sharedMaterial = GetMaterialFromCache(materialColor);
+            renderer.sharedMaterial = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor);
 		}
-	}
-
-	private Material GetMaterialFromCache(Color32 color)
-	{
-		Material material;
-		if (!materialsCache.TryGetValue(color, out material))
-		{
-			if (color.a == 255)
-			{
-				material = new Material(OpaqueMaterial);
-			}
-			else if (color.a == 254)
-			{
-				material = new Material(AlwaysOnTopMaterial);
-			}
-			else
-			{
-				material = new Material(TransparentMaterial);
-			}
-
-			material.color = color;
-			materialsCache.Add(color, material);
-		}
-
-		return material;
-	}
+	}       	
 
 	public string ToString(uint timer)
 	{
