@@ -369,7 +369,8 @@ public class RoomLoader : MonoBehaviour
 
 	void Update()
 	{
-		if (Input.GetAxis("Mouse ScrollWheel") > 0)
+		float mouseWheel = Input.GetAxis("Mouse ScrollWheel");
+		if (mouseWheel > 0.0f)
 		{
 			if (Camera.main.orthographic)
 			{
@@ -381,8 +382,7 @@ public class RoomLoader : MonoBehaviour
 			}
 
 		}
-
-		if (Input.GetAxis("Mouse ScrollWheel") < 0)
+		else if (mouseWheel < 0.0f)
 		{
 			if (Camera.main.orthographic)
 			{
