@@ -41,34 +41,37 @@ public class WarpDialog : MonoBehaviour
 			if(!Panel.GetComponentsInChildren<InputField>().Any(x => x.isFocused))
 			{
 				bool enoughTimeElapsed = (Time.time - lastTimeKeyPressed) > 0.1f;
-				if (Input.GetKey(KeyCode.Keypad9) && enoughTimeElapsed)
-				{				
-					RotateActor(-1);
-				}
-
-				if (Input.GetKey(KeyCode.Keypad7) && enoughTimeElapsed)
-				{				
-					RotateActor(1);
-				}
-
-				if (Input.GetKey(KeyCode.Keypad4) && enoughTimeElapsed)
+				if (enoughTimeElapsed)
 				{
-					MoveActor(new Vector3(-1.0f, 0.0f, 0.0f));
-				}
+					if (Input.GetKey(KeyCode.Keypad9))
+					{				
+						RotateActor(-1);
+					}
 
-				if (Input.GetKey(KeyCode.Keypad6) && enoughTimeElapsed)
-				{
-					MoveActor(new Vector3(1.0f, 0.0f, 0.0f));
-				}
+					if (Input.GetKey(KeyCode.Keypad7))
+					{				
+						RotateActor(1);
+					}
 
-				if (Input.GetKey(KeyCode.Keypad2) && enoughTimeElapsed)
-				{
-					MoveActor(new Vector3(0.0f, 0.0f,-1.0f));
-				}
+					if (Input.GetKey(KeyCode.Keypad4))
+					{
+						MoveActor(new Vector3(-1.0f, 0.0f, 0.0f));
+					}
 
-				if (Input.GetKey(KeyCode.Keypad8) && enoughTimeElapsed)
-				{
-					MoveActor(new Vector3(00.0f, 0.0f, 1.0f));
+					if (Input.GetKey(KeyCode.Keypad6))
+					{
+						MoveActor(new Vector3(1.0f, 0.0f, 0.0f));
+					}
+
+					if (Input.GetKey(KeyCode.Keypad2))
+					{						
+						MoveActor(new Vector3(0.0f, 0.0f, -1.0f));
+					}
+
+					if (Input.GetKey(KeyCode.Keypad8))
+					{
+						MoveActor(new Vector3(0.0f, 0.0f, 1.0f));
+					}	
 				}
 
 				if (Input.GetKeyUp(KeyCode.Keypad4) ||
@@ -90,7 +93,7 @@ public class WarpDialog : MonoBehaviour
 				if (Input.GetKeyDown(KeyCode.W) && isAITD1())
 				{
 					Vector3 offset = GetComponent<DosBox>().GetMousePosition(warpActor.Room, warpActor.Floor) - warpActor.LocalPosition;
-					offset = new Vector3(Mathf.RoundToInt(offset.x), Mathf.RoundToInt(offset.y), Mathf.RoundToInt(offset.z));
+					offset = new Vector3(Mathf.RoundToInt(offset.x), 0.0f, Mathf.RoundToInt(offset.z));
 					MoveActor(offset);
 				}
 			}
@@ -168,6 +171,8 @@ public class WarpDialog : MonoBehaviour
 		WriteActorAngle(warpActor, (newAngle + 1024) % 1024);
 		angle.text = (newAngle * 360.0f / 1024.0f).ToString("N1");
 		lastTimeKeyPressed = Time.time;
+
+		warpActor.Angles.y = newAngle * 360.0f / 1024.0f;
 	}
 
 	//input keys
@@ -181,6 +186,10 @@ public class WarpDialog : MonoBehaviour
 
 		UpdatePositionInputFields(local, world, bound);
 		lastTimeKeyPressed = Time.time;
+
+		warpActor.LocalPosition = local;
+		warpActor.WorldPosition = world;
+		warpActor.BoundingPos = bound;
 	}
 
 	void UpdatePositionInputFields(Vector3 local, Vector3 world, Vector3 bound)
