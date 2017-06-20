@@ -58,6 +58,9 @@ If everything is OK, you should now view a white square with an arrow, this is p
 If you leave current room, next room is switched automatically.
 Note : once game is linked, you can start another new game, or load a saved game, it will continue to work.
 
+## Warp actor
+When the game is linked to DOSBOX, it is possible to change the position of an actor by selecting it, then pressing CTRL-W. The actor will be warped where the mouse cursor is. It is also possible to individually edit positions of an actor by right clicking on it or pressing numpad keys.
+
 # Model viewer 
 
 ## Installation 
@@ -79,7 +82,9 @@ If you want to be able to view animations, unpack files LISTANIM.PAK and LISTANI
 
 - N : noise material
 - G : gradient material
-- A : camera auto rotate mode
+- R : camera auto rotate mode
+- E : show extra info
+- A : enable animation
 - Tab : switch to room viewer
 
 ## Known bugs/limitations :
