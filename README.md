@@ -59,7 +59,10 @@ If you leave current room, next room is switched automatically.
 Note : once game is linked, you can start another new game, or load a saved game, it will continue to work.
 
 ## Warp actor
-When the game is linked to DOSBOX, it is possible to change the position of an actor by selecting it, then pressing CTRL-W. The actor will be warped where the mouse cursor is. It is also possible to individually edit positions of an actor by right clicking on it or pressing numpad keys.
+When the game is linked to DOSBOX, it is possible to change the position of an actor by selecting it, then pressing CTRL-W. The actor will be warped to mouse position. It is also possible to manually edit positions of an actor by right clicking on it or by pressing numpad keys :
+- 4 6 2 8 : move actor left / right / down / up
+- 7 9 : rotate actor left / right
+- If you hold 0 while pressing the numpad keys above, position is updated at a higher rate.
 
 # Model viewer 
 
