@@ -9,11 +9,11 @@ AITD2 and AITD3 games are also supported.
 1. Extract AITD room viewer archive somewhere (eg : on your desktop)
 2. Create a folder named "GAMEDATA" inside AITD room viewer folder
 3. Make sure you have original version of the game installed on your computer.
-4. Download [QuickBMS](http://aluigi.altervista.org/quickbms.htm) and [alonedark.bms] (http://aluigi.altervista.org/bms/alonedark.bms) script ([alternative link](https://github.com/tigrouind/AITD-roomviewer/releases/download/1.1.14/alonedark.bms)).
+4. Download [QuickBMS](http://aluigi.altervista.org/quickbms.htm) and [alonedark.bms](http://aluigi.altervista.org/bms/alonedark.bms) script ([alternative link](https://github.com/tigrouind/AITD-roomviewer/releases/download/1.1.14/alonedark.bms)).
 5. Start QuickBMS
- - Select "alonedark.bms" script
- - Select all files named ETAGE00.PAK, ETAGE01.PAK, ETAGE02.PAK, ... from AITD original game folder (use ctrl + left click)
- - Select as output folder the folder "GAMEDATA" you created previously.
+   - Select "alonedark.bms" script
+   - Select all files named ETAGE00.PAK, ETAGE01.PAK, ETAGE02.PAK, ... from AITD original game folder (use ctrl + left click)
+   - Select as output folder the folder "GAMEDATA" you created previously.
 
 ## Commands
 
@@ -60,8 +60,8 @@ Note : once game is linked, you can start another new game, or load a saved game
 
 ## Warp actor
 When the game is linked to DOSBOX, it is possible to change the position of an actor by selecting it, then pressing CTRL-W. The actor will be warped to mouse position. It is also possible to manually edit positions of an actor by right clicking on it or by pressing numpad keys :
-- 4 6 2 8 : move actor left / right / down / up
-- 7 9 : rotate actor left / right
+- 4, 6, 2, 8 : move actor left / right / down / up
+- 7, 9 : rotate actor left / right
 - If you hold 0 while pressing the numpad keys above, position is updated at a higher rate.
 
 # Model viewer 
