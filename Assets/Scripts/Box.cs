@@ -31,10 +31,34 @@ public class Box : MonoBehaviour
 	public int PositionInTrack;
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
-	public Vector3 BoundingPos;
-	public Vector3 BoundingSize;
+	public Vector3 BoundingLower;
+	public Vector3 BoundingUpper;
 	public Vector3 Angles;
 	public Vector3 Mod;
+
+    public Vector3 BoundingPos 
+    {
+        get
+        {
+            return new Vector3(
+                (int)((BoundingUpper.x + BoundingLower.x)) / 2, 
+                (int)((BoundingUpper.y + BoundingLower.y)) / 2,
+                (int)((BoundingUpper.z + BoundingLower.z)) / 2
+            );
+        }
+    }
+
+    public Vector3 BoundingSize 
+    {
+        get
+        {
+            return new Vector3(
+                (BoundingUpper.x - BoundingLower.x), 
+                (BoundingUpper.y - BoundingLower.y),
+                (BoundingUpper.z - BoundingLower.z)
+            );
+        }
+    }
 
 	public bool HighLight
 	{
@@ -123,7 +147,10 @@ public class Box : MonoBehaviour
 				sb.AppendFormat("\r\nZV_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
 				sb.AppendFormat("\r\nZV_SIZE = {0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
 				sb.AppendFormat("\r\nMOD = {0} {1} {2}", Mod.x, Mod.y, Mod.z);
-				sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", Angles.x, Angles.y, Angles.z);
+                sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", 
+                    Angles.x * 360.0f / 1024.0f, 
+                    Angles.y * 360.0f / 1024.0f,
+                    Angles.z * 360.0f / 1024.0f);
 			}			
 			
 			if (Body != -1)

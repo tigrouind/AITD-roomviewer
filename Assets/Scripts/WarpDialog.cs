@@ -102,19 +102,8 @@ public class WarpDialog : MonoBehaviour
 
 	public void LoadActor(Box actor)
 	{
-		angle.text = actor.Angles.y.ToString("N1");
-		boundingPosX.text = actor.BoundingPos.x.ToString();
-		boundingPosY.text = actor.BoundingPos.y.ToString();
-		boundingPosZ.text = actor.BoundingPos.z.ToString();
-		localPosX.text = actor.LocalPosition.x.ToString();
-		localPosY.text = actor.LocalPosition.y.ToString();
-		localPosZ.text = actor.LocalPosition.z.ToString();
-		worldPosX.text = actor.WorldPosition.x.ToString();
-		worldPosY.text = actor.WorldPosition.y.ToString();
-		worldPosZ.text = actor.WorldPosition.z.ToString();
-		positionX.text = actor.LocalPosition.x.ToString();
-		positionY.text = actor.LocalPosition.y.ToString();
-		positionZ.text = actor.LocalPosition.z.ToString();
+        UpdateAngleInputField(actor);
+        UpdatePositionInputFields(actor);
 		warpActor = actor;
 	}
 
@@ -122,30 +111,37 @@ public class WarpDialog : MonoBehaviour
 	{
 		//parse angle
 		int angleInt;
-		TryParseAngle(ref angle, out angleInt, Mathf.RoundToInt((warpActor.Angles.y * 1024.0f) / 360.0f));
+        TryParseAngle(angle, out angleInt, (int)warpActor.Angles.y);
 		WriteActorAngle(warpActor, angleInt);
+        UpdateAngleInputField(warpActor);
 
 		//parse position
-		Vector3 bound, local, world;
+        Vector3 lowerBound, upperBound, local, world;
 
 		if (!AdvancedMode.BoolValue)
 		{
-			TryParsePosition(ref positionX, ref positionY, ref positionZ, out local, warpActor.LocalPosition);
+			TryParsePosition(positionX, positionY, positionZ, out local, warpActor.LocalPosition);
 
 			//apply offset to world/bound
 			Vector3 offset = local - warpActor.LocalPosition;
 			world = warpActor.WorldPosition + offset;
-			bound = warpActor.BoundingPos + offset;
+            lowerBound = warpActor.BoundingLower + offset;
+            upperBound = warpActor.BoundingUpper + offset;
 		}
 		else
 		{
-			TryParsePosition(ref boundingPosX, ref boundingPosY, ref boundingPosZ, out bound, warpActor.BoundingPos);
-			TryParsePosition(ref localPosX, ref localPosY, ref localPosZ, out local, warpActor.LocalPosition);
-			TryParsePosition(ref worldPosX, ref worldPosY, ref worldPosZ, out world, warpActor.WorldPosition);
-		}
+            Vector3 boundingPos;
+            TryParsePosition(boundingPosX, boundingPosY, boundingPosZ, out boundingPos, warpActor.BoundingPos);
+			TryParsePosition(localPosX, localPosY, localPosZ, out local, warpActor.LocalPosition);
+			TryParsePosition(worldPosX, worldPosY, worldPosZ, out world, warpActor.WorldPosition);
 
-		UpdatePositionInputFields(local, world, bound);
-		WriteActorPosition(warpActor, bound, local, world);
+            Vector3 offset = boundingPos - warpActor.BoundingPos;
+            lowerBound = warpActor.BoundingLower + offset;
+            upperBound = warpActor.BoundingUpper + offset;
+		}
+            		
+        WriteActorPosition(warpActor, lowerBound, upperBound, local, world);
+        UpdatePositionInputFields(warpActor);
 	}
 
 	public void AdvancedModeClick()
@@ -166,13 +162,10 @@ public class WarpDialog : MonoBehaviour
 	//input keys
 	void RotateActor(int offset)
 	{
-		int angleInt = Mathf.RoundToInt((warpActor.Angles.y * 1024.0f) / 360.0f);
-		int newAngle = angleInt + offset;
-		WriteActorAngle(warpActor, (newAngle + 1024) % 1024);
-		angle.text = (newAngle * 360.0f / 1024.0f).ToString("N1");
-		lastTimeKeyPressed = Time.time;
-
-		warpActor.Angles.y = newAngle * 360.0f / 1024.0f;
+        int angle = (int)warpActor.Angles.y + offset;
+        WriteActorAngle(warpActor, (angle + 1024) % 1024);		
+        UpdateAngleInputField(warpActor);
+        lastTimeKeyPressed = Time.time;
 	}
 
 	//input keys
@@ -180,59 +173,57 @@ public class WarpDialog : MonoBehaviour
 	{
 		Vector3 local = warpActor.LocalPosition + offset;
 		Vector3 world = warpActor.WorldPosition + offset;
-		Vector3 bound = warpActor.BoundingPos + offset;
+        Vector3 boundLow = warpActor.BoundingLower + offset;
+        Vector3 boundUpper = warpActor.BoundingUpper + offset;
 
-		WriteActorPosition(warpActor, bound, local, world);
-
-		UpdatePositionInputFields(local, world, bound);
-		lastTimeKeyPressed = Time.time;
-
-		warpActor.LocalPosition = local;
-		warpActor.WorldPosition = world;
-		warpActor.BoundingPos = bound;
+        WriteActorPosition(warpActor, boundLow, boundUpper, local, world);        		
+        UpdatePositionInputFields(warpActor);
+        lastTimeKeyPressed = Time.time;
 	}
 
-	void UpdatePositionInputFields(Vector3 local, Vector3 world, Vector3 bound)
+    void UpdatePositionInputFields(Box actor)
 	{
-		//update gui
-		localPosX.text = positionX.text = local.x.ToString();
-		localPosY.text = positionY.text = local.y.ToString();
-		localPosZ.text = positionZ.text = local.z.ToString();
-		worldPosX.text = world.x.ToString();
-		worldPosY.text = world.y.ToString();
-		worldPosZ.text = world.z.ToString();
-		boundingPosX.text = bound.x.ToString();
-		boundingPosY.text = bound.y.ToString();
-		boundingPosZ.text = bound.z.ToString();
+        boundingPosX.text = actor.BoundingPos.x.ToString();
+        boundingPosY.text = actor.BoundingPos.y.ToString();
+        boundingPosZ.text = actor.BoundingPos.z.ToString();
+        localPosX.text = positionX.text = actor.LocalPosition.x.ToString();
+        localPosY.text = positionY.text = actor.LocalPosition.y.ToString();
+        localPosZ.text = positionZ.text = actor.LocalPosition.z.ToString();
+        worldPosX.text = actor.WorldPosition.x.ToString();
+        worldPosY.text = actor.WorldPosition.y.ToString();
+        worldPosZ.text = actor.WorldPosition.z.ToString();
 	}
+
+    void UpdateAngleInputField(Box actor)
+    {
+        angle.text = (actor.Angles.y * 360.0f / 1024.0f).ToString("N1");
+    }
 	
-	private void TryParseAngle(ref InputField inputField, out int intValue, int defaultValue)
+	private void TryParseAngle(InputField inputField, out int intValue, int defaultValue)
 	{
 		float floatValue;
 		if(float.TryParse(inputField.text, out floatValue))
 		{
 			floatValue = floatValue >= 0.0f ? floatValue % 360.0f : 360.0f - ((-floatValue) % 360.0f);
-			intValue = Mathf.RoundToInt((floatValue * 1024.0f) / 360.0f) ;
+			intValue = Mathf.RoundToInt((floatValue * 1024.0f) / 360.0f);
 		}
 		else
 		{
 			intValue = defaultValue;
 		}
-
-		inputField.text = (intValue * 360 / 1024.0f).ToString("N1");
 	}
 	
-	private void TryParsePosition(ref InputField posX, ref InputField posY, ref InputField posZ, out Vector3 intValue, Vector3 defaultValue)
+	private void TryParsePosition(InputField posX, InputField posY, InputField posZ, out Vector3 intValue, Vector3 defaultValue)
 	{
 		int x, y, z;
-		TryParsePosition(ref posX, out x, (int)defaultValue.x);
-		TryParsePosition(ref posY, out y, (int)defaultValue.y);
-		TryParsePosition(ref posZ, out z, (int)defaultValue.z);
+		TryParsePosition(posX, out x, (int)defaultValue.x);
+		TryParsePosition(posY, out y, (int)defaultValue.y);
+		TryParsePosition(posZ, out z, (int)defaultValue.z);
 
 		intValue = new Vector3(x, y, z);
 	}
 
-	private void TryParsePosition(ref InputField inputField, out int intValue, int defaultValue)
+	private void TryParsePosition(InputField inputField, out int intValue, int defaultValue)
 	{
 		if(int.TryParse(inputField.text, out intValue))
 		{
@@ -242,8 +233,6 @@ public class WarpDialog : MonoBehaviour
 		{
 			intValue = defaultValue;
 		}
-
-		inputField.text = intValue.ToString();
 	}
 	
 	private void WriteActorAngle(Box actor, int angle)
@@ -257,10 +246,12 @@ public class WarpDialog : MonoBehaviour
 			byte[] position = new byte[2];
 			WriteShort(angle, position, 0);
 			ProcessReader.Write(position, offset + 42, 2);
+
+            warpActor.Angles.y = angle;
 		}
 	}
 
-	private void WriteActorPosition(Box actor, Vector3 boundingPosition, Vector3 localPosition, Vector3 worldPosition)
+    private void WriteActorPosition(Box actor, Vector3 lowerBound, Vector3 upperBound, Vector3 localPosition, Vector3 worldPosition)
 	{
 		ProcessMemoryReader ProcessReader = GetComponent<DosBox>().ProcessReader;
 
@@ -271,16 +262,14 @@ public class WarpDialog : MonoBehaviour
 			long offset = GetComponent<DosBox>().GetActorMemoryAddress(index);
 
 			//update to memory
-			//bounding
-			Vector3 boundOffset = boundingPosition - actor.BoundingPos;
+			//bounds
 			byte[] buffer = new byte[12];
-			ProcessReader.Read(buffer, offset + 8, 12);
-			WriteShort(ReadShort(buffer[0], buffer[1]) + (int)boundOffset.x, buffer, 0); 
-			WriteShort(ReadShort(buffer[2], buffer[3]) + (int)boundOffset.x, buffer, 2);
-			WriteShort(ReadShort(buffer[4], buffer[5]) + (int)boundOffset.y, buffer, 4); 
-			WriteShort(ReadShort(buffer[6], buffer[7]) + (int)boundOffset.y, buffer, 6);
-			WriteShort(ReadShort(buffer[8], buffer[9]) + (int)boundOffset.z, buffer, 8);
-			WriteShort(ReadShort(buffer[10], buffer[11]) + (int)boundOffset.z, buffer, 10);
+            WriteShort((int)lowerBound.x, buffer, 0); 
+            WriteShort((int)upperBound.x, buffer, 2);
+            WriteShort((int)lowerBound.y, buffer, 4); 
+            WriteShort((int)upperBound.y, buffer, 6);
+            WriteShort((int)lowerBound.z, buffer, 8);
+            WriteShort((int)upperBound.z, buffer, 10);
 			ProcessReader.Write(buffer, offset + 8, 12);
 
 			//local+world
@@ -291,6 +280,11 @@ public class WarpDialog : MonoBehaviour
 			WriteShort((int)worldPosition.y, buffer, 8); 
 			WriteShort((int)worldPosition.z, buffer, 10);
 			ProcessReader.Write(buffer, offset + 28, 12);
+
+            warpActor.LocalPosition = localPosition;
+            warpActor.WorldPosition = worldPosition;
+            warpActor.BoundingLower = lowerBound;
+            warpActor.BoundingUpper = upperBound;
 		}
 	}	
 

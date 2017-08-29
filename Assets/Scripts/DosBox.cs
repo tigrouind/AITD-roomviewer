@@ -119,32 +119,25 @@ public class DosBox : MonoBehaviour
 							int boundingY2 = ReadShort(memory[k + 14], memory[k + 15]);
 							int boundingZ1 = ReadShort(memory[k + 16], memory[k + 17]);
 							int boundingZ2 = ReadShort(memory[k + 18], memory[k + 19]);
-							
+                            							
 							FixBoundingWrap(ref boundingX1, ref boundingX2);
 							FixBoundingWrap(ref boundingY1, ref boundingY2);
 							FixBoundingWrap(ref boundingZ1, ref boundingZ2);
 
-							int boundingx = (boundingX1 + boundingX2) / 2;
-							int boundingy = (boundingY1 + boundingY2) / 2;
-							int boundingz = (boundingZ1 + boundingZ2) / 2;
+                            box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
+                            box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
 
 							//local to global position
-							int boxPositionx = boundingx + (int)(roomObject.localPosition.x * 1000.0f);
-							int boxPositiony = boundingy + (int)(roomObject.localPosition.y * 1000.0f);
-							int boxPositionz = boundingz + (int)(roomObject.localPosition.z * 1000.0f);
-
-							box.transform.position = new Vector3(boxPositionx, -boxPositiony, boxPositionz) / 1000.0f;
+                            Vector3 boxPosition = box.BoundingPos / 1000.0f + roomObject.localPosition;
+							box.transform.position = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z);
 
 							//make actors appears slightly bigger than they are to be not covered by colliders
-							float delta = 1.0f;
-							box.transform.localScale = new Vector3(
-								boundingX2 - boundingX1 + delta,
-								boundingY2 - boundingY1 + delta,
-								boundingZ2 - boundingZ1 + delta) / 1000.0f;
+                            Vector3 delta = Vector3.one;
+                            box.transform.localScale = (box.BoundingSize + delta) / 1000.0f;
 
 							//make sure very small actors are visible
 							box.transform.localScale = new Vector3(
-								Mathf.Max(box.transform.localScale.x, 0.1f),
+                                Mathf.Max(box.transform.localScale.x, 0.1f),
 								Mathf.Max(box.transform.localScale.y, 0.1f),
 								Mathf.Max(box.transform.localScale.z, 0.1f));
 
@@ -166,10 +159,9 @@ public class DosBox : MonoBehaviour
 							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
 
-
-							box.Angles.x = ReadShort(memory[k + 40], memory[k + 41]) * 360 / 1024.0f;
-							box.Angles.y = ReadShort(memory[k + 42], memory[k + 43]) * 360 / 1024.0f;
-							box.Angles.z = ReadShort(memory[k + 44], memory[k + 45]) * 360 / 1024.0f;
+							box.Angles.x = ReadShort(memory[k + 40], memory[k + 41]);
+							box.Angles.y = ReadShort(memory[k + 42], memory[k + 43]);
+							box.Angles.z = ReadShort(memory[k + 44], memory[k + 45]);
 
 							box.Mod.x = ReadShort(memory[k + 90], memory[k + 91]);
 							box.Mod.y = ReadShort(memory[k + 92], memory[k + 93]);
@@ -183,20 +175,12 @@ public class DosBox : MonoBehaviour
 							box.WorldPosition.y = ReadShort(memory[k + 36], memory[k + 37]) + box.Mod.y;
 							box.WorldPosition.z = ReadShort(memory[k + 38], memory[k + 39]) + box.Mod.z;
 
-							box.BoundingPos.x = boundingx;
-							box.BoundingPos.y = boundingy;
-							box.BoundingPos.z = boundingz;
-
-							box.BoundingSize.x = boundingX2 - boundingX1;
-							box.BoundingSize.y = boundingY2 - boundingY1;
-							box.BoundingSize.z = boundingZ2 - boundingZ1;
-							
 							box.ShowAdditionalInfo = ShowAdditionalInfo;
 
 							//player
 							if (objectid == lastValidPlayerIndex)
 							{								
-								float angle = box.Angles.y;
+                                float angle = box.Angles.y * 360.0f / 1024.0f;
 								float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
 								playerInfo = new StringBuilder();
