@@ -454,13 +454,16 @@ public class RoomLoader : MonoBehaviour
 
 		RefreshHighLightedBox();
 
-		foreach (var key in keyCodes)
-		{
-			if (Input.GetKeyDown(key))
-			{
-				ProcessKey(key);
-			}
-		}
+        if (!GetComponent<WarpDialog>().warpMenuEnabled)
+        {
+            foreach (var key in keyCodes)
+            {
+                if (Input.GetKeyDown(key))
+                {
+                    ProcessKey(key);
+                }
+            }
+        }
 	}
 
 	private int BoxComparer(RaycastHit a, RaycastHit b)
@@ -538,7 +541,9 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//toggle selected box
-		if (Input.GetMouseButtonDown(0) && HighLightedBox != null)
+        if (Input.GetMouseButtonDown(0) && HighLightedBox != null
+            && !(GetComponent<WarpDialog>().warpMenuEnabled  //make sure it not possible to change actor when there is a click inside warp menu
+                  && RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
 			if (SelectedBox != HighLightedBox)
 			{

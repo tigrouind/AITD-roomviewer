@@ -114,15 +114,10 @@ public class Box : MonoBehaviour
 			}
 		}
 
-		if (alwaysOnTop)
-		{
-			materialColor = new Color32(materialColor.r, materialColor.g, materialColor.b, 254);
-		}
-
 		Renderer renderer = this.GetComponent<Renderer>();
 		if ((renderer.sharedMaterial == null || renderer.sharedMaterial.color != materialColor))
 		{				
-            renderer.sharedMaterial = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor);
+            renderer.sharedMaterial = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor, alwaysOnTop);
 		}
 	}       	
 
