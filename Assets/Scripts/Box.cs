@@ -29,6 +29,7 @@ public class Box : MonoBehaviour
 	public uint RoomChrono;
 	public int TrackNumber;
 	public int PositionInTrack;
+	public int Slot;
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
 	public Vector3 BoundingLower;
@@ -180,6 +181,7 @@ public class Box : MonoBehaviour
 					sb.Append("\r\nTRACKNUMBER = " + TrackNumber);
 				if (PositionInTrack != -1)
 					sb.Append("\r\nTRACKPOSITION = " + PositionInTrack);
+				sb.Append("\r\nSLOT = " + Slot);
 			}
 		}
 

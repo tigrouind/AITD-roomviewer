@@ -158,6 +158,7 @@ public class DosBox : MonoBehaviour
 							box.PositionInTrack = ReadShort(memory[k + 88], memory[k + 89]);
 							box.TrackMode = trackMode;
 							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
+							box.Slot = i;
 
 							box.Angles.x = ReadShort(memory[k + 40], memory[k + 41]);
 							box.Angles.y = ReadShort(memory[k + 42], memory[k + 43]);
