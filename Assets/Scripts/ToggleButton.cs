@@ -24,7 +24,7 @@ public class ToggleButton : MonoBehaviour
 		}
 	}
 
-	public bool BoolValue 
+	public bool BoolValue
 	{
 		get
 		{
@@ -38,7 +38,7 @@ public class ToggleButton : MonoBehaviour
 
 
 	// Use this for initialization
-	void Start () 
+	void Start ()
 	{
 		RefreshText();
 	}

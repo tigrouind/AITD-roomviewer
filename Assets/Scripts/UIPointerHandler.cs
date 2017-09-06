@@ -16,13 +16,13 @@ public class UIPointerHandler : MonoBehaviour, IPointerEnterHandler, IPointerExi
 
 	public PointerEventHandler PointerExit = new PointerEventHandler();
 
-    public void OnPointerEnter(PointerEventData eventData)
-    {
+	public void OnPointerEnter(PointerEventData eventData)
+	{
 		PointerEnter.Invoke(eventData);
-    }
+	}
 
-    public void OnPointerExit(PointerEventData eventData)
-    {
+	public void OnPointerExit(PointerEventData eventData)
+	{
 		PointerExit.Invoke(eventData);
-    }
+	}
 }

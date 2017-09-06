@@ -11,7 +11,7 @@ public class Vars : MonoBehaviour
 	private byte[] memory = new byte[512];
 	private Var[] vars = new Var[207];
 	private Var[] cvars = new Var[44];
-	private VarParser varParser = new VarParser(); 
+	private VarParser varParser = new VarParser();
 
 	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 };
 	private long varsMemoryAddress = -1;
@@ -33,7 +33,7 @@ public class Vars : MonoBehaviour
 	public void Start()
 	{
 		//parse vars.txt file
-		string varPath = @"GAMEDATA\vars.txt"; 
+		string varPath = @"GAMEDATA\vars.txt";
 		if (File.Exists(varPath))
 		{
 			varParser.Parse(varPath);
@@ -107,7 +107,7 @@ public class Vars : MonoBehaviour
 		//set cell size
 		Vector2 cellSize = new Vector2(Screen.width / 21.0f, (Screen.height - 60.0f) / 16.0f);
 		TabA.GetComponent<GridLayoutGroup>().cellSize = cellSize;
-		TabB.GetComponent<GridLayoutGroup>().cellSize = cellSize;	
+		TabB.GetComponent<GridLayoutGroup>().cellSize = cellSize;
 	}
 
 	void BuildTables()
@@ -179,7 +179,7 @@ public class Vars : MonoBehaviour
 			}
 
 			data[i].value = value;
-					
+
 			if (ignoreDifferences)
 			{
 				data[i].time = float.MinValue;
@@ -195,7 +195,7 @@ public class Vars : MonoBehaviour
 					data[i].time = currenttime;
 				}
 			}
-				
+
 			data[i].memoryAddress = offset + i * 2;
 
 			//Check differences
@@ -276,7 +276,7 @@ public class Vars : MonoBehaviour
 	}
 
 	public void ToggleButtonState(Button button, bool enabled)
-	{ 
+	{
 		Text text = button.GetComponentInChildren<Text>();
 		text.color = enabled ? Color.red : (Color)new Color32(50, 50, 50, 255);
 		SetButtonColor(button, enabled ? new Color32(255, 174, 174, 255) : new Color32(43, 193, 118, 255), enabled ? new Color32(255, 174, 174, 255) : new Color32(178, 255, 207, 255));
@@ -311,7 +311,7 @@ public class Vars : MonoBehaviour
 	{
 		public int value;
 		public int saveState; //value set there when using SaveState button
-		public float time;  //time since last difference
+		public float time;	//time since last difference
 		public long memoryAddress;
 		public InputField inputField;
 	}

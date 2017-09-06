@@ -77,7 +77,7 @@ public class ProcessMemoryReader
 	public void Close()
 	{
 		if (processHandle != IntPtr.Zero)
-		{			
+		{
 			CloseHandle(processHandle);
 			processHandle = IntPtr.Zero;
 		}
@@ -93,12 +93,12 @@ public class ProcessMemoryReader
 
 		//scan process memory regions
 		while (min_address < max_address
-		       && VirtualQueryEx(processHandle, (IntPtr)min_address, out mem_info, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION))) > 0)
+			&& VirtualQueryEx(processHandle, (IntPtr)min_address, out mem_info, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION))) > 0)
 		{
 			//check if memory region is accessible
 			//skip regions smaller than 16M (default DOSBOX memory size)
 			if (mem_info.Protect == PAGE_READWRITE && mem_info.State == MEM_COMMIT && (mem_info.Type & MEM_PRIVATE) == MEM_PRIVATE
-			    && (int)mem_info.RegionSize >= 1024 * 1024 * 16)
+				&& (int)mem_info.RegionSize >= 1024 * 1024 * 16)
 			{
 				long readPosition = (long)mem_info.BaseAddress;
 				int bytesToRead = (int)mem_info.RegionSize;

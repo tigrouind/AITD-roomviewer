@@ -88,7 +88,7 @@ public class DosBox : MonoBehaviour
 					int body = ReadShort(memory[k + 2], memory[k + 3]);
 
 					int trackModeOffset = TrackModeOffsets[dosBoxPattern];
-					int trackMode = ReadShort(memory[k + trackModeOffset], memory[k + trackModeOffset + 1]); 
+					int trackMode = ReadShort(memory[k + trackModeOffset], memory[k + trackModeOffset + 1]);
 					bool isActive = objectid != -1;
 
 					if (isActive)
@@ -119,25 +119,25 @@ public class DosBox : MonoBehaviour
 							int boundingY2 = ReadShort(memory[k + 14], memory[k + 15]);
 							int boundingZ1 = ReadShort(memory[k + 16], memory[k + 17]);
 							int boundingZ2 = ReadShort(memory[k + 18], memory[k + 19]);
-                            							
+
 							FixBoundingWrap(ref boundingX1, ref boundingX2);
 							FixBoundingWrap(ref boundingY1, ref boundingY2);
 							FixBoundingWrap(ref boundingZ1, ref boundingZ2);
 
-                            box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
-                            box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
+							box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
+							box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
 
 							//local to global position
-                            Vector3 boxPosition = box.BoundingPos / 1000.0f + roomObject.localPosition;
+							Vector3 boxPosition = box.BoundingPos / 1000.0f + roomObject.localPosition;
 							box.transform.position = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z);
 
 							//make actors appears slightly bigger than they are to be not covered by colliders
-                            Vector3 delta = Vector3.one;
-                            box.transform.localScale = (box.BoundingSize + delta) / 1000.0f;
+							Vector3 delta = Vector3.one;
+							box.transform.localScale = (box.BoundingSize + delta) / 1000.0f;
 
 							//make sure very small actors are visible
 							box.transform.localScale = new Vector3(
-                                Mathf.Max(box.transform.localScale.x, 0.1f),
+								Mathf.Max(box.transform.localScale.x, 0.1f),
 								Mathf.Max(box.transform.localScale.y, 0.1f),
 								Mathf.Max(box.transform.localScale.z, 0.1f));
 
@@ -180,8 +180,8 @@ public class DosBox : MonoBehaviour
 
 							//player
 							if (objectid == lastValidPlayerIndex)
-							{								
-                                float angle = box.Angles.y * 360.0f / 1024.0f;
+							{
+								float angle = box.Angles.y * 360.0f / 1024.0f;
 								float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
 								playerInfo = new StringBuilder();
@@ -284,7 +284,7 @@ public class DosBox : MonoBehaviour
 		Arrow.gameObject.SetActive(Actors.activeSelf
 			&& player != null
 			&& player.activeSelf
-			&& player.transform.localScale.magnitude > 0.01f);	
+			&& player.transform.localScale.magnitude > 0.01f);
 	}
 
 	void FixedUpdate()
@@ -304,12 +304,12 @@ public class DosBox : MonoBehaviour
 			if (frames >= oldFramesCount)
 				diff = frames - oldFramesCount;
 			else
-				diff = (fps - oldFramesCount) + frames;	
+				diff = (fps - oldFramesCount) + frames;
 			oldFramesCount = frames;
 
 			//check for large delays
 			if (diff == 0)
-			{ 
+			{
 				delayFpsCounter++;
 				if (delayFpsCounter > 100 / (1000 / 200)) // 20 frames at 200FPS = 100ms
 				{
@@ -318,7 +318,7 @@ public class DosBox : MonoBehaviour
 			}
 			else
 			{
-				delayFpsCounter = 0; 
+				delayFpsCounter = 0;
 			}
 
 			previousFramesCount.Enqueue(diff);
@@ -345,7 +345,7 @@ public class DosBox : MonoBehaviour
 						if (position != lastPlayerPositionFixedUpdate)
 						{
 							lastPlayerOffset = Mathf.FloorToInt((position - lastPlayerPositionFixedUpdate).magnitude);
-							lastPlayerPositionFixedUpdate = position;	
+							lastPlayerPositionFixedUpdate = position;
 						}
 
 						int modx = ReadShort(memory[k + 90], memory[k + 91]);
@@ -362,7 +362,7 @@ public class DosBox : MonoBehaviour
 			}
 		}
 	}
-	
+
 	public Vector3 GetMousePosition(int room, int floor)
 	{
 		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
@@ -425,12 +425,12 @@ public class DosBox : MonoBehaviour
 				string name;
 				try
 				{
-					name = x.ProcessName; 
+					name = x.ProcessName;
 				}
 				catch
-				{ 
+				{
 					name = string.Empty;
-				} 
+				}
 				return name.StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase);
 			})
 		.Select(x => x.Id)

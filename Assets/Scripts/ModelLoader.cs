@@ -16,7 +16,7 @@ public class ModelLoader : MonoBehaviour
 	private int modelFolderIndex = 0;
 
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
-	private VarParser varParser = new VarParser(); 
+	private VarParser varParser = new VarParser();
 
 	private string[] modelFolders = new string[] { "GAMEDATA\\LISTBODY", "GAMEDATA\\LISTBOD2" };
 	private string[] animFolders = new string[] { "GAMEDATA\\LISTANIM", "GAMEDATA\\LISTANI2" };
@@ -315,7 +315,7 @@ public class ModelLoader : MonoBehaviour
 
 				case 2: //1x1 pixel
 				case 6: //square
-				case 7: 
+				case 7:
 					{
 						i++;
 						int colorIndex = allbytes[i];
@@ -516,7 +516,7 @@ public class ModelLoader : MonoBehaviour
 		for (int i = 0 ; i < animFrames.Count ; i++)
 		{
 			totaltime += animFrames[(i + 1) % animFrames.Count].Time;
-			if(time < totaltime) 
+			if(time < totaltime)
 			{
 				frame = i;
 				break;
@@ -528,8 +528,8 @@ public class ModelLoader : MonoBehaviour
 		float framePosition = (time - (totaltime - nextFrame.Time)) / nextFrame.Time;
 
 		for (int i = 0 ; i < bones.Count; i++)
-		{		
-			Transform boneTransform = bones[i].transform;	
+		{
+			Transform boneTransform = bones[i].transform;
 
 			if(i >= currentFrame.Bones.Count)
 			{
@@ -549,13 +549,13 @@ public class ModelLoader : MonoBehaviour
 				//rotation
 				boneTransform.localPosition = initialBonesPosition[i];
 				boneTransform.localScale = Vector3.one;
-				boneTransform.localRotation = 
+				boneTransform.localRotation =
 					Quaternion.Slerp(
 						Quaternion.AngleAxis(currentBone.z, Vector3.forward) *
-						Quaternion.AngleAxis(currentBone.x, Vector3.right) * 
+						Quaternion.AngleAxis(currentBone.x, Vector3.right) *
 						Quaternion.AngleAxis(currentBone.y, Vector3.up),
 						Quaternion.AngleAxis(nextBone.z, Vector3.forward) *
-						Quaternion.AngleAxis(nextBone.x, Vector3.right) * 
+						Quaternion.AngleAxis(nextBone.x, Vector3.right) *
 						Quaternion.AngleAxis(nextBone.y, Vector3.up),
 						framePosition);
 			}
@@ -564,18 +564,18 @@ public class ModelLoader : MonoBehaviour
 				//position
 				boneTransform.localRotation = Quaternion.identity;
 				boneTransform.localScale = Vector3.one;
-				boneTransform.localPosition = initialBonesPosition[i] + 
+				boneTransform.localPosition = initialBonesPosition[i] +
 					Vector3.Lerp(
 						new Vector3(currentBone.x, currentBone.y, currentBone.z),
 						new Vector3(nextBone.x, nextBone.y, nextBone.z),
 						framePosition);
 			}
-			else 
+			else
 			{
 				//scaling
 				boneTransform.localRotation = Quaternion.identity;
 				boneTransform.localPosition = initialBonesPosition[i];
-				boneTransform.localScale = 
+				boneTransform.localScale =
 					Vector3.Lerp(
 						new Vector3(currentBone.x, currentBone.y, currentBone.z),
 						new Vector3(nextBone.x, nextBone.y, nextBone.z),
@@ -604,7 +604,7 @@ public class ModelLoader : MonoBehaviour
 	void Start()
 	{
 		//parse vars.txt file
-		string varPath = @"GAMEDATA\vars.txt"; 
+		string varPath = @"GAMEDATA\vars.txt";
 		if (File.Exists(varPath))
 		{
 			varParser.Parse(varPath);
@@ -754,9 +754,9 @@ public class ModelLoader : MonoBehaviour
 				}
 			}
 		}
-			
+
 		if (Input.GetMouseButtonUp(0)
-		    && !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
+			&& !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
 		{
 			menuEnabled = false;
 		}
@@ -764,20 +764,20 @@ public class ModelLoader : MonoBehaviour
 		Panel.gameObject.SetActive(menuEnabled);
 
 		modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
-		animIndex =  Math.Min(Math.Max(animIndex, 0), animFiles.Count - 1);
+		animIndex = Math.Min(Math.Max(animIndex, 0), animFiles.Count - 1);
 
 		//load new model if needed
 		if (modelFiles.Count > 0 && oldModelIndex != modelIndex)
 		{
 			ModelInput.text = modelIndex.ToString();
 			LoadBody(modelFiles[modelIndex]);
-		}            	
+		}
 
 		if (animFiles.Count > 0 && oldAnimIndex != animIndex)
 		{
 			AnimationInput.text = animIndex.ToString();
 			LoadAnim(animFiles[animIndex]);
-		}    
+		}
 
 		//rotate model
 		if (autoRotate && AutoRotate.BoolValue)
@@ -812,11 +812,11 @@ public class ModelLoader : MonoBehaviour
 		stringBuilder.Append(LeftTextBody);
 		if(EnableAnimation.BoolValue)
 		{
-			stringBuilder.Append("\r\n" + LeftTextAnim); 
+			stringBuilder.Append("\r\n" + LeftTextAnim);
 			if(ShowAdditionalInfo.BoolValue && animFrames != null)
 			{
 				int index = 0;
-				stringBuilder.Append("\r\n\r\n"); 
+				stringBuilder.Append("\r\n\r\n");
 				foreach(Frame frame in animFrames)
 				{
 					stringBuilder.AppendFormat("Frame {0}: <color=#00c864>{1} {2} {3} {4}</color>\r\n", index, frame.Time, frame.OffsetX, frame.OffsetY, -frame.OffsetZ);
@@ -862,7 +862,7 @@ public class ModelLoader : MonoBehaviour
 		KeyCode keyCodeEnum = (KeyCode)Enum.Parse(typeof(KeyCode), keyCode, true);
 		ProcessKey(keyCodeEnum);
 	}
-		
+
 	void ProcessKey(KeyCode code)
 	{
 		switch (code)

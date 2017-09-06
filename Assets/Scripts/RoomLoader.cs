@@ -59,7 +59,7 @@ public class RoomLoader : MonoBehaviour
 	}
 
 	void Start()
-	{		
+	{
 		Directory.CreateDirectory("GAMEDATA");
 
 		//check existing ETAGEXX folders
@@ -251,7 +251,7 @@ public class RoomLoader : MonoBehaviour
 				}
 				else if (box.Flags == 0) //room switch
 				{
-					box.Color = new Color32(255, 0, 0, 45); 
+					box.Color = new Color32(255, 0, 0, 45);
 				}
 				else
 				{
@@ -266,7 +266,7 @@ public class RoomLoader : MonoBehaviour
 			List<int> cameraInRoom = new List<int>();
 			for (int cameraIndex = 0; cameraIndex < cameraCount; cameraIndex++)
 			{
-				int cameraID = ReadShort(allPointsA[roomheader + cameraIndex * 2 + 12], allPointsA[roomheader + cameraIndex * 2 + 13]);  //camera
+				int cameraID = ReadShort(allPointsA[roomheader + cameraIndex * 2 + 12], allPointsA[roomheader + cameraIndex * 2 + 13]);	 //camera
 				cameraInRoom.Add(cameraID);
 			}
 
@@ -407,10 +407,10 @@ public class RoomLoader : MonoBehaviour
 			{
 				Vector3 newMousePosition = Input.mousePosition;
 				if (newMousePosition != this.mousePosition)
-				{ 
+				{
 					Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
 					Vector3 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraHeight)
-					                     - Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
+										 - Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
 
 					Camera.main.transform.position += mouseDelta;
 					mousePosition = newMousePosition;
@@ -454,16 +454,16 @@ public class RoomLoader : MonoBehaviour
 
 		RefreshHighLightedBox();
 
-        if (!GetComponent<WarpDialog>().warpMenuEnabled)
-        {
-            foreach (var key in keyCodes)
-            {
-                if (Input.GetKeyDown(key))
-                {
-                    ProcessKey(key);
-                }
-            }
-        }
+		if (!GetComponent<WarpDialog>().warpMenuEnabled)
+		{
+			foreach (var key in keyCodes)
+			{
+				if (Input.GetKeyDown(key))
+				{
+					ProcessKey(key);
+				}
+			}
+		}
 	}
 
 	private int BoxComparer(RaycastHit a, RaycastHit b)
@@ -484,14 +484,14 @@ public class RoomLoader : MonoBehaviour
 		{
 			return a.distance.CompareTo(b.distance);
 		}
-            
+
 		//if objects are too close each other, check current room
 		int aCurrentRoom = boxA.Room == room ? 0 : 1;
 		int bCurrentRoom = boxB.Room == room ? 0 : 1;
 		if (aCurrentRoom != bCurrentRoom)
 		{
 			return aCurrentRoom.CompareTo(bCurrentRoom);
-		}      
+		}
 
 		return 0;
 	}
@@ -503,7 +503,7 @@ public class RoomLoader : MonoBehaviour
 		RaycastHit[] hitInfos = null;
 
 		if (mousePosition.x > 0 && mousePosition.x < Screen.width &&
-		    mousePosition.y > 0 && mousePosition.y < Screen.height)
+			mousePosition.y > 0 && mousePosition.y < Screen.height)
 		{
 			hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
 		}
@@ -541,9 +541,9 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//toggle selected box
-        if (Input.GetMouseButtonDown(0) && HighLightedBox != null
-            && !(GetComponent<WarpDialog>().warpMenuEnabled  //make sure it not possible to change actor when there is a click inside warp menu
-                  && RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
+		if (Input.GetMouseButtonDown(0) && HighLightedBox != null
+			&& !(GetComponent<WarpDialog>().warpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
+				  && RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
 			if (SelectedBox != HighLightedBox)
 			{
@@ -628,7 +628,7 @@ public class RoomLoader : MonoBehaviour
 		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled);
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
-		
+
 	public void ProcessKey(string keyCode)
 	{
 		KeyCode keyCodeEnum = (KeyCode)Enum.Parse(typeof(KeyCode), keyCode, true);
@@ -645,7 +645,7 @@ public class RoomLoader : MonoBehaviour
 					bool result = (GetComponent<DosBox>().LinkToDosBOX(floor, room));
 
 					//set follow mode to player
-					CameraFollow.Value = 2; 
+					CameraFollow.Value = 2;
 					GetComponent<DosBox>().ResetCamera(floor, room);
 
 					Actors.SetActive(result);
@@ -708,7 +708,7 @@ public class RoomLoader : MonoBehaviour
 				if (DetectGame() == 1)
 				{
 					GetComponent<Vars>().enabled = !GetComponent<Vars>().enabled;
-					menuEnabled = false; 
+					menuEnabled = false;
 				}
 				break;
 

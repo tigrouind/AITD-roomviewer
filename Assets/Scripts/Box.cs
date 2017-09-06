@@ -37,29 +37,29 @@ public class Box : MonoBehaviour
 	public Vector3 Angles;
 	public Vector3 Mod;
 
-    public Vector3 BoundingPos 
-    {
-        get
-        {
-            return new Vector3(
-                (int)((BoundingUpper.x + BoundingLower.x)) / 2, 
-                (int)((BoundingUpper.y + BoundingLower.y)) / 2,
-                (int)((BoundingUpper.z + BoundingLower.z)) / 2
-            );
-        }
-    }
+	public Vector3 BoundingPos
+	{
+		get
+		{
+			return new Vector3(
+				(int)((BoundingUpper.x + BoundingLower.x)) / 2,
+				(int)((BoundingUpper.y + BoundingLower.y)) / 2,
+				(int)((BoundingUpper.z + BoundingLower.z)) / 2
+			);
+		}
+	}
 
-    public Vector3 BoundingSize 
-    {
-        get
-        {
-            return new Vector3(
-                (BoundingUpper.x - BoundingLower.x), 
-                (BoundingUpper.y - BoundingLower.y),
-                (BoundingUpper.z - BoundingLower.z)
-            );
-        }
-    }
+	public Vector3 BoundingSize
+	{
+		get
+		{
+			return new Vector3(
+				(BoundingUpper.x - BoundingLower.x),
+				(BoundingUpper.y - BoundingLower.y),
+				(BoundingUpper.z - BoundingLower.z)
+			);
+		}
+	}
 
 	public bool HighLight
 	{
@@ -105,7 +105,7 @@ public class Box : MonoBehaviour
 			if (materialColor.a == 255)
 			{
 				materialColor = new Color32((byte)(Math.Min(materialColor.r + 75, 255)),
-					(byte)(Math.Min(materialColor.g + 75, 255)), 
+					(byte)(Math.Min(materialColor.g + 75, 255)),
 					(byte)(Math.Min(materialColor.b + 75, 255)),
 					materialColor.a);
 			}
@@ -117,24 +117,24 @@ public class Box : MonoBehaviour
 
 		Renderer renderer = this.GetComponent<Renderer>();
 		if ((renderer.sharedMaterial == null || renderer.sharedMaterial.color != materialColor))
-		{				
-            renderer.sharedMaterial = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor, alwaysOnTop);
+		{
+			renderer.sharedMaterial = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor, alwaysOnTop);
 		}
-	}       	
+	}
 
 	public string ToString(uint timer)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.Append(name.ToUpper() + "\r\nID = " + ID);   
+		sb.Append(name.ToUpper() + "\r\nID = " + ID);
 		if (name == "Collider" || name == "Trigger" || name == "Actor")
 		{
-			sb.AppendFormat("\r\nFLAGS = 0x{0:X4}", Flags);   
+			sb.AppendFormat("\r\nFLAGS = 0x{0:X4}", Flags);
 		}
 
 		if (name == "Actor")
 		{
 			sb.AppendFormat("\r\nCOL_FLAGS = 0x{0:X4}", ColFlags);
-			
+
 			if (ShowAdditionalInfo)
 			{
 				sb.AppendFormat("\r\nROOM = E{0}R{1}", Floor, Room);
@@ -143,12 +143,12 @@ public class Box : MonoBehaviour
 				sb.AppendFormat("\r\nZV_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
 				sb.AppendFormat("\r\nZV_SIZE = {0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
 				sb.AppendFormat("\r\nMOD = {0} {1} {2}", Mod.x, Mod.y, Mod.z);
-                sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}", 
-                    Angles.x * 360.0f / 1024.0f, 
-                    Angles.y * 360.0f / 1024.0f,
-                    Angles.z * 360.0f / 1024.0f);
-			}			
-			
+				sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}",
+					Angles.x * 360.0f / 1024.0f,
+					Angles.y * 360.0f / 1024.0f,
+					Angles.z * 360.0f / 1024.0f);
+			}
+
 			if (Body != -1)
 				sb.Append("\r\nBODY = " + Body);
 			if (Life != -1)
