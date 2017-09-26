@@ -544,12 +544,26 @@ public class RoomLoader : MonoBehaviour
 		{
 			SelectedBox = null;
 		}
-
-		//display selected box info
-		//if actor is no more available (eg : after room switch) don't display info
-		if (SelectedBox != null && SelectedBox.ID == SelectedBoxId)
+			
+		if (SelectedBox != null)
 		{
-			BottomText.text = SelectedBox.ToString(GetComponent<DosBox>().InternalTimer);
+			if (SelectedBox.ID == SelectedBoxId)
+			{
+				//display selected box info
+				BottomText.text = SelectedBox.ToString(GetComponent<DosBox>().InternalTimer);
+			}
+			else
+			{
+				//if actor is no more available (eg : after room switch) search for it
+				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+				{
+					if (box.ID == SelectedBoxId)
+					{
+						SelectedBox = box;
+						break;
+					}
+				}
+			}
 		}
 		else
 		{
