@@ -52,6 +52,7 @@ public class DosBox : MonoBehaviour
 	private int lastDelayFpsCounter;
 	private StringBuilder fpsInfo;
 	private bool allowInventory;
+	private int inHand;
 
 	private Vector3 lastPlayerPositionFixedUpdate;
 	private int lastPlayerOffset;
@@ -248,6 +249,7 @@ public class DosBox : MonoBehaviour
 					fpsInfo.AppendFormat("Cursor position: {0} {1} {2}\n", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z));
 					fpsInfo.AppendFormat("Last player offset: {0}\n", lastPlayerOffset);
 					fpsInfo.AppendFormat("Last player mod: {0}\n", lastPlayerMod);
+					fpsInfo.AppendFormat("In hand: {0}\n", inHand);
 				}
 				else
 				{
@@ -277,6 +279,10 @@ public class DosBox : MonoBehaviour
 				//inventory
 				ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 4);
 				allowInventory = ReadShort(memory[0], memory[1]) == 1;
+
+				//inhand
+				ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xA33C, 2);
+				inHand = ReadShort(memory[0], memory[1]);
 			}
 		}
 
