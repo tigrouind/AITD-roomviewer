@@ -495,20 +495,8 @@ public class DosBox : MonoBehaviour
 
 	public Box GetPlayerBox()
 	{
-		int i = 0;
-		foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
-		{
-			int k = i * ActorStructSize[dosBoxPattern];
-			int objectid = Utils.ReadShort(memory, k + 0);
-			if (objectid == lastValidPlayerIndex)
-			{
-				return box;
-			}
-			
-			i++;
-		}
-
-		return null;
+		return Actors.GetComponentsInChildren<Box>(true)
+			.FirstOrDefault(x => x.ID == lastValidPlayerIndex);
 	}
 
 	#endregion
