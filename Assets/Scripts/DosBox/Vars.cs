@@ -53,23 +53,6 @@ public class Vars : MonoBehaviour
 		Panel.gameObject.SetActive(false);
 	}
 
-	private short ReadShort(byte a, byte b)
-	{
-		unchecked
-		{
-			return (short)(a | b << 8);
-		}
-	}
-
-	private void WriteShort(int value, byte[] data, int offset)
-	{
-		unchecked
-		{
-			data[offset + 0] = (byte)(value & 0xFF);
-			data[offset + 1] = (byte)(value >> 8);
-		}
-	}
-
 	void Update()
 	{
 		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
@@ -175,7 +158,7 @@ public class Vars : MonoBehaviour
 			}
 			else
 			{
-				value = ReadShort(memory[i * 2 + 0], memory[i * 2 + 1]);
+				value = Utils.ReadShort(memory[i * 2 + 0], memory[i * 2 + 1]);
 			}
 
 			data[i].value = value;
@@ -248,7 +231,7 @@ public class Vars : MonoBehaviour
 				//write new value to memory
 				ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 				byte[] wordValue = new byte[2];
-				WriteShort(newValueInt, wordValue, 0);
+				Utils.WriteShort(newValueInt, wordValue, 0);
 				processReader.Write(wordValue, data[cellIndex].memoryAddress, wordValue.Length);
 			}
 		}

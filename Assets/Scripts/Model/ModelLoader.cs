@@ -53,14 +53,6 @@ public class ModelLoader : MonoBehaviour
 	public ToggleButton EnableAnimation;
 	public ToggleButton ShowAdditionalInfo;
 
-	public static short ReadShort(byte a, byte b)
-	{
-		unchecked
-		{
-			return (short)(a | b << 8);
-		}
-	}
-
 	void LoadBody(string filename, bool resetcamera = true)
 	{
 		string varName = varParser.GetText("BODYS", modelIndex);
@@ -88,18 +80,18 @@ public class ModelLoader : MonoBehaviour
 		int i = 0;
 
 		//header
-		int flags = ReadShort(allbytes[i + 0], allbytes[i + 1]);
+		int flags = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]);
 		i += 0xE;
-		i += ReadShort(allbytes[i + 0], allbytes[i + 1]) + 2;
+		i += Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]) + 2;
 
 		//vertexes
-		int count = ReadShort(allbytes[i + 0], allbytes[i + 1]);
+		int count = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]);
 		i += 2;
 
 		List<Vector3> vertices = new List<Vector3>();
 		for (int j = 0; j < count; j++)
 		{
-			Vector3 position = new Vector3(ReadShort(allbytes[i + 0], allbytes[i + 1]), -ReadShort(allbytes[i + 2], allbytes[i + 3]), ReadShort(allbytes[i + 4], allbytes[i + 5]));
+			Vector3 position = new Vector3(Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]), -Utils.ReadShort(allbytes[i + 2], allbytes[i + 3]), Utils.ReadShort(allbytes[i + 4], allbytes[i + 5]));
 			vertices.Add(position / 1000.0f);
 			i += 6;
 		}
@@ -113,7 +105,7 @@ public class ModelLoader : MonoBehaviour
 		if ((flags & 2) == 2)
 		{
 			//bones
-			count = ReadShort(allbytes[i + 0], allbytes[i + 1]);
+			count = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]);
 			i += 2;
 			i += count * 2;
 
@@ -122,9 +114,9 @@ public class ModelLoader : MonoBehaviour
 			bonesPerIndex.Add(255, transform);
 			for (int n = 0; n < count; n++)
 			{
-				int startindex = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
-				int numpoints = ReadShort(allbytes[i + 2], allbytes[i + 3]);
-				int vertexindex = ReadShort(allbytes[i + 4], allbytes[i + 5]) / 6;
+				int startindex = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
+				int numpoints = Utils.ReadShort(allbytes[i + 2], allbytes[i + 3]);
+				int vertexindex = Utils.ReadShort(allbytes[i + 4], allbytes[i + 5]) / 6;
 				int parentindex = allbytes[i + 6];
 				int boneindex = allbytes[i + 7];
 
@@ -173,7 +165,7 @@ public class ModelLoader : MonoBehaviour
 		float noisesize = 0.8f / bounds.size.magnitude;
 
 		//primitives
-		count = ReadShort(allbytes[i + 0], allbytes[i + 1]);
+		count = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]);
 		i += 2;
 
 		//load palette
@@ -200,8 +192,8 @@ public class ModelLoader : MonoBehaviour
 						i += 2;
 
 						Color32 color = paletteColors[colorIndex];
-						int pointIndexA = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
-						int pointIndexB = ReadShort(allbytes[i + 2], allbytes[i + 3]) / 6;
+						int pointIndexA = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
+						int pointIndexB = Utils.ReadShort(allbytes[i + 2], allbytes[i + 3]) / 6;
 						Vector3 directionVector = vertices[pointIndexA] - vertices[pointIndexB];
 						Vector3 middle = (vertices[pointIndexA] + vertices[pointIndexB]) / 2.0f;
 						Quaternion rotation = Quaternion.LookRotation(directionVector);
@@ -232,7 +224,7 @@ public class ModelLoader : MonoBehaviour
 						int verticesCount = allVertices.Count;
 						for (int m = 0; m < numPoints; m++)
 						{
-							int pointIndex = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
+							int pointIndex = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
 							i += 2;
 
 							colors.Add(color);
@@ -296,9 +288,9 @@ public class ModelLoader : MonoBehaviour
 						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
 						i += 2;
 
-						int size = ReadShort(allbytes[i + 0], allbytes[i + 1]);
+						int size = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]);
 						i += 2;
-						int pointSphereIndex = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
+						int pointSphereIndex = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
 						i += 2;
 
 						Vector3 position = vertices[pointSphereIndex];
@@ -320,7 +312,7 @@ public class ModelLoader : MonoBehaviour
 						i++;
 						int colorIndex = allbytes[i];
 						i += 2;
-						int cubeIndex = ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
+						int cubeIndex = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]) / 6;
 						i += 2;
 
 						Color32 color = paletteColors[colorIndex];
@@ -461,27 +453,27 @@ public class ModelLoader : MonoBehaviour
 
 		int i = 0;
 		byte[] allbytes = File.ReadAllBytes(filename);
-		int frameCount = ReadShort(allbytes[i + 0], allbytes[i + 1]);
-		int boneCount = ReadShort(allbytes[i + 2], allbytes[i + 3]);
+		int frameCount = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]);
+		int boneCount = Utils.ReadShort(allbytes[i + 2], allbytes[i + 3]);
 		i += 4;
 
 		animFrames = new List<Frame>();
 		for(int frame = 0 ; frame < frameCount ; frame++)
 		{
 			Frame f = new Frame();
-			f.Time = ReadShort(allbytes[i + 0], allbytes[i + 1]);
-			f.OffsetX = ReadShort(allbytes[i + 2], allbytes[i + 3]);
-			f.OffsetY = ReadShort(allbytes[i + 4], allbytes[i + 5]);
-			f.OffsetZ = ReadShort(allbytes[i + 6], allbytes[i + 7]);
+			f.Time = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]);
+			f.OffsetX = Utils.ReadShort(allbytes[i + 2], allbytes[i + 3]);
+			f.OffsetY = Utils.ReadShort(allbytes[i + 4], allbytes[i + 5]);
+			f.OffsetZ = Utils.ReadShort(allbytes[i + 6], allbytes[i + 7]);
 
 			f.Bones = new List<Vector4>();
 			i += 8;
 			for(int bone = 0 ; bone < boneCount ; bone++)
 			{
-				int type = ReadShort(allbytes[i + 0], allbytes[i + 1]);
-				int x = ReadShort(allbytes[i + 2], allbytes[i + 3]);
-				int y = ReadShort(allbytes[i + 4], allbytes[i + 5]);
-				int z = ReadShort(allbytes[i + 6], allbytes[i + 7]);
+				int type = Utils.ReadShort(allbytes[i + 0], allbytes[i + 1]);
+				int x = Utils.ReadShort(allbytes[i + 2], allbytes[i + 3]);
+				int y = Utils.ReadShort(allbytes[i + 4], allbytes[i + 5]);
+				int z = Utils.ReadShort(allbytes[i + 6], allbytes[i + 7]);
 
 				if(type == 0) //rotate
 				{

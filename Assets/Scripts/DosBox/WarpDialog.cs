@@ -249,7 +249,7 @@ public class WarpDialog : MonoBehaviour
 		{
 			long offset = GetComponent<DosBox>().GetActorMemoryAddress(index);
 			byte[] position = new byte[2];
-			WriteShort(angle, position, 0);
+			Utils.WriteShort(angle, position, 0);
 			ProcessReader.Write(position, offset + 42, 2);
 
 			warpActor.Angles.y = angle;
@@ -269,21 +269,21 @@ public class WarpDialog : MonoBehaviour
 			//update to memory
 			//bounds
 			byte[] buffer = new byte[12];
-			WriteShort((int)lowerBound.x, buffer, 0);
-			WriteShort((int)upperBound.x, buffer, 2);
-			WriteShort((int)lowerBound.y, buffer, 4);
-			WriteShort((int)upperBound.y, buffer, 6);
-			WriteShort((int)lowerBound.z, buffer, 8);
-			WriteShort((int)upperBound.z, buffer, 10);
+			Utils.WriteShort((int)lowerBound.x, buffer, 0);
+			Utils.WriteShort((int)upperBound.x, buffer, 2);
+			Utils.WriteShort((int)lowerBound.y, buffer, 4);
+			Utils.WriteShort((int)upperBound.y, buffer, 6);
+			Utils.WriteShort((int)lowerBound.z, buffer, 8);
+			Utils.WriteShort((int)upperBound.z, buffer, 10);
 			ProcessReader.Write(buffer, offset + 8, 12);
 
 			//local+world
-			WriteShort((int)localPosition.x, buffer, 0);
-			WriteShort((int)localPosition.y, buffer, 2);
-			WriteShort((int)localPosition.z, buffer, 4);
-			WriteShort((int)worldPosition.x, buffer, 6);
-			WriteShort((int)worldPosition.y, buffer, 8);
-			WriteShort((int)worldPosition.z, buffer, 10);
+			Utils.WriteShort((int)localPosition.x, buffer, 0);
+			Utils.WriteShort((int)localPosition.y, buffer, 2);
+			Utils.WriteShort((int)localPosition.z, buffer, 4);
+			Utils.WriteShort((int)worldPosition.x, buffer, 6);
+			Utils.WriteShort((int)worldPosition.y, buffer, 8);
+			Utils.WriteShort((int)worldPosition.z, buffer, 10);
 			ProcessReader.Write(buffer, offset + 28, 12);
 
 			warpActor.LocalPosition = localPosition;
@@ -291,22 +291,5 @@ public class WarpDialog : MonoBehaviour
 			warpActor.BoundingLower = lowerBound;
 			warpActor.BoundingUpper = upperBound;
 		}
-	}
-
-	private short ReadShort(byte a, byte b)
-	{
-		unchecked
-		{
-			return (short)(a | b << 8);
-		}
-	}
-
-	private void WriteShort(int value, byte[] data, int offset)
-	{
-		unchecked
-		{
-			data[offset + 0] = (byte)(value & 0xFF);
-			data[offset + 1] = (byte)(value >> 8);
-		}
-	}
+	}		
 }

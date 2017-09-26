@@ -82,14 +82,14 @@ public class DosBox : MonoBehaviour
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{
 					int k = i * ActorStructSize[dosBoxPattern];
-					int floorNumber = ReadShort(memory[k + 46], memory[k + 47]);
-					int roomNumber = ReadShort(memory[k + 48], memory[k + 49]);
+					int floorNumber = Utils.ReadShort(memory[k + 46], memory[k + 47]);
+					int roomNumber = Utils.ReadShort(memory[k + 48], memory[k + 49]);
 
-					int objectid = ReadShort(memory[k + 0], memory[k + 1]);
-					int body = ReadShort(memory[k + 2], memory[k + 3]);
+					int objectid = Utils.ReadShort(memory[k + 0], memory[k + 1]);
+					int body = Utils.ReadShort(memory[k + 2], memory[k + 3]);
 
 					int trackModeOffset = TrackModeOffsets[dosBoxPattern];
-					int trackMode = ReadShort(memory[k + trackModeOffset], memory[k + trackModeOffset + 1]);
+					int trackMode = Utils.ReadShort(memory[k + trackModeOffset], memory[k + trackModeOffset + 1]);
 					bool isActive = objectid != -1;
 
 					if (isActive)
@@ -114,12 +114,12 @@ public class DosBox : MonoBehaviour
 						if (roomObject != null)
 						{
 							//local position
-							int boundingX1 = ReadShort(memory[k + 8], memory[k + 9]);
-							int boundingX2 = ReadShort(memory[k + 10], memory[k + 11]);
-							int boundingY1 = ReadShort(memory[k + 12], memory[k + 13]);
-							int boundingY2 = ReadShort(memory[k + 14], memory[k + 15]);
-							int boundingZ1 = ReadShort(memory[k + 16], memory[k + 17]);
-							int boundingZ2 = ReadShort(memory[k + 18], memory[k + 19]);
+							int boundingX1 = Utils.ReadShort(memory[k + 8], memory[k + 9]);
+							int boundingX2 = Utils.ReadShort(memory[k + 10], memory[k + 11]);
+							int boundingY1 = Utils.ReadShort(memory[k + 12], memory[k + 13]);
+							int boundingY2 = Utils.ReadShort(memory[k + 14], memory[k + 15]);
+							int boundingZ1 = Utils.ReadShort(memory[k + 16], memory[k + 17]);
+							int boundingZ2 = Utils.ReadShort(memory[k + 18], memory[k + 19]);
 
 							FixBoundingWrap(ref boundingX1, ref boundingX2);
 							FixBoundingWrap(ref boundingY1, ref boundingY2);
@@ -146,36 +146,36 @@ public class DosBox : MonoBehaviour
 							box.Body = body;
 							box.Room = roomNumber;
 							box.Floor = floorNumber;
-							box.Flags = ReadShort(memory[k + 4], memory[k + 5]);
-							box.ColFlags = ReadShort(memory[k + 6], memory[k + 7]);
-							box.LifeMode = ReadShort(memory[k + 50], memory[k + 51]);
-							box.Life = ReadShort(memory[k + 52], memory[k + 53]);
-							box.Chrono = ReadUnsignedInt(memory[k + 54], memory[k + 55], memory[k + 56], memory[k + 57]);
-							box.RoomChrono = ReadUnsignedInt(memory[k + 58], memory[k + 59], memory[k + 60], memory[k + 61]);
-							box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
-							box.Keyframe = ReadShort(memory[k + 74], memory[k + 75]);
-							box.TotalFrames = ReadShort(memory[k + 76], memory[k + 77]);
-							box.TrackNumber = ReadShort(memory[k + 84], memory[k + 85]);
-							box.PositionInTrack = ReadShort(memory[k + 88], memory[k + 89]);
+							box.Flags = Utils.ReadShort(memory[k + 4], memory[k + 5]);
+							box.ColFlags = Utils.ReadShort(memory[k + 6], memory[k + 7]);
+							box.LifeMode =Utils. ReadShort(memory[k + 50], memory[k + 51]);
+							box.Life = Utils.ReadShort(memory[k + 52], memory[k + 53]);
+							box.Chrono = Utils.ReadUnsignedInt(memory[k + 54], memory[k + 55], memory[k + 56], memory[k + 57]);
+							box.RoomChrono = Utils.ReadUnsignedInt(memory[k + 58], memory[k + 59], memory[k + 60], memory[k + 61]);
+							box.Anim = Utils.ReadShort(memory[k + 62], memory[k + 63]);
+							box.Keyframe = Utils.ReadShort(memory[k + 74], memory[k + 75]);
+							box.TotalFrames = Utils.ReadShort(memory[k + 76], memory[k + 77]);
+							box.TrackNumber = Utils.ReadShort(memory[k + 84], memory[k + 85]);
+							box.PositionInTrack = Utils.ReadShort(memory[k + 88], memory[k + 89]);
 							box.TrackMode = trackMode;
-							box.Speed = ReadShort(memory[k + 116], memory[k + 118]);
+							box.Speed = Utils.ReadShort(memory[k + 116], memory[k + 118]);
 							box.Slot = i;
 
-							box.Angles.x = ReadShort(memory[k + 40], memory[k + 41]);
-							box.Angles.y = ReadShort(memory[k + 42], memory[k + 43]);
-							box.Angles.z = ReadShort(memory[k + 44], memory[k + 45]);
+							box.Angles.x = Utils.ReadShort(memory[k + 40], memory[k + 41]);
+							box.Angles.y = Utils.ReadShort(memory[k + 42], memory[k + 43]);
+							box.Angles.z = Utils.ReadShort(memory[k + 44], memory[k + 45]);
 
-							box.Mod.x = ReadShort(memory[k + 90], memory[k + 91]);
-							box.Mod.y = ReadShort(memory[k + 92], memory[k + 93]);
-							box.Mod.z = ReadShort(memory[k + 94], memory[k + 95]);
+							box.Mod.x = Utils.ReadShort(memory[k + 90], memory[k + 91]);
+							box.Mod.y = Utils.ReadShort(memory[k + 92], memory[k + 93]);
+							box.Mod.z = Utils.ReadShort(memory[k + 94], memory[k + 95]);
 
-							box.LocalPosition.x = ReadShort(memory[k + 28], memory[k + 29]) + box.Mod.x;
-							box.LocalPosition.y = ReadShort(memory[k + 30], memory[k + 31]) + box.Mod.y;
-							box.LocalPosition.z = ReadShort(memory[k + 32], memory[k + 33]) + box.Mod.z;
+							box.LocalPosition.x = Utils.ReadShort(memory[k + 28], memory[k + 29]) + box.Mod.x;
+							box.LocalPosition.y = Utils.ReadShort(memory[k + 30], memory[k + 31]) + box.Mod.y;
+							box.LocalPosition.z = Utils.ReadShort(memory[k + 32], memory[k + 33]) + box.Mod.z;
 
-							box.WorldPosition.x = ReadShort(memory[k + 34], memory[k + 35]) + box.Mod.x;
-							box.WorldPosition.y = ReadShort(memory[k + 36], memory[k + 37]) + box.Mod.y;
-							box.WorldPosition.z = ReadShort(memory[k + 38], memory[k + 39]) + box.Mod.z;
+							box.WorldPosition.x = Utils.ReadShort(memory[k + 34], memory[k + 35]) + box.Mod.x;
+							box.WorldPosition.y = Utils.ReadShort(memory[k + 36], memory[k + 37]) + box.Mod.y;
+							box.WorldPosition.z = Utils.ReadShort(memory[k + 38], memory[k + 39]) + box.Mod.z;
 
 							box.ShowAdditionalInfo = ShowAdditionalInfo;
 
@@ -274,11 +274,11 @@ public class DosBox : MonoBehaviour
 			{
 				//inventory
 				ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 2);
-				allowInventory = ReadShort(memory[0], memory[1]) == 1;
+				allowInventory = Utils.ReadShort(memory[0], memory[1]) == 1;
 
 				//inhand
 				ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xA33C, 2);
-				inHand = ReadShort(memory[0], memory[1]);
+				inHand = Utils.ReadShort(memory[0], memory[1]);
 			}
 		}
 
@@ -295,15 +295,15 @@ public class DosBox : MonoBehaviour
 		{
 			//internal timer
 			ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
-			InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
+			InternalTimer = Utils.ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
 
 			//fps
 			ProcessReader.Read(memory, memoryAddress - 0x83B6, 2);
-			int fps = ReadShort(memory[0], memory[1]);
+			int fps = Utils.ReadShort(memory[0], memory[1]);
 
 			//frames
 			ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0x7464, 2);
-			int frames = ReadShort(memory[0], memory[1]);
+			int frames = Utils.ReadShort(memory[0], memory[1]);
 
 			//check how much frames elapsed since last time
 			int diff;
@@ -340,15 +340,15 @@ public class DosBox : MonoBehaviour
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{
 					int k = i * ActorStructSize[dosBoxPattern];
-					int objectid = ReadShort(memory[k + 0], memory[k + 1]);
+					int objectid = Utils.ReadShort(memory[k + 0], memory[k + 1]);
 
 					//playerspeed
 					if (objectid == lastValidPlayerIndex)
 					{
-						int boundingX1 = ReadShort(memory[k + 8], memory[k + 9]);
-						int boundingX2 = ReadShort(memory[k + 10], memory[k + 11]);
-						int boundingZ1 = ReadShort(memory[k + 16], memory[k + 17]);
-						int boundingZ2 = ReadShort(memory[k + 18], memory[k + 19]);
+						int boundingX1 = Utils.ReadShort(memory[k + 8], memory[k + 9]);
+						int boundingX2 = Utils.ReadShort(memory[k + 10], memory[k + 11]);
+						int boundingZ1 = Utils.ReadShort(memory[k + 16], memory[k + 17]);
+						int boundingZ2 = Utils.ReadShort(memory[k + 18], memory[k + 19]);
 
 						Vector3 position = new Vector3((boundingX1 + boundingX2) / 2.0f, 0.0f, (boundingZ1 + boundingZ2) / 2.0f);
 						if (position != lastPlayerPositionFixedUpdate)
@@ -357,9 +357,9 @@ public class DosBox : MonoBehaviour
 							lastPlayerPositionFixedUpdate = position;
 						}
 
-						int modx = ReadShort(memory[k + 90], memory[k + 91]);
-						int mody = ReadShort(memory[k + 92], memory[k + 93]);
-						int modz = ReadShort(memory[k + 94], memory[k + 95]);
+						int modx = Utils.ReadShort(memory[k + 90], memory[k + 91]);
+						int mody = Utils.ReadShort(memory[k + 92], memory[k + 93]);
+						int modz = Utils.ReadShort(memory[k + 94], memory[k + 95]);
 						Vector3 mod = new Vector3(modx, mody, modz);
 
 						if(mod != Vector3.zero)
@@ -369,8 +369,8 @@ public class DosBox : MonoBehaviour
 					}
 
 					//detect frame change
-					int anim = box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
-					int keyframe = ReadShort(memory[k + 74], memory[k + 75]);
+					int anim = box.Anim = Utils.ReadShort(memory[k + 62], memory[k + 63]);
+					int keyframe = Utils.ReadShort(memory[k + 74], memory[k + 75]);
 
 					if(anim != box.Anim || keyframe != box.Keyframe)
 					{
@@ -395,31 +395,6 @@ public class DosBox : MonoBehaviour
 			mousePosition -= roomObject.position;
 		}
 		return mousePosition * 1000.0f;
-	}
-
-	private uint ReadUnsignedInt(byte a, byte b, byte c, byte d)
-	{
-		unchecked
-		{
-			return (uint)(a | b << 8 | c << 16 | d << 24);
-		}
-	}
-
-	private short ReadShort(byte a, byte b)
-	{
-		unchecked
-		{
-			return (short)(a | b << 8);
-		}
-	}
-
-	private void WriteShort(int value, byte[] data, int offset)
-	{
-		unchecked
-		{
-			data[offset + 0] = (byte)(value & 0xFF);
-			data[offset + 1] = (byte)(value >> 8);
-		}
 	}
 
 	private void FixBoundingWrap(ref int a, ref int b)
@@ -524,7 +499,7 @@ public class DosBox : MonoBehaviour
 		foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 		{
 			int k = i * ActorStructSize[dosBoxPattern];
-			int objectid = ReadShort(memory[k + 0], memory[k + 1]);
+			int objectid = Utils.ReadShort(memory[k + 0], memory[k + 1]);
 			if (objectid == lastValidPlayerIndex)
 			{
 				return box;
