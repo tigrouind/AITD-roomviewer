@@ -85,17 +85,22 @@ public class WarpDialog : MonoBehaviour
 					lastTimeKeyPressed = 0.0f;
 				}
 			}
+		}
 
-			//warp to mouse position
-			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+		//warp to mouse position
+		if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+		{
+			Func<bool> isAITD1 = () => GetComponent<RoomLoader>().DetectGame() == 1;
+			if (Input.GetKeyDown(KeyCode.W) && isAITD1())
 			{
-				Func<bool> isAITD1 = () => GetComponent<RoomLoader>().DetectGame() == 1;
-				if (Input.GetKeyDown(KeyCode.W) && isAITD1())
+				if (warpActor == null)
 				{
-					Vector3 offset = GetComponent<DosBox>().GetMousePosition(warpActor.Room, warpActor.Floor) - warpActor.LocalPosition;
-					offset = new Vector3(Mathf.RoundToInt(offset.x), 0.0f, Mathf.RoundToInt(offset.z));
-					MoveActor(offset);
+					warpActor = GetComponent<DosBox>().GetPlayerBox();
 				}
+
+				Vector3 offset = GetComponent<DosBox>().GetMousePosition(warpActor.Room, warpActor.Floor) - warpActor.LocalPosition;
+				offset = new Vector3(Mathf.RoundToInt(offset.x), 0.0f, Mathf.RoundToInt(offset.z));
+				MoveActor(offset);
 			}
 		}
 	}

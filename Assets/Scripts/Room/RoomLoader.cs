@@ -735,6 +735,14 @@ public class RoomLoader : MonoBehaviour
 			case KeyCode.E:
 				GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
 				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+				if (ShowAdditionalInfo.BoolValue && SelectedBox == null)
+				{
+					SelectedBox = GetComponent<DosBox>().GetPlayerBox();
+					if (SelectedBox != null)
+					{
+						SelectedBoxId = SelectedBox.ID;
+					}
+				}
 				break;
 
 			case KeyCode.Escape:
