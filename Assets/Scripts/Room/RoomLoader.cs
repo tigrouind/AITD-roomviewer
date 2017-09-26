@@ -555,15 +555,15 @@ public class RoomLoader : MonoBehaviour
 				SelectedBox = null;
 			}
 		}
-
-		//if actor is no more available (eg : after room switch) hide selected box
-		if (!DosBoxEnabled || (SelectedBox != null && SelectedBox.ID != SelectedBoxId))
+			
+		if (!DosBoxEnabled)
 		{
 			SelectedBox = null;
 		}
 
 		//display selected box info
-		if (SelectedBox != null)
+		//if actor is no more available (eg : after room switch) don't display info
+		if (SelectedBox != null && SelectedBox.ID == SelectedBoxId)
 		{
 			BottomText.text = SelectedBox.ToString(GetComponent<DosBox>().InternalTimer);
 		}
