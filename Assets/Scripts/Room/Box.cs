@@ -20,7 +20,7 @@ public class Box : MonoBehaviour
 	public int TrackMode;
 	public int Body;
 	public int Anim;
-	public int Frame;
+	public int Keyframe;
 	public int TotalFrames;
 	public int Speed;
 	public int Room;
@@ -30,6 +30,7 @@ public class Box : MonoBehaviour
 	public int TrackNumber;
 	public int PositionInTrack;
 	public int Slot;
+	public uint LastKeyFrameChange;
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
 	public Vector3 BoundingLower;
@@ -158,9 +159,13 @@ public class Box : MonoBehaviour
 			if (Anim != -1)
 			{
 				sb.Append("\r\nANIM = " + Anim);
-				if (Frame != -1)
+				if (Keyframe != -1)
 				{
-					sb.Append("\r\nFRAME = " + Frame + "/" + (TotalFrames - 1));
+					sb.Append("\r\nKEYFRAME = " + Keyframe + "/" + (TotalFrames - 1));
+					if (ShowAdditionalInfo)
+					{				
+						sb.Append("\r\nSUB_KEYFRAME = " + Math.Max(timer - LastKeyFrameChange, 0));
+					}
 				}
 				if (ShowAdditionalInfo)
 				{

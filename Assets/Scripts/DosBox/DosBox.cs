@@ -153,7 +153,7 @@ public class DosBox : MonoBehaviour
 							box.Chrono = ReadUnsignedInt(memory[k + 54], memory[k + 55], memory[k + 56], memory[k + 57]);
 							box.RoomChrono = ReadUnsignedInt(memory[k + 58], memory[k + 59], memory[k + 60], memory[k + 61]);
 							box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
-							box.Frame = ReadShort(memory[k + 74], memory[k + 75]);
+							box.Keyframe = ReadShort(memory[k + 74], memory[k + 75]);
 							box.TotalFrames = ReadShort(memory[k + 76], memory[k + 77]);
 							box.TrackNumber = ReadShort(memory[k + 84], memory[k + 85]);
 							box.PositionInTrack = ReadShort(memory[k + 88], memory[k + 89]);
@@ -272,12 +272,8 @@ public class DosBox : MonoBehaviour
 		{
 			if (ShowAdditionalInfo)
 			{
-				//timer
-				ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
-				InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
-
 				//inventory
-				ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 4);
+				ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 2);
 				allowInventory = ReadShort(memory[0], memory[1]) == 1;
 
 				//inhand
@@ -297,6 +293,10 @@ public class DosBox : MonoBehaviour
 	{
 		if (ProcessReader != null && ShowAdditionalInfo)
 		{
+			//internal timer
+			ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
+			InternalTimer = ReadUnsignedInt(memory[0], memory[1], memory[2], memory[3]);
+
 			//fps
 			ProcessReader.Read(memory, memoryAddress - 0x83B6, 2);
 			int fps = ReadShort(memory[0], memory[1]);
@@ -333,13 +333,16 @@ public class DosBox : MonoBehaviour
 
 			calculatedFps = previousFramesCount.Sum();
 
-			//playerspeed
+			//playerspeed + frame change
 			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
 			{
-				for (int i = 0 ; i < Actors.GetComponentsInChildren<Box>(true).Length ; i++)
+				int i = 0;
+				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{
 					int k = i * ActorStructSize[dosBoxPattern];
 					int objectid = ReadShort(memory[k + 0], memory[k + 1]);
+
+					//playerspeed
 					if (objectid == lastValidPlayerIndex)
 					{
 						int boundingX1 = ReadShort(memory[k + 8], memory[k + 9]);
@@ -364,6 +367,19 @@ public class DosBox : MonoBehaviour
 							lastPlayerMod = Mathf.FloorToInt(mod.magnitude);
 						}
 					}
+
+					//detect frame change
+					int anim = box.Anim = ReadShort(memory[k + 62], memory[k + 63]);
+					int keyframe = ReadShort(memory[k + 74], memory[k + 75]);
+
+					if(anim != box.Anim || keyframe != box.Keyframe)
+					{
+						box.Anim = anim;
+						box.Keyframe = keyframe;
+						box.LastKeyFrameChange = InternalTimer;
+					}
+
+					i++;
 				}
 			}
 		}
