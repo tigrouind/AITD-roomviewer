@@ -158,7 +158,7 @@ public class Vars : MonoBehaviour
 			}
 			else
 			{
-				value = Utils.ReadShort(memory[i * 2 + 0], memory[i * 2 + 1]);
+				value = Utils.ReadShort(memory, i * 2 + 0);
 			}
 
 			data[i].value = value;

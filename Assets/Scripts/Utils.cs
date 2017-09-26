@@ -2,27 +2,27 @@
 
 public static class Utils
 {
-	public static uint ReadUnsignedInt(byte a, byte b, byte c, byte d)
+	public static uint ReadUnsignedInt(byte[] data, int offset)
 	{
 		unchecked
 		{
-			return (uint)(a | b << 8 | c << 16 | d << 24);
+			return (uint)(data[offset] | data[offset + 1] << 8 | data[offset + 2] << 16 | data[offset + 3] << 24);
 		}
 	}
 
-	public static int ReadInt(byte a, byte b, byte c, byte d)
+	public static int ReadInt(byte[] data, int offset)
 	{
 		unchecked
 		{
-			return (int)(a | b << 8 | c << 16 | d << 24);
+			return (int)(data[offset] | data[offset + 1] << 8 | data[offset + 2] << 16 | data[offset + 3] << 24);
 		}
 	}
 
-	public static short ReadShort(byte a, byte b)
+	public static short ReadShort(byte[] data, int offset)
 	{
 		unchecked
 		{
-			return (short)(a | b << 8);
+			return (short)(data[offset] | data[offset + 1] << 8);
 		}
 	}
 
