@@ -123,7 +123,7 @@ public class Box : MonoBehaviour
 		}
 	}
 
-	public string ToString(uint timer)
+	public string ToString(uint timer, uint timerForKeyFrame)
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.Append(name.ToUpper() + "\r\nID = " + ID);
@@ -164,7 +164,7 @@ public class Box : MonoBehaviour
 					sb.Append("\r\nKEYFRAME = " + Keyframe + "/" + (TotalFrames - 1));
 					if (ShowAdditionalInfo)
 					{				
-						sb.Append("\r\nSUB_KEYFRAME = " + Math.Max(timer - LastKeyFrameChange, 0));
+						sb.Append("\r\nSUB_KEYFRAME = " + Math.Max(timerForKeyFrame - LastKeyFrameChange, 0));
 					}
 				}
 				if (ShowAdditionalInfo)

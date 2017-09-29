@@ -512,7 +512,7 @@ public class RoomLoader : MonoBehaviour
 			BoxInfo.transform.position = new Vector3(position.x / Screen.width, position.y / Screen.height, 0.0f);
 
 			//text
-			BoxInfo.text = box.ToString(GetComponent<DosBox>().InternalTimer);
+			BoxInfo.text = box.ToString(GetComponent<DosBox>().InternalTimer, GetComponent<DosBox>().InternalTimerForKeyFrame);
 		}
 		else
 		{
@@ -550,7 +550,7 @@ public class RoomLoader : MonoBehaviour
 			if (SelectedBox.ID == SelectedBoxId)
 			{
 				//display selected box info
-				BottomText.text = SelectedBox.ToString(GetComponent<DosBox>().InternalTimer);
+				BottomText.text = SelectedBox.ToString(GetComponent<DosBox>().InternalTimer, GetComponent<DosBox>().InternalTimerForKeyFrame);
 			}
 			else
 			{

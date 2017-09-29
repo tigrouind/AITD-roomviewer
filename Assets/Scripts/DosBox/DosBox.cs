@@ -13,6 +13,7 @@ public class DosBox : MonoBehaviour
 	public Arrow Arrow;
 	public Box BoxPrefab;
 	public uint InternalTimer;
+	public uint InternalTimerForKeyFrame;
 	public bool ShowAdditionalInfo;
 	public ProcessMemoryReader ProcessReader;
 
@@ -300,6 +301,14 @@ public class DosBox : MonoBehaviour
 			//fps
 			ProcessReader.Read(memory, memoryAddress - 0x83B6, 2);
 			int fps = Utils.ReadShort(memory, 0);
+
+			//frame buffer
+			ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xB668, 4);
+			uint pixels = Utils.ReadUnsignedInt(memory, 0);
+			if(pixels != 0)
+			{
+				InternalTimerForKeyFrame = InternalTimer;
+			}
 
 			//frames
 			ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0x7464, 2);
