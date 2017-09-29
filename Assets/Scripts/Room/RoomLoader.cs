@@ -652,6 +652,7 @@ public class RoomLoader : MonoBehaviour
 					//select player by default
 					if (SelectedBox == null)
 					{
+						GetComponent<DosBox>().Update();
 						SelectedBox = GetComponent<DosBox>().GetPlayerBox();
 						if (SelectedBox != null)
 						{
