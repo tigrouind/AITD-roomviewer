@@ -385,7 +385,7 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	private void UpdateBoxAnimAndKeyFrame(Box box, int offset)
+	void UpdateBoxAnimAndKeyFrame(Box box, int offset)
 	{
 		int anim = Utils.ReadShort(memory, offset + 62);
 		int keyframe = Utils.ReadShort(memory, offset + 74);
@@ -398,19 +398,7 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	public Vector3 GetMousePosition(int room, int floor)
-	{
-		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
-		Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
-		Transform roomObject = GetComponent<RoomLoader>().GetRoom(floor, room);
-		if (roomObject != null)
-		{
-			mousePosition -= roomObject.position;
-		}
-		return mousePosition * 1000.0f;
-	}
-
-	private void FixBoundingWrap(ref int a, ref int b)
+	void FixBoundingWrap(ref int a, ref int b)
 	{
 		if(a > b)
 		{
@@ -510,6 +498,18 @@ public class DosBox : MonoBehaviour
 	{
 		return Actors.GetComponentsInChildren<Box>(true)
 			.FirstOrDefault(x => x.ID == lastValidPlayerIndex);
+	}
+
+	public Vector3 GetMousePosition(int room, int floor)
+	{
+		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
+		Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
+		Transform roomObject = GetComponent<RoomLoader>().GetRoom(floor, room);
+		if (roomObject != null)
+		{
+			mousePosition -= roomObject.position;
+		}
+		return mousePosition * 1000.0f;
 	}
 
 	#endregion
