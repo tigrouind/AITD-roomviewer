@@ -153,8 +153,6 @@ public class DosBox : MonoBehaviour
 							box.Life = Utils.ReadShort(memory, k + 52);
 							box.Chrono = Utils.ReadUnsignedInt(memory, k + 54);
 							box.RoomChrono = Utils.ReadUnsignedInt(memory, k + 58);
-							box.Anim = Utils.ReadShort(memory, k + 62);
-							box.Keyframe = Utils.ReadShort(memory, k + 74);
 							box.TotalFrames = Utils.ReadShort(memory, k + 76);
 							box.TrackNumber = Utils.ReadShort(memory, k + 84);
 							box.PositionInTrack = Utils.ReadShort(memory, k + 88);
@@ -179,6 +177,7 @@ public class DosBox : MonoBehaviour
 							box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + box.Mod.z;
 
 							box.ShowAdditionalInfo = ShowAdditionalInfo;
+							UpdateBoxAnimAndKeyFrame(box, k);
 
 							//player
 							if (objectid == lastValidPlayerIndex)
@@ -378,19 +377,24 @@ public class DosBox : MonoBehaviour
 					}
 
 					//detect frame change
-					int anim = box.Anim = Utils.ReadShort(memory, k + 62);
-					int keyframe = Utils.ReadShort(memory, k + 74);
-
-					if(anim != box.Anim || keyframe != box.Keyframe)
-					{
-						box.Anim = anim;
-						box.Keyframe = keyframe;
-						box.LastKeyFrameChange = InternalTimer;
-					}
+					UpdateBoxAnimAndKeyFrame(box, k);
 
 					i++;
 				}
 			}
+		}
+	}
+
+	private void UpdateBoxAnimAndKeyFrame(Box box, int offset)
+	{
+		int anim = Utils.ReadShort(memory, offset + 62);
+		int keyframe = Utils.ReadShort(memory, offset + 74);
+
+		if(anim != box.Anim || keyframe != box.Keyframe)
+		{
+			box.Anim = anim;
+			box.Keyframe = keyframe;
+			box.LastKeyFrameChange = InternalTimer;
 		}
 	}
 
