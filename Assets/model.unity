@@ -841,7 +841,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1935078266}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1581,7 +1581,7 @@ RectTransform:
   - {fileID: 1420102172}
   - {fileID: 1374317428}
   m_Father: {fileID: 1935078266}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1662,9 +1662,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1447186196}
   - component: {fileID: 1447186195}
-  - component: {fileID: 1447186194}
-  - component: {fileID: 1447186193}
-  - component: {fileID: 1447186192}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1672,27 +1669,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &1447186192
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1447186191}
-  m_Enabled: 1
---- !u!124 &1447186193
-Behaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1447186191}
-  m_Enabled: 1
---- !u!92 &1447186194
-Behaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1447186191}
-  m_Enabled: 1
 --- !u!20 &1447186195
 Camera:
   m_ObjectHideFlags: 0
@@ -2381,8 +2357,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
-  - {fileID: 1196216666}
   - {fileID: 692489840}
+  - {fileID: 1196216666}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
