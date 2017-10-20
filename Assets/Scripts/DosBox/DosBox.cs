@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class DosBox : MonoBehaviour
 {
-	public GUIText RightText;
+	public Text RightText;
 	public GameObject Actors;
 	public Arrow Arrow;
 	public Box BoxPrefab;

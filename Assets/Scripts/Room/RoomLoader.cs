@@ -18,7 +18,7 @@ public class RoomLoader : MonoBehaviour
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
 
-	public GUIText LeftText;
+	public Text LeftText;
 	public GUIText BottomText;
 	public Box BoxPrefab;
 

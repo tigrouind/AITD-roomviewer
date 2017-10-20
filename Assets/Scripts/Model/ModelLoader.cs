@@ -28,7 +28,7 @@ public class ModelLoader : MonoBehaviour
 
 	private int PaletteIndex;
 	public Texture2D[] PaletteTexture;
-	public GUIText LeftText;
+	public Text LeftText;
 	public Mesh SphereMesh;
 	public Mesh CubeMesh;
 
