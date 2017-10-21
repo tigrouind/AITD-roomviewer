@@ -472,6 +472,7 @@ public class DosBox : MonoBehaviour
 	{
 		ProcessReader.Close();
 		ProcessReader = null;
+		BoxInfo.Clear();
 		RightText.text = string.Empty;
 	}
 

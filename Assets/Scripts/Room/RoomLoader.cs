@@ -521,7 +521,7 @@ public class RoomLoader : MonoBehaviour
 			{
 				HighLightedBox.HighLight = false;
 				HighLightedBox = null;
-				BoxInfo.gameObject.SetActive(false);
+				BoxInfo.Clear();
 			}
 		}
 
@@ -568,7 +568,7 @@ public class RoomLoader : MonoBehaviour
 		}
 		else
 		{
-			BottomText.gameObject.SetActive(false);
+			BottomText.Clear();
 		}
 	}
 

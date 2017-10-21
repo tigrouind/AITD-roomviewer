@@ -21,6 +21,9 @@ public class BoxInfo : MonoBehaviour
 		values.Length = 0;
 		values.Capacity = 0;
 		Count = 0;
+		LeftText.text = string.Empty;
+		RightText.text = string.Empty;
+		gameObject.SetActive(false);
 	}
 
 	public void Append(string name, object value)
