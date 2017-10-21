@@ -123,73 +123,74 @@ public class Box : MonoBehaviour
 		}
 	}
 
-	public string ToString(uint timer, uint timerForKeyFrame)
+	public void UpdateText(BoxInfo sb, uint timer, uint timerForKeyFrame)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.Append(name.ToUpper() + "\r\nID = " + ID);
+		sb.Clear();
+		sb.Append("TYPE", name.ToUpper());
+		sb.Append("ID", ID);
 		if (name == "Collider" || name == "Trigger" || name == "Actor")
 		{
-			sb.AppendFormat("\r\nFLAGS = 0x{0:X4}", Flags);
+			sb.AppendFormat("FLAGS", "0x{0:X4}", Flags);
 		}
 
 		if (name == "Actor")
 		{
-			sb.AppendFormat("\r\nCOL_FLAGS = 0x{0:X4}", ColFlags);
+			sb.AppendFormat("COL_FLAGS", "0x{0:X4}", ColFlags);
 
 			if (ShowAdditionalInfo)
 			{
-				sb.AppendFormat("\r\nROOM = E{0}R{1}", Floor, Room);
-				sb.AppendFormat("\r\nROOM_POS = {0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
-				sb.AppendFormat("\r\nWORLD_POS = {0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
-				sb.AppendFormat("\r\nZV_POS = {0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
-				sb.AppendFormat("\r\nZV_SIZE = {0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
-				sb.AppendFormat("\r\nMOD = {0} {1} {2}", Mod.x, Mod.y, Mod.z);
-				sb.AppendFormat("\r\nANGLE = {0:N1} {1:N1} {2:N1}",
+				sb.AppendFormat("ROOM", "E{0}R{1}", Floor, Room);
+				sb.AppendFormat("ROOM_POS", "{0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
+				sb.AppendFormat("WORLD_POS", "{0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
+				sb.AppendFormat("ZV_POS", "{0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
+				sb.AppendFormat("ZV_SIZE", "{0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
+				sb.AppendFormat("MOD", "{0} {1} {2}", Mod.x, Mod.y, Mod.z);
+				sb.AppendFormat("ANGLE", "{0:N1} {1:N1} {2:N1}",
 					Angles.x * 360.0f / 1024.0f,
 					Angles.y * 360.0f / 1024.0f,
 					Angles.z * 360.0f / 1024.0f);
 			}
 
 			if (Body != -1)
-				sb.Append("\r\nBODY = " + Body);
+				sb.Append("BODY", Body);
 			if (Life != -1)
-				sb.Append("\r\nLIFE = " + Life);
+				sb.Append("LIFE", Life);
 			if (LifeMode != -1)
-				sb.Append("\r\nLIFEMODE = " + LifeMode);
+				sb.Append("LIFEMODE", LifeMode);
 			if (Anim != -1)
 			{
-				sb.Append("\r\nANIM = " + Anim);
+				sb.Append("ANIM", Anim);
 				if (Keyframe != -1)
 				{
-					sb.Append("\r\nKEYFRAME = " + Keyframe + "/" + (TotalFrames - 1));
+					sb.Append("KEYFRAME", Keyframe + "/" + (TotalFrames - 1));
 					if (ShowAdditionalInfo)
 					{				
-						sb.Append("\r\nSUB_KEYFRAME = " + Math.Max(timerForKeyFrame - LastKeyFrameChange, 0));
+						sb.Append("SUB_KEYFRAME", Math.Max(timerForKeyFrame - LastKeyFrameChange, 0));
 					}
 				}
 				if (ShowAdditionalInfo)
 				{
 					if (Speed != -1)
-						sb.Append("\r\nSPEED = " + Speed);
+						sb.Append("SPEED", Speed);
 				}
 			}
 
 			if (ShowAdditionalInfo)
 			{
 				if (Chrono != 0)
-					sb.AppendFormat("\r\nCHRONO = {0}", TimeSpan.FromSeconds((timer - Chrono) / 60));
+					sb.AppendFormat("CHRONO", "{0}", TimeSpan.FromSeconds((timer - Chrono) / 60));
 				if (RoomChrono != 0)
-					sb.AppendFormat("\r\nROOM_CHRONO = {0}", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
+					sb.AppendFormat("ROOM_CHRONO", "{0}", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
 				if (TrackMode != -1)
-					sb.Append("\r\nTRACKMODE = " + TrackMode);
+					sb.Append("TRACKMODE", TrackMode);
 				if (TrackNumber != -1)
-					sb.Append("\r\nTRACKNUMBER = " + TrackNumber);
+					sb.Append("TRACKNUMBER", TrackNumber);
 				if (PositionInTrack != -1)
-					sb.Append("\r\nTRACKPOSITION = " + PositionInTrack);
-				sb.Append("\r\nSLOT = " + Slot);
+					sb.Append("TRACKPOSITION", PositionInTrack);
+				sb.Append("SLOT", Slot);
 			}
 		}
 
-		return sb.ToString();
+		sb.UpdateText();
 	}
 }

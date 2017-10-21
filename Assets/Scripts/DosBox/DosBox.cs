@@ -8,7 +8,8 @@ using UnityEngine.UI;
 
 public class DosBox : MonoBehaviour
 {
-	public GUIText RightText;
+	public Text RightText;
+	public BoxInfo BoxInfo;
 	public GameObject Actors;
 	public Arrow Arrow;
 	public Box BoxPrefab;
@@ -41,7 +42,6 @@ public class DosBox : MonoBehaviour
 	private int linkfloor = 0;
 	private int linkroom = 0;
 	private long memoryAddress;
-	private StringBuilder playerInfo;
 	private byte[] memory;
 
 	//fps
@@ -51,7 +51,6 @@ public class DosBox : MonoBehaviour
 
 	private int delayFpsCounter;
 	private int lastDelayFpsCounter;
-	private StringBuilder fpsInfo;
 	private bool allowInventory;
 	private int inHand;
 
@@ -73,6 +72,7 @@ public class DosBox : MonoBehaviour
 	public void Update()
 	{
 		GameObject player = null;
+		BoxInfo.Clear();
 
 		if (ProcessReader != null)
 		{
@@ -185,9 +185,8 @@ public class DosBox : MonoBehaviour
 								float angle = box.Angles.y * 360.0f / 1024.0f;
 								float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
-								playerInfo = new StringBuilder();
-								playerInfo.AppendFormat("Position: {0} {1} {2}\n", box.LocalPosition.x, box.LocalPosition.y, box.LocalPosition.z);
-								playerInfo.AppendFormat("Angle: {0:N1} {1:N1}", angle, sideAngle);
+								BoxInfo.AppendFormat("Position", "{0} {1} {2}", box.LocalPosition.x, box.LocalPosition.y, box.LocalPosition.z);
+								BoxInfo.AppendFormat("Angle", "{0:N1} {1:N1}", angle, sideAngle);
 
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
@@ -240,26 +239,19 @@ public class DosBox : MonoBehaviour
 				if (ShowAdditionalInfo)
 				{
 					Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
-
-					fpsInfo = new StringBuilder();
-					fpsInfo.AppendFormat("Timer: {0}\n", TimeSpan.FromSeconds(InternalTimer / 60));
-					fpsInfo.AppendFormat("Fps: {0}\n", calculatedFps);
-					fpsInfo.AppendFormat("Delay: {0} ms\n", lastDelayFpsCounter * 1000 / 200);
-					fpsInfo.AppendFormat("Allow inventory: {0}\n", allowInventory ? "Yes" : "No");
-					fpsInfo.AppendFormat("Cursor position: {0} {1} {2}\n", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z));
-					fpsInfo.AppendFormat("Last player offset: {0}\n", lastPlayerOffset);
-					fpsInfo.AppendFormat("Last player mod: {0}\n", lastPlayerMod);
-					fpsInfo.AppendFormat("In hand: {0}\n", inHand);
-				}
-				else
-				{
-					fpsInfo = null;
+					BoxInfo.Append();
+					BoxInfo.AppendFormat("Timer", "{0}", TimeSpan.FromSeconds(InternalTimer / 60));
+					BoxInfo.AppendFormat("Fps", "{0}", calculatedFps);
+					BoxInfo.AppendFormat("Delay", "{0} ms", lastDelayFpsCounter * 1000 / 200);
+					BoxInfo.AppendFormat("Allow inventory", "{0}", allowInventory ? "Yes" : "No");
+					BoxInfo.AppendFormat("Cursor position", "{0} {1} {2}", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z));
+					BoxInfo.AppendFormat("Last player offset", "{0}", lastPlayerOffset);
+					BoxInfo.AppendFormat("Last player mod", "{0}", lastPlayerMod);
+					BoxInfo.AppendFormat("In hand", "{0}", inHand);
 				}
 
-				if (playerInfo != null)
-					RightText.text = playerInfo.ToString();
-				if (fpsInfo != null)
-					RightText.text += "\n\n" + fpsInfo.ToString();
+				BoxInfo.UpdateText();
+					
 			}
 			else
 			{
@@ -464,6 +456,7 @@ public class DosBox : MonoBehaviour
 					{
 						GetComponent<Vars>().SearchForPatterns(reader);
 					}
+					RightText.text = string.Empty;
 					return true;
 				}
 			}
@@ -479,6 +472,7 @@ public class DosBox : MonoBehaviour
 	{
 		ProcessReader.Close();
 		ProcessReader = null;
+		BoxInfo.Clear();
 		RightText.text = string.Empty;
 	}
 

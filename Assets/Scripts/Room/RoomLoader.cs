@@ -18,11 +18,11 @@ public class RoomLoader : MonoBehaviour
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
 
-	public GUIText LeftText;
-	public GUIText BottomText;
+	public Text LeftText;
+	public BoxInfo BottomText;
 	public Box BoxPrefab;
 
-	public GUIText BoxInfo;
+	public BoxInfo BoxInfo;
 	private Box HighLightedBox;
 	private Box SelectedBox;
 	private int SelectedBoxId;
@@ -492,7 +492,8 @@ public class RoomLoader : MonoBehaviour
 			hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
 		}
 
-		if (hitInfos != null && hitInfos.Length > 0)
+		if (hitInfos != null && hitInfos.Length > 0 
+			&& !menuEnabled && !GetComponent<WarpDialog>().warpMenuEnabled)
 		{
 			//sort colliders by priority
 			Array.Sort(hitInfos, BoxComparer);
@@ -509,10 +510,10 @@ public class RoomLoader : MonoBehaviour
 
 			//display info
 			Vector3 position = Camera.main.WorldToScreenPoint(box.GetComponent<Renderer>().bounds.center);
-			BoxInfo.transform.position = new Vector3(position.x / Screen.width, position.y / Screen.height, 0.0f);
+			BoxInfo.transform.position = new Vector3(position.x, position.y, 0.0f);
 
 			//text
-			BoxInfo.text = box.ToString(GetComponent<DosBox>().InternalTimer, GetComponent<DosBox>().InternalTimerForKeyFrame);
+			box.UpdateText(BoxInfo, GetComponent<DosBox>().InternalTimer, GetComponent<DosBox>().InternalTimerForKeyFrame);
 		}
 		else
 		{
@@ -520,7 +521,7 @@ public class RoomLoader : MonoBehaviour
 			{
 				HighLightedBox.HighLight = false;
 				HighLightedBox = null;
-				BoxInfo.text = string.Empty;
+				BoxInfo.Clear();
 			}
 		}
 
@@ -550,7 +551,7 @@ public class RoomLoader : MonoBehaviour
 			if (SelectedBox.ID == SelectedBoxId)
 			{
 				//display selected box info
-				BottomText.text = SelectedBox.ToString(GetComponent<DosBox>().InternalTimer, GetComponent<DosBox>().InternalTimerForKeyFrame);
+				SelectedBox.UpdateText(BottomText, GetComponent<DosBox>().InternalTimer, GetComponent<DosBox>().InternalTimerForKeyFrame);
 			}
 			else
 			{
@@ -567,7 +568,7 @@ public class RoomLoader : MonoBehaviour
 		}
 		else
 		{
-			BottomText.text = string.Empty;
+			BottomText.Clear();
 		}
 	}
 
