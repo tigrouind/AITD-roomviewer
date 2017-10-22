@@ -9,7 +9,6 @@ public class BoxInfo : MonoBehaviour
 {
 	public Text LeftText;
 	public Text RightText;
-	public int Count;
 
 	readonly StringBuilder names = new StringBuilder();
 	readonly StringBuilder values = new StringBuilder();
@@ -20,7 +19,7 @@ public class BoxInfo : MonoBehaviour
 		names.Capacity = 0;
 		values.Length = 0;
 		values.Capacity = 0;
-		Count = 0;
+
 		LeftText.text = string.Empty;
 		RightText.text = string.Empty;
 		gameObject.SetActive(false);
@@ -30,7 +29,6 @@ public class BoxInfo : MonoBehaviour
     {
 		names.AppendLine(name);
 		values.AppendLine(value.ToString());
-		Count++;
     }
 
 	public void Append()
@@ -45,13 +43,14 @@ public class BoxInfo : MonoBehaviour
 
     public void UpdateText()
     {
-		var rect = GetComponent<RectTransform>();
-		rect.sizeDelta = new Vector2(rect.sizeDelta.x, Count * 18.0f);
+    	//remove last line return character
+		names.Length -= 2;
+		values.Length -= 2;
 
-    	LeftText.text = names.ToString();	
+		LeftText.text = names.ToString();	
 		RightText.text = values.ToString();	
 
-		gameObject.SetActive(Count > 0);
+		gameObject.SetActive(LeftText.text.Length > 0);
     }
 }
 
