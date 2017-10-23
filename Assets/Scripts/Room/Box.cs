@@ -101,6 +101,7 @@ public class Box : MonoBehaviour
 	private void RefreshMaterial()
 	{
 		Color32 materialColor = color;
+
 		if (highlighted)
 		{
 			if (materialColor.a == 255)
@@ -116,10 +117,15 @@ public class Box : MonoBehaviour
 			}
 		}
 
+		if (alwaysOnTop)
+		{
+			materialColor = new Color32(materialColor.r, materialColor.g, materialColor.b, 254);
+		}
+
 		Renderer renderer = this.GetComponent<Renderer>();
 		if ((renderer.sharedMaterial == null || renderer.sharedMaterial.color != materialColor))
 		{
-			renderer.sharedMaterial = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor, alwaysOnTop);
+			renderer.sharedMaterial = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor);
 		}
 	}
 

@@ -9,12 +9,12 @@ public class MaterialCache : MonoBehaviour
 	public Material OpaqueMaterial;
 	public Material AlwaysOnTopMaterial;
 
-	public Material GetMaterialFromCache(Color32 color, bool alwaysOnTop)
+	public Material GetMaterialFromCache(Color32 color)
 	{
 		Material material;
 		if (!materialsCache.TryGetValue(color, out material))
 		{
-			if (alwaysOnTop)
+			if (color.a == 254)
 			{
 				material = new Material(AlwaysOnTopMaterial);
 			}
