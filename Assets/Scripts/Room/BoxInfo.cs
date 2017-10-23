@@ -44,8 +44,11 @@ public class BoxInfo : MonoBehaviour
     public void UpdateText()
     {
     	//remove last line return character
-		names.Length -= 2;
-		values.Length -= 2;
+		if (names.Length >= 2)
+		{
+			names.Length -= 2;
+			values.Length -= 2;
+		}
 
 		LeftText.text = names.ToString();	
 		RightText.text = values.ToString();	
