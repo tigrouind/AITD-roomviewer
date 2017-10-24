@@ -132,8 +132,7 @@ public class Box : MonoBehaviour
 	public void UpdateText(BoxInfo sb, uint timer, uint timerForKeyFrame)
 	{
 		sb.Clear();
-		sb.Append("TYPE", name.ToUpper());
-		sb.Append("ID", ID);
+		sb.AppendFormat("TYPE/ID", "{0}; {1}", name.ToUpper(), ID);
 		if (name == "Collider" || name == "Trigger" || name == "Actor")
 		{
 			sb.AppendFormat("FLAGS", "0x{0:X4}", Flags);
@@ -150,7 +149,7 @@ public class Box : MonoBehaviour
 				sb.AppendFormat("WORLD_POS", "{0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
 				sb.AppendFormat("ZV_POS", "{0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
 				sb.AppendFormat("ZV_SIZE", "{0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
-				sb.AppendFormat("MOD", "{0} {1} {2}", Mod.x, Mod.y, Mod.z);
+				sb.AppendFormat("MOD", "{0} {1} {2} ({3})", Mod.x, Mod.y, Mod.z, Mathf.FloorToInt(Mod.magnitude));
 				sb.AppendFormat("ANGLE", "{0:N1} {1:N1} {2:N1}",
 					Angles.x * 360.0f / 1024.0f,
 					Angles.y * 360.0f / 1024.0f,
@@ -158,14 +157,18 @@ public class Box : MonoBehaviour
 			}
 
 			if (Body != -1)
-				sb.Append("BODY", Body);
+			{
+				if(Anim != -1)
+					sb.AppendFormat("BODY/ANIM", "{0}; {1}", Body, Anim);
+				else
+					sb.Append("BODY", Body);
+			}
 			if (Life != -1)
 				sb.Append("LIFE", Life);
 			if (LifeMode != -1)
 				sb.Append("LIFEMODE", LifeMode);
 			if (Anim != -1)
 			{
-				sb.Append("ANIM", Anim);
 				if (Keyframe != -1)
 				{
 					sb.Append("KEYFRAME", Keyframe + "/" + (TotalFrames - 1));
@@ -176,17 +179,16 @@ public class Box : MonoBehaviour
 				}
 				if (ShowAdditionalInfo)
 				{
-					if (Speed != -1)
-						sb.Append("SPEED", Speed);
+					sb.Append("SPEED", Speed);
 				}
 			}
 
 			if (ShowAdditionalInfo)
 			{
 				if (Chrono != 0)
-					sb.AppendFormat("CHRONO", "{0}", TimeSpan.FromSeconds((timer - Chrono) / 60));
+					sb.Append("CHRONO", TimeSpan.FromSeconds((timer - Chrono) / 60));
 				if (RoomChrono != 0)
-					sb.AppendFormat("ROOM_CHRONO", "{0}", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
+					sb.Append("ROOM_CHRONO", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
 				if (TrackMode != -1)
 					sb.Append("TRACKMODE", TrackMode);
 				if (TrackNumber != -1)

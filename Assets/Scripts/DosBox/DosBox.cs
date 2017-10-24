@@ -240,14 +240,12 @@ public class DosBox : MonoBehaviour
 				{
 					Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
 					BoxInfo.Append();
-					BoxInfo.AppendFormat("Timer", "{0}", TimeSpan.FromSeconds(InternalTimer / 60));
-					BoxInfo.AppendFormat("Fps", "{0}", calculatedFps);
-					BoxInfo.AppendFormat("Delay", "{0} ms", lastDelayFpsCounter * 1000 / 200);
-					BoxInfo.AppendFormat("Allow inventory", "{0}", allowInventory ? "Yes" : "No");
+					BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
+					BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, lastDelayFpsCounter * 1000 / 200);
 					BoxInfo.AppendFormat("Cursor position", "{0} {1} {2}", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z));
-					BoxInfo.AppendFormat("Last player offset", "{0}", lastPlayerOffset);
-					BoxInfo.AppendFormat("Last player mod", "{0}", lastPlayerMod);
-					BoxInfo.AppendFormat("In hand", "{0}", inHand);
+					BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", lastPlayerOffset, lastPlayerMod);
+					BoxInfo.AppendFormat("Allow inventory", allowInventory ? "Yes" : "No");
+					BoxInfo.Append("In hand", inHand);
 				}
 
 				BoxInfo.UpdateText();
