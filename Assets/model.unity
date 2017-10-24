@@ -304,7 +304,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Enable animation
+      value: '[A]nimation enabled'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -798,7 +798,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Gradient material
+      value: '[G]radient texture'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -1539,7 +1539,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Auto rotate
+      value: '[R]otate model'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -2018,7 +2018,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Show additional info
+      value: '[E]xtra information'
       objectReference: {fileID: 0}
     - target: {fileID: 224573472092331948, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
@@ -2132,7 +2132,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Noise material
+      value: '[N]oise texture'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
