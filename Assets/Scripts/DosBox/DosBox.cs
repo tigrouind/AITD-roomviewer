@@ -242,7 +242,7 @@ public class DosBox : MonoBehaviour
 					BoxInfo.Append();
 					BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
 					BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, lastDelayFpsCounter * 1000 / 200);
-					BoxInfo.AppendFormat("Cursor position", "{0} {1} {2}", (int)(mousePosition.x), (int)(mousePosition.y), (int)(mousePosition.z));
+					BoxInfo.AppendFormat("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
 					BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", lastPlayerOffset, lastPlayerMod);
 					BoxInfo.AppendFormat("Allow inventory", allowInventory ? "Yes" : "No");
 					BoxInfo.Append("In hand", inHand);
