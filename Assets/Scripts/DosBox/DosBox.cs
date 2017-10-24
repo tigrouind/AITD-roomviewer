@@ -54,10 +54,8 @@ public class DosBox : MonoBehaviour
 	private int lastDelayFpsCounter;
 
 	private int lastPlayerOffset;
-	private int lastPlayerMod;
-
-	private int InHand;
-	private bool AllowInventory;
+	private int inHand;
+	private bool allowInventory;
 
 	public void Start()
 	{
@@ -173,6 +171,11 @@ public class DosBox : MonoBehaviour
 							box.Mod.y = mody;
 							box.Mod.z = modz;
 
+							if (box.Mod != Vector3.zero)
+							{
+								box.LastMod = box.Mod;
+							}
+
 							box.LocalPosition.x = Utils.ReadShort(memory, k + 28) + box.Mod.x;
 							box.LocalPosition.y = Utils.ReadShort(memory, k + 30) + box.Mod.y;
 							box.LocalPosition.z = Utils.ReadShort(memory, k + 32) + box.Mod.z;
@@ -208,8 +211,8 @@ public class DosBox : MonoBehaviour
 
 								//follow player
 								Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
-								//face camera
 
+								//face camera
 								float angle = box.Angles.y * 360.0f / 1024.0f;
 								Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
 								Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
@@ -224,13 +227,6 @@ public class DosBox : MonoBehaviour
 								box.Color = new Color32(255, 255, 255, 255);
 								box.AlwaysOnTop = Camera.main.orthographic;
 								Arrow.AlwaysOnTop = Camera.main.orthographic;
-
-								Vector3 mod = new Vector3(modx, mody, modz);
-								if(mod != Vector3.zero)
-								{
-									lastPlayerMod = Mathf.FloorToInt(mod.magnitude);
-								}
-
 								player = box;
 							}
 							else
@@ -271,11 +267,11 @@ public class DosBox : MonoBehaviour
 
 					//inventory
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 2);
-					AllowInventory = Utils.ReadShort(memory, 0) == 1;
+					allowInventory = Utils.ReadShort(memory, 0) == 1;
 
 					//inhand
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xA33C, 2);
-					InHand = Utils.ReadShort(memory, 0);
+					inHand = Utils.ReadShort(memory, 0);
 				}
 			}
 			else
@@ -315,9 +311,9 @@ public class DosBox : MonoBehaviour
 			BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
 			BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, (lastDelayFpsCounter * 1000) / 70);
 			BoxInfo.AppendFormat("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
-			BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", lastPlayerOffset, lastPlayerMod);
-			BoxInfo.AppendFormat("Allow inventory", AllowInventory ? "Yes" : "No");
-			BoxInfo.Append("In hand", InHand);
+			if(Player != null) BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", lastPlayerOffset, Mathf.FloorToInt(Player.LastMod.magnitude));
+			BoxInfo.AppendFormat("Allow inventory", allowInventory ? "Yes" : "No");
+			BoxInfo.Append("In hand", inHand);
 		}
 
 		BoxInfo.UpdateText();
