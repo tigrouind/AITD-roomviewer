@@ -5043,6 +5043,16 @@ Prefab:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114082493465760428, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_HorizontalFit
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 224530555466019952, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_SizeDelta.x
+      value: 120
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: eaccbadae88674849b937ca8b9acb14f, type: 2}
   m_IsPrefabParent: 0
