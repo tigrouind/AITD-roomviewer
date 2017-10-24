@@ -3619,7 +3619,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Triggers
+      value: '[T]riggers'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -3870,7 +3870,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Camera follow
+      value: '[F]ollow mode'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -4287,7 +4287,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Actors
+      value: '[A]ctors'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -5285,7 +5285,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Camera projection
+      value: '[D]isplay mode'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -6039,7 +6039,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Camera rotation
+      value: Rotation [PGUP/PGDN]
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -6165,7 +6165,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Rooms
+      value: '[R]ooms'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -6709,7 +6709,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Cameras
+      value: '[C]amera'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
@@ -7101,7 +7101,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Show additional info
+      value: '[E]xtra information'
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ae31a2aa100e4854b87cfb5151edd6e1, type: 2}
