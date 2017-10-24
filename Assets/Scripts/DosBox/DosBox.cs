@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine.UI;
+using System.Collections;
 
 public class DosBox : MonoBehaviour
 {
@@ -47,14 +48,10 @@ public class DosBox : MonoBehaviour
 	//fps
 	private int oldFramesCount;
 	private Queue<int> previousFramesCount = new Queue<int>();
-	private int calculatedFps;
 
 	private int delayFpsCounter;
 	private int lastDelayFpsCounter;
-	private bool allowInventory;
-	private int inHand;
 
-	private Vector3 lastPlayerPositionFixedUpdate;
 	private int lastPlayerOffset;
 	private int lastPlayerMod;
 
@@ -67,6 +64,8 @@ public class DosBox : MonoBehaviour
 			box.transform.parent = Actors.transform;
 			box.name = "Actor";
 		}
+
+		InvokeRepeating("CalculateFPS", 0.0f, 1.0f/70.0f);
 	}
 
 	public void Update()
@@ -122,6 +121,10 @@ public class DosBox : MonoBehaviour
 							int boundingZ1 = Utils.ReadShort(memory, k + 16);
 							int boundingZ2 = Utils.ReadShort(memory, k + 18);
 
+							int modx = Utils.ReadShort(memory, k + 90);
+							int mody = Utils.ReadShort(memory, k + 92);
+							int modz = Utils.ReadShort(memory, k + 94);
+
 							FixBoundingWrap(ref boundingX1, ref boundingX2);
 							FixBoundingWrap(ref boundingY1, ref boundingY2);
 							FixBoundingWrap(ref boundingZ1, ref boundingZ2);
@@ -164,9 +167,9 @@ public class DosBox : MonoBehaviour
 							box.Angles.y = Utils.ReadShort(memory, k + 42);
 							box.Angles.z = Utils.ReadShort(memory, k + 44);
 
-							box.Mod.x = Utils.ReadShort(memory, k + 90);
-							box.Mod.y = Utils.ReadShort(memory, k + 92);
-							box.Mod.z = Utils.ReadShort(memory, k + 94);
+							box.Mod.x = modx;
+							box.Mod.y = mody;
+							box.Mod.z = modz;
 
 							box.LocalPosition.x = Utils.ReadShort(memory, k + 28) + box.Mod.x;
 							box.LocalPosition.y = Utils.ReadShort(memory, k + 30) + box.Mod.y;
@@ -177,7 +180,15 @@ public class DosBox : MonoBehaviour
 							box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + box.Mod.z;
 
 							box.ShowAdditionalInfo = ShowAdditionalInfo;
-							UpdateBoxAnimAndKeyFrame(box, k);
+
+							int anim = Utils.ReadShort(memory, k + 62);
+							int keyframe = Utils.ReadShort(memory, k + 74);
+							if(anim != box.Anim || keyframe != box.Keyframe)
+							{
+								box.Anim = anim;
+								box.Keyframe = keyframe;
+								box.LastKeyFrameChange = InternalTimer;
+							}
 
 							//player
 							if (objectid == lastValidPlayerIndex)
@@ -191,6 +202,9 @@ public class DosBox : MonoBehaviour
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
 								{
+									Vector3 offset = box.transform.position - lastPlayerPosition;
+									lastPlayerOffset = Mathf.FloorToInt(1000.0f * new Vector3(offset.x, 0.0f, offset.z).magnitude);
+
 									//center camera to player position
 									GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
 									lastPlayerPosition = box.transform.position;
@@ -212,6 +226,12 @@ public class DosBox : MonoBehaviour
 								box.Color = new Color32(255, 255, 255, 255);
 								box.AlwaysOnTop = Camera.main.orthographic;
 								Arrow.AlwaysOnTop = Camera.main.orthographic;
+
+								Vector3 mod = new Vector3(modx, mody, modz);
+								if(mod != Vector3.zero)
+								{
+									lastPlayerMod = Mathf.FloorToInt(mod.magnitude);
+								}
 
 								player = box.gameObject;
 							}
@@ -238,10 +258,34 @@ public class DosBox : MonoBehaviour
 
 				if (ShowAdditionalInfo)
 				{
+					//inventory
+					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 2);
+					bool allowInventory = Utils.ReadShort(memory, 0) == 1;
+
+					//inhand
+					ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xA33C, 2);
+					int inHand = Utils.ReadShort(memory, 0);
+
+					//internal timer
+					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
+					InternalTimer = Utils.ReadUnsignedInt(memory, 0);
+
+					//frame buffer
+					ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xB668, 4);
+					uint pixels = Utils.ReadUnsignedInt(memory, 0);
+					if(pixels != 0)
+					{
+						//hack: if pixel is not black, were are not in main menu/inventory
+						InternalTimerForKeyFrame = InternalTimer;
+					}
+						
+					int calculatedFps = previousFramesCount.Sum();
+
+					//update box
 					Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
-					BoxInfo.Append();
+					if (!BoxInfo.IsEmpty) BoxInfo.Append();
 					BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
-					BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, lastDelayFpsCounter * 1000 / 200);
+					BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, (lastDelayFpsCounter * 1000) / 70);
 					BoxInfo.AppendFormat("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
 					BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", lastPlayerOffset, lastPlayerMod);
 					BoxInfo.AppendFormat("Allow inventory", allowInventory ? "Yes" : "No");
@@ -249,26 +293,11 @@ public class DosBox : MonoBehaviour
 				}
 
 				BoxInfo.UpdateText();
-					
 			}
 			else
 			{
 				//unlink DOSBOX
 				GetComponent<RoomLoader>().ProcessKey(KeyCode.L);
-			}
-		}
-
-		if (ProcessReader != null)
-		{
-			if (ShowAdditionalInfo)
-			{
-				//inventory
-				ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 2);
-				allowInventory = Utils.ReadShort(memory, 0) == 1;
-
-				//inhand
-				ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xA33C, 2);
-				inHand = Utils.ReadShort(memory, 0);
 			}
 		}
 
@@ -279,43 +308,32 @@ public class DosBox : MonoBehaviour
 			&& player.transform.localScale.magnitude > 0.01f);
 	}
 
-	void FixedUpdate()
+	public void CalculateFPS()
 	{
 		if (ProcessReader != null && ShowAdditionalInfo)
 		{
-			//internal timer
-			ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
-			InternalTimer = Utils.ReadUnsignedInt(memory, 0);
-
 			//fps
 			ProcessReader.Read(memory, memoryAddress - 0x83B6, 2);
 			int fps = Utils.ReadShort(memory, 0);
 
-			//frame buffer
-			ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xB668, 4);
-			uint pixels = Utils.ReadUnsignedInt(memory, 0);
-			if(pixels != 0)
-			{
-				InternalTimerForKeyFrame = InternalTimer;
-			}
-
-			//frames
+			//frames counter
 			ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0x7464, 2);
 			int frames = Utils.ReadShort(memory, 0);
 
 			//check how much frames elapsed since last time
 			int diff;
 			if (frames >= oldFramesCount)
-				diff = frames - oldFramesCount;
+				diff = frames - oldFramesCount; //eg:15 - 20
 			else
-				diff = (fps - oldFramesCount) + frames;
+				diff = (fps - oldFramesCount) + frames; //special case: eg: 58 - 60 + 3
 			oldFramesCount = frames;
 
 			//check for large delays
 			if (diff == 0)
 			{
 				delayFpsCounter++;
-				if (delayFpsCounter > 100 / (1000 / 200)) // 20 frames at 200FPS = 100ms
+				//only display delay if greater than 100ms
+				if (delayFpsCounter > 100 / (1000 / 70)) // 100ms in frames
 				{
 					lastDelayFpsCounter = delayFpsCounter;
 				}
@@ -324,68 +342,13 @@ public class DosBox : MonoBehaviour
 			{
 				delayFpsCounter = 0;
 			}
-
+				
 			previousFramesCount.Enqueue(diff);
-			while (previousFramesCount.Count > 200)
+			while (previousFramesCount.Count > 70)
 				previousFramesCount.Dequeue();
+		}	
+			
 
-			calculatedFps = previousFramesCount.Sum();
-
-			//playerspeed + frame change
-			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
-			{
-				int i = 0;
-				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
-				{
-					int k = i * ActorStructSize[dosBoxPattern];
-					int objectid = Utils.ReadShort(memory, k + 0);
-
-					//playerspeed
-					if (objectid == lastValidPlayerIndex)
-					{
-						int boundingX1 = Utils.ReadShort(memory, k + 8);
-						int boundingX2 = Utils.ReadShort(memory, k + 10);
-						int boundingZ1 = Utils.ReadShort(memory, k + 16);
-						int boundingZ2 = Utils.ReadShort(memory, k + 18);
-
-						Vector3 position = new Vector3((boundingX1 + boundingX2) / 2.0f, 0.0f, (boundingZ1 + boundingZ2) / 2.0f);
-						if (position != lastPlayerPositionFixedUpdate)
-						{
-							lastPlayerOffset = Mathf.FloorToInt((position - lastPlayerPositionFixedUpdate).magnitude);
-							lastPlayerPositionFixedUpdate = position;
-						}
-
-						int modx = Utils.ReadShort(memory, k + 90);
-						int mody = Utils.ReadShort(memory, k + 92);
-						int modz = Utils.ReadShort(memory, k + 94);
-						Vector3 mod = new Vector3(modx, mody, modz);
-
-						if(mod != Vector3.zero)
-						{
-							lastPlayerMod = Mathf.FloorToInt(mod.magnitude);
-						}
-					}
-
-					//detect frame change
-					UpdateBoxAnimAndKeyFrame(box, k);
-
-					i++;
-				}
-			}
-		}
-	}
-
-	void UpdateBoxAnimAndKeyFrame(Box box, int offset)
-	{
-		int anim = Utils.ReadShort(memory, offset + 62);
-		int keyframe = Utils.ReadShort(memory, offset + 74);
-
-		if(anim != box.Anim || keyframe != box.Keyframe)
-		{
-			box.Anim = anim;
-			box.Keyframe = keyframe;
-			box.LastKeyFrameChange = InternalTimer;
-		}
 	}
 
 	void FixBoundingWrap(ref int a, ref int b)
