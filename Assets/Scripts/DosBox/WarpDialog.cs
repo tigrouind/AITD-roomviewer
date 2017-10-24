@@ -95,7 +95,7 @@ public class WarpDialog : MonoBehaviour
 			{
 				if (warpActor == null)
 				{
-					warpActor = GetComponent<DosBox>().GetPlayerBox();
+					warpActor = GetComponent<DosBox>().Player;
 				}
 
 				Vector3 offset = GetComponent<DosBox>().GetMousePosition(warpActor.Room, warpActor.Floor) - warpActor.LocalPosition;

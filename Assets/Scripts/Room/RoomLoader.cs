@@ -436,6 +436,8 @@ public class RoomLoader : MonoBehaviour
 			Panel.gameObject.SetActive(menuEnabled);
 		}
 
+		GetComponent<DosBox>().UpdateAllActors();
+		GetComponent<DosBox>().UpdateBoxInfo();
 		RefreshHighLightedBox();
 
 		if (!GetComponent<WarpDialog>().warpMenuEnabled)
@@ -653,8 +655,8 @@ public class RoomLoader : MonoBehaviour
 					//select player by default
 					if (SelectedBox == null)
 					{
-						GetComponent<DosBox>().Update();
-						SelectedBox = GetComponent<DosBox>().GetPlayerBox();
+						GetComponent<DosBox>().UpdateAllActors();
+						SelectedBox = GetComponent<DosBox>().Player;
 						if (SelectedBox != null)
 						{
 							SelectedBoxId = SelectedBox.ID;

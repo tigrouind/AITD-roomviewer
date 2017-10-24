@@ -18,6 +18,7 @@ public class DosBox : MonoBehaviour
 	public uint InternalTimerForKeyFrame;
 	public bool ShowAdditionalInfo;
 	public ProcessMemoryReader ProcessReader;
+	public Box Player;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -55,6 +56,9 @@ public class DosBox : MonoBehaviour
 	private int lastPlayerOffset;
 	private int lastPlayerMod;
 
+	private int InHand;
+	private bool AllowInventory;
+
 	public void Start()
 	{
 		//game has maximum 50 actors
@@ -68,11 +72,9 @@ public class DosBox : MonoBehaviour
 		InvokeRepeating("CalculateFPS", 0.0f, 1.0f/70.0f);
 	}
 
-	public void Update()
+	public void UpdateAllActors()
 	{
-		GameObject player = null;
-		BoxInfo.Clear();
-
+		Box player = null;
 		if (ProcessReader != null)
 		{
 			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
@@ -193,12 +195,6 @@ public class DosBox : MonoBehaviour
 							//player
 							if (objectid == lastValidPlayerIndex)
 							{
-								float angle = box.Angles.y * 360.0f / 1024.0f;
-								float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
-
-								BoxInfo.AppendFormat("Position", "{0} {1} {2}", box.LocalPosition.x, box.LocalPosition.y, box.LocalPosition.z);
-								BoxInfo.AppendFormat("Angle", "{0:N1} {1:N1}", angle, sideAngle);
-
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
 								{
@@ -213,6 +209,8 @@ public class DosBox : MonoBehaviour
 								//follow player
 								Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
 								//face camera
+
+								float angle = box.Angles.y * 360.0f / 1024.0f;
 								Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
 								Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
 
@@ -233,7 +231,7 @@ public class DosBox : MonoBehaviour
 									lastPlayerMod = Mathf.FloorToInt(mod.magnitude);
 								}
 
-								player = box.gameObject;
+								player = box;
 							}
 							else
 							{
@@ -258,14 +256,6 @@ public class DosBox : MonoBehaviour
 
 				if (ShowAdditionalInfo)
 				{
-					//inventory
-					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 2);
-					bool allowInventory = Utils.ReadShort(memory, 0) == 1;
-
-					//inhand
-					ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xA33C, 2);
-					int inHand = Utils.ReadShort(memory, 0);
-
 					//internal timer
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
 					InternalTimer = Utils.ReadUnsignedInt(memory, 0);
@@ -278,21 +268,15 @@ public class DosBox : MonoBehaviour
 						//hack: if pixel is not black, were are not in main menu/inventory
 						InternalTimerForKeyFrame = InternalTimer;
 					}
-						
-					int calculatedFps = previousFramesCount.Sum();
 
-					//update box
-					Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
-					if (!BoxInfo.IsEmpty) BoxInfo.Append();
-					BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
-					BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, (lastDelayFpsCounter * 1000) / 70);
-					BoxInfo.AppendFormat("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
-					BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", lastPlayerOffset, lastPlayerMod);
-					BoxInfo.AppendFormat("Allow inventory", allowInventory ? "Yes" : "No");
-					BoxInfo.Append("In hand", inHand);
+					//inventory
+					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 2);
+					AllowInventory = Utils.ReadShort(memory, 0) == 1;
+
+					//inhand
+					ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xA33C, 2);
+					InHand = Utils.ReadShort(memory, 0);
 				}
-
-				BoxInfo.UpdateText();
 			}
 			else
 			{
@@ -304,8 +288,39 @@ public class DosBox : MonoBehaviour
 		//arrow is only active if actors are active and player is active
 		Arrow.gameObject.SetActive(Actors.activeSelf
 			&& player != null
-			&& player.activeSelf
+			&& player.gameObject.activeSelf
 			&& player.transform.localScale.magnitude > 0.01f);
+		Player = player;
+	}
+
+	public void UpdateBoxInfo()
+	{
+		BoxInfo.Clear();
+		if (Player != null)
+		{
+			float angle = Player.Angles.y * 360.0f / 1024.0f;
+			float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
+
+			BoxInfo.AppendFormat("Position", "{0} {1} {2}", Player.LocalPosition.x, Player.LocalPosition.y, Player.LocalPosition.z);
+			BoxInfo.AppendFormat("Angle", "{0:N1} {1:N1}", angle, sideAngle);
+		}
+
+		if (ShowAdditionalInfo)
+		{
+			if(Player != null) BoxInfo.Append();
+
+			int calculatedFps = previousFramesCount.Sum();
+			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
+
+			BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
+			BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, (lastDelayFpsCounter * 1000) / 70);
+			BoxInfo.AppendFormat("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
+			BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", lastPlayerOffset, lastPlayerMod);
+			BoxInfo.AppendFormat("Allow inventory", AllowInventory ? "Yes" : "No");
+			BoxInfo.Append("In hand", InHand);
+		}
+
+		BoxInfo.UpdateText();
 	}
 
 	public void CalculateFPS()
@@ -447,12 +462,6 @@ public class DosBox : MonoBehaviour
 	public long GetActorMemoryAddress(int index)
 	{
 		return memoryAddress + index * ActorStructSize[dosBoxPattern];
-	}
-
-	public Box GetPlayerBox()
-	{
-		return Actors.GetComponentsInChildren<Box>(true)
-			.FirstOrDefault(x => x.ID == lastValidPlayerIndex);
 	}
 
 	public Vector3 GetMousePosition(int room, int floor)

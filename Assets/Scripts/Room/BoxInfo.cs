@@ -13,14 +13,6 @@ public class BoxInfo : MonoBehaviour
 	readonly StringBuilder names = new StringBuilder();
 	readonly StringBuilder values = new StringBuilder();
 
-	public bool IsEmpty 
-	{
-		get
-		{
-			return names.Length == 0;
-		}
-	}
-
 	public void Clear()
 	{
 		names.Length = 0;
