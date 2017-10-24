@@ -439,6 +439,7 @@ public class RoomLoader : MonoBehaviour
 		GetComponent<DosBox>().UpdateAllActors();
 		GetComponent<DosBox>().UpdateBoxInfo();
 		RefreshHighLightedBox();
+		RefreshSelectedBox();
 
 		if (!GetComponent<WarpDialog>().warpMenuEnabled)
 		{
@@ -485,9 +486,9 @@ public class RoomLoader : MonoBehaviour
 	private void RefreshHighLightedBox()
 	{
 		Vector3 mousePosition = Input.mousePosition;
-
 		RaycastHit[] hitInfos = null;
 
+		//check screen boundaries
 		if (mousePosition.x > 0 && mousePosition.x < Screen.width &&
 			mousePosition.y > 0 && mousePosition.y < Screen.height)
 		{
@@ -517,20 +518,20 @@ public class RoomLoader : MonoBehaviour
 			//text
 			box.UpdateText(BoxInfo, GetComponent<DosBox>().InternalTimer, GetComponent<DosBox>().InternalTimerForKeyFrame);
 		}
-		else
+		else if (HighLightedBox != null)
 		{
-			if (HighLightedBox != null)
-			{
-				HighLightedBox.HighLight = false;
-				HighLightedBox = null;
-				BoxInfo.Clear();
-			}
+			HighLightedBox.HighLight = false;
+			HighLightedBox = null;
+			BoxInfo.Clear();
 		}
+	}
 
+	private void RefreshSelectedBox()
+	{
 		//toggle selected box
 		if (Input.GetMouseButtonDown(0) && HighLightedBox != null
 			&& !(GetComponent<WarpDialog>().warpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
-				  && RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
+				&& RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
 			if (SelectedBox != HighLightedBox)
 			{
@@ -542,12 +543,12 @@ public class RoomLoader : MonoBehaviour
 				SelectedBox = null;
 			}
 		}
-			
+
 		if (!DosBoxEnabled)
 		{
 			SelectedBox = null;
 		}
-			
+
 		if (SelectedBox != null)
 		{
 			if (SelectedBox.ID == SelectedBoxId)
