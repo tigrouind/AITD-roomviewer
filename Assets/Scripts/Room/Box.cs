@@ -30,7 +30,7 @@ public class Box : MonoBehaviour
 	public int TrackNumber;
 	public int PositionInTrack;
 	public int Slot;
-	public uint LastKeyFrameChange;
+	public Timer lastKeyFrameChange = new Timer();
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
 	public Vector3 BoundingLower;
@@ -130,7 +130,7 @@ public class Box : MonoBehaviour
 		}
 	}
 
-	public void UpdateText(BoxInfo sb, uint timer, uint timerForKeyFrame)
+	public void UpdateText(BoxInfo sb, uint timer)
 	{
 		sb.Clear();
 		sb.Append("TYPE", name.ToUpper());
@@ -177,7 +177,7 @@ public class Box : MonoBehaviour
 					sb.Append("KEYFRAME", Keyframe + "/" + (TotalFrames - 1));
 					if (ShowAdditionalInfo)
 					{				
-						sb.Append("SUB_KEYFRAME", Math.Max(timerForKeyFrame - LastKeyFrameChange, 0));
+						sb.Append("SUB_KEYFRAME", Mathf.FloorToInt(lastKeyFrameChange.Elapsed * 60.0f));
 					}
 				}
 				if (ShowAdditionalInfo)

@@ -15,7 +15,6 @@ public class DosBox : MonoBehaviour
 	public Arrow Arrow;
 	public Box BoxPrefab;
 	public uint InternalTimer;
-	public uint InternalTimerForKeyFrame;
 	public bool ShowAdditionalInfo;
 	public ProcessMemoryReader ProcessReader;
 	public Box Player;
@@ -57,6 +56,7 @@ public class DosBox : MonoBehaviour
 	private Vector3 LastPlayerMod;
 	private int inHand;
 	private bool allowInventory;
+	private bool inventoryActivated;
 
 	public void Start()
 	{
@@ -74,6 +74,15 @@ public class DosBox : MonoBehaviour
 		Box player = null;
 		if (ProcessReader != null)
 		{
+			if (ShowAdditionalInfo)
+			{
+				//frame buffer
+				ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xB668, 4);
+				uint pixels = Utils.ReadUnsignedInt(memory, 0);
+				//hack: if pixel is not black, were are not in main menu/inventory
+				inventoryActivated = pixels == 0;
+			}
+
 			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
 			{
 				//read actors info
@@ -193,9 +202,20 @@ public class DosBox : MonoBehaviour
 							{
 								box.Anim = anim;
 								box.Keyframe = keyframe;
-								box.LastKeyFrameChange = InternalTimer;
+								box.lastKeyFrameChange.Reset();
 							}
 
+							if (ShowAdditionalInfo)
+							{
+								if (inventoryActivated)
+								{
+									box.lastKeyFrameChange.Stop();
+								}
+								else
+								{
+									box.lastKeyFrameChange.Start();
+								}
+							}
 							//player
 							if (objectid == lastValidPlayerIndex)
 							{
@@ -257,15 +277,6 @@ public class DosBox : MonoBehaviour
 					//internal timer
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
 					InternalTimer = Utils.ReadUnsignedInt(memory, 0);
-
-					//frame buffer
-					ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xB668, 4);
-					uint pixels = Utils.ReadUnsignedInt(memory, 0);
-					if(pixels != 0)
-					{
-						//hack: if pixel is not black, were are not in main menu/inventory
-						InternalTimerForKeyFrame = InternalTimer;
-					}
 
 					//inventory
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 2);
