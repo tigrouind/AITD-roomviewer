@@ -49,9 +49,10 @@ public class DosBox : MonoBehaviour
 	//fps
 	private int oldFramesCount;
 	private Queue<int> previousFramesCount = new Queue<int>();
+	private Queue<float> previousFrameTime = new Queue<float>();
 
-	private int delayFpsCounter;
-	private int lastDelayFpsCounter;
+	private float lastTimeNoDelay;
+	private float lastDelay;
 
 	private int lastPlayerOffset;
 	private int inHand;
@@ -66,8 +67,6 @@ public class DosBox : MonoBehaviour
 			box.transform.parent = Actors.transform;
 			box.name = "Actor";
 		}
-
-		StartCoroutine(FPSCoroutine(1.0f/60.0f));
 	}
 
 	public void UpdateAllActors()
@@ -306,10 +305,11 @@ public class DosBox : MonoBehaviour
 			if(Player != null) BoxInfo.Append();
 
 			int calculatedFps = previousFramesCount.Sum();
+			
 			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
 
 			BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
-			BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, (lastDelayFpsCounter * 1000) / 60);
+			BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
 			BoxInfo.AppendFormat("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
 			if(Player != null) BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", lastPlayerOffset, Mathf.FloorToInt(Player.LastMod.magnitude));
 			BoxInfo.AppendFormat("Allow inventory", allowInventory ? "Yes" : "No");
@@ -319,22 +319,7 @@ public class DosBox : MonoBehaviour
 		BoxInfo.UpdateText();
 	}
 
-	private IEnumerator FPSCoroutine(float interval)
-	{
-		float nextTick = Time.time + interval;
-		while (true)
-		{
-			while(Time.time < nextTick)
-			{
-				yield return null;
-			}
-			nextTick += interval;
-
-			CalculateFPS();
-		}
-	}
-
-	private void CalculateFPS()
+	public void CalculateFPS()
 	{
 		if (ProcessReader != null && ShowAdditionalInfo)
 		{
@@ -342,7 +327,7 @@ public class DosBox : MonoBehaviour
 			ProcessReader.Read(memory, memoryAddress - 0x83B6, 2);
 			int fps = Utils.ReadShort(memory, 0);
 
-			//frames counter
+			//frames counter (reset to zero when every second by AITD)
 			ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0x7464, 2);
 			int frames = Utils.ReadShort(memory, 0);
 
@@ -351,27 +336,37 @@ public class DosBox : MonoBehaviour
 			if (frames >= oldFramesCount)
 				diff = frames - oldFramesCount; //eg: 15 - 20
 			else
-				diff = (fps - oldFramesCount) + frames; //special case: eg: 60 - 58 + 3
+				diff = fps - oldFramesCount + frames; //special case: eg: 60 - 58 + 3
 			oldFramesCount = frames;
 
 			//check for large delays
-			if (diff == 0)
+			float time = Time.time;
+			if (diff != 0)
 			{
-				delayFpsCounter++;
-				//only display delay if greater than 100ms
-				if (delayFpsCounter > 6) // 100ms in frames
-				{
-					lastDelayFpsCounter = delayFpsCounter;
-				}
+				lastTimeNoDelay = time;
 			}
 			else
 			{
-				delayFpsCounter = 0;
+				float delay = time - lastTimeNoDelay;
+				if(delay > 0.1f) //100ms
+				{
+					lastDelay = delay;
+				}
 			}
-				
-			previousFramesCount.Enqueue(diff);
-			while (previousFramesCount.Count > 60)
+
+			if (diff > 0)
+			{
+				previousFramesCount.Enqueue(diff);
+				previousFrameTime.Enqueue(time);
+			}
+
+			//remove any frame info older than one second
+			while (previousFrameTime.Count > 0 && 
+				previousFrameTime.Peek() < (time - 1.0f))
+			{
 				previousFramesCount.Dequeue();
+				previousFrameTime.Dequeue();
+			}
 		}		
 	}
 

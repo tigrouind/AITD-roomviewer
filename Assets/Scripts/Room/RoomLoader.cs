@@ -437,6 +437,7 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		GetComponent<DosBox>().UpdateAllActors();
+		GetComponent<DosBox>().CalculateFPS();
 		GetComponent<DosBox>().UpdateBoxInfo();
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
