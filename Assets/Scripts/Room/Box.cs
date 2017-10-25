@@ -37,7 +37,7 @@ public class Box : MonoBehaviour
 	public Vector3 BoundingUpper;
 	public Vector3 Angles;
 	public Vector3 Mod;
-	public Vector3 LastMod;
+	public int LastOffset;
 
 	public Vector3 BoundingPos
 	{
@@ -133,7 +133,8 @@ public class Box : MonoBehaviour
 	public void UpdateText(BoxInfo sb, uint timer, uint timerForKeyFrame)
 	{
 		sb.Clear();
-		sb.AppendFormat("TYPE/ID", "{0}; {1}", name.ToUpper(), ID);
+		sb.Append("TYPE", name.ToUpper());
+		sb.Append("ID", ID);
 		if (name == "Collider" || name == "Trigger" || name == "Actor")
 		{
 			sb.AppendFormat("FLAGS", "0x{0:X4}", Flags);
@@ -150,7 +151,8 @@ public class Box : MonoBehaviour
 				sb.AppendFormat("WORLD_POS", "{0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
 				sb.AppendFormat("ZV_POS", "{0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
 				sb.AppendFormat("ZV_SIZE", "{0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
-				sb.AppendFormat("MOD", "{0} {1} {2} ({3})", Mod.x, Mod.y, Mod.z, Mathf.FloorToInt(LastMod.magnitude));
+				sb.Append("OFFSET", LastOffset);
+				sb.AppendFormat("MOD", "{0} {1} {2}", Mod.x, Mod.y, Mod.z);
 				sb.AppendFormat("ANGLE", "{0:N1} {1:N1} {2:N1}",
 					Angles.x * 360.0f / 1024.0f,
 					Angles.y * 360.0f / 1024.0f,
