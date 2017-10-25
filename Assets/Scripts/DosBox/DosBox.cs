@@ -67,7 +67,7 @@ public class DosBox : MonoBehaviour
 			box.name = "Actor";
 		}
 
-		InvokeRepeating("CalculateFPS", 0.0f, 1.0f/70.0f);
+		StartCoroutine(FPSCoroutine(1.0f/60.0f));
 	}
 
 	public void UpdateAllActors()
@@ -309,7 +309,7 @@ public class DosBox : MonoBehaviour
 			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
 
 			BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
-			BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, (lastDelayFpsCounter * 1000) / 70);
+			BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, (lastDelayFpsCounter * 1000) / 60);
 			BoxInfo.AppendFormat("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
 			if(Player != null) BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", lastPlayerOffset, Mathf.FloorToInt(Player.LastMod.magnitude));
 			BoxInfo.AppendFormat("Allow inventory", allowInventory ? "Yes" : "No");
@@ -319,7 +319,22 @@ public class DosBox : MonoBehaviour
 		BoxInfo.UpdateText();
 	}
 
-	public void CalculateFPS()
+	private IEnumerator FPSCoroutine(float interval)
+	{
+		float nextTick = Time.time + interval;
+		while (true)
+		{
+			while(Time.time < nextTick)
+			{
+				yield return null;
+			}
+			nextTick += interval;
+
+			CalculateFPS();
+		}
+	}
+
+	private void CalculateFPS()
 	{
 		if (ProcessReader != null && ShowAdditionalInfo)
 		{
@@ -334,9 +349,9 @@ public class DosBox : MonoBehaviour
 			//check how much frames elapsed since last time
 			int diff;
 			if (frames >= oldFramesCount)
-				diff = frames - oldFramesCount; //eg:15 - 20
+				diff = frames - oldFramesCount; //eg: 15 - 20
 			else
-				diff = (fps - oldFramesCount) + frames; //special case: eg: 58 - 60 + 3
+				diff = (fps - oldFramesCount) + frames; //special case: eg: 60 - 58 + 3
 			oldFramesCount = frames;
 
 			//check for large delays
@@ -344,7 +359,7 @@ public class DosBox : MonoBehaviour
 			{
 				delayFpsCounter++;
 				//only display delay if greater than 100ms
-				if (delayFpsCounter > 100 / (1000 / 70)) // 100ms in frames
+				if (delayFpsCounter > 6) // 100ms in frames
 				{
 					lastDelayFpsCounter = delayFpsCounter;
 				}
@@ -355,11 +370,9 @@ public class DosBox : MonoBehaviour
 			}
 				
 			previousFramesCount.Enqueue(diff);
-			while (previousFramesCount.Count > 70)
+			while (previousFramesCount.Count > 60)
 				previousFramesCount.Dequeue();
-		}	
-			
-
+		}		
 	}
 
 	void FixBoundingWrap(ref int a, ref int b)
