@@ -13,47 +13,53 @@ public class BoxInfo : MonoBehaviour
 	readonly StringBuilder names = new StringBuilder();
 	readonly StringBuilder values = new StringBuilder();
 
-	public void Clear()
+	public void Clear(bool hide = false)
 	{
-		names.Length = 0;
-		names.Capacity = 0;
-		values.Length = 0;
-		values.Capacity = 0;
+		if (names.Length > 0)
+		{
+			names.Length = 0;
+			names.Capacity = 0;
+			values.Length = 0;
+			values.Capacity = 0;
+		}	
 
-		LeftText.text = string.Empty;
-		RightText.text = string.Empty;
-		gameObject.SetActive(false);
+		if (hide)
+		{
+			LeftText.text = string.Empty;
+			RightText.text = string.Empty;
+			gameObject.SetActive(false);
+		}
+	}
+
+	public void Append()
+	{
+		AppendInternal(string.Empty, string.Empty);
+	}
+
+	public void Append(string name, string format, params object[] args)
+	{
+		AppendInternal(name, string.Format(format, args));
 	}
 
 	public void Append(string name, object value)
-    {
-		names.AppendLine(name);
-		values.AppendLine(value.ToString());
-    }
+	{
+		AppendInternal(name, value.ToString());
+	}
 
-	public void Append()
-    {
-		Append(string.Empty, string.Empty);
-    }
+	private void AppendInternal(string name, string value)
+	{
+		if (names.Length > 0) names.AppendLine();
+		if (values.Length > 0) values.AppendLine();
 
-	public void AppendFormat(string name, string format, params object[] args)
-    {
-		Append(name, string.Format(format, args));
-    }
+		names.Append(name);
+		values.Append(value);
+	}
 
-    public void UpdateText()
-    {
-    	//remove last line return character
-		if (names.Length >= 2)
-		{
-			names.Length -= 2;
-			values.Length -= 2;
-		}
-
+	public void UpdateText()
+	{
+		gameObject.SetActive(names.Length > 0);
 		LeftText.text = names.ToString();	
 		RightText.text = values.ToString();	
-
-		gameObject.SetActive(LeftText.text.Length > 0);
-    }
+	}
 }
 

@@ -523,7 +523,7 @@ public class RoomLoader : MonoBehaviour
 		{
 			HighLightedBox.HighLight = false;
 			HighLightedBox = null;
-			BoxInfo.Clear();
+			BoxInfo.Clear(true);
 		}
 	}
 
@@ -572,7 +572,7 @@ public class RoomLoader : MonoBehaviour
 		}
 		else
 		{
-			BottomText.Clear();
+			BottomText.Clear(true);
 		}
 	}
 

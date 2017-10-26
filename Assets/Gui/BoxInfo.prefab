@@ -21,7 +21,6 @@ GameObject:
   - component: {fileID: 224210215839016210}
   - component: {fileID: 222125165874203352}
   - component: {fileID: 114605620693848880}
-  - component: {fileID: 114649942414442944}
   m_Layer: 5
   m_Name: LeftText
   m_TagString: Untagged
@@ -39,7 +38,6 @@ GameObject:
   - component: {fileID: 224530555466019952}
   - component: {fileID: 222310080981560710}
   - component: {fileID: 114746343870169160}
-  - component: {fileID: 114082493465760428}
   m_Layer: 5
   m_Name: RightText
   m_TagString: Untagged
@@ -61,25 +59,12 @@ GameObject:
   - component: {fileID: 114570693340206130}
   - component: {fileID: 114442461690753092}
   m_Layer: 0
-  m_Name: Box
+  m_Name: BoxInfo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &114082493465760428
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1160476113823362}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1741964061, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalFit: 2
-  m_VerticalFit: 2
 --- !u!114 &114324926652900274
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -127,8 +112,8 @@ MonoBehaviour:
   m_Spacing: 5
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
 --- !u!114 &114570693340206130
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -175,19 +160,6 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 
---- !u!114 &114649942414442944
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1028282492170092}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1741964061, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalFit: 2
-  m_VerticalFit: 2
 --- !u!114 &114746343870169160
 MonoBehaviour:
   m_ObjectHideFlags: 1

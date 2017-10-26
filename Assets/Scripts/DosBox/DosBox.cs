@@ -310,8 +310,8 @@ public class DosBox : MonoBehaviour
 			float angle = Player.Angles.y * 360.0f / 1024.0f;
 			float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
-			BoxInfo.AppendFormat("Position", "{0} {1} {2}", Player.LocalPosition.x, Player.LocalPosition.y, Player.LocalPosition.z);
-			BoxInfo.AppendFormat("Angle", "{0:N1} {1:N1}", angle, sideAngle);
+			BoxInfo.Append("Position", "{0} {1} {2}", Player.LocalPosition.x, Player.LocalPosition.y, Player.LocalPosition.z);
+			BoxInfo.Append("Angle", "{0:N1} {1:N1}", angle, sideAngle);
 		}
 
 		if (ShowAdditionalInfo)
@@ -323,10 +323,10 @@ public class DosBox : MonoBehaviour
 			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
 
 			BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
-			BoxInfo.AppendFormat("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
-			BoxInfo.AppendFormat("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
-			if(Player != null) BoxInfo.AppendFormat("Last offset/mod", "{0}; {1}", Player.LastOffset, Mathf.FloorToInt(LastPlayerMod.magnitude));
-			BoxInfo.AppendFormat("Allow inventory", allowInventory ? "Yes" : "No");
+			BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
+			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
+			if(Player != null) BoxInfo.Append("Last offset/mod", "{0}; {1}", Player.LastOffset, Mathf.FloorToInt(LastPlayerMod.magnitude));
+			BoxInfo.Append("Allow inventory", allowInventory ? "Yes" : "No");
 			BoxInfo.Append("In hand", inHand);
 		}
 
@@ -466,7 +466,7 @@ public class DosBox : MonoBehaviour
 	{
 		ProcessReader.Close();
 		ProcessReader = null;
-		BoxInfo.Clear();
+		BoxInfo.Clear(true);
 		RightText.text = string.Empty;
 	}
 
