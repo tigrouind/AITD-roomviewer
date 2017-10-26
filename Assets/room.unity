@@ -2125,6 +2125,29 @@ RectTransform:
   m_PrefabParentObject: {fileID: 224107256483961652, guid: 9bf397cf9a21ca143aa19764d3c2cd45,
     type: 2}
   m_PrefabInternal: {fileID: 553116458}
+--- !u!1 &563636460 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1160476113823362, guid: eaccbadae88674849b937ca8b9acb14f,
+    type: 2}
+  m_PrefabInternal: {fileID: 1861942660}
+--- !u!114 &563636464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 563636460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1679637790, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: 160
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
 --- !u!1 &588446503
 GameObject:
   m_ObjectHideFlags: 0
@@ -2661,6 +2684,29 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 686186029}
+--- !u!1 &706353773 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1160476113823362, guid: eaccbadae88674849b937ca8b9acb14f,
+    type: 2}
+  m_PrefabInternal: {fileID: 1428925852}
+--- !u!114 &706353777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 706353773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1679637790, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: 160
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
 --- !u!114 &709522643 stripped
 MonoBehaviour:
   m_PrefabParentObject: {fileID: 114360847406017678, guid: 9bf397cf9a21ca143aa19764d3c2cd45,
@@ -6951,7 +6997,6 @@ MonoBehaviour:
   Arrow: {fileID: 845929843}
   BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}
   InternalTimer: 0
-  InternalTimerForKeyFrame: 0
   ShowAdditionalInfo: 0
   Player: {fileID: 0}
 --- !u!114 &2046595783
