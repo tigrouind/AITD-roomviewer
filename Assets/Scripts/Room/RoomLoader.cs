@@ -436,8 +436,8 @@ public class RoomLoader : MonoBehaviour
 			Panel.gameObject.SetActive(menuEnabled);
 		}
 
-		GetComponent<DosBox>().UpdateAllActors();
 		GetComponent<DosBox>().CalculateFPS();
+		GetComponent<DosBox>().UpdateAllActors();
 		GetComponent<DosBox>().UpdateBoxInfo();
 		RefreshHighLightedBox();
 		RefreshSelectedBox();

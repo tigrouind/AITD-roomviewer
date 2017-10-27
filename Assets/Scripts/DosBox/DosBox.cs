@@ -52,6 +52,7 @@ public class DosBox : MonoBehaviour
 
 	private float lastTimeNoDelay;
 	private float lastDelay;
+	private int frameCountAfterInventory;
 
 	private Vector3 LastPlayerMod;
 	private int inHand;
@@ -79,8 +80,16 @@ public class DosBox : MonoBehaviour
 				//frame buffer
 				ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xB668, 4);
 				uint pixels = Utils.ReadUnsignedInt(memory, 0);
-				//hack: if pixel is not black, were are not in main menu/inventory
-				inventoryActivated = pixels == 0;
+				//hack: if pixels are black, were are in main menu/inventory
+				if (pixels == 0)
+				{
+					inventoryActivated = true;
+					frameCountAfterInventory = 0;
+				}
+				else if (frameCountAfterInventory > 1)
+				{
+					inventoryActivated = false;
+				}
 			}
 
 			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
@@ -358,9 +367,10 @@ public class DosBox : MonoBehaviour
 			if (diff != 0)
 			{
 				lastTimeNoDelay = time;
+				frameCountAfterInventory += diff;
 			}
 			else
-			{
+			{				
 				float delay = time - lastTimeNoDelay;
 				if(delay > 0.1f) //100ms
 				{
