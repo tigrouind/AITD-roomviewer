@@ -28,7 +28,7 @@ public class Vars : MonoBehaviour
 	public RectTransform TabB;
 	public RectTransform TableHeaderPrefab;
 	public InputField TableCellPrefab;
-	public Text VarText;
+	public RectTransform ToolTip;
 
 	public void Start()
 	{
@@ -50,7 +50,10 @@ public class Vars : MonoBehaviour
 
 	public void OnDisable()
 	{
-		Panel.gameObject.SetActive(false);
+		if(Panel != null)
+			Panel.gameObject.SetActive(false);
+		if(ToolTip != null)
+			ToolTip.gameObject.SetActive(false);
 	}
 
 	void Update()
@@ -88,7 +91,7 @@ public class Vars : MonoBehaviour
 	void UpdateCellSize()
 	{
 		//set cell size
-		Vector2 cellSize = new Vector2(Screen.width / 21.0f, (Screen.height - 60.0f) / 16.0f);
+		Vector2 cellSize = new Vector2(Screen.width / 21.0f, (Screen.height - 30.0f) / 16.0f);
 		TabA.GetComponent<GridLayoutGroup>().cellSize = cellSize;
 		TabB.GetComponent<GridLayoutGroup>().cellSize = cellSize;
 	}
@@ -129,7 +132,7 @@ public class Vars : MonoBehaviour
 				cell.onEndEdit.AddListener((value) => OnCellChange(cell, data, cellIndex));
 
 				UIPointerHandler pointerHandler = cell.GetComponent<UIPointerHandler>();
-				pointerHandler.PointerEnter.AddListener((value) => OnCellPointerEnter(sectionName, cellIndex));
+				pointerHandler.PointerEnter.AddListener((value) => OnCellPointerEnter(cell, sectionName, cellIndex));
 				pointerHandler.PointerExit.AddListener((value) => OnCellPointerExit());
 				data[i].inputField = cell;
 			}
@@ -208,14 +211,21 @@ public class Vars : MonoBehaviour
 		}
 	}
 
-	void OnCellPointerEnter(string sectionName, int cellIndex)
+	void OnCellPointerEnter(InputField cell, string sectionName, int cellIndex)
 	{
-		VarText.text = varParser.GetText(sectionName, cellIndex);
+		string text = varParser.GetText(sectionName, cellIndex);
+		if(!string.IsNullOrEmpty(text))
+		{
+			ToolTip.GetComponentInChildren<Text>().text = text;
+			ToolTip.GetComponent<RectTransform>().position = cell.GetComponent<RectTransform>().position
+			 - new Vector3(0.0f, cell.GetComponent<RectTransform>().sizeDelta.y / 2.0f + 5.0f);
+			ToolTip.gameObject.SetActive(true);
+		}
 	}
 
 	void OnCellPointerExit()
 	{
-		VarText.text = string.Empty;
+		ToolTip.gameObject.SetActive(false);
 	}
 
 	void OnCellChange(InputField cell, Var[] data, int cellIndex)
