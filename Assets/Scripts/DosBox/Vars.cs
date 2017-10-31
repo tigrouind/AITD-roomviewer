@@ -217,10 +217,18 @@ public class Vars : MonoBehaviour
 		if(!string.IsNullOrEmpty(text))
 		{
 			ToolTip.GetComponentInChildren<Text>().text = text;
-			ToolTip.GetComponent<RectTransform>().position = cell.GetComponent<RectTransform>().position
-			 - new Vector3(0.0f, cell.GetComponent<RectTransform>().sizeDelta.y / 2.0f + 5.0f);
+			ToolTip.GetComponent<RectTransform>().position = MoveToolTipIfNeeded(cell.GetComponent<RectTransform>().position
+				- new Vector3(0.0f, cell.GetComponent<RectTransform>().sizeDelta.y / 2.0f + 5.0f),
+				ToolTip.GetComponent<RectTransform>().sizeDelta.x / 2.0f,
+				Screen.width - ToolTip.GetComponent<RectTransform>().sizeDelta.x / 2.0f);
+
 			ToolTip.gameObject.SetActive(true);
 		}
+	}
+
+	Vector3 MoveToolTipIfNeeded(Vector3 position, float min, float max)
+	{
+		return new Vector3(Mathf.Clamp(position.x, min, max), position.y, position.z);
 	}
 
 	void OnCellPointerExit()
