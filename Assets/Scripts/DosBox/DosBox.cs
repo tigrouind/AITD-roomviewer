@@ -319,7 +319,7 @@ public class DosBox : MonoBehaviour
 			float angle = Player.Angles.y * 360.0f / 1024.0f;
 			float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
-			BoxInfo.Append("Position", "{0} {1} {2}", Player.LocalPosition.x, Player.LocalPosition.y, Player.LocalPosition.z);
+			BoxInfo.Append("Position", Player.LocalPosition);
 			BoxInfo.Append("Angle", "{0:N1} {1:N1}", angle, sideAngle);
 		}
 

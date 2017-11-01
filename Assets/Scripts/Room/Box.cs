@@ -147,12 +147,12 @@ public class Box : MonoBehaviour
 			if (ShowAdditionalInfo)
 			{
 				info.Append("ROOM", "E{0}R{1}", Floor, Room);
-				info.Append("ROOM_POS", "{0} {1} {2}", LocalPosition.x, LocalPosition.y, LocalPosition.z);
-				info.Append("WORLD_POS", "{0} {1} {2}", WorldPosition.x, WorldPosition.y, WorldPosition.z);
-				info.Append("ZV_POS", "{0} {1} {2}", BoundingPos.x, BoundingPos.y, BoundingPos.z);
-				info.Append("ZV_SIZE", "{0} {1} {2}", BoundingSize.x, BoundingSize.y, BoundingSize.z);
+				info.Append("ROOM_POS", LocalPosition);
+				info.Append("WORLD_POS", WorldPosition);
+				info.Append("ZV_POS", BoundingPos);
+				info.Append("ZV_SIZE", BoundingSize);
 				info.Append("OFFSET", LastOffset);
-				info.Append("MOD", "{0} {1} {2}", Mod.x, Mod.y, Mod.z);
+				info.Append("MOD", Mod);
 				info.Append("ANGLE", "{0:N1} {1:N1} {2:N1}",
 					Angles.x * 360.0f / 1024.0f,
 					Angles.y * 360.0f / 1024.0f,

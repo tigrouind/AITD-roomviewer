@@ -31,6 +31,17 @@ public class BoxInfo : MonoBehaviour
 		AppendLineIfNecessary();	
 	}
 
+	public void Append(string name, Vector3 value)
+	{
+		AppendLineIfNecessary();
+		names.Append(name);
+		values.Append(value.x);
+		values.Append(' ');
+		values.Append(value.y);
+		values.Append(' ');
+		values.Append(value.z);
+	}
+
 	public void Append<T>(string name, T value)
 	{
 		AppendLineIfNecessary();
