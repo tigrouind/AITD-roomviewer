@@ -133,7 +133,7 @@ public class Box : MonoBehaviour
 	public void UpdateText(BoxInfo info, uint timer)
 	{
 		info.Clear();
-		info.Append("TYPE", name.ToUpper());
+		info.Append("TYPE", name.ToUpperInvariant());
 		info.Append("ID", ID);
 		if (name == "Collider" || name == "Trigger" || name == "Actor")
 		{
@@ -174,7 +174,7 @@ public class Box : MonoBehaviour
 			{
 				if (Keyframe != -1)
 				{
-					info.Append("KEYFRAME", Keyframe + "/" + (TotalFrames - 1));
+					info.Append("KEYFRAME", "{0}/{1}", Keyframe, TotalFrames - 1);
 					if (ShowAdditionalInfo)
 					{				
 						info.Append("SUB_KEYFRAME", Mathf.FloorToInt(lastKeyFrameChange.Elapsed * 60.0f));

@@ -15,13 +15,8 @@ public class BoxInfo : MonoBehaviour
 
 	public void Clear(bool hide = false)
 	{
-		if (names.Length > 0)
-		{
-			names.Length = 0;
-			names.Capacity = 0;
-			values.Length = 0;
-			values.Capacity = 0;
-		}	
+		names.Length = 0;
+		values.Length = 0;
 
 		if (hide)
 		{
@@ -33,26 +28,27 @@ public class BoxInfo : MonoBehaviour
 
 	public void Append()
 	{
-		AppendInternal(string.Empty, string.Empty);
+		AppendLineIfNecessary();	
+	}
+
+	public void Append<T>(string name, T value)
+	{
+		AppendLineIfNecessary();
+		names.Append(name);
+		values.Append(value.ToString());
 	}
 
 	public void Append(string name, string format, params object[] args)
 	{
-		AppendInternal(name, string.Format(format, args));
+		AppendLineIfNecessary();
+		names.Append(name);
+		values.AppendFormat(format, args);
 	}
 
-	public void Append(string name, object value)
-	{
-		AppendInternal(name, value.ToString());
-	}
-
-	private void AppendInternal(string name, string value)
+	private void AppendLineIfNecessary()
 	{
 		if (names.Length > 0) names.AppendLine();
 		if (values.Length > 0) values.AppendLine();
-
-		names.Append(name);
-		values.Append(value);
 	}
 
 	public void UpdateText()
