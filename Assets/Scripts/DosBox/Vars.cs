@@ -30,6 +30,12 @@ public class Vars : MonoBehaviour
 	public InputField TableCellPrefab;
 	public RectTransform ToolTip;
 
+	public Vars()
+	{
+		InitVars(vars);
+		InitVars(cvars);
+	}
+
 	public void Start()
 	{
 		//parse vars.txt file
@@ -37,6 +43,14 @@ public class Vars : MonoBehaviour
 		if (File.Exists(varPath))
 		{
 			varParser.Parse(varPath);
+		}
+	}
+
+	void InitVars(Var[] data)
+	{
+		for(int i = 0 ; i < data.Length ; i++)
+		{
+			data[i] = new Var();
 		}
 	}
 
@@ -128,22 +142,24 @@ public class Vars : MonoBehaviour
 
 				InputField cell = Instantiate(TableCellPrefab);
 				cell.transform.SetParent(tab.transform);
-				int cellIndex = i;
-				cell.onEndEdit.AddListener((value) => OnCellChange(cell, data, cellIndex));
 
+				Var var = data[i];
+				cell.onEndEdit.AddListener((value) => OnCellChange(cell, var));
+
+				int cellIndex = i;
 				UIPointerHandler pointerHandler = cell.GetComponent<UIPointerHandler>();
 				pointerHandler.PointerEnter.AddListener((value) => OnCellPointerEnter(cell, sectionName, cellIndex));
 				pointerHandler.PointerExit.AddListener((value) => OnCellPointerExit());
-				data[i].inputField = cell;
+				var.inputField = cell;
 			}
 		}
 	}
 
 	void SaveState(Var[] data)
 	{
-		for (int i = 0; i < data.Length; i++)
+		foreach(Var var in data)
 		{
-			data[i].saveState = data[i].value;
+			var.saveState = var.value;
 		}
 	}
 
@@ -152,42 +168,43 @@ public class Vars : MonoBehaviour
 		float currenttime = Time.time;
 		for (int i = 0; i < data.Length; i++)
 		{
-			int oldValue = data[i].value;
+			Var var = data[i];
+			int oldValue = var.value;
 			int value;
 
 			if (compare)
 			{
-				value = data[i].saveState;
+				value = var.saveState;
 			}
 			else
 			{
 				value = Utils.ReadShort(memory, i * 2 + 0);
 			}
 
-			data[i].value = value;
+			var.value = value;
 
 			if (ignoreDifferences)
 			{
-				data[i].time = float.MinValue;
+				var.time = float.MinValue;
 			}
 			else if (value != oldValue)
 			{
 				if (compare)
 				{
-					data[i].time = float.MaxValue;
+					var.time = float.MaxValue;
 				}
 				else
 				{
-					data[i].time = currenttime;
+					var.time = currenttime;
 				}
 			}
 
-			data[i].memoryAddress = offset + i * 2;
+			var.memoryAddress = offset + i * 2;
 
 			//Check differences
-			bool difference = (currenttime - data[i].time) < 5.0f;
+			bool difference = (currenttime - var.time) < 5.0f;
 
-			InputField inputField = data[i].inputField;
+			InputField inputField = var.inputField;
 
 			string newText = string.Empty;
 			if (value != 0 || difference)
@@ -217,10 +234,14 @@ public class Vars : MonoBehaviour
 		if(!string.IsNullOrEmpty(text))
 		{
 			ToolTip.GetComponentInChildren<Text>().text = text;
-			ToolTip.GetComponent<RectTransform>().position = MoveToolTipIfNeeded(cell.GetComponent<RectTransform>().position
-				- new Vector3(0.0f, cell.GetComponent<RectTransform>().sizeDelta.y / 2.0f + 5.0f),
-				ToolTip.GetComponent<RectTransform>().sizeDelta.x / 2.0f,
-				Screen.width - ToolTip.GetComponent<RectTransform>().sizeDelta.x / 2.0f);
+
+			RectTransform toolTipTransform = ToolTip.GetComponent<RectTransform>();
+			Vector2 toolTipSize = toolTipTransform.sizeDelta;
+
+			toolTipTransform.position = MoveToolTipIfNeeded(cell.GetComponent<RectTransform>().position
+				- new Vector3(0.0f, toolTipSize.y / 2.0f + 5.0f),
+				toolTipSize.x / 2.0f,
+				Screen.width - toolTipSize.x / 2.0f);
 
 			ToolTip.gameObject.SetActive(true);
 		}
@@ -236,7 +257,7 @@ public class Vars : MonoBehaviour
 		ToolTip.gameObject.SetActive(false);
 	}
 
-	void OnCellChange(InputField cell, Var[] data, int cellIndex)
+	void OnCellChange(InputField cell, Var var)
 	{
 		int newValueInt;
 		if (int.TryParse(cell.text, out newValueInt) || cell.text == string.Empty)
@@ -244,13 +265,13 @@ public class Vars : MonoBehaviour
 			if (newValueInt > short.MaxValue) newValueInt = short.MaxValue;
 			if (newValueInt < short.MinValue) newValueInt = short.MinValue;
 
-			if (newValueInt != data[cellIndex].value)
+			if (newValueInt != var.value)
 			{
 				//write new value to memory
 				ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 				byte[] wordValue = new byte[2];
 				Utils.WriteShort(newValueInt, wordValue, 0);
-				processReader.Write(wordValue, data[cellIndex].memoryAddress, wordValue.Length);
+				processReader.Write(wordValue, var.memoryAddress, wordValue.Length);
 			}
 		}
 	}
@@ -308,7 +329,7 @@ public class Vars : MonoBehaviour
 		cvarsMemoryAddress = reader.SearchForBytePattern(cvarsMemoryPattern);
 	}
 
-	public struct Var
+	public class Var
 	{
 		public int value;
 		public int saveState; //value set there when using SaveState button
