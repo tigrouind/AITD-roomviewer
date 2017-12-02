@@ -481,6 +481,12 @@ public class RoomLoader : MonoBehaviour
 			return aCurrentRoom.CompareTo(bCurrentRoom);
 		}
 
+		if (boxA.name == "Camera" && boxB.name == "Camera")
+		{
+			return -boxA.GetComponent<Renderer>().sharedMaterial.renderQueue
+				.CompareTo(boxB.GetComponent<Renderer>().sharedMaterial.renderQueue);
+		}
+
 		return 0;
 	}
 
@@ -506,8 +512,20 @@ public class RoomLoader : MonoBehaviour
 			if (box != HighLightedBox)
 			{
 				if (HighLightedBox != null)
+				{
 					HighLightedBox.HighLight = false;
+					if(HighLightedBox.name == "Camera")
+					{
+						HighLightedBox.GetComponent<Renderer>().sharedMaterial.renderQueue = 3000;
+					}
+				}
+
 				box.HighLight = true;
+
+				if(box.name == "Camera")
+				{
+					box.GetComponent<Renderer>().sharedMaterial.renderQueue = 4000;
+				}
 
 				HighLightedBox = box;
 			}
