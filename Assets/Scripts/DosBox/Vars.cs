@@ -235,11 +235,12 @@ public class Vars : MonoBehaviour
 		{
 			ToolTip.GetComponentInChildren<Text>().text = text;
 
+			RectTransform cellTransform = cell.GetComponent<RectTransform>();
 			RectTransform toolTipTransform = ToolTip.GetComponent<RectTransform>();
 			Vector2 toolTipSize = toolTipTransform.sizeDelta;
 
-			toolTipTransform.position = MoveToolTipIfNeeded(cell.GetComponent<RectTransform>().position
-				- new Vector3(0.0f, toolTipSize.y / 2.0f + 5.0f),
+			toolTipTransform.position = MoveToolTipIfNeeded(cellTransform.position
+				- new Vector3(0.0f, cellTransform.sizeDelta.y / 2.0f, 0.0f),
 				toolTipSize.x / 2.0f,
 				Screen.width - toolTipSize.x / 2.0f);
 
