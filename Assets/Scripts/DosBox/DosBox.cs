@@ -57,6 +57,7 @@ public class DosBox : MonoBehaviour
 	private int inHand;
 	private bool allowInventory;
 	private bool inventoryActivated;
+	private bool isGameLagging;
 
 	public void Start()
 	{
@@ -213,7 +214,7 @@ public class DosBox : MonoBehaviour
 									box.lastKeyFrameChange.Reset();
 								}
 
-								if (inventoryActivated)
+								if (inventoryActivated || isGameLagging)
 								{
 									box.lastKeyFrameChange.Stop();
 								}
@@ -374,12 +375,14 @@ public class DosBox : MonoBehaviour
 			{
 				lastTimeNoDelay = time;
 				frameCountAfterInventory += diff;
+				isGameLagging = false;
 			}
 			else
 			{				
 				float delay = time - lastTimeNoDelay;
 				if(delay > 0.1f) //100ms
 				{
+					isGameLagging = true;
 					lastDelay = delay;
 				}
 			}
