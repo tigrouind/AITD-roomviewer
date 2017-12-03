@@ -207,15 +207,17 @@ public class DosBox : MonoBehaviour
 
 							int anim = Utils.ReadShort(memory, k + 62);
 							int keyframe = Utils.ReadShort(memory, k + 74);
-							if(anim != box.Anim || keyframe != box.Keyframe)
-							{
-								box.Anim = anim;
-								box.Keyframe = keyframe;
-								box.lastKeyFrameChange.Reset();
-							}
 
 							if (ShowAdditionalInfo)
 							{
+								int endframe = Utils.ReadShort(memory, k + 78);
+								int endanim = Utils.ReadShort(memory, k + 80);
+
+								if(anim != box.Anim || keyframe != box.Keyframe || endframe == 1 || endanim == 1)
+								{
+									box.lastKeyFrameChange.Reset();
+								}
+
 								if (inventoryActivated)
 								{
 									box.lastKeyFrameChange.Stop();
@@ -225,6 +227,10 @@ public class DosBox : MonoBehaviour
 									box.lastKeyFrameChange.Start();
 								}
 							}
+
+							box.Anim = anim;
+							box.Keyframe = keyframe;
+
 							//player
 							if (objectid == lastValidPlayerIndex)
 							{
