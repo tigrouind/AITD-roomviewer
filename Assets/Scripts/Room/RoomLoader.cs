@@ -17,6 +17,7 @@ public class RoomLoader : MonoBehaviour
 	private Vector3 mousePosition;
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
+	private BoxComparer boxComparer = new BoxComparer();
 
 	public Text LeftText;
 	public BoxInfo BottomText;
@@ -454,42 +455,6 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	private int BoxComparer(RaycastHit a, RaycastHit b)
-	{
-		Box boxA = a.collider.GetComponent<Box>();
-		Box boxB = b.collider.GetComponent<Box>();
-
-		//actors have priority over the rest
-		int isActorA = boxA.name == "Actor" ? 0 : 1;
-		int isActorB = boxB.name == "Actor" ? 0 : 1;
-		if (isActorA != isActorB)
-		{
-			return isActorA.CompareTo(isActorB);
-		}
-
-		// check distance
-		if (Mathf.Abs(a.distance - b.distance) >= 0.0005f)
-		{
-			return a.distance.CompareTo(b.distance);
-		}
-
-		//if objects are too close each other, check current room
-		int aCurrentRoom = boxA.Room == room ? 0 : 1;
-		int bCurrentRoom = boxB.Room == room ? 0 : 1;
-		if (aCurrentRoom != bCurrentRoom)
-		{
-			return aCurrentRoom.CompareTo(bCurrentRoom);
-		}
-
-		if (boxA.name == "Camera" && boxB.name == "Camera")
-		{
-			return -boxA.GetComponent<Renderer>().sharedMaterial.renderQueue
-				.CompareTo(boxB.GetComponent<Renderer>().sharedMaterial.renderQueue);
-		}
-
-		return 0;
-	}
-
 	private void RefreshHighLightedBox()
 	{
 		Vector3 mousePosition = Input.mousePosition;
@@ -506,7 +471,8 @@ public class RoomLoader : MonoBehaviour
 			&& !menuEnabled && !GetComponent<WarpDialog>().warpMenuEnabled)
 		{
 			//sort colliders by priority
-			Array.Sort(hitInfos, BoxComparer);
+			boxComparer.Room = room;
+			Array.Sort(hitInfos, boxComparer);
 
 			Box box = hitInfos[0].collider.GetComponent<Box>();
 			if (box != HighLightedBox)
