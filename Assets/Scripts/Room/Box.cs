@@ -160,6 +160,11 @@ public class Box : MonoBehaviour
 					Angles.z * 360.0f / 1024.0f);
 			}
 
+			if (Life != -1)
+				info.Append("LIFE", Life);
+			if (LifeMode != -1)
+				info.Append("LIFEMODE", LifeMode);
+
 			if (Body != -1)
 			{
 				if(Anim != -1)
@@ -167,10 +172,7 @@ public class Box : MonoBehaviour
 				else
 					info.Append("BODY", Body);
 			}
-			if (Life != -1)
-				info.Append("LIFE", Life);
-			if (LifeMode != -1)
-				info.Append("LIFEMODE", LifeMode);
+
 			if (Anim != -1)
 			{
 				if (Keyframe != -1)
