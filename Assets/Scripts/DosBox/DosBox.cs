@@ -54,7 +54,6 @@ public class DosBox : MonoBehaviour
 	private float lastDelay;
 	private int frameCountAfterInventory;
 
-	private Vector3 LastPlayerMod;
 	private int inHand;
 	private bool allowInventory;
 	private bool inventoryActivated;
@@ -191,17 +190,13 @@ public class DosBox : MonoBehaviour
 							box.Angles.y = Utils.ReadShort(memory, k + 42);
 							box.Angles.z = Utils.ReadShort(memory, k + 44);
 
-							box.Mod.x = modx;
-							box.Mod.y = mody;
-							box.Mod.z = modz;
+							box.LocalPosition.x = Utils.ReadShort(memory, k + 28) + modx;
+							box.LocalPosition.y = Utils.ReadShort(memory, k + 30) + mody;
+							box.LocalPosition.z = Utils.ReadShort(memory, k + 32) + modz;
 
-							box.LocalPosition.x = Utils.ReadShort(memory, k + 28) + box.Mod.x;
-							box.LocalPosition.y = Utils.ReadShort(memory, k + 30) + box.Mod.y;
-							box.LocalPosition.z = Utils.ReadShort(memory, k + 32) + box.Mod.z;
-
-							box.WorldPosition.x = Utils.ReadShort(memory, k + 34) + box.Mod.x;
-							box.WorldPosition.y = Utils.ReadShort(memory, k + 36) + box.Mod.y;
-							box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + box.Mod.z;
+							box.WorldPosition.x = Utils.ReadShort(memory, k + 34) + modx;
+							box.WorldPosition.y = Utils.ReadShort(memory, k + 36) + mody;
+							box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + modz;
 
 							box.ShowAdditionalInfo = ShowAdditionalInfo;
 
@@ -231,6 +226,15 @@ public class DosBox : MonoBehaviour
 							box.Anim = anim;
 							box.Keyframe = keyframe;
 
+							if (box.Speed == 0)
+							{
+								box.PositionStartMovement = box.transform.position;
+							}
+							else
+							{
+								box.lastDistance = Mathf.FloorToInt((box.transform.position - box.PositionStartMovement).magnitude * 1000.0f);
+							}
+
 							//player
 							if (objectid == lastValidPlayerIndex)
 							{
@@ -242,10 +246,6 @@ public class DosBox : MonoBehaviour
 									lastPlayerPosition = box.transform.position;
 								}
 
-								if (box.Mod != Vector3.zero)
-								{
-									LastPlayerMod = box.Mod;
-								}
 								//follow player
 								Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
 
@@ -340,7 +340,7 @@ public class DosBox : MonoBehaviour
 			BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
 			BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
 			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
-			if(Player != null) BoxInfo.Append("Last offset/mod", "{0}; {1}", Player.LastOffset, Mathf.FloorToInt(LastPlayerMod.magnitude));
+			if(Player != null) BoxInfo.Append("Last offset/mod", "{0}; {1}", Player.LastOffset, Mathf.FloorToInt(Player.lastDistance));
 			BoxInfo.Append("Allow inventory", allowInventory ? "Yes" : "No");
 			BoxInfo.Append("In hand", inHand);
 		}
