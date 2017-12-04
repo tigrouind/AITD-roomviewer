@@ -382,7 +382,8 @@ public class RoomLoader : MonoBehaviour
 		if (Input.GetMouseButtonDown(2))
 		{
 			//reset zoom
-			Camera.main.transform.position = new Vector3(0.0f, 10.0f, 0.0f);
+			Vector3 pos =Camera.main.transform.position;
+			Camera.main.transform.position = new Vector3(pos.x, 10.0f, pos.z);
 		}
 
 		if (!menuEnabled && !GetComponent<WarpDialog>().warpMenuEnabled)
