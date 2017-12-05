@@ -52,12 +52,10 @@ public class DosBox : MonoBehaviour
 
 	private float lastTimeNoDelay;
 	private float lastDelay;
-	private int frameCountAfterInventory;
 
 	private int inHand;
 	private bool allowInventory;
-	private bool inventoryActivated;
-	private bool isGameLagging;
+	private bool saveTimerFlag;
 
 	public void Start()
 	{
@@ -75,23 +73,6 @@ public class DosBox : MonoBehaviour
 		Box player = null;
 		if (ProcessReader != null)
 		{
-			if (ShowAdditionalInfo)
-			{
-				//frame buffer
-				ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xB668, 4);
-				uint pixels = Utils.ReadUnsignedInt(memory, 0);
-				//hack: if pixels are black, were are in main menu/inventory
-				if (pixels == 0)
-				{
-					inventoryActivated = true;
-					frameCountAfterInventory = 0;
-				}
-				else if (frameCountAfterInventory > 1)
-				{
-					inventoryActivated = false;
-				}
-			}
-
 			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
 			{
 				//read actors info
@@ -214,7 +195,7 @@ public class DosBox : MonoBehaviour
 									box.lastKeyFrameChange.Reset();
 								}
 
-								if (inventoryActivated || isGameLagging)
+								if (saveTimerFlag)
 								{
 									box.lastKeyFrameChange.Stop();
 								}
@@ -301,6 +282,9 @@ public class DosBox : MonoBehaviour
 					//inhand
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xA33C, 2);
 					inHand = Utils.ReadShort(memory, 0);
+
+					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 + 0x13EA, 4);
+					saveTimerFlag = memory[0] == 1;
 				}
 			}
 			else
@@ -371,18 +355,15 @@ public class DosBox : MonoBehaviour
 
 			//check for large delays
 			float time = Time.time;
-			if (diff != 0)
+			if (!saveTimerFlag)
 			{
 				lastTimeNoDelay = time;
-				frameCountAfterInventory += diff;
-				isGameLagging = false;
 			}
 			else
 			{				
 				float delay = time - lastTimeNoDelay;
 				if(delay > 0.1f) //100ms
 				{
-					isGameLagging = true;
 					lastDelay = delay;
 				}
 			}
