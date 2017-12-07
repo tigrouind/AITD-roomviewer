@@ -18,6 +18,7 @@ public class RoomLoader : MonoBehaviour
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
 	private BoxComparer boxComparer = new BoxComparer();
+	private float defaultCameraZoom = 10.0f;
 
 	public Text LeftText;
 	public BoxInfo BottomText;
@@ -54,6 +55,15 @@ public class RoomLoader : MonoBehaviour
 			.Select(x => int.Parse(x.Substring(5, 2)))
 			.ToList();
 		floor = floors.FirstOrDefault();
+
+		var args = System.Environment.GetCommandLineArgs();
+		if(args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
+		{
+			defaultCameraZoom = 16.93509f;
+			ProcessKey(KeyCode.Mouse2);
+			ProcessKey(KeyCode.D);
+			ProcessKey(KeyCode.C);
+		}
 
 		RefreshRooms();
 		ToggleMenuDOSBoxOptions(false);
@@ -377,13 +387,6 @@ public class RoomLoader : MonoBehaviour
 			{
 				Camera.main.transform.position = Vector3.Scale(Camera.main.transform.position, new Vector3(1.0f, 1.0f / 0.9f, 1.0f));
 			}
-		}
-
-		if (Input.GetMouseButtonDown(2))
-		{
-			//reset zoom
-			Vector3 pos =Camera.main.transform.position;
-			Camera.main.transform.position = new Vector3(pos.x, 10.0f, pos.z);
 		}
 
 		if (!menuEnabled && !GetComponent<WarpDialog>().warpMenuEnabled)
@@ -740,6 +743,14 @@ public class RoomLoader : MonoBehaviour
 			case KeyCode.E:
 				GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
 				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+				break;
+
+			case KeyCode.Mouse2:
+				//reset zoom
+				Vector3 pos = Camera.main.transform.position;
+				Camera.main.transform.position = new Vector3(pos.x, defaultCameraZoom, pos.z);
+				float planeWidth = Mathf.Tan(Camera.main.fieldOfView * Mathf.Deg2Rad / 2.0f);
+				Camera.main.orthographicSize = defaultCameraZoom * planeWidth;
 				break;
 
 			case KeyCode.Escape:
