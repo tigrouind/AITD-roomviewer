@@ -56,14 +56,7 @@ public class RoomLoader : MonoBehaviour
 			.ToList();
 		floor = floors.FirstOrDefault();
 
-		var args = System.Environment.GetCommandLineArgs();
-		if (args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
-		{
-			defaultCameraZoom = 16.93509f;
-			ProcessKey(KeyCode.Mouse2); //reset camera zoom
-			ProcessKey(KeyCode.D); //camera perspective
-			ProcessKey(KeyCode.C); //camera areas for current room
-		}
+		CheckCommandLine();
 
 		RefreshRooms();
 		ToggleMenuDOSBoxOptions(false);
@@ -810,6 +803,18 @@ public class RoomLoader : MonoBehaviour
 	}
 
 	#endregion
+
+	void CheckCommandLine()
+	{
+		var args = System.Environment.GetCommandLineArgs();
+		if (args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
+		{
+			defaultCameraZoom = 16.93509f;
+			ProcessKey(KeyCode.Mouse2); //reset camera zoom
+			ProcessKey(KeyCode.D); //camera perspective
+			ProcessKey(KeyCode.C); //camera areas for current room
+		}
+	}
 
 	Mesh GetMeshFromPoints(List<Vector2> vertices2D, List<int> indices)
 	{
