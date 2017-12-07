@@ -50,8 +50,9 @@ public class DosBox : MonoBehaviour
 	private Queue<int> previousFramesCount = new Queue<int>();
 	private Queue<float> previousFrameTime = new Queue<float>();
 
-	private float lastTimeNoDelay;
 	private float lastDelay;
+	private Timer delayCounter = new Timer();
+	private Timer totalDelay = new Timer();
 
 	private int inHand;
 	private bool allowInventory;
@@ -321,9 +322,11 @@ public class DosBox : MonoBehaviour
 			int calculatedFps = previousFramesCount.Sum();
 			
 			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
+			TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
 
 			BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
 			BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
+			BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
 			if(Player != null) BoxInfo.Append("Last offset/mod", "{0}; {1}", Player.LastOffset, Mathf.FloorToInt(Player.lastDistance));
 			BoxInfo.Append("Allow inventory", allowInventory ? "Yes" : "No");
@@ -331,6 +334,14 @@ public class DosBox : MonoBehaviour
 		}
 
 		BoxInfo.UpdateText();
+	}
+
+	public void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.Q))
+		{
+			totalDelay.Reset();
+		}
 	}
 
 	public void CalculateFPS()
@@ -354,20 +365,23 @@ public class DosBox : MonoBehaviour
 			oldFramesCount = frames;
 
 			//check for large delays
-			float time = Time.time;
 			if (!saveTimerFlag)
 			{
-				lastTimeNoDelay = time;
+				delayCounter.Reset();
+				totalDelay.Stop();
 			}
 			else
-			{				
-				float delay = time - lastTimeNoDelay;
-				if(delay > 0.1f) //100ms
+			{	
+				delayCounter.Start();
+				totalDelay.Start();
+
+				if(delayCounter.Elapsed >= 0.1f) //100ms
 				{
-					lastDelay = delay;
+					lastDelay = delayCounter.Elapsed;
 				}
 			}
 
+			float time = Time.time;
 			if (diff > 0)
 			{
 				previousFramesCount.Enqueue(diff);
