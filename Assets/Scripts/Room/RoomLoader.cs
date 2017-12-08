@@ -813,6 +813,7 @@ public class RoomLoader : MonoBehaviour
 			ProcessKey(KeyCode.Mouse2); //reset camera zoom
 			ProcessKey(KeyCode.D); //camera perspective
 			ProcessKey(KeyCode.C); //camera areas for current room
+			ProcessKey(KeyCode.E); //extra info
 		}
 	}
 
