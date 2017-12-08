@@ -809,7 +809,7 @@ public class RoomLoader : MonoBehaviour
 		var args = System.Environment.GetCommandLineArgs();
 		if (args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
 		{
-			defaultCameraZoom = 16.93509f;
+			defaultCameraZoom = 10.0f / Mathf.Pow(0.9f, 5.0f);
 			ProcessKey(KeyCode.Mouse2); //reset camera zoom
 			ProcessKey(KeyCode.D); //camera perspective
 			ProcessKey(KeyCode.C); //camera areas for current room
