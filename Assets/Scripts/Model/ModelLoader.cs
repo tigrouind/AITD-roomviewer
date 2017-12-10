@@ -56,7 +56,8 @@ public class ModelLoader : MonoBehaviour
 	void LoadBody(string filename, bool resetcamera = true)
 	{
 		string varName = varParser.GetText("BODYS", modelIndex);
-		LeftTextBody = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + modelIndex + "/" + (modelFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
+		string folderName = modelFolders[modelFolderIndex];
+		LeftTextBody = folderName.Substring(folderName.Length - 4) + " " + modelIndex + "/" + (modelFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
 		RefreshLeftText();
 
 		//camera
@@ -449,7 +450,8 @@ public class ModelLoader : MonoBehaviour
 	void LoadAnim(string filename)
 	{
 		string varName = varParser.GetText("ANIMS", animIndex);
-		LeftTextAnim = Path.GetFileName(Path.GetDirectoryName(filename)) + " " + animIndex + "/" + (animFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
+		string folderName = animFolders[modelFolderIndex];
+		LeftTextAnim = folderName.Substring(folderName.Length - 4) + " " + animIndex + "/" + (animFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
 
 		int i = 0;
 		byte[] allbytes = File.ReadAllBytes(filename);
