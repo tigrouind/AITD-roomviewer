@@ -139,6 +139,7 @@ public class DosBox : MonoBehaviour
 							{
 								Vector3 offset = box.transform.position - boxPosition;
 								box.LastOffset = Mathf.FloorToInt(1000.0f * new Vector3(offset.x, 0.0f, offset.z).magnitude);
+								box.LastDistance += box.LastOffset;
 								box.transform.position = boxPosition;
 							}
 
@@ -208,15 +209,6 @@ public class DosBox : MonoBehaviour
 
 							box.Anim = anim;
 							box.Keyframe = keyframe;
-
-							if (box.Speed == 0)
-							{
-								box.PositionStartMovement = box.transform.position;
-							}
-							else
-							{
-								box.lastDistance = Mathf.FloorToInt((box.transform.position - box.PositionStartMovement).magnitude * 1000.0f);
-							}
 
 							//player
 							if (objectid == lastValidPlayerIndex)
@@ -328,7 +320,7 @@ public class DosBox : MonoBehaviour
 			BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
 			BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
-			if(Player != null) BoxInfo.Append("Last offset/mod", "{0}; {1}", Player.LastOffset, Mathf.FloorToInt(Player.lastDistance));
+			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Player.LastDistance);
 			BoxInfo.Append("Allow inventory", allowInventory ? "Yes" : "No");
 			BoxInfo.Append("In hand", inHand);
 		}
@@ -341,6 +333,13 @@ public class DosBox : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.Q))
 		{
 			totalDelay.Reset();
+		}
+		if (Input.GetKeyDown(KeyCode.W))
+		{
+			foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+			{
+				box.LastDistance = 0;
+			}
 		}
 	}
 
