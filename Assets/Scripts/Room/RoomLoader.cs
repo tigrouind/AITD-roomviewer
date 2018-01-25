@@ -19,6 +19,8 @@ public class RoomLoader : MonoBehaviour
 	private List<int> floors = new List<int>();
 	private BoxComparer boxComparer = new BoxComparer();
 	private float defaultCameraZoom = 10.0f;
+	private Timer defaultBoxSelectionTimer = new Timer();
+	private bool speedRunMode;
 
 	public Text LeftText;
 	public BoxInfo BottomText;
@@ -529,6 +531,7 @@ public class RoomLoader : MonoBehaviour
 			else
 			{
 				SelectedBox = null;
+				defaultBoxSelectionTimer.Restart();
 			}
 		}
 
@@ -560,6 +563,16 @@ public class RoomLoader : MonoBehaviour
 		else
 		{
 			BottomText.Clear(true);
+
+			if(speedRunMode && defaultBoxSelectionTimer.Elapsed > 1.0f)
+			{
+				//select player by default
+				SelectedBox = GetComponent<DosBox>().Player;
+				if (SelectedBox != null)
+				{
+					SelectedBoxId = SelectedBox.ID;
+				}
+			}
 		}
 	}
 
@@ -809,6 +822,7 @@ public class RoomLoader : MonoBehaviour
 		var args = System.Environment.GetCommandLineArgs();
 		if (args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
 		{
+			speedRunMode = true;
 			defaultCameraZoom = 10.0f / Mathf.Pow(0.9f, 5.0f);
 			ProcessKey(KeyCode.Mouse2); //reset camera zoom
 			ProcessKey(KeyCode.D); //camera perspective

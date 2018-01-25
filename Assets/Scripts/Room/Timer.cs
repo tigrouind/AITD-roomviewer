@@ -24,6 +24,13 @@ public class Timer
 			running = false;
 		}
 	}
+
+	public void Restart()
+	{
+		elapsed = 0;
+		started = Time.time;
+		running = true;
+	}
 		
 	public void Reset() {
 		elapsed = 0;
