@@ -419,6 +419,10 @@ public class RoomLoader : MonoBehaviour
 			else if(warpDialog.warpMenuEnabled)
 			{
 				warpDialog.warpMenuEnabled = false;
+				if(speedRunMode)
+				{
+					warpDialog.warpActor = null; //reset to player
+				}
 			}
 			else if (DetectGame() == 1 && HighLightedBox != null && HighLightedBox.name == "Actor")
 			{
