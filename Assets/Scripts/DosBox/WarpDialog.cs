@@ -90,8 +90,7 @@ public class WarpDialog : MonoBehaviour
 		//warp to mouse position
 		if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
 		{
-			Func<bool> isAITD1 = () => GetComponent<RoomLoader>().DetectGame() == 1;
-			if (Input.GetKeyDown(KeyCode.W) && isAITD1())
+			if (Input.GetKeyDown(KeyCode.W) && GetComponent<RoomLoader>().DetectGame() == 1)
 			{
 				if (warpActor == null)
 				{

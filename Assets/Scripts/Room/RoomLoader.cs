@@ -83,7 +83,6 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-
 	void CenterCamera(int room)
 	{
 		if (transform.childCount > 0)
@@ -262,7 +261,6 @@ public class RoomLoader : MonoBehaviour
 
 			camerasPerRoom.Add(cameraInRoom);
 		}
-
 
 		//cameras
 		bool isAITD1 = DetectGame() == 1;
@@ -452,6 +450,7 @@ public class RoomLoader : MonoBehaviour
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
 
+		//process keys
 		if (!GetComponent<WarpDialog>().warpMenuEnabled)
 		{
 			foreach (var key in keyCodes)
@@ -630,9 +629,10 @@ public class RoomLoader : MonoBehaviour
 
 	private void ToggleMenuDOSBoxOptions(bool enabled)
 	{
-		ShowVars.transform.gameObject.SetActive(enabled);
+		bool isAITD1 = DetectGame() == 1;
 		ShowActors.transform.parent.gameObject.SetActive(enabled);
-		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled);
+		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled && isAITD1);
+		ShowVars.transform.gameObject.SetActive(enabled && isAITD1);
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 
@@ -751,8 +751,11 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.E:
-				GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
-				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+				if (DetectGame() == 1)
+				{
+					GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
+					ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+				}
 				break;
 
 			case KeyCode.Mouse2:
