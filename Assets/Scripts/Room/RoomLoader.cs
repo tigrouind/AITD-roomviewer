@@ -422,7 +422,7 @@ public class RoomLoader : MonoBehaviour
 					warpDialog.warpActor = null; //reset to player
 				}
 			}
-			else if (DetectGame() == 1 && HighLightedBox != null && HighLightedBox.name == "Actor")
+			else if (DetectGame() == 1 && DosBoxEnabled && HighLightedBox != null && HighLightedBox.name == "Actor")
 			{
 				warpDialog.LoadActor(HighLightedBox);
 				warpDialog.warpMenuEnabled = true;
@@ -680,6 +680,9 @@ public class RoomLoader : MonoBehaviour
 
 					Actors.SetActive(false);
 					DosBoxEnabled = false;
+
+					GetComponent<Vars>().enabled = false; //hide vars
+					GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp
 				}
 				LinkToDOSBox.BoolValue = DosBoxEnabled;
 				ToggleMenuDOSBoxOptions(DosBoxEnabled);
@@ -723,7 +726,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.V:
-				if (DetectGame() == 1)
+				if (DetectGame() == 1 && DosBoxEnabled)
 				{
 					GetComponent<Vars>().enabled = !GetComponent<Vars>().enabled;
 					menuEnabled = false;

@@ -36,7 +36,7 @@ public class WarpDialog : MonoBehaviour
 
 		Panel.gameObject.SetActive(warpMenuEnabled);
 
-		if(warpActor != null)
+		if(warpActor != null && GetComponent<DosBox>().ProcessReader != null)
 		{
 			if(!Panel.GetComponentsInChildren<InputField>().Any(x => x.isFocused))
 			{
@@ -88,10 +88,11 @@ public class WarpDialog : MonoBehaviour
 		}
 
 		//warp to mouse position
-		if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+		if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.W))
 		{
-			if (Input.GetKeyDown(KeyCode.W) && GetComponent<RoomLoader>().DetectGame() == 1)
+			if (GetComponent<RoomLoader>().DetectGame() == 1 && GetComponent<DosBox>().ProcessReader != null)
 			{
+				//select player by default
 				if (warpActor == null)
 				{
 					warpActor = GetComponent<DosBox>().Player;
