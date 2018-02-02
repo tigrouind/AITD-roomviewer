@@ -90,7 +90,7 @@ public class WarpDialog : MonoBehaviour
 		//warp to mouse position
 		if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.W))
 		{
-			if (GetComponent<RoomLoader>().DetectGame() == 1 && GetComponent<DosBox>().ProcessReader != null)
+			if (GetComponent<DosBox>().ProcessReader != null)
 			{
 				//select player by default
 				if (warpActor == null)

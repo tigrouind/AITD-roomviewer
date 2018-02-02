@@ -422,7 +422,7 @@ public class RoomLoader : MonoBehaviour
 					warpDialog.warpActor = null; //reset to player
 				}
 			}
-			else if (DetectGame() == 1 && DosBoxEnabled && HighLightedBox != null && HighLightedBox.name == "Actor")
+			else if (DosBoxEnabled && HighLightedBox != null && HighLightedBox.name == "Actor")
 			{
 				warpDialog.LoadActor(HighLightedBox);
 				warpDialog.warpMenuEnabled = true;

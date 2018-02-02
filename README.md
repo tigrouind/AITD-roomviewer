@@ -58,7 +58,7 @@ If everything is OK, you should now view a white square with an arrow, this is p
 If you leave current room, next room is switched automatically.
 Note : once game is linked, you can start another new game, or load a saved game, it will continue to work.
 
-## Warp actor (AITD1 only)
+## Warp actor
 When the game is linked to DOSBOX, it is possible to change the position of an actor by selecting it, then pressing CTRL-W. The actor will be warped to mouse position. It is also possible to manually edit positions of an actor by right clicking on it or by pressing numpad keys :
 - 4, 6, 2, 8 : move actor left / right / down / up
 - 7, 9 : rotate actor left / right

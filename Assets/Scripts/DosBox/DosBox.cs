@@ -120,9 +120,13 @@ public class DosBox : MonoBehaviour
 							int boundingZ1 = Utils.ReadShort(memory, k + 16);
 							int boundingZ2 = Utils.ReadShort(memory, k + 18);
 
-							int modx = Utils.ReadShort(memory, k + 90);
-							int mody = Utils.ReadShort(memory, k + 92);
-							int modz = Utils.ReadShort(memory, k + 94);
+							int modx = 0, mody = 0, modz = 0;
+							if(dosBoxPattern == 0) //AITD1 only
+							{
+								modx = Utils.ReadShort(memory, k + 90);
+								mody = Utils.ReadShort(memory, k + 92);
+								modz = Utils.ReadShort(memory, k + 94);
+							}
 
 							FixBoundingWrap(ref boundingX1, ref boundingX2);
 							FixBoundingWrap(ref boundingY1, ref boundingY2);
