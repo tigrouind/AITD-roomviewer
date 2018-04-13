@@ -57,6 +57,8 @@ public class DosBox : MonoBehaviour
 	private int inHand;
 	private bool allowInventory;
 	private bool saveTimerFlag;
+	private ushort internalTimer2;
+
 
 	public void Start()
 	{
@@ -272,6 +274,10 @@ public class DosBox : MonoBehaviour
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
 					InternalTimer = Utils.ReadUnsignedInt(memory, 0);
 
+					//internal timer
+					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 + 0xA5CE, 2);
+					internalTimer2 = Utils.ReadUnsignedShort(memory, 0);
+
 					//inventory
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 - 0x1A4, 2);
 					allowInventory = Utils.ReadShort(memory, 0) == 1;
@@ -321,6 +327,7 @@ public class DosBox : MonoBehaviour
 			TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
 
 			BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
+			BoxInfo.Append("Timer2", TimeSpan.FromSeconds(internalTimer2 / 60));
 			BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
 			BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));

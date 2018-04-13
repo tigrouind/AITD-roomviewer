@@ -26,6 +26,14 @@ public static class Utils
 		}
 	}
 
+	public static ushort ReadUnsignedShort(byte[] data, int offset)
+	{
+		unchecked
+		{
+			return (ushort)(data[offset] | data[offset + 1] << 8);
+		}
+	}
+
 	public static void WriteShort(int value, byte[] data, int offset)
 	{
 		unchecked
