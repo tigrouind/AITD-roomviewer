@@ -122,6 +122,7 @@ public class Vars : MonoBehaviour
 		{
 			//empty
 			GameObject empty = new GameObject(string.Empty, typeof(RectTransform));
+			empty.AddComponent<Image>().color = new Color32(43, 193, 118, 255);
 			empty.transform.SetParent(tab.transform);
 
 			for (int i = 0; i < 20; i++)
@@ -137,7 +138,10 @@ public class Vars : MonoBehaviour
 				{
 					RectTransform header = Instantiate(TableHeaderPrefab);
 					header.transform.SetParent(tab.transform);
-					header.GetComponentInChildren<Text>().text = i.ToString();
+					Text textComponent = header.GetComponentInChildren<Text>();
+					textComponent.GetComponentInChildren<RectTransform>().offsetMax = new Vector2(-5, 0);
+					textComponent.alignment = TextAnchor.MiddleRight;
+					textComponent.text = i.ToString();
 				}
 
 				InputField cell = Instantiate(TableCellPrefab);
@@ -223,29 +227,31 @@ public class Vars : MonoBehaviour
 			}
 			else
 			{
-				SetInputFieldColor(inputField, new Color32(0, 0, 0, 0));
+				SetInputFieldColor(inputField, new Color32(47, 47, 47, 255));
 			}
 		}
 	}
 
 	void OnCellPointerEnter(InputField cell, string sectionName, int cellIndex)
 	{
-		string text = varParser.GetText(sectionName, cellIndex);
-		if(!string.IsNullOrEmpty(text))
+		string text = "#" + cellIndex;
+		string description = varParser.GetText(sectionName, cellIndex);
+		if(!string.IsNullOrEmpty(description))
 		{
-			ToolTip.GetComponentInChildren<Text>().text = text;
-
-			RectTransform cellTransform = cell.GetComponent<RectTransform>();
-			RectTransform toolTipTransform = ToolTip.GetComponent<RectTransform>();
-			Vector2 toolTipSize = toolTipTransform.sizeDelta;
-
-			toolTipTransform.position = MoveToolTipIfNeeded(cellTransform.position
-				- new Vector3(0.0f, cellTransform.sizeDelta.y / 2.0f, 0.0f),
-				toolTipSize.x / 2.0f,
-				Screen.width - toolTipSize.x / 2.0f);
-
-			ToolTip.gameObject.SetActive(true);
+			text += "\r\n" + description;
 		}
+
+		ToolTip.GetComponentInChildren<Text>().text = text;
+		RectTransform cellTransform = cell.GetComponent<RectTransform>();
+		RectTransform toolTipTransform = ToolTip.GetComponent<RectTransform>();
+		Vector2 toolTipSize = toolTipTransform.sizeDelta;
+
+		toolTipTransform.position = MoveToolTipIfNeeded(cellTransform.position
+			- new Vector3(0.0f, cellTransform.sizeDelta.y / 2.0f, 0.0f),
+			toolTipSize.x / 2.0f,
+			Screen.width - toolTipSize.x / 2.0f);
+
+		ToolTip.gameObject.SetActive(true);
 	}
 
 	Vector3 MoveToolTipIfNeeded(Vector3 position, float min, float max)
