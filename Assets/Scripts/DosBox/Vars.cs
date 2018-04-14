@@ -122,7 +122,7 @@ public class Vars : MonoBehaviour
 		{
 			//empty
 			GameObject empty = new GameObject(string.Empty, typeof(RectTransform));
-			empty.AddComponent<Image>().color = new Color32(43, 193, 118, 255);
+			empty.AddComponent<Image>().color = TableHeaderPrefab.GetComponent<Image>().color;
 			empty.transform.SetParent(tab.transform);
 
 			for (int i = 0; i < 20; i++)
