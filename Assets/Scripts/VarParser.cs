@@ -25,7 +25,7 @@ public class VarParser
 
 	public void Parse(string filePath)
 	{
-		var allLines = System.IO.File.ReadLines(filePath);
+		var allLines = System.IO.File.ReadAllLines(filePath);
 		Regex section = new Regex("^[A-Z](.*)$");
 		Regex item = new Regex("^(?<linenumber>[0-9]+)(-(?<next>[0-9]+))?(?<text>.*)");
 		Dictionary<int, string> currentSection = null;
