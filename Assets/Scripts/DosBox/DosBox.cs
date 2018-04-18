@@ -451,7 +451,8 @@ public class DosBox : MonoBehaviour
 		}
 
 		//search player position in DOSBOX processes
-		int patternIndex = GetComponent<RoomLoader>().DetectGame() - 1;
+		int detectedGame = GetComponent<RoomLoader>().DetectGame();
+		int patternIndex = detectedGame - 1;
 		foreach (int processId in processIds)
 		{
 			ProcessMemoryReader reader = new ProcessMemoryReader(processId);
@@ -468,6 +469,11 @@ public class DosBox : MonoBehaviour
 					ProcessReader = reader;
 					memory = new byte[ActorStructSize[patternIndex] * 50];
 					dosBoxPattern = patternIndex;
+
+					//check if CDROM/floppy version (AITD1 only)				
+					byte[] cdPattern = ASCIIEncoding.ASCII.GetBytes("CD Not Found");
+					GetComponent<RoomLoader>().IsCDROMVersion = 
+						detectedGame == 1 && reader.SearchForBytePattern(cdPattern) != -1;
 
 					//vars
 					if (patternIndex == 0) //AITD1 only

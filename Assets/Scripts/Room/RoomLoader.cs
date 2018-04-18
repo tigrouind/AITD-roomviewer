@@ -32,6 +32,7 @@ public class RoomLoader : MonoBehaviour
 	private int SelectedBoxId;
 
 	private bool DosBoxEnabled;
+	public bool IsCDROMVersion;
 	public GameObject Actors;
 
 	public RectTransform Panel;
@@ -631,7 +632,7 @@ public class RoomLoader : MonoBehaviour
 	{
 		bool isAITD1 = DetectGame() == 1;
 		ShowActors.transform.parent.gameObject.SetActive(enabled);
-		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled && isAITD1);
+		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled && isAITD1 && IsCDROMVersion);
 		ShowVars.transform.gameObject.SetActive(enabled && isAITD1);
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
@@ -757,7 +758,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.E:
-				if (DetectGame() == 1 && DosBoxEnabled)
+				if (DetectGame() == 1 && DosBoxEnabled && IsCDROMVersion)
 				{
 					GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
 					ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
