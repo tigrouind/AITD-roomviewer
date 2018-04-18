@@ -749,12 +749,15 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.A:
-				ShowActors.BoolValue = !ShowActors.BoolValue;
-				Actors.SetActive(ShowActors.BoolValue);
+				if (DosBoxEnabled)
+				{
+					ShowActors.BoolValue = !ShowActors.BoolValue;
+					Actors.SetActive(ShowActors.BoolValue);
+				}
 				break;
 
 			case KeyCode.E:
-				if (DetectGame() == 1)
+				if (DetectGame() == 1 && DosBoxEnabled)
 				{
 					GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
 					ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
