@@ -359,7 +359,7 @@ public class DosBox : MonoBehaviour
 			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
 			TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
 
-			BoxInfo.Append("Timer", TimeSpan.FromSeconds(InternalTimer / 60));
+			BoxInfo.Append("Timer 1", TimeSpan.FromSeconds(InternalTimer / 60));
 			BoxInfo.Append("Timer 2", TimeSpan.FromSeconds(internalTimer2 / 60));
 			BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
 			BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
