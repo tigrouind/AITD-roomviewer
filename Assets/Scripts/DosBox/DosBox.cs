@@ -59,7 +59,6 @@ public class DosBox : MonoBehaviour
 	private bool saveTimerFlag;
 	private ushort internalTimer2;
 
-
 	public void Start()
 	{
 		//game has maximum 50 actors
@@ -138,8 +137,8 @@ public class DosBox : MonoBehaviour
 							box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
 
 							//local to global position
-							Vector3 boxPosition = box.BoundingPos / 1000.0f + roomObject.localPosition;
-							boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z);
+							Vector3 boxPosition = box.BoundingPos / 1000.0f;
+							boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z) + roomObject.localPosition;
 
 							if (box.transform.position != boxPosition)
 							{
@@ -187,8 +186,42 @@ public class DosBox : MonoBehaviour
 							box.WorldPosition.x = Utils.ReadShort(memory, k + 34) + modx;
 							box.WorldPosition.y = Utils.ReadShort(memory, k + 36) + mody;
 							box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + modz;
-
 							box.ShowAdditionalInfo = ShowAdditionalInfo;
+
+							if (ShowAdditionalInfo)
+							{
+								//hot point
+								int animationType = Utils.ReadShort(memory, k + 142);
+								Box hotPoint = box.HotPoint;
+
+								if (animationType == 2)
+								{
+									if (hotPoint == null)
+									{ 
+										hotPoint = Instantiate(BoxPrefab);
+										hotPoint.name = "HotPoint";
+										hotPoint.Color = new Color32(255, 0, 0, 255);
+										box.HotPoint = hotPoint;
+									}
+
+									Vector3 hotPosition;
+									hotPosition.x = Utils.ReadShort(memory, k + 154);
+									hotPosition.y = Utils.ReadShort(memory, k + 156);
+									hotPosition.z = Utils.ReadShort(memory, k + 158);
+									
+									Vector3 finalPos = (hotPosition + box.LocalPosition) / 1000.0f;
+									finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z) + roomObject.localPosition;
+									hotPoint.transform.position = finalPos;
+
+									float range = Utils.ReadShort(memory, k + 148);
+									hotPoint.transform.localScale = new Vector3(range, range, range) / 500.0f;
+								}
+								else if (hotPoint != null)
+								{
+									Destroy(hotPoint.gameObject);
+									box.HotPoint = null;
+								}
+							}
 
 							int anim = Utils.ReadShort(memory, k + 62);
 							int keyframe = Utils.ReadShort(memory, k + 74);

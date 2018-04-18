@@ -38,6 +38,7 @@ public class Box : MonoBehaviour
 	public Vector3 Angles;
 	public int LastOffset;
 	public int LastDistance;
+	public Box HotPoint;
 
 	public Vector3 BoundingPos
 	{
