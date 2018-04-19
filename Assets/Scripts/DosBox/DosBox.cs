@@ -188,7 +188,8 @@ public class DosBox : MonoBehaviour
 							box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + modz;
 							box.ShowAdditionalInfo = ShowAdditionalInfo;
 
-							if (ShowAdditionalInfo)
+							bool isAITD1 = dosBoxPattern == 0;
+							if (isAITD1)
 							{
 								//hot point
 								int animationType = Utils.ReadShort(memory, k + 142);
