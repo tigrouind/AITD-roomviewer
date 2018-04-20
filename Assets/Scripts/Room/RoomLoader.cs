@@ -650,14 +650,14 @@ public class RoomLoader : MonoBehaviour
 			case KeyCode.L:
 				if (!DosBoxEnabled)
 				{
-					bool result = (GetComponent<DosBox>().LinkToDosBOX(floor, room));
+					DosBoxEnabled = (GetComponent<DosBox>().LinkToDosBOX(floor, room));
 
 					//set follow mode to player
 					CameraFollow.Value = 2;
 					GetComponent<DosBox>().ResetCamera(floor, room);
+					GetComponent<DosBox>().ShowAdditionalInfo = DosBoxEnabled && ShowAdditionalInfo.BoolValue && IsCDROMVersion && DetectGame() == 1;
 
-					Actors.SetActive(result);
-					DosBoxEnabled = result;
+					Actors.SetActive(DosBoxEnabled && ShowActors.BoolValue);
 
 					//select player by default
 					if (SelectedBox == null)
@@ -684,6 +684,7 @@ public class RoomLoader : MonoBehaviour
 
 					GetComponent<Vars>().enabled = false; //hide vars
 					GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp
+					GetComponent<DosBox>().ShowAdditionalInfo = false;
 				}
 				LinkToDOSBox.BoolValue = DosBoxEnabled;
 				ToggleMenuDOSBoxOptions(DosBoxEnabled);
@@ -750,18 +751,15 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.A:
-				if (DosBoxEnabled)
-				{
-					ShowActors.BoolValue = !ShowActors.BoolValue;
-					Actors.SetActive(ShowActors.BoolValue);
-				}
+				ShowActors.BoolValue = !ShowActors.BoolValue;
+				Actors.SetActive(DosBoxEnabled && ShowActors.BoolValue);
 				break;
 
 			case KeyCode.E:
-				if (DetectGame() == 1 && DosBoxEnabled && IsCDROMVersion)
+				if (DetectGame() == 1)
 				{
-					GetComponent<DosBox>().ShowAdditionalInfo = !GetComponent<DosBox>().ShowAdditionalInfo;
 					ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+					GetComponent<DosBox>().ShowAdditionalInfo = DosBoxEnabled && IsCDROMVersion && ShowAdditionalInfo.BoolValue;
 				}
 				break;
 
