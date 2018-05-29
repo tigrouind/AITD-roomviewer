@@ -1,4 +1,4 @@
-﻿Shader "Custom/Gradient"
+﻿Shader "Custom/Gradient2"
 {
 	Properties {
 		_Palette ("Texture", 2D) = "white" { }
@@ -43,8 +43,11 @@
 				float palette = output.color.b + 1.0/32.0;
 				float2 screen = output.screenPos.xy / output.screenPos.w;
 
-				float gradient = (dot(screen, output.color.rg) - output.uv.x) / (output.uv.y - output.uv.x);
+				float gradient = (output.uv.x - dot(screen, output.color.rg)) / output.uv.y * 2.0 + output.color.a + 1.0/32.0;
+				gradient = abs(((gradient+1.0)%2.0) - 1.0);
+
 				return tex2D (_Palette, float2(gradient, palette));
+
 			}
 			ENDCG
 		}

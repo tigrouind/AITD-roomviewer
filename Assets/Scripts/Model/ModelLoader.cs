@@ -31,6 +31,8 @@ public class ModelLoader : MonoBehaviour
 	public Text LeftText;
 	public Mesh SphereMesh;
 	public Mesh CubeMesh;
+	private List<List<int>> gradientPolygonList;
+	private List<int> gradientPolygonType;
 
 	private Vector2 cameraRotation = new Vector2();
 	private Vector2 cameraPosition = new Vector2();
@@ -175,8 +177,16 @@ public class ModelLoader : MonoBehaviour
 		List<BoneWeight> boneWeights = new List<BoneWeight>();
 		List<Vector3> allVertices = new List<Vector3>();
 		List<Color32> colors = new List<Color32>();
-		List<int> indices = new List<int>();
+		List<int>[] indices = new List<int>[5];
 		List<Vector2> uv = new List<Vector2>();
+
+		for (int n = 0 ; n < indices.Length ; n++)
+		{
+			indices[n] = new List<int>();
+		}
+
+		gradientPolygonList = new List<List<int>>();
+		gradientPolygonType = new List<int>();
 
 		for (int n = 0; n < count; n++)
 		{
@@ -200,7 +210,7 @@ public class ModelLoader : MonoBehaviour
 						Quaternion rotation = Quaternion.LookRotation(directionVector);
 
 						uv.AddRange(CubeMesh.uv);
-						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
+						indices[0].AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x =>
 							rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
 							+ middle));
@@ -219,9 +229,10 @@ public class ModelLoader : MonoBehaviour
 						i += 3;
 
 						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
+						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
 
-						//add vertices
-						List<Vector3> polyVertices = new List<Vector3>();
+						//add vertices					
+						List<int> polyVertices = new List<int>();
 						int verticesCount = allVertices.Count;
 						for (int m = 0; m < numPoints; m++)
 						{
@@ -229,18 +240,26 @@ public class ModelLoader : MonoBehaviour
 							i += 2;
 
 							colors.Add(color);
+							polyVertices.Add(allVertices.Count);
 							allVertices.Add(vertices[pointIndex]);
-							polyVertices.Add(vertices[pointIndex]);
 							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
+						}
+							
+						if ((polyType == 3 || polyType == 4 || polyType == 5 || polyType == 6) && GradientMaterial.BoolValue)
+						{
+							gradientPolygonType.Add(polyType);
+							gradientPolygonList.Add(polyVertices);
 						}
 
 						if (polyType == 1 && NoiseMaterial.BoolValue)
 						{
 							Vector3 forward, left;
-							ComputeUV(polyVertices, out forward, out left);
+							ComputeUV(polyVertices, allVertices, out forward, out left);
 
-							foreach (Vector3 poly in polyVertices)
+							foreach (int pointIndex in polyVertices)
 							{
+								Vector3 poly = allVertices[pointIndex];
+
 								uv.Add(new Vector2(
 									Vector3.Dot(poly, left) * noisesize,
 									Vector3.Dot(poly, forward) * noisesize
@@ -260,9 +279,9 @@ public class ModelLoader : MonoBehaviour
 
 						while (v1 < v2)
 						{
-							indices.Add(verticesCount + v0);
-							indices.Add(verticesCount + v1);
-							indices.Add(verticesCount + v2);
+							triangleList.Add(verticesCount + v0);
+							triangleList.Add(verticesCount + v1);
+							triangleList.Add(verticesCount + v2);
 
 							if (swap)
 							{
@@ -287,6 +306,8 @@ public class ModelLoader : MonoBehaviour
 						i++;
 						int colorIndex = allbytes[i];
 						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
+						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
+
 						i += 2;
 
 						int size = Utils.ReadShort(allbytes, i + 0);
@@ -298,8 +319,14 @@ public class ModelLoader : MonoBehaviour
 						float scale = size / 500.0f;
 						float uvScale = noisesize * size / 200.0f;
 
+						if ((polyType == 3 || polyType == 4 || polyType == 5 || polyType == 6) && GradientMaterial.BoolValue)
+						{
+							gradientPolygonType.Add(polyType);
+							gradientPolygonList.Add(SphereMesh.triangles.Select(x => x + allVertices.Count).ToList());
+						}
+
 						uv.AddRange(SphereMesh.uv.Select(x => x * uvScale));
-						indices.AddRange(SphereMesh.triangles.Select(x => x + allVertices.Count));
+						triangleList.AddRange(SphereMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(SphereMesh.vertices.Select(x => x * scale + position));
 						colors.AddRange(SphereMesh.vertices.Select(x => color));
 						boneWeights.AddRange(SphereMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[pointSphereIndex], weight0 = 1 }));
@@ -330,7 +357,7 @@ public class ModelLoader : MonoBehaviour
 						}
 
 						uv.AddRange(CubeMesh.uv);
-						indices.AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
+						indices[0].AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x => x * pointsize + position));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
 						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[cubeIndex], weight0 = 1 }));
@@ -348,44 +375,14 @@ public class ModelLoader : MonoBehaviour
 		msh.colors32 = colors.ToArray();
 
 		//separate transparent/opaque triangles
-		List<int> opaque = new List<int>();
-		List<int> noise = new List<int>();
-		List<int> transparent = new List<int>();
-		List<int> gradient = new List<int>();
 
-		for (int t = 0; t < indices.Count; t += 3)
-		{
-			List<int> trianglesList;
-			float alpha = colors[indices[t]].a;
-			if (alpha == 255)
-			{
-				trianglesList = opaque;
-			}
-			else if (alpha == 254)
-			{
-				trianglesList = noise;
-			}
-			else if (alpha == 253)
-			{
-				trianglesList = gradient;
-			}
-			else
-			{
-				trianglesList = transparent;
-			}
-
-			trianglesList.Add(indices[t + 0]);
-			trianglesList.Add(indices[t + 1]);
-			trianglesList.Add(indices[t + 2]);
-		}
-
-		msh.subMeshCount = 4;
-		msh.SetTriangles(opaque, 0);
-		msh.SetTriangles(transparent, 1);
-		msh.SetTriangles(noise, 2);
-		msh.SetTriangles(gradient, 3);
+		msh.subMeshCount = 5;
+		msh.SetTriangles(indices[0], 0);
+		msh.SetTriangles(indices[1], 1);
+		msh.SetTriangles(indices[2], 2);
+		msh.SetTriangles(indices[3], 3);
+		msh.SetTriangles(indices[4], 4);
 		msh.SetUVs(0, uv);
-
 		msh.RecalculateNormals();
 		msh.RecalculateBounds();
 
@@ -401,6 +398,39 @@ public class ModelLoader : MonoBehaviour
 		filter.localBounds = msh.bounds;
 		filter.sharedMesh = msh;
 	}
+		
+	int GetTriangleListIndex(int polyType)
+	{
+		switch (polyType)
+		{
+			default:
+			case 0: //single color
+				return 0;
+
+			case 1: //noise
+				if (NoiseMaterial.BoolValue)
+					return 2;
+				else
+					return 0;
+				
+			case 2: //transparent
+				return 1;
+
+			case 3: //gradient
+			case 6: 
+			case 4:
+				if (GradientMaterial.BoolValue)
+					return 3;
+				else
+					return 0;
+
+			case 5:
+				if (GradientMaterial.BoolValue)
+					return 4;
+				else
+					return 0;
+		}
+	}
 
 	Color32 GetPaletteColor(Color32[] paletteColors, int colorIndex, int polyType)
 	{
@@ -409,7 +439,6 @@ public class ModelLoader : MonoBehaviour
 		if (polyType == 1 && NoiseMaterial.BoolValue)
 		{
 			//noise
-			color.a = 254;
 			color.r = (byte)((colorIndex % 16) * 16);
 			color.g = (byte)((colorIndex / 16) * 16);
 		}
@@ -421,18 +450,18 @@ public class ModelLoader : MonoBehaviour
 		else if ((polyType == 3 || polyType == 6) && GradientMaterial.BoolValue)
 		{
 			//horizontal gradient
-			color.a = 253;
 			color.r = 255;
 			color.g = 0;
 			color.b = (byte)((colorIndex / 16) * 16);
+			color.a = (byte)((colorIndex % 16) * 16);
 		}
 		else if ((polyType == 4 || polyType == 5) && GradientMaterial.BoolValue)
 		{
 			//vertical gradient
-			color.a = 253;
 			color.r = 0;
 			color.g = 255;
 			color.b = (byte)((colorIndex / 16) * 16);
+			color.a = (byte)((colorIndex % 16) * 16);
 		}
 
 		return color;
@@ -578,15 +607,15 @@ public class ModelLoader : MonoBehaviour
 		}
 	}
 
-	void ComputeUV(List<Vector3> polyVertices, out Vector3 forward, out Vector3 left)
+	void ComputeUV(List<int> polyVertices, List<Vector3> allVertices, out Vector3 forward, out Vector3 left)
 	{
 		int lastPoly = polyVertices.Count - 1;
 		Vector3 up;
 		do
 		{
-			Vector3 a = polyVertices[0];
-			Vector3 b = polyVertices[1];
-			Vector3 c = polyVertices[lastPoly];
+			Vector3 a = allVertices[polyVertices[0]];
+			Vector3 b = allVertices[polyVertices[1]];
+			Vector3 c = allVertices[polyVertices[lastPoly]];
 			left = (b - a).normalized;
 			forward = (c - a).normalized;
 			up = Vector3.Cross(left, forward).normalized;
@@ -634,6 +663,8 @@ public class ModelLoader : MonoBehaviour
 		GetComponent<SkinnedMeshRenderer>().materials[2] //noise
 			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
 		GetComponent<SkinnedMeshRenderer>().materials[3] //gradient
+			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
+		GetComponent<SkinnedMeshRenderer>().materials[4] //gradient2
 			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
 	}
 
@@ -798,6 +829,112 @@ public class ModelLoader : MonoBehaviour
 		//set camera
 		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
 		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
+
+		if (GradientMaterial.BoolValue)
+		{
+			UpdateGradientsUVs();
+		}
+	}
+
+	void UpdateGradientsUVs()
+	{
+		Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+		List<Vector2> uv = new List<Vector2>();
+		mesh.GetUVs(0, uv);
+		Vector3[] vertices = mesh.vertices;
+
+		float gmaxY = 0;
+		float gminY = Camera.main.pixelHeight;
+
+		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
+		{
+			float maxX = 0;
+			float minX = Camera.main.pixelWidth;
+			float maxY = 0;
+			float minY = Camera.main.pixelHeight;
+
+			int polyType = gradientPolygonType[i];
+
+			foreach(int polyIndex in gradientPolygonList[i])
+			{
+				Vector3 poly = vertices[polyIndex];
+				Vector3 point = Camera.main.WorldToScreenPoint(transform.TransformPoint(poly));
+
+				if (point.z <= 0.0f)
+				{
+					continue;
+				}
+
+				if (point.y > maxY)
+				{
+					maxY = point.y;
+				}
+
+				if (point.y < minY)
+				{
+					minY = point.y;
+				}
+
+				if (point.y > gmaxY)
+				{
+					gmaxY = point.y;
+				}
+
+				if (point.y < gminY)
+				{
+					gminY = point.y;
+				}
+
+				if (point.x > maxX)
+				{
+					maxX = point.x;
+				}
+
+				if (point.x < minX)
+				{
+					minX = point.x;
+				}
+			}
+
+			minX = Mathf.Clamp(minX, 0.0f, Camera.main.pixelWidth);
+			maxX = Mathf.Clamp(maxX, 0.0f, Camera.main.pixelWidth);
+			minY = Mathf.Clamp(minY, 0.0f, Camera.main.pixelHeight);
+			maxY = Mathf.Clamp(maxY, 0.0f, Camera.main.pixelHeight);
+
+			foreach (int polyIndex in gradientPolygonList[i])
+			{
+				if (polyType == 4)
+				{
+					uv[polyIndex] = new Vector2(maxY / Camera.main.pixelHeight, minY / Camera.main.pixelHeight);    
+				}
+				else if (polyType == 5)
+				{
+					uv[polyIndex] = new Vector2(maxY / Camera.main.pixelHeight, 0.0f);    
+				}
+				else if (polyType == 3)
+				{
+					uv[polyIndex] = new Vector2(minX / Camera.main.pixelWidth, maxX / Camera.main.pixelWidth);    
+				}
+				else if (polyType == 6)
+				{
+					uv[polyIndex] = new Vector2(maxX / Camera.main.pixelWidth, minX / Camera.main.pixelWidth);    
+				}
+			}
+		}
+
+		for (int i = 0; i < gradientPolygonList.Count; i++)
+		{
+			foreach (int polyIndex in gradientPolygonList[i])
+			{
+				int polyType = gradientPolygonType[i];
+				if (polyType == 5)
+				{
+					uv[polyIndex] = new Vector2(uv[polyIndex].x, (gmaxY - gminY) / Camera.main.pixelHeight);    
+				}
+			}
+		}
+
+		mesh.SetUVs(0, uv);
 	}
 
 	void RefreshLeftText()
