@@ -843,22 +843,22 @@ public class ModelLoader : MonoBehaviour
 		mesh.GetUVs(0, uv);
 		Vector3[] vertices = mesh.vertices;
 
-		float gmaxY = 0;
-		float gminY = Camera.main.pixelHeight;
+		float gmaxY = 0.0f;
+		float gminY = 1.0f;
 
 		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
 		{
-			float maxX = 0;
-			float minX = Camera.main.pixelWidth;
-			float maxY = 0;
-			float minY = Camera.main.pixelHeight;
+			float maxX = 0.0f;
+			float minX = 1.0f;
+			float maxY = 0.0f;
+			float minY = 1.0f;
 
 			int polyType = gradientPolygonType[i];
 
 			foreach(int polyIndex in gradientPolygonList[i])
 			{
 				Vector3 poly = vertices[polyIndex];
-				Vector3 point = Camera.main.WorldToScreenPoint(transform.TransformPoint(poly));
+				Vector3 point = Camera.main.WorldToViewportPoint(transform.TransformPoint(poly));
 
 				if (point.z <= 0.0f)
 				{
@@ -896,28 +896,30 @@ public class ModelLoader : MonoBehaviour
 				}
 			}
 
-			minX = Mathf.Clamp(minX, 0.0f, Camera.main.pixelWidth);
-			maxX = Mathf.Clamp(maxX, 0.0f, Camera.main.pixelWidth);
-			minY = Mathf.Clamp(minY, 0.0f, Camera.main.pixelHeight);
-			maxY = Mathf.Clamp(maxY, 0.0f, Camera.main.pixelHeight);
+			minX = Mathf.Clamp01(minX);
+			maxX = Mathf.Clamp01(maxX);
+			minY = Mathf.Clamp01(minY);
+			maxY = Mathf.Clamp01(maxY);
 
 			foreach (int polyIndex in gradientPolygonList[i])
 			{
-				if (polyType == 4)
+				switch (polyType)				 
 				{
-					uv[polyIndex] = new Vector2(maxY / Camera.main.pixelHeight, minY / Camera.main.pixelHeight);    
-				}
-				else if (polyType == 5)
-				{
-					uv[polyIndex] = new Vector2(maxY / Camera.main.pixelHeight, 0.0f);    
-				}
-				else if (polyType == 3)
-				{
-					uv[polyIndex] = new Vector2(minX / Camera.main.pixelWidth, maxX / Camera.main.pixelWidth);    
-				}
-				else if (polyType == 6)
-				{
-					uv[polyIndex] = new Vector2(maxX / Camera.main.pixelWidth, minX / Camera.main.pixelWidth);    
+					case 4:
+						uv[polyIndex] = new Vector2(maxY, minY);    
+						break;
+					
+					case 5:
+						uv[polyIndex] = new Vector2(maxY, 0.0f);    
+						break;
+
+					case 3:
+						uv[polyIndex] = new Vector2(minX, maxX);    
+						break;
+
+					case 6: 
+						uv[polyIndex] = new Vector2(maxX, minX);    
+						break;
 				}
 			}
 		}
@@ -929,7 +931,7 @@ public class ModelLoader : MonoBehaviour
 				int polyType = gradientPolygonType[i];
 				if (polyType == 5)
 				{
-					uv[polyIndex] = new Vector2(uv[polyIndex].x, (gmaxY - gminY) / Camera.main.pixelHeight);    
+					uv[polyIndex] = new Vector2(uv[polyIndex].x, gmaxY - gminY);    
 				}
 			}
 		}
