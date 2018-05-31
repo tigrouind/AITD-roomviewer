@@ -34,6 +34,8 @@ public class ModelLoader : MonoBehaviour
 	private List<List<int>> gradientPolygonList;
 	private List<int> gradientPolygonType;
 	private Mesh bakedMesh;
+	private List<Vector3> verticesCopy = new List<Vector3>();
+	private List<Vector2> uvCopy = new List<Vector2>();
 
 	private Vector2 cameraRotation = new Vector2();
 	private Vector2 cameraPosition = new Vector2();
@@ -846,10 +848,9 @@ public class ModelLoader : MonoBehaviour
 		{
 			skinMesh = mesh;
 		}
-			
-		List<Vector2> uv = new List<Vector2>();
-		mesh.GetUVs(0, uv);
-		Vector3[] vertices = skinMesh.vertices;
+
+		mesh.GetUVs(0, uvCopy);
+		mesh.GetVertices(verticesCopy);
 
 		float gmaxY = 0.0f;
 		float gminY = 1.0f;
@@ -867,7 +868,7 @@ public class ModelLoader : MonoBehaviour
 			bool pointBehindCamera = false;
 			foreach(int vertexIndex in gradientPolygonList[i])
 			{
-				Vector3 poly = vertices[vertexIndex];
+				Vector3 poly = verticesCopy[vertexIndex];
 				Vector3 point = Camera.main.WorldToViewportPoint(transform.TransformPoint(poly));
 
 				if (point.z <= 0.0f)
@@ -921,15 +922,15 @@ public class ModelLoader : MonoBehaviour
 					{
 						case 4:
 						case 5: //vertical gradient
-							uv[vertexIndex] = new Vector2(maxY, 0.0f);    
+							uvCopy[vertexIndex] = new Vector2(maxY, 0.0f);    
 							break;
 
 						case 3: //horizontal
-							uv[vertexIndex] = new Vector2(minX, maxX);    
+							uvCopy[vertexIndex] = new Vector2(minX, maxX);    
 							break;
 
 						case 6: //horizontal (reversed)
-							uv[vertexIndex] = new Vector2(maxX, minX);    
+							uvCopy[vertexIndex] = new Vector2(maxX, minX);    
 							break;
 					}
 				}
@@ -945,12 +946,12 @@ public class ModelLoader : MonoBehaviour
 					int polyType = gradientPolygonType[i];
 					if (polyType == 4 || polyType == 5)
 					{
-						uv[polyIndex] = new Vector2(uv[polyIndex].x, gmaxY - gminY);    
+						uvCopy[polyIndex] = new Vector2(uvCopy[polyIndex].x, gmaxY - gminY);    
 					}
 				}
 			}
 		}
-		mesh.SetUVs(0, uv);
+		mesh.SetUVs(0, uvCopy);
 	}
 
 	void RefreshLeftText()
