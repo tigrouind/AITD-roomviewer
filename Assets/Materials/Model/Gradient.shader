@@ -43,7 +43,7 @@
 				float palette = output.color.b + 1.0/32.0;
 				float2 screen = output.screenPos.xy / output.screenPos.w;
 
-				float gradient = (dot(screen, output.color.rg) - output.uv.x) / (output.uv.y - output.uv.x);
+				float gradient = (screen.x - output.uv.x) / (output.uv.y - output.uv.x);
 				return tex2D (_Palette, float2(gradient, palette));
 			}
 			ENDCG

@@ -418,12 +418,12 @@ public class ModelLoader : MonoBehaviour
 
 			case 3: //gradient
 			case 6: 
-			case 4:
 				if (GradientMaterial.BoolValue)
 					return 3;
 				else
 					return 0;
 
+			case 4:
 			case 5:
 				if (GradientMaterial.BoolValue)
 					return 4;
@@ -447,19 +447,10 @@ public class ModelLoader : MonoBehaviour
 			//transparency
 			color.a = 128;
 		}
-		else if ((polyType == 3 || polyType == 6) && GradientMaterial.BoolValue)
+		else if ((polyType == 3 || polyType == 6 || polyType == 4 || polyType == 5) && GradientMaterial.BoolValue)
 		{
-			//horizontal gradient
-			color.r = 255;
-			color.g = 0;
-			color.b = (byte)((colorIndex / 16) * 16);
-			color.a = (byte)((colorIndex % 16) * 16);
-		}
-		else if ((polyType == 4 || polyType == 5) && GradientMaterial.BoolValue)
-		{
-			//vertical gradient
-			color.r = 0;
-			color.g = 255;
+			//horizontal or vertical gradient
+			color.r = (byte)((polyType == 5) ? 127 : 255);
 			color.b = (byte)((colorIndex / 16) * 16);
 			color.a = (byte)((colorIndex % 16) * 16);
 		}
@@ -846,6 +837,7 @@ public class ModelLoader : MonoBehaviour
 		float gmaxY = 0.0f;
 		float gminY = 1.0f;
 
+		bool pointBehindCameraForAnyPoly = false; 
 		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
 		{
 			float maxX = 0.0f;
@@ -855,14 +847,17 @@ public class ModelLoader : MonoBehaviour
 
 			int polyType = gradientPolygonType[i];
 
-			foreach(int polyIndex in gradientPolygonList[i])
+			bool pointBehindCamera = false;
+			foreach(int vertexIndex in gradientPolygonList[i])
 			{
-				Vector3 poly = vertices[polyIndex];
+				Vector3 poly = vertices[vertexIndex];
 				Vector3 point = Camera.main.WorldToViewportPoint(transform.TransformPoint(poly));
 
 				if (point.z <= 0.0f)
 				{
-					continue;
+					pointBehindCamera = true;
+					pointBehindCameraForAnyPoly = true;
+					break;
 				}
 
 				if (point.y > maxY)
@@ -896,46 +891,48 @@ public class ModelLoader : MonoBehaviour
 				}
 			}
 
-			minX = Mathf.Clamp01(minX);
-			maxX = Mathf.Clamp01(maxX);
-			minY = Mathf.Clamp01(minY);
-			maxY = Mathf.Clamp01(maxY);
-
-			foreach (int polyIndex in gradientPolygonList[i])
+			if (!pointBehindCamera)
 			{
-				switch (polyType)				 
+				minX = Mathf.Clamp01(minX);
+				maxX = Mathf.Clamp01(maxX);
+				minY = Mathf.Clamp01(minY);
+				maxY = Mathf.Clamp01(maxY);
+
+				foreach (int vertexIndex in gradientPolygonList[i])
 				{
-					case 4:
-						uv[polyIndex] = new Vector2(maxY, minY);    
-						break;
-					
-					case 5:
-						uv[polyIndex] = new Vector2(maxY, 0.0f);    
-						break;
+					switch (polyType)
+					{
+						case 4:
+						case 5: //vertical gradient
+							uv[vertexIndex] = new Vector2(maxY, 0.0f);    
+							break;
 
-					case 3:
-						uv[polyIndex] = new Vector2(minX, maxX);    
-						break;
+						case 3: //horizontal
+							uv[vertexIndex] = new Vector2(minX, maxX);    
+							break;
 
-					case 6: 
-						uv[polyIndex] = new Vector2(maxX, minX);    
-						break;
+						case 6: //horizontal (reversed)
+							uv[vertexIndex] = new Vector2(maxX, minX);    
+							break;
+					}
 				}
 			}
 		}
 
-		for (int i = 0; i < gradientPolygonList.Count; i++)
+		if (!pointBehindCameraForAnyPoly)
 		{
-			foreach (int polyIndex in gradientPolygonList[i])
+			for (int i = 0; i < gradientPolygonList.Count; i++)
 			{
-				int polyType = gradientPolygonType[i];
-				if (polyType == 5)
+				foreach (int polyIndex in gradientPolygonList[i])
 				{
-					uv[polyIndex] = new Vector2(uv[polyIndex].x, gmaxY - gminY);    
+					int polyType = gradientPolygonType[i];
+					if (polyType == 4 || polyType == 5)
+					{
+						uv[polyIndex] = new Vector2(uv[polyIndex].x, gmaxY - gminY);    
+					}
 				}
 			}
 		}
-
 		mesh.SetUVs(0, uv);
 	}
 
