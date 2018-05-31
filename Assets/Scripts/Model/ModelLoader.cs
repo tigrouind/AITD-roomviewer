@@ -33,6 +33,7 @@ public class ModelLoader : MonoBehaviour
 	public Mesh CubeMesh;
 	private List<List<int>> gradientPolygonList;
 	private List<int> gradientPolygonType;
+	private Mesh bakedMesh;
 
 	private Vector2 cameraRotation = new Vector2();
 	private Vector2 cameraPosition = new Vector2();
@@ -830,9 +831,25 @@ public class ModelLoader : MonoBehaviour
 	void UpdateGradientsUVs()
 	{
 		Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+		Mesh skinMesh;
+		if (EnableAnimation.BoolValue)
+		{
+			if (bakedMesh == null)
+			{
+				bakedMesh = new Mesh();
+			}
+
+			gameObject.GetComponent<SkinnedMeshRenderer>().BakeMesh(bakedMesh);
+			skinMesh = bakedMesh;
+		}
+		else
+		{
+			skinMesh = mesh;
+		}
+			
 		List<Vector2> uv = new List<Vector2>();
 		mesh.GetUVs(0, uv);
-		Vector3[] vertices = mesh.vertices;
+		Vector3[] vertices = skinMesh.vertices;
 
 		float gmaxY = 0.0f;
 		float gminY = 1.0f;
