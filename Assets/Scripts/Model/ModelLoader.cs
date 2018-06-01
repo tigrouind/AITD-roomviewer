@@ -34,8 +34,8 @@ public class ModelLoader : MonoBehaviour
 	private List<List<int>> gradientPolygonList;
 	private List<int> gradientPolygonType;
 	private Mesh bakedMesh;
-	private List<Vector3> verticesCopy = new List<Vector3>();
-	private List<Vector2> uvCopy = new List<Vector2>();
+	private List<Vector3> allVertices;
+	private List<Vector2> uv;
 
 	private Vector2 cameraRotation = new Vector2();
 	private Vector2 cameraPosition = new Vector2();
@@ -178,10 +178,10 @@ public class ModelLoader : MonoBehaviour
 		Color32[] paletteColors = PaletteTexture[PaletteIndex].GetPixels32();
 
 		List<BoneWeight> boneWeights = new List<BoneWeight>();
-		List<Vector3> allVertices = new List<Vector3>();
+		allVertices = new List<Vector3>();
+		uv = new List<Vector2>();
 		List<Color32> colors = new List<Color32>();
 		List<int>[] indices = new List<int>[5];
-		List<Vector2> uv = new List<Vector2>();
 
 		for (int n = 0 ; n < indices.Length ; n++)
 		{
@@ -257,7 +257,7 @@ public class ModelLoader : MonoBehaviour
 						if (polyType == 1 && NoiseMaterial.BoolValue)
 						{
 							Vector3 forward, left;
-							ComputeUV(polyVertices, allVertices, out forward, out left);
+							ComputeUV(polyVertices, out forward, out left);
 
 							foreach (int pointIndex in polyVertices)
 							{
@@ -601,7 +601,7 @@ public class ModelLoader : MonoBehaviour
 		}
 	}
 
-	void ComputeUV(List<int> polyVertices, List<Vector3> allVertices, out Vector3 forward, out Vector3 left)
+	void ComputeUV(List<int> polyVertices, out Vector3 forward, out Vector3 left)
 	{
 		int lastPoly = polyVertices.Count - 1;
 		Vector3 up;
@@ -833,7 +833,7 @@ public class ModelLoader : MonoBehaviour
 	void UpdateGradientsUVs()
 	{
 		Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
-		Mesh skinMesh;
+		
 		if (EnableAnimation.BoolValue)
 		{
 			if (bakedMesh == null)
@@ -842,15 +842,8 @@ public class ModelLoader : MonoBehaviour
 			}
 
 			gameObject.GetComponent<SkinnedMeshRenderer>().BakeMesh(bakedMesh);
-			skinMesh = bakedMesh;
+			bakedMesh.GetVertices(allVertices);
 		}
-		else
-		{
-			skinMesh = mesh;
-		}
-
-		mesh.GetUVs(0, uvCopy);
-		mesh.GetVertices(verticesCopy);
 
 		float gmaxY = 0.0f;
 		float gminY = 1.0f;
@@ -868,7 +861,7 @@ public class ModelLoader : MonoBehaviour
 			bool pointBehindCamera = false;
 			foreach(int vertexIndex in gradientPolygonList[i])
 			{
-				Vector3 poly = verticesCopy[vertexIndex];
+				Vector3 poly = allVertices[vertexIndex];
 				Vector3 point = Camera.main.WorldToViewportPoint(transform.TransformPoint(poly));
 
 				if (point.z <= 0.0f)
@@ -922,15 +915,15 @@ public class ModelLoader : MonoBehaviour
 					{
 						case 4:
 						case 5: //vertical gradient
-							uvCopy[vertexIndex] = new Vector2(maxY, 0.0f);    
+							uv[vertexIndex] = new Vector2(maxY, 0.0f);    
 							break;
 
 						case 3: //horizontal
-							uvCopy[vertexIndex] = new Vector2(minX, maxX);    
+							uv[vertexIndex] = new Vector2(minX, maxX);    
 							break;
 
 						case 6: //horizontal (reversed)
-							uvCopy[vertexIndex] = new Vector2(maxX, minX);    
+							uv[vertexIndex] = new Vector2(maxX, minX);    
 							break;
 					}
 				}
@@ -946,12 +939,12 @@ public class ModelLoader : MonoBehaviour
 					int polyType = gradientPolygonType[i];
 					if (polyType == 4 || polyType == 5)
 					{
-						uvCopy[polyIndex] = new Vector2(uvCopy[polyIndex].x, gmaxY - gminY);    
+						uv[polyIndex] = new Vector2(uv[polyIndex].x, gmaxY - gminY);    
 					}
 				}
 			}
 		}
-		mesh.SetUVs(0, uvCopy);
+		mesh.SetUVs(0, uv);
 	}
 
 	void RefreshLeftText()
