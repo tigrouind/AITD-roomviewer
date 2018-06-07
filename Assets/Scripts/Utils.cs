@@ -34,12 +34,32 @@ public static class Utils
 		}
 	}
 
-	public static void WriteShort(int value, byte[] data, int offset)
+	public static void Write(short value, byte[] data, int offset)
 	{
 		unchecked
 		{
 			data[offset + 0] = (byte)(value & 0xFF);
 			data[offset + 1] = (byte)(value >> 8);
+		}
+	}
+
+	public static void Write(ushort value, byte[] data, int offset)
+	{
+		unchecked
+		{
+			data[offset + 0] = (byte)(value & 0xFF);
+			data[offset + 1] = (byte)(value >> 8);
+		}
+	}
+
+	public static void Write(uint value, byte[] data, int offset)
+	{
+		unchecked
+		{
+			data[offset + 0] = (byte)(value & 0xFF);
+			data[offset + 1] = (byte)(value >> 8);
+			data[offset + 2] = (byte)(value >> 16);
+			data[offset + 3] = (byte)(value >> 24);
 		}
 	}
 }

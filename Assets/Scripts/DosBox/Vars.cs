@@ -277,7 +277,7 @@ public class Vars : MonoBehaviour
 				//write new value to memory
 				ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 				byte[] wordValue = new byte[2];
-				Utils.WriteShort(newValueInt, wordValue, 0);
+				Utils.Write((short)newValueInt, wordValue, 0);
 				processReader.Write(wordValue, var.memoryAddress, wordValue.Length);
 			}
 		}

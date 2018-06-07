@@ -308,7 +308,7 @@ public class DosBox : MonoBehaviour
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
 					InternalTimer = Utils.ReadUnsignedInt(memory, 0);
 
-					//internal timer
+					//internal timer 2
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 + 0xA5CE, 2);
 					internalTimer2 = Utils.ReadUnsignedShort(memory, 0);
 
@@ -385,6 +385,20 @@ public class DosBox : MonoBehaviour
 			{
 				box.LastDistance = 0;
 			}
+		}
+		if (Input.GetKeyDown(KeyCode.Alpha1) && ProcessReader != null)
+		{
+			//internal timer 1
+			InternalTimer -= 60 * 5; //back 5 frames
+			Utils.Write(InternalTimer, memory, 0);
+			ProcessReader.Write(memory, memoryAddress - 0x83B6 - 6, 4);
+		}
+		if (Input.GetKeyDown(KeyCode.Alpha2) && ProcessReader != null)
+		{
+			//internal timer 2
+			internalTimer2 -= 60 * 5; //back 5 frames
+			Utils.Write(internalTimer2, memory, 0);
+			ProcessReader.Write(memory, memoryAddress - 0x83B6 - 6 + 0xA5CE, 2);
 		}
 	}
 
