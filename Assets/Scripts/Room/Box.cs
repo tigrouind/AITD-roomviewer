@@ -10,6 +10,7 @@ public class Box : MonoBehaviour
 	private Color32 color;
 	private bool highlighted;
 	private bool alwaysOnTop;
+	private static string[] animTypeInfo = new string[] { "ONCE", "REPEAT", "UNINTERRUPT" };
 
 	public bool ShowAdditionalInfo;
 	public int ID;
@@ -20,6 +21,8 @@ public class Box : MonoBehaviour
 	public int TrackMode;
 	public int Body;
 	public int Anim;
+	public int NextAnim;
+	public int AnimType;
 	public int Keyframe;
 	public int TotalFrames;
 	public int Speed;
@@ -168,7 +171,17 @@ public class Box : MonoBehaviour
 			if (Body != -1)
 			{
 				if(Anim != -1)
-					info.Append("BODY/ANIM", "{0}; {1}", Body, Anim);
+				{
+					if(NextAnim != -1)
+						info.Append("BODY/ANIM", "{0}; {1}; {2}", Body, Anim, NextAnim);
+					else
+						info.Append("BODY/ANIM", "{0}; {1}", Body, Anim);
+
+					if (AnimType >= 0 && AnimType <= 2)
+					{
+						info.Append("ANIMTYPE", animTypeInfo[AnimType]);
+					}
+				}
 				else
 					info.Append("BODY", Body);
 			}

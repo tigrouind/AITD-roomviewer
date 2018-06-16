@@ -168,6 +168,8 @@ public class DosBox : MonoBehaviour
 							box.Life = Utils.ReadShort(memory, k + 52);
 							box.Chrono = Utils.ReadUnsignedInt(memory, k + 54);
 							box.RoomChrono = Utils.ReadUnsignedInt(memory, k + 58);
+							box.AnimType = Utils.ReadShort(memory, k + 64);
+							box.NextAnim = Utils.ReadShort(memory, k + 66);
 							box.TotalFrames = Utils.ReadShort(memory, k + 76);
 							box.TrackNumber = Utils.ReadShort(memory, k + 84);
 							box.PositionInTrack = Utils.ReadShort(memory, k + 88);
