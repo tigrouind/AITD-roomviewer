@@ -730,7 +730,7 @@ public class ModelLoader : MonoBehaviour
 			if (Input.GetMouseButton(0))
 			{
 				Vector2 mouseDelta = mousePosition - Input.mousePosition;
-				cameraRotation += mouseDelta * Time.deltaTime * 50.0f;
+				cameraRotation += mouseDelta;
 				cameraRotation.y = Mathf.Clamp(cameraRotation.y, -90.00f, 90.00f);
 				mousePosition = Input.mousePosition;
 			}
