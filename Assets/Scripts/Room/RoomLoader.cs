@@ -54,14 +54,16 @@ public class RoomLoader : MonoBehaviour
 		//check existing ETAGEXX folders
 		floors = Directory.GetDirectories("GAMEDATA")
 			.Select(x => Path.GetFileName(x))
-			.Where(x => x.StartsWith("ETAGE"))
+			.Where(x => x.StartsWith("ETAGE", StringComparison.InvariantCultureIgnoreCase))
 			.Select(x => int.Parse(x.Substring(5, 2)))
 			.ToList();
 		floor = floors.FirstOrDefault();
 
 		CheckCommandLine();
-
-		RefreshRooms();
+		if (floors.Count > 0)
+		{
+			RefreshRooms();
+		}
 		ToggleMenuDOSBoxOptions(false);
 	}
 
