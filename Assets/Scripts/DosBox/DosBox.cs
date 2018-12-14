@@ -142,8 +142,9 @@ public class DosBox : MonoBehaviour
 
 							if (box.transform.position != boxPosition)
 							{
-								Vector3 offset = box.transform.position - boxPosition;
-								box.LastOffset = Mathf.FloorToInt(1000.0f * new Vector3(offset.x, 0.0f, offset.z).magnitude);
+								Vector3 offset = 1000.0f * (box.transform.position - boxPosition);
+								float distance = new Vector3(Mathf.Round(offset.x), 0.0f, Mathf.Round(offset.z)).magnitude;
+								box.LastOffset = Mathf.FloorToInt(distance);
 								box.LastDistance += box.LastOffset;
 								box.transform.position = boxPosition;
 							}
