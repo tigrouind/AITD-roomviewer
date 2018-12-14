@@ -32,7 +32,8 @@ public class RoomLoader : MonoBehaviour
 	private int SelectedBoxId;
 
 	private bool DosBoxEnabled;
-	public bool IsCDROMVersion;
+	private bool isAITD1;
+	public int DetectedGame;
 	public GameObject Actors;
 
 	public RectTransform Panel;
@@ -58,6 +59,8 @@ public class RoomLoader : MonoBehaviour
 			.Select(x => int.Parse(x.Substring(5, 2)))
 			.ToList();
 		floor = floors.FirstOrDefault();
+		DetectedGame = DetectGame();
+		isAITD1 = DetectedGame == 1;
 
 		CheckCommandLine();
 		if (floors.Count > 0)
@@ -266,7 +269,6 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//cameras
-		bool isAITD1 = DetectGame() == 1;
 		filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000001");
 		byte[] allPointsB = File.ReadAllBytes(filePath);
 		int roomIndex = 0;
@@ -347,7 +349,7 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	public int DetectGame()
+	int DetectGame()
 	{
 		//detect game based on number of floors
 		if (floors.Count >= 15)
@@ -446,10 +448,14 @@ public class RoomLoader : MonoBehaviour
 		{
 			Panel.gameObject.SetActive(menuEnabled);
 		}
+		
+		DosBox dosBox = GetComponent<DosBox>(); 		
+		dosBox.ShowAdditionalInfo = ShowAdditionalInfo.BoolValue && DosBoxEnabled;
+		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && isAITD1 && dosBox.IsCDROMVersion;
 
-		GetComponent<DosBox>().CalculateFPS();
-		GetComponent<DosBox>().UpdateAllActors();
-		GetComponent<DosBox>().UpdateBoxInfo();
+		dosBox.CalculateFPS();
+		dosBox.UpdateAllActors();
+		dosBox.UpdateBoxInfo();
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
 
@@ -632,9 +638,8 @@ public class RoomLoader : MonoBehaviour
 
 	private void ToggleMenuDOSBoxOptions(bool enabled)
 	{
-		bool isAITD1 = DetectGame() == 1;
 		ShowActors.transform.parent.gameObject.SetActive(enabled);
-		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled && isAITD1 && IsCDROMVersion);
+		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled);
 		ShowVars.transform.gameObject.SetActive(enabled && isAITD1);
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
@@ -657,7 +662,6 @@ public class RoomLoader : MonoBehaviour
 					//set follow mode to player
 					CameraFollow.Value = 2;
 					GetComponent<DosBox>().ResetCamera(floor, room);
-					GetComponent<DosBox>().ShowAdditionalInfo = DosBoxEnabled && ShowAdditionalInfo.BoolValue && IsCDROMVersion && DetectGame() == 1;
 
 					Actors.SetActive(DosBoxEnabled && ShowActors.BoolValue);
 
@@ -686,7 +690,6 @@ public class RoomLoader : MonoBehaviour
 
 					GetComponent<Vars>().enabled = false; //hide vars
 					GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp
-					GetComponent<DosBox>().ShowAdditionalInfo = false;
 				}
 				LinkToDOSBox.BoolValue = DosBoxEnabled;
 				ToggleMenuDOSBoxOptions(DosBoxEnabled);
@@ -730,7 +733,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.V:
-				if (DetectGame() == 1 && DosBoxEnabled)
+				if (isAITD1 && DosBoxEnabled)
 				{
 					GetComponent<Vars>().enabled = !GetComponent<Vars>().enabled;
 					menuEnabled = false;
@@ -758,11 +761,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.E:
-				if (DetectGame() == 1)
-				{
-					ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
-					GetComponent<DosBox>().ShowAdditionalInfo = DosBoxEnabled && IsCDROMVersion && ShowAdditionalInfo.BoolValue;
-				}
+				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
 				break;
 
 			case KeyCode.Mouse2:

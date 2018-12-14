@@ -12,7 +12,7 @@ public class Box : MonoBehaviour
 	private bool alwaysOnTop;
 	private static string[] animTypeInfo = new string[] { "ONCE", "REPEAT", "UNINTERRUPT" };
 
-	public bool ShowAdditionalInfo;
+	public bool ShowAITD1Vars;
 	public int ID;
 	public int Flags;
 	public int ColFlags;
@@ -148,7 +148,7 @@ public class Box : MonoBehaviour
 		{
 			info.Append("COL_FLAGS", "0x{0:X4}", ColFlags);
 
-			if (ShowAdditionalInfo)
+			if (ShowAITD1Vars)
 			{
 				info.Append("ROOM", "E{0}R{1}", Floor, Room);
 				info.Append("ROOM_POS", LocalPosition);
@@ -191,18 +191,18 @@ public class Box : MonoBehaviour
 				if (Keyframe != -1)
 				{
 					info.Append("KEYFRAME", "{0}/{1}", Keyframe, TotalFrames - 1);
-					if (ShowAdditionalInfo)
+					if (ShowAITD1Vars)
 					{				
 						info.Append("SUB_KEYFRAME", Mathf.FloorToInt(lastKeyFrameChange.Elapsed * 60.0f));
 					}
 				}
-				if (ShowAdditionalInfo)
+				if (ShowAITD1Vars)
 				{
 					info.Append("SPEED", Speed);
 				}
 			}
 
-			if (ShowAdditionalInfo)
+			if (ShowAITD1Vars)
 			{
 				if (Chrono != 0)
 					info.Append("CHRONO", TimeSpan.FromSeconds((timer - Chrono) / 60));

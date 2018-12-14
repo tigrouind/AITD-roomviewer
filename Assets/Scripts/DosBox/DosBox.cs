@@ -16,6 +16,9 @@ public class DosBox : MonoBehaviour
 	public Box BoxPrefab;
 	public uint InternalTimer;
 	public bool ShowAdditionalInfo;
+	public bool ShowAITD1Vars;
+	public bool IsCDROMVersion;
+
 	public ProcessMemoryReader ProcessReader;
 	public Box Player;
 
@@ -189,7 +192,7 @@ public class DosBox : MonoBehaviour
 							box.WorldPosition.x = Utils.ReadShort(memory, k + 34) + modx;
 							box.WorldPosition.y = Utils.ReadShort(memory, k + 36) + mody;
 							box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + modz;
-							box.ShowAdditionalInfo = ShowAdditionalInfo;
+							box.ShowAITD1Vars = ShowAITD1Vars;
 
 							bool isAITD1 = dosBoxPattern == 0;
 							if (isAITD1)
@@ -230,7 +233,7 @@ public class DosBox : MonoBehaviour
 							int anim = Utils.ReadShort(memory, k + 62);
 							int keyframe = Utils.ReadShort(memory, k + 74);
 
-							if (ShowAdditionalInfo)
+							if (ShowAITD1Vars)
 							{
 								int endframe = Utils.ReadShort(memory, k + 78);
 								int endanim = Utils.ReadShort(memory, k + 80);
@@ -305,7 +308,7 @@ public class DosBox : MonoBehaviour
 					i++;
 				}
 
-				if (ShowAdditionalInfo)
+				if (ShowAITD1Vars)
 				{
 					//internal timer
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6, 4);
@@ -323,6 +326,7 @@ public class DosBox : MonoBehaviour
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 + 0xA33C, 2);
 					inHand = Utils.ReadShort(memory, 0);
 
+					//set by AITD when long running code is started (eg: loading ressource)
 					ProcessReader.Read(memory, memoryAddress - 0x83B6 - 6 + 0x13EA, 4);
 					saveTimerFlag = memory[0] == 1;
 				}
@@ -354,23 +358,30 @@ public class DosBox : MonoBehaviour
 			BoxInfo.Append("Angle", "{0:N1} {1:N1}", angle, sideAngle);
 		}
 
-		if (ShowAdditionalInfo)
+		if (ShowAITD1Vars || ShowAdditionalInfo)
 		{
 			if(Player != null) BoxInfo.Append();
-
-			int calculatedFps = previousFramesCount.Sum();
 			
-			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
-			TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
+			if (ShowAITD1Vars)
+			{
+				int calculatedFps = previousFramesCount.Sum();							
+				TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
 
-			BoxInfo.Append("Timer 1", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer / 60), InternalTimer % 60);
-			BoxInfo.Append("Timer 2", "{0}.{1:D2}", TimeSpan.FromSeconds(internalTimer2 / 60), internalTimer2 % 60);
-			BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
-			BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
-			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
-			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Player.LastDistance);
-			BoxInfo.Append("Allow inventory", allowInventory ? "Yes" : "No");
-			BoxInfo.Append("In hand", inHand);
+				BoxInfo.Append("Timer 1", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer / 60), InternalTimer % 60);
+				BoxInfo.Append("Timer 2", "{0}.{1:D2}", TimeSpan.FromSeconds(internalTimer2 / 60), internalTimer2 % 60);
+				BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
+				BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
+			}
+
+			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
+			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));				
+			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Player.LastDistance);	
+
+			if (ShowAITD1Vars)
+			{		
+				BoxInfo.Append("Allow inventory", allowInventory ? "Yes" : "No");
+				BoxInfo.Append("In hand", inHand);
+			}
 		}
 
 		BoxInfo.UpdateText();
@@ -407,7 +418,7 @@ public class DosBox : MonoBehaviour
 
 	public void CalculateFPS()
 	{
-		if (ProcessReader != null && ShowAdditionalInfo)
+		if (ProcessReader != null && ShowAITD1Vars)
 		{
 			//fps
 			ProcessReader.Read(memory, memoryAddress - 0x83B6, 2);
@@ -502,7 +513,7 @@ public class DosBox : MonoBehaviour
 		}
 
 		//search player position in DOSBOX processes
-		int detectedGame = GetComponent<RoomLoader>().DetectGame();
+		int detectedGame = GetComponent<RoomLoader>().DetectedGame;
 		int patternIndex = detectedGame - 1;
 		foreach (int processId in processIds)
 		{
@@ -523,8 +534,7 @@ public class DosBox : MonoBehaviour
 
 					//check if CDROM/floppy version (AITD1 only)				
 					byte[] cdPattern = ASCIIEncoding.ASCII.GetBytes("CD Not Found");
-					GetComponent<RoomLoader>().IsCDROMVersion = 
-						detectedGame == 1 && reader.SearchForBytePattern(cdPattern) != -1;
+					IsCDROMVersion = detectedGame == 1 && reader.SearchForBytePattern(cdPattern) != -1;
 
 					//vars
 					if (patternIndex == 0) //AITD1 only
