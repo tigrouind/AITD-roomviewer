@@ -435,11 +435,11 @@ public class DosBox : MonoBehaviour
 			{	
 				delayCounter.Start();
 				totalDelay.Start();
+			}
 
-				if(delayCounter.Elapsed >= 0.1f) //100ms
-				{
-					lastDelay = delayCounter.Elapsed;
-				}
+			if(delayCounter.Elapsed >= 0.1f) //100ms
+			{
+				lastDelay = delayCounter.Elapsed;
 			}
 
 			float time = Time.time;
