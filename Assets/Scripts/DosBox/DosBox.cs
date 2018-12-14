@@ -435,6 +435,11 @@ public class DosBox : MonoBehaviour
 			else
 				diff = fps - oldFramesCount + frames; //special case: eg: 60 - 58 + 3
 			oldFramesCount = frames;
+			
+			if(delayCounter.Elapsed >= 0.1f) //100ms
+			{
+				lastDelay = delayCounter.Elapsed;
+			}
 
 			//check for large delays
 			if (!saveTimerFlag)
@@ -446,11 +451,6 @@ public class DosBox : MonoBehaviour
 			{	
 				delayCounter.Start();
 				totalDelay.Start();
-			}
-
-			if(delayCounter.Elapsed >= 0.1f) //100ms
-			{
-				lastDelay = delayCounter.Elapsed;
 			}
 
 			float time = Time.time;
