@@ -147,8 +147,8 @@ public class DosBox : MonoBehaviour
 							{
 								Vector3 offset = 1000.0f * (box.transform.position - boxPosition);
 								float distance = new Vector3(Mathf.Round(offset.x), 0.0f, Mathf.Round(offset.z)).magnitude;
-								box.LastOffset = Mathf.FloorToInt(distance);
-								box.LastDistance += box.LastOffset;
+								box.LastOffset = Mathf.RoundToInt(distance);
+								box.LastDistance += distance;
 								box.transform.position = boxPosition;
 							}
 
@@ -375,7 +375,7 @@ public class DosBox : MonoBehaviour
 
 			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
 			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));				
-			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Player.LastDistance);	
+			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));	
 
 			if (ShowAITD1Vars)
 			{		
@@ -397,7 +397,7 @@ public class DosBox : MonoBehaviour
 		{
 			foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 			{
-				box.LastDistance = 0;
+				box.LastDistance = 0.0f;
 			}
 		}
 		if (Input.GetKeyDown(KeyCode.Alpha1) && ProcessReader != null)

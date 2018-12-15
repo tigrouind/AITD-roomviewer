@@ -40,7 +40,7 @@ public class Box : MonoBehaviour
 	public Vector3 BoundingUpper;
 	public Vector3 Angles;
 	public int LastOffset;
-	public int LastDistance;
+	public float LastDistance;
 	public Box HotPoint;
 
 	public Vector3 BoundingPos
@@ -156,7 +156,7 @@ public class Box : MonoBehaviour
 				info.Append("ZV_POS", BoundingPos);
 				info.Append("ZV_SIZE", BoundingSize);
 				info.Append("OFFSET", LastOffset);
-				info.Append("DISTANCE", LastDistance);
+				info.Append("DISTANCE", Mathf.RoundToInt(LastDistance));
 				info.Append("ANGLE", "{0:N1} {1:N1} {2:N1}",
 					Angles.x * 360.0f / 1024.0f,
 					Angles.y * 360.0f / 1024.0f,
