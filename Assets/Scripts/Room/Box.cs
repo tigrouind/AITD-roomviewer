@@ -13,6 +13,7 @@ public class Box : MonoBehaviour
 	private static string[] animTypeInfo = new string[] { "ONCE", "REPEAT", "UNINTERRUPT" };
 
 	public bool ShowAITD1Vars;
+	public bool ShowAdditionalInfo;
 	public int ID;
 	public int Flags;
 	public int ColFlags;
@@ -148,7 +149,7 @@ public class Box : MonoBehaviour
 		{
 			info.Append("COL_FLAGS", "0x{0:X4}", ColFlags);
 
-			if (ShowAITD1Vars)
+			if (ShowAdditionalInfo)
 			{
 				info.Append("ROOM", "E{0}R{1}", Floor, Room);
 				info.Append("ROOM_POS", LocalPosition);
@@ -172,12 +173,12 @@ public class Box : MonoBehaviour
 			{
 				if(Anim != -1)
 				{
-					if(NextAnim != -1)
+					if(ShowAITD1Vars && NextAnim != -1)
 						info.Append("BODY/ANIM", "{0}; {1}; {2}", Body, Anim, NextAnim);
 					else
 						info.Append("BODY/ANIM", "{0}; {1}", Body, Anim);
 
-					if (AnimType >= 0 && AnimType <= 2)
+					if (ShowAITD1Vars && AnimType >= 0 && AnimType <= 2)
 					{
 						info.Append("ANIMTYPE", animTypeInfo[AnimType]);
 					}
@@ -186,36 +187,29 @@ public class Box : MonoBehaviour
 					info.Append("BODY", Body);
 			}
 
-			if (Anim != -1)
+			if (ShowAITD1Vars && Anim != -1)
 			{
 				if (Keyframe != -1)
 				{
 					info.Append("KEYFRAME", "{0}/{1}", Keyframe, TotalFrames - 1);
-					if (ShowAITD1Vars)
-					{				
-						info.Append("SUB_KEYFRAME", Mathf.FloorToInt(lastKeyFrameChange.Elapsed * 60.0f));
-					}
+					info.Append("SUB_KEYFRAME", Mathf.FloorToInt(lastKeyFrameChange.Elapsed * 60.0f));
 				}
-				if (ShowAITD1Vars)
-				{
-					info.Append("SPEED", Speed);
-				}
+
+				info.Append("SPEED", Speed);
 			}
 
-			if (ShowAITD1Vars)
-			{
-				if (Chrono != 0)
-					info.Append("CHRONO", TimeSpan.FromSeconds((timer - Chrono) / 60));
-				if (RoomChrono != 0)
-					info.Append("ROOM_CHRONO", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
-				if (TrackMode != -1)
-					info.Append("TRACKMODE", TrackMode);
-				if (TrackNumber != -1)
-					info.Append("TRACKNUMBER", TrackNumber);
-				if (PositionInTrack != -1)
-					info.Append("TRACKPOSITION", PositionInTrack);
+			if (ShowAITD1Vars && Chrono != 0)
+				info.Append("CHRONO", TimeSpan.FromSeconds((timer - Chrono) / 60));
+			if (ShowAITD1Vars && RoomChrono != 0)
+				info.Append("ROOM_CHRONO", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
+			if (ShowAdditionalInfo && TrackMode != -1)
+				info.Append("TRACKMODE", TrackMode);
+			if (ShowAITD1Vars && TrackNumber != -1)
+				info.Append("TRACKNUMBER", TrackNumber);
+			if (ShowAITD1Vars && PositionInTrack != -1)
+				info.Append("TRACKPOSITION", PositionInTrack);
+			if (ShowAdditionalInfo)
 				info.Append("SLOT", Slot);
-			}
 		}
 
 		info.UpdateText();

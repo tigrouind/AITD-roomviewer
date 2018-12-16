@@ -168,7 +168,7 @@ public class DosBox : MonoBehaviour
 							box.Floor = floorNumber;
 							box.Flags = Utils.ReadShort(memory, k + 4);
 							box.ColFlags = Utils.ReadShort(memory, k + 6);
-							box.LifeMode =Utils. ReadShort(memory, k + 50);
+							box.LifeMode = Utils. ReadShort(memory, k + 50);
 							box.Life = Utils.ReadShort(memory, k + 52);
 							box.Chrono = Utils.ReadUnsignedInt(memory, k + 54);
 							box.RoomChrono = Utils.ReadUnsignedInt(memory, k + 58);
@@ -193,6 +193,7 @@ public class DosBox : MonoBehaviour
 							box.WorldPosition.y = Utils.ReadShort(memory, k + 36) + mody;
 							box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + modz;
 							box.ShowAITD1Vars = ShowAITD1Vars;
+							box.ShowAdditionalInfo = ShowAdditionalInfo;
 
 							bool isAITD1 = dosBoxPattern == 0;
 							if (isAITD1)

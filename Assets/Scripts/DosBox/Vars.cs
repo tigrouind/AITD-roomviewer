@@ -328,8 +328,7 @@ public class Vars : MonoBehaviour
 		oldcompare = compare;
 		ToggleButtonState(button, compare);
 	}
-
-
+	
 	public void SearchForPatterns(ProcessMemoryReader reader)
 	{
 		varsMemoryAddress = reader.SearchForBytePattern(varsMemoryPattern);
