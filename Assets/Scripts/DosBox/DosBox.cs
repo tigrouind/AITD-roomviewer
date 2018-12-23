@@ -42,7 +42,7 @@ public class DosBox : MonoBehaviour
 	private int[] TrackModeOffsets = new [] { 82, 90, 90 };
 
 	private Vector3 lastPlayerPosition;
-	private int lastValidPlayerIndex;
+	private int lastValidPlayerIndex = -1;
 	private int linkfloor = 0;
 	private int linkroom = 0;
 	private long memoryAddress;
@@ -560,6 +560,7 @@ public class DosBox : MonoBehaviour
 		ProcessReader = null;
 		BoxInfo.Clear(true);
 		RightText.text = string.Empty;
+		lastValidPlayerIndex = -1;
 	}
 
 	public void ResetCamera(int floor, int room)
