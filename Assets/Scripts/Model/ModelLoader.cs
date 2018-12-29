@@ -824,7 +824,7 @@ public class ModelLoader : MonoBehaviour
 		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
 		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
 
-		if (GradientMaterial.BoolValue)
+		if (GradientMaterial.BoolValue && gradientPolygonList != null)
 		{
 			UpdateGradientsUVs();
 		}
