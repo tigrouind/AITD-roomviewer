@@ -515,6 +515,14 @@ public class RoomLoader : MonoBehaviour
 
 			//display info
 			Vector3 position = Camera.main.WorldToScreenPoint(box.GetComponent<Renderer>().bounds.center);
+			Vector2 size = BoxInfo.GetComponent<RectTransform>().sizeDelta;
+			Rect rect = new Rect((Vector2)position - size / 2.0f, size);
+
+			if(rect.xMax > Screen.width) position.x = Screen.width - size.x / 2.0f;
+			if(rect.xMin < 0.0f) position.x = size.x / 2.0f;			
+			if(rect.yMax > Screen.height) position.y = Screen.height - size.y / 2.0f;
+			if(rect.yMin < 0.0f) position.y = size.y / 2.0f;
+			
 			BoxInfo.transform.position = new Vector3(position.x, position.y, 0.0f);
 
 			//text
