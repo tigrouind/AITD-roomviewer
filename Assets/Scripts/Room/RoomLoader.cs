@@ -21,6 +21,7 @@ public class RoomLoader : MonoBehaviour
 	private float defaultCameraZoom = 10.0f;
 	private Timer defaultBoxSelectionTimer = new Timer();
 	private bool speedRunMode;
+	private bool dragging;
 
 	public Text LeftText;
 	public BoxInfo BottomText;
@@ -392,6 +393,7 @@ public class RoomLoader : MonoBehaviour
 			//start drag
 			if (Input.GetMouseButtonDown(0))
 			{
+				dragging = false;				
 				mousePosition = Input.mousePosition;
 			}
 
@@ -407,6 +409,7 @@ public class RoomLoader : MonoBehaviour
 
 					Camera.main.transform.position += mouseDelta;
 					mousePosition = newMousePosition;
+					dragging = true;
 				}
 			}
 		}
@@ -539,7 +542,7 @@ public class RoomLoader : MonoBehaviour
 	private void RefreshSelectedBox()
 	{
 		//toggle selected box
-		if (Input.GetMouseButtonDown(0) && HighLightedBox != null
+		if (Input.GetMouseButtonUp(0) && HighLightedBox != null && !dragging
 			&& !(GetComponent<WarpDialog>().warpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
 				&& RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
