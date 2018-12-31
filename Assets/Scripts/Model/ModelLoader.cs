@@ -620,6 +620,8 @@ public class ModelLoader : MonoBehaviour
 
 	void Start()
 	{
+		CheckCommandLine();
+
 		//parse vars.txt file
 		string varPath = @"GAMEDATA\vars.txt";
 		if (File.Exists(varPath))
@@ -995,6 +997,16 @@ public class ModelLoader : MonoBehaviour
 			animIndex = Math.Min(Math.Max(newAnimIndex, 0), animFiles.Count - 1);
 			AnimationInput.text = animIndex.ToString();
 			LoadAnim(animFiles[animIndex]);
+		}
+	}
+
+	void CheckCommandLine()
+	{
+		var args = System.Environment.GetCommandLineArgs();
+		if (args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
+		{			
+			ProcessKey(KeyCode.E); //extra info
+			ProcessKey(KeyCode.A); //animation
 		}
 	}
 
