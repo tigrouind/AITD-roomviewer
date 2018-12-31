@@ -1550,6 +1550,26 @@ Prefab:
       propertyPath: m_SizeDelta.y
       value: 100
       objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.r
+      value: 0.21176471
+      objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.g
+      value: 0.41568628
+      objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.b
+      value: 0.5411765
+      objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.a
+      value: 0.8627451
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: eaccbadae88674849b937ca8b9acb14f, type: 2}
   m_IsPrefabParent: 0
@@ -5027,6 +5047,26 @@ Prefab:
       propertyPath: m_SizeDelta.x
       value: 160
       objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.r
+      value: 0.21176471
+      objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.g
+      value: 0.41568628
+      objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.b
+      value: 0.5411765
+      objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.a
+      value: 0.8627451
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: eaccbadae88674849b937ca8b9acb14f, type: 2}
   m_IsPrefabParent: 0
@@ -6617,6 +6657,26 @@ Prefab:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.r
+      value: 0.21176471
+      objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.g
+      value: 0.41568628
+      objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.b
+      value: 0.5411765
+      objectReference: {fileID: 0}
+    - target: {fileID: 114324926652900274, guid: eaccbadae88674849b937ca8b9acb14f,
+        type: 2}
+      propertyPath: m_Color.a
+      value: 0.8627451
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: eaccbadae88674849b937ca8b9acb14f, type: 2}
   m_IsPrefabParent: 0
@@ -6990,7 +7050,7 @@ MonoBehaviour:
   BottomText: {fileID: 440051174}
   BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}
   BoxInfo: {fileID: 1957303515}
-  IsCDROMVersion: 0
+  DetectedGame: 0
   Actors: {fileID: 1100510531}
   Panel: {fileID: 686186030}
   ShowVars: {fileID: 588804799}
@@ -7034,6 +7094,8 @@ MonoBehaviour:
   BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}
   InternalTimer: 0
   ShowAdditionalInfo: 0
+  ShowAITD1Vars: 0
+  IsCDROMVersion: 0
   Player: {fileID: 0}
 --- !u!114 &2046595783
 MonoBehaviour:
