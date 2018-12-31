@@ -11,6 +11,7 @@ public class Box : MonoBehaviour
 	private bool highlighted;
 	private bool alwaysOnTop;
 	private static string[] animTypeInfo = new string[] { "ONCE", "REPEAT", "UNINTERRUPT" };
+	private static string[] trackModeInfo = new string[] { "NONE", "MANUAL", "FOLLOW", "TRACK" };
 
 	public bool ShowAITD1Vars;
 	public bool ShowAdditionalInfo;
@@ -202,8 +203,8 @@ public class Box : MonoBehaviour
 				info.Append("CHRONO", TimeSpan.FromSeconds((timer - Chrono) / 60));
 			if (ShowAITD1Vars && RoomChrono != 0)
 				info.Append("ROOM_CHRONO", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
-			if (ShowAdditionalInfo && TrackMode != -1)
-				info.Append("TRACKMODE", TrackMode);
+			if (ShowAdditionalInfo && TrackMode >= 0 && TrackMode <= 3)
+				info.Append("TRACKMODE", trackModeInfo[TrackMode]);
 			if (ShowAITD1Vars && TrackNumber != -1)
 				info.Append("TRACKNUMBER", TrackNumber);
 			if (ShowAITD1Vars && PositionInTrack != -1)
