@@ -43,7 +43,8 @@ public class Box : MonoBehaviour
 	public Vector3 Angles;
 	public int LastOffset;
 	public float LastDistance;
-	public Box HotPoint;
+	public Box BoxHotPoint;
+	public Box BoxWorldPos;
 
 	public Vector3 BoundingPos
 	{
@@ -141,6 +142,7 @@ public class Box : MonoBehaviour
 		info.Clear();
 		info.Append("TYPE", name.ToUpperInvariant());
 		info.Append("ID", ID);
+			
 		if (name == "Collider" || name == "Trigger" || name == "Actor")
 		{
 			info.Append("FLAGS", "0x{0:X4}", Flags);

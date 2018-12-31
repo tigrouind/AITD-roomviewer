@@ -485,6 +485,13 @@ public class RoomLoader : MonoBehaviour
 			mousePosition.y > 0 && mousePosition.y < Screen.height)
 		{
 			hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
+			if(hitInfos != null && hitInfos.Length > 0)
+			{
+				hitInfos = hitInfos
+					.Where(x => x.collider.GetComponent<Box>().name != "HotPoint" 
+							 && x.collider.GetComponent<Box>().name != "WorldPos")
+					.ToArray();
+			}			
 		}
 
 		if (hitInfos != null && hitInfos.Length > 0 
@@ -521,6 +528,7 @@ public class RoomLoader : MonoBehaviour
 			Vector2 size = BoxInfo.GetComponent<RectTransform>().sizeDelta;
 			Rect rect = new Rect((Vector2)position - size / 2.0f, size);
 
+			//make sure box fit in viewport
 			if(rect.xMax > Screen.width) position.x = Screen.width - size.x / 2.0f;
 			if(rect.xMin < 0.0f) position.x = size.x / 2.0f;			
 			if(rect.yMax > Screen.height) position.y = Screen.height - size.y / 2.0f;

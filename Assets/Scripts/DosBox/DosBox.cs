@@ -200,7 +200,7 @@ public class DosBox : MonoBehaviour
 							{
 								//hot point
 								int animationType = Utils.ReadShort(memory, k + 142);
-								Box hotPoint = box.HotPoint;
+								Box hotPoint = box.BoxHotPoint;
 
 								if (animationType == 2)
 								{
@@ -209,7 +209,7 @@ public class DosBox : MonoBehaviour
 										hotPoint = Instantiate(BoxPrefab);
 										hotPoint.name = "HotPoint";
 										hotPoint.Color = new Color32(255, 0, 0, 255);
-										box.HotPoint = hotPoint;
+										box.BoxHotPoint = hotPoint;
 									}
 
 									Vector3 hotPosition;
@@ -227,7 +227,7 @@ public class DosBox : MonoBehaviour
 								else if (hotPoint != null)
 								{
 									Destroy(hotPoint.gameObject);
-									box.HotPoint = null;
+									box.BoxHotPoint = null;
 								}
 							}
 
@@ -287,11 +287,42 @@ public class DosBox : MonoBehaviour
 								box.AlwaysOnTop = Camera.main.orthographic;
 								Arrow.AlwaysOnTop = Camera.main.orthographic;
 								player = box;
+
+								//worldpost unsync
+								Box worldPos = box.BoxWorldPos;
+
+								if (box.WorldPosition.x != box.BoundingPos.x || box.WorldPosition.z != box.BoundingPos.z)
+								{
+									if (worldPos == null)
+									{ 
+										worldPos = Instantiate(BoxPrefab);
+										worldPos.name = "WorldPos";
+										worldPos.Color = new Color32(255, 0, 0, 128);
+										box.BoxWorldPos = worldPos;
+									}
+
+									Vector3 finalPos = box.WorldPosition / 1000.0f;
+									finalPos = new Vector3(finalPos.x, boxPosition.y, finalPos.z) + roomObject.localPosition;
+									worldPos.transform.position = finalPos;
+									worldPos.transform.localScale = box.transform.localScale;
+								}
+								else if (worldPos != null)
+								{
+									Destroy(worldPos.gameObject);
+									box.BoxWorldPos = null;
+								}
 							}
 							else
 							{
 								//other actors are green
 								box.Color = new Color32(0, 128, 0, 255);
+
+								//no world pos box for other actors
+								if (box.BoxWorldPos != null)
+								{
+									Destroy(box.BoxWorldPos.gameObject);
+									box.BoxWorldPos = null;
+								}
 							}
 
 							box.gameObject.SetActive(true);
