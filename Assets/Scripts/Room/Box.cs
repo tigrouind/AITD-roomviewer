@@ -45,6 +45,9 @@ public class Box : MonoBehaviour
 	public float LastDistance;
 	public Box BoxHotPoint;
 	public Box BoxWorldPos;
+	public int OldAngle; 
+	public int NewAngle;
+	public int RotateTime;
 
 	public Vector3 BoundingPos
 	{
@@ -106,6 +109,29 @@ public class Box : MonoBehaviour
 		}
 	}
 
+	public string RotateDir
+	{
+		get
+		{
+			int diff = NewAngle - OldAngle;
+			if(RotateTime != 0 && diff != 0)
+			{
+				if(diff > 0)
+				{
+					return "▲";
+				}									
+				else
+				{
+					return "▼";
+				}
+			}
+			else
+			{
+				return string.Empty;
+			}
+		}
+	}
+	
 	private void RefreshMaterial()
 	{
 		Color32 materialColor = color;
@@ -161,10 +187,11 @@ public class Box : MonoBehaviour
 				info.Append("ZV_SIZE", BoundingSize);
 				info.Append("OFFSET", LastOffset);
 				info.Append("DISTANCE", Mathf.RoundToInt(LastDistance));
-				info.Append("ANGLE", "{0:N1} {1:N1} {2:N1}",
+				info.Append("ANGLE", "{0:N1} {1:N1} {2:N1} {3}",
 					Angles.x * 360.0f / 1024.0f,
 					Angles.y * 360.0f / 1024.0f,
-					Angles.z * 360.0f / 1024.0f);
+					Angles.z * 360.0f / 1024.0f,
+					RotateDir);
 			}
 
 			if (Life != -1)
