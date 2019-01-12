@@ -229,9 +229,9 @@ public class Box : MonoBehaviour
 			}
 
 			if (ShowAITD1Vars && Chrono != 0)
-				info.Append("CHRONO", TimeSpan.FromSeconds((timer - Chrono) / 60));
+				info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((timer - Chrono) / 60), (timer - Chrono) % 60);
 			if (ShowAITD1Vars && RoomChrono != 0)
-				info.Append("ROOM_CHRONO", TimeSpan.FromSeconds((timer - RoomChrono) / 60));
+				info.Append("ROOM_CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((timer - RoomChrono) / 60), (timer - RoomChrono) % 60);
 			if (ShowAdditionalInfo && TrackMode >= 0 && TrackMode <= 3)
 				info.Append("TRACKMODE", trackModeInfo[TrackMode]);
 			if (ShowAITD1Vars && TrackNumber != -1)
