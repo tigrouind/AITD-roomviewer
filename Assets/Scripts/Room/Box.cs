@@ -187,11 +187,19 @@ public class Box : MonoBehaviour
 				info.Append("ZV_SIZE", BoundingSize);
 				info.Append("OFFSET", LastOffset);
 				info.Append("DISTANCE", Mathf.RoundToInt(LastDistance));
-				info.Append("ANGLE", "{0:N1} {1:N1} {2:N1} {3}",
-					Angles.x * 360.0f / 1024.0f,
-					Angles.y * 360.0f / 1024.0f,
-					Angles.z * 360.0f / 1024.0f,
-					RotateDir);
+				if(Angles.x == 0.0f && Angles.z == 0.0f)
+				{
+					info.Append("ANGLE", "{0:N1} {1}",
+						Angles.y * 360.0f / 1024.0f,
+						RotateDir);
+				}
+				else
+				{
+					info.Append("ANGLE", "{0:N1} {1:N1} {2:N1}",
+						Angles.x * 360.0f / 1024.0f,
+						Angles.y * 360.0f / 1024.0f,
+						Angles.z * 360.0f / 1024.0f);
+				}
 			}
 
 			if (Life != -1)
