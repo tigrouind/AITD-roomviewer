@@ -395,7 +395,7 @@ public class DosBox : MonoBehaviour
 
 		if (ShowAITD1Vars || ShowAdditionalInfo)
 		{
-			if(Player != null) BoxInfo.Append();
+			if(Player != null) BoxInfo.AppendLine();
 			
 			if (ShowAITD1Vars)
 			{

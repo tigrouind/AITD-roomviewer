@@ -26,7 +26,7 @@ public class BoxInfo : MonoBehaviour
 		}
 	}
 
-	public void Append()
+	public void AppendLine()
 	{
 		AppendLineIfNecessary();	
 	}
