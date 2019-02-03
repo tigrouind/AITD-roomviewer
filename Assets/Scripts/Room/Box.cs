@@ -35,6 +35,7 @@ public class Box : MonoBehaviour
 	public int TrackNumber;
 	public int PositionInTrack;
 	public int Slot;
+	public int HitForce;
 	public Timer lastKeyFrameChange = new Timer();
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
@@ -246,6 +247,8 @@ public class Box : MonoBehaviour
 				info.Append("TRACKNUMBER", TrackNumber);
 			if (ShowAITD1Vars && PositionInTrack != -1)
 				info.Append("TRACKPOSITION", PositionInTrack);
+			if (ShowAITD1Vars)
+				info.Append("HITFORCE", HitForce);
 			if (ShowAdditionalInfo)
 				info.Append("SLOT", Slot);
 		}
