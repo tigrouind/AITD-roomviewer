@@ -521,6 +521,24 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	void CleanRedBoxes()
+	{
+		foreach(Box box in Actors.GetComponentsInChildren<Box>(true))
+		{
+			if (box.BoxHotPoint != null)
+			{
+				Destroy(box.BoxHotPoint.gameObject);
+				box.BoxHotPoint = null;
+			}
+
+			if (box.BoxWorldPos != null)
+			{
+				Destroy(box.BoxWorldPos.gameObject);
+				box.BoxWorldPos = null;
+			}
+		}
+	}
+
 	#region Room loader
 
 	public bool LinkToDosBOX(int floor, int room)
@@ -596,6 +614,7 @@ public class DosBox : MonoBehaviour
 		BoxInfo.Clear(true);
 		RightText.text = string.Empty;
 		lastValidPlayerIndex = -1;
+		CleanRedBoxes();
 	}
 
 	public void ResetCamera(int floor, int room)
