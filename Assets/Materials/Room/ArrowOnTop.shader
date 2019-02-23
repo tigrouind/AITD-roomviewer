@@ -1,8 +1,8 @@
-Shader "Custom/AlwaysOnTop"
+﻿Shader "Custom/ArrowOnTop"
 {
 	Properties 
 	{
-		_Color ("Main Color", Color) = (1,1,1,1)
+		_MainTex ("Texture", 2D) = "white" {}
 	}
 	SubShader 
 	{
@@ -15,13 +15,15 @@ Shader "Custom/AlwaysOnTop"
 		struct Input 
 		{
 			float4 color : COLOR;
+			float2 uv_MainTex;
 		};
 
-		fixed4 _Color;
+		sampler2D _MainTex;
 		void surf (Input IN, inout SurfaceOutput o)
 		{
-			o.Albedo = _Color.rgb;
-			o.Alpha = _Color.a;
+			float4 tex = tex2D (_MainTex, IN.uv_MainTex);
+			o.Albedo = tex.rgb;
+			o.Alpha = tex.a;
 		}
 		ENDCG
 	}

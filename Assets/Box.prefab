@@ -94,6 +94,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27276e615a2c822418417273ecb8abb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowAITD1Vars: 0
   ShowAdditionalInfo: 0
   ID: 0
   Flags: 0
@@ -103,7 +104,9 @@ MonoBehaviour:
   TrackMode: 0
   Body: 0
   Anim: 0
-  Frame: 0
+  NextAnim: 0
+  AnimType: 0
+  Keyframe: 0
   TotalFrames: 0
   Speed: 0
   Room: 0
@@ -112,12 +115,20 @@ MonoBehaviour:
   RoomChrono: 0
   TrackNumber: 0
   PositionInTrack: 0
+  Slot: 0
+  HitForce: 0
   LocalPosition: {x: 0, y: 0, z: 0}
   WorldPosition: {x: 0, y: 0, z: 0}
-  BoundingPos: {x: 0, y: 0, z: 0}
-  BoundingSize: {x: 0, y: 0, z: 0}
+  BoundingLower: {x: 0, y: 0, z: 0}
+  BoundingUpper: {x: 0, y: 0, z: 0}
   Angles: {x: 0, y: 0, z: 0}
-  Mod: {x: 0, y: 0, z: 0}
+  LastOffset: 0
+  LastDistance: 0
+  BoxHotPoint: {fileID: 0}
+  BoxWorldPos: {fileID: 0}
+  OldAngle: 0
+  NewAngle: 0
+  RotateTime: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

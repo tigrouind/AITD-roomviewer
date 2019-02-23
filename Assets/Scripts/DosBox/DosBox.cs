@@ -227,6 +227,7 @@ public class DosBox : MonoBehaviour
 
 									float range = Utils.ReadShort(memory, k + 148);
 									hotPoint.transform.localScale = new Vector3(range, range, range) / 500.0f;
+									hotPoint.AlwaysOnTop = Camera.main.orthographic;
 								}
 								else if (hotPoint != null)
 								{
@@ -309,6 +310,7 @@ public class DosBox : MonoBehaviour
 									finalPos = new Vector3(finalPos.x, boxPosition.y, finalPos.z) + roomObject.localPosition;
 									worldPos.transform.position = finalPos;
 									worldPos.transform.localScale = box.transform.localScale;
+									worldPos.AlwaysOnTop = Camera.main.orthographic;									
 								}
 								else if (worldPos != null)
 								{
