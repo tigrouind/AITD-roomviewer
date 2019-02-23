@@ -164,6 +164,30 @@ public class Box : MonoBehaviour
 		}
 	}
 
+	void OnDisable()
+	{
+		if(BoxHotPoint != null)
+		{
+			BoxHotPoint.gameObject.SetActive(false);
+		}
+		if(BoxWorldPos != null)
+		{
+			BoxWorldPos.gameObject.SetActive(false);
+		}
+	}
+
+	void OnEnable()
+	{
+		if(BoxHotPoint != null)
+		{
+			BoxHotPoint.gameObject.SetActive(true);
+		}
+		if(BoxWorldPos != null)
+		{
+			BoxWorldPos.gameObject.SetActive(true);
+		}
+	}
+
 	public void UpdateText(BoxInfo info, uint timer)
 	{
 		info.Clear();
