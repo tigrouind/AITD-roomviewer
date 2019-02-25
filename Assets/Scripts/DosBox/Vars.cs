@@ -227,7 +227,7 @@ public class Vars : MonoBehaviour
 			}
 			else
 			{
-				SetInputFieldColor(inputField, new Color32(28, 28, 28, 255));
+				SetInputFieldColor(inputField, new Color32(28, 28, 38, 255));
 			}
 		}
 	}
