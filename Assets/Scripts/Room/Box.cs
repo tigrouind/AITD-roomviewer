@@ -12,6 +12,7 @@ public class Box : MonoBehaviour
 	private bool alwaysOnTop;
 	private static string[] animTypeInfo = new string[] { "ONCE", "REPEAT", "UNINTERRUPT" };
 	private static string[] trackModeInfo = new string[] { "NONE", "MANUAL", "FOLLOW", "TRACK" };
+	private static string[] actionTypeInfo = new string[] { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
 
 	public bool ShowAITD1Vars;
 	public bool ShowAdditionalInfo;
@@ -25,6 +26,7 @@ public class Box : MonoBehaviour
 	public int Anim;
 	public int NextAnim;
 	public int AnimType;
+	public int ActionType;
 	public int Keyframe;
 	public int TotalFrames;
 	public int Speed;
@@ -267,6 +269,8 @@ public class Box : MonoBehaviour
 				info.Append("TRACKNUMBER", TrackNumber);
 			if (ShowAITD1Vars && PositionInTrack != -1)
 				info.Append("TRACKPOSITION", PositionInTrack);
+			if (ShowAITD1Vars && ActionType >= 0 && ActionType <= 10)
+				info.Append("ACTIONTYPE", actionTypeInfo[ActionType]);
 			if (ShowAITD1Vars)
 				info.Append("HITFORCE", HitForce);
 			if (ShowAdditionalInfo)
