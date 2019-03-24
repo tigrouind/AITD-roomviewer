@@ -36,6 +36,8 @@ public class ModelLoader : MonoBehaviour
 	private Mesh bakedMesh;
 	private List<Vector3> allVertices;
 	private List<Vector2> uv;
+	public Vector3 boundingLower;
+	public Vector3 boundingUpper; 
 
 	private Vector2 cameraRotation = new Vector2();
 	private Vector2 cameraPosition = new Vector2();
@@ -87,6 +89,17 @@ public class ModelLoader : MonoBehaviour
 
 		//header
 		int flags = Utils.ReadShort(allbytes, i + 0);
+
+		//bounding box
+		int x1 = Utils.ReadShort(allbytes, i + 2);
+		int x2 = Utils.ReadShort(allbytes, i + 4);
+		int y1 = Utils.ReadShort(allbytes, i + 6);
+		int y2 = Utils.ReadShort(allbytes, i + 8);
+		int z1 = Utils.ReadShort(allbytes, i + 10);
+		int z2 = Utils.ReadShort(allbytes, i + 12);
+		boundingLower = new Vector3(x1, y1, z1);
+		boundingUpper = new Vector3(x2, y2, z2);
+
 		i += 0xE;
 		i += Utils.ReadShort(allbytes, i + 0) + 2;
 
@@ -953,18 +966,28 @@ public class ModelLoader : MonoBehaviour
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.Append(LeftTextBody);
+
 		if(EnableAnimation.BoolValue)
 		{
 			stringBuilder.Append("\r\n" + LeftTextAnim);
-			if(ShowAdditionalInfo.BoolValue && animFrames != null)
+		}
+
+		if(ShowAdditionalInfo.BoolValue)
+		{
+			stringBuilder.Append("\r\n\r\n");
+			stringBuilder.AppendFormat("Bounding box: <color=#00c864>{0} {1} {2}</color>\r\n", 
+				boundingUpper.x - boundingLower.x, 
+				boundingUpper.y - boundingLower.y,
+				boundingUpper.z - boundingLower.z);
+		}
+
+		if(EnableAnimation.BoolValue && ShowAdditionalInfo.BoolValue && animFrames != null)
+		{
+			int index = 0;
+			foreach(Frame frame in animFrames)
 			{
-				int index = 0;
-				stringBuilder.Append("\r\n\r\n");
-				foreach(Frame frame in animFrames)
-				{
-					stringBuilder.AppendFormat("Frame {0}: <color=#00c864>{1} {2} {3} {4}</color>\r\n", index, frame.Time, frame.OffsetX, frame.OffsetY, -frame.OffsetZ);
-					index++;
-				}
+				stringBuilder.AppendFormat("Frame {0}: <color=#00c864>{1} {2} {3} {4}</color>\r\n", index, frame.Time, frame.OffsetX, frame.OffsetY, -frame.OffsetZ);
+				index++;
 			}
 		}
 
