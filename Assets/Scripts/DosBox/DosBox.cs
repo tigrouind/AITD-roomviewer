@@ -85,60 +85,117 @@ public class DosBox : MonoBehaviour
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{
 					int k = i * ActorStructSize[dosBoxPattern];
-					int floorNumber = Utils.ReadShort(memory, k + 46);
-					int roomNumber = Utils.ReadShort(memory, k + 48);
+					box.ID = Utils.ReadShort(memory, k + 0);
 
-					int objectid = Utils.ReadShort(memory, k + 0);
-					int body = Utils.ReadShort(memory, k + 2);
+					if (box.ID != -1)
+					{						
+						int trackModeOffset = TrackModeOffsets[dosBoxPattern];
+						box.Body = Utils.ReadShort(memory, k + 2);
+						box.Room = Utils.ReadShort(memory, k + 48);
+						box.Floor = Utils.ReadShort(memory, k + 46);
+						box.Flags = Utils.ReadShort(memory, k + 4);
+						box.ColFlags = Utils.ReadShort(memory, k + 6);
+						box.LifeMode = Utils. ReadShort(memory, k + 50);
+						box.Life = Utils.ReadShort(memory, k + 52);
+						box.Chrono = Utils.ReadUnsignedInt(memory, k + 54);
+						box.RoomChrono = Utils.ReadUnsignedInt(memory, k + 58);
+						box.AnimType = Utils.ReadShort(memory, k + 64);
+						box.NextAnim = Utils.ReadShort(memory, k + 66);
+						box.TotalFrames = Utils.ReadShort(memory, k + 76);
+						box.TrackNumber = Utils.ReadShort(memory, k + 84);
+						box.PositionInTrack = Utils.ReadShort(memory, k + 88);
+						box.TrackMode = Utils.ReadShort(memory, k + trackModeOffset);
+						box.OldAngle = Utils.ReadShort(memory, k + 106);
+						box.NewAngle = Utils.ReadShort(memory, k + 108);
+						box.RotateTime = Utils.ReadShort(memory, k + 110);
+						box.Speed = Utils.ReadShort(memory, k + 116);
+						box.ActionType = Utils.ReadShort(memory, k + 142);
+						box.HitForce = Utils.ReadShort(memory, k + 150);
+						box.Slot = i;
 
-					int trackModeOffset = TrackModeOffsets[dosBoxPattern];
-					int trackMode = Utils.ReadShort(memory, k + trackModeOffset);
-					bool isActive = objectid != -1;
+						box.Angles.x = Utils.ReadShort(memory, k + 40);
+						box.Angles.y = Utils.ReadShort(memory, k + 42);
+						box.Angles.z = Utils.ReadShort(memory, k + 44);
 
+						//local position
+						int boundingX1 = Utils.ReadShort(memory, k + 8);
+						int boundingX2 = Utils.ReadShort(memory, k + 10);
+						int boundingY1 = Utils.ReadShort(memory, k + 12);
+						int boundingY2 = Utils.ReadShort(memory, k + 14);
+						int boundingZ1 = Utils.ReadShort(memory, k + 16);
+						int boundingZ2 = Utils.ReadShort(memory, k + 18);
+
+						int modx = 0, mody = 0, modz = 0;
+						if(dosBoxPattern == 0) //AITD1 only
+						{
+							modx = Utils.ReadShort(memory, k + 90);
+							mody = Utils.ReadShort(memory, k + 92);
+							modz = Utils.ReadShort(memory, k + 94);
+						}
+
+						FixBoundingWrap(ref boundingX1, ref boundingX2);
+						FixBoundingWrap(ref boundingY1, ref boundingY2);
+						FixBoundingWrap(ref boundingZ1, ref boundingZ2);
+
+						box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
+						box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
+
+						box.LocalPosition.x = Utils.ReadShort(memory, k + 28) + modx;
+						box.LocalPosition.y = Utils.ReadShort(memory, k + 30) + mody;
+						box.LocalPosition.z = Utils.ReadShort(memory, k + 32) + modz;
+
+						box.WorldPosition.x = Utils.ReadShort(memory, k + 34) + modx;
+						box.WorldPosition.y = Utils.ReadShort(memory, k + 36) + mody;
+						box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + modz;
+						box.ShowAITD1Vars = ShowAITD1Vars;
+						box.ShowAdditionalInfo = ShowAdditionalInfo;
+
+						box.HotPosition.x = Utils.ReadShort(memory, k + 154);
+						box.HotPosition.y = Utils.ReadShort(memory, k + 156);
+						box.HotPosition.z = Utils.ReadShort(memory, k + 158);
+						box.HotBoxSize = Utils.ReadShort(memory, k + 148);
+
+						box.Anim = Utils.ReadShort(memory, k + 62);
+						box.Keyframe = Utils.ReadShort(memory, k + 74);
+						box.Endframe = Utils.ReadShort(memory, k + 78);
+						box.EndAnim = Utils.ReadShort(memory, k + 80);
+					}
+
+					i++;
+				}
+
+				//find player + switch floor if necessary
+				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+				{
+					bool isActive = box.ID != -1;
 					if (isActive)
 					{
 						//player
-						if (trackMode == 1 || objectid == lastValidPlayerIndex)
+						if (box.TrackMode == 1 || box.ID == lastValidPlayerIndex)
 						{
 							//update player index
-							lastValidPlayerIndex = objectid;
+							lastValidPlayerIndex = box.ID;
 
 							//automatically switch room and floor (has to be done before setting other actors positions)
-							if (linkfloor != floorNumber || linkroom != roomNumber)
+							if (linkfloor != box.Floor || linkroom != box.Room)
 							{
-								linkfloor = floorNumber;
-								linkroom = roomNumber;
+								linkfloor = box.Floor;
+								linkroom = box.Room;
 
 								GetComponent<RoomLoader>().RefreshRooms(linkfloor, linkroom);
 							}
 						}
+					}
+				}
 
-						Transform roomObject = GetComponent<RoomLoader>().GetRoom(floorNumber, roomNumber);
+				//update all boxes
+				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+				{
+					if (box.ID != -1)
+					{
+						Transform roomObject = GetComponent<RoomLoader>().GetRoom(box.Floor, box.Room);
 						if (roomObject != null)
-						{
-							//local position
-							int boundingX1 = Utils.ReadShort(memory, k + 8);
-							int boundingX2 = Utils.ReadShort(memory, k + 10);
-							int boundingY1 = Utils.ReadShort(memory, k + 12);
-							int boundingY2 = Utils.ReadShort(memory, k + 14);
-							int boundingZ1 = Utils.ReadShort(memory, k + 16);
-							int boundingZ2 = Utils.ReadShort(memory, k + 18);
-
-							int modx = 0, mody = 0, modz = 0;
-							if(dosBoxPattern == 0) //AITD1 only
-							{
-								modx = Utils.ReadShort(memory, k + 90);
-								mody = Utils.ReadShort(memory, k + 92);
-								modz = Utils.ReadShort(memory, k + 94);
-							}
-
-							FixBoundingWrap(ref boundingX1, ref boundingX2);
-							FixBoundingWrap(ref boundingY1, ref boundingY2);
-							FixBoundingWrap(ref boundingZ1, ref boundingZ2);
-
-							box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
-							box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
-
+						{							
 							//local to global position
 							Vector3 boxPosition = box.BoundingPos / 1000.0f;
 							boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z) + roomObject.localPosition;
@@ -162,44 +219,6 @@ public class DosBox : MonoBehaviour
 								Mathf.Max(box.transform.localScale.y, 0.1f),
 								Mathf.Max(box.transform.localScale.z, 0.1f));
 
-							box.ID = objectid;
-							box.Body = body;
-							box.Room = roomNumber;
-							box.Floor = floorNumber;
-							box.Flags = Utils.ReadShort(memory, k + 4);
-							box.ColFlags = Utils.ReadShort(memory, k + 6);
-							box.LifeMode = Utils. ReadShort(memory, k + 50);
-							box.Life = Utils.ReadShort(memory, k + 52);
-							box.Chrono = Utils.ReadUnsignedInt(memory, k + 54);
-							box.RoomChrono = Utils.ReadUnsignedInt(memory, k + 58);
-							box.AnimType = Utils.ReadShort(memory, k + 64);
-							box.NextAnim = Utils.ReadShort(memory, k + 66);
-							box.TotalFrames = Utils.ReadShort(memory, k + 76);
-							box.TrackNumber = Utils.ReadShort(memory, k + 84);
-							box.PositionInTrack = Utils.ReadShort(memory, k + 88);
-							box.TrackMode = trackMode;
-							box.OldAngle = Utils.ReadShort(memory, k + 106);
-							box.NewAngle = Utils.ReadShort(memory, k + 108);
-							box.RotateTime = Utils.ReadShort(memory, k + 110);
-							box.Speed = Utils.ReadShort(memory, k + 116);
-							box.ActionType = Utils.ReadShort(memory, k + 142);
-							box.HitForce = Utils.ReadShort(memory, k + 150);
-							box.Slot = i;
-
-							box.Angles.x = Utils.ReadShort(memory, k + 40);
-							box.Angles.y = Utils.ReadShort(memory, k + 42);
-							box.Angles.z = Utils.ReadShort(memory, k + 44);
-
-							box.LocalPosition.x = Utils.ReadShort(memory, k + 28) + modx;
-							box.LocalPosition.y = Utils.ReadShort(memory, k + 30) + mody;
-							box.LocalPosition.z = Utils.ReadShort(memory, k + 32) + modz;
-
-							box.WorldPosition.x = Utils.ReadShort(memory, k + 34) + modx;
-							box.WorldPosition.y = Utils.ReadShort(memory, k + 36) + mody;
-							box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + modz;
-							box.ShowAITD1Vars = ShowAITD1Vars;
-							box.ShowAdditionalInfo = ShowAdditionalInfo;
-
 							bool isAITD1 = dosBoxPattern == 0;
 							if (isAITD1)
 							{
@@ -213,20 +232,16 @@ public class DosBox : MonoBehaviour
 										hotPoint = Instantiate(BoxPrefab);
 										hotPoint.name = "HotPoint";
 										hotPoint.Color = new Color32(255, 0, 0, 255);
+										Destroy(hotPoint.gameObject.GetComponent<BoxCollider>());
 										box.BoxHotPoint = hotPoint;
 									}
 
-									Vector3 hotPosition;
-									hotPosition.x = Utils.ReadShort(memory, k + 154);
-									hotPosition.y = Utils.ReadShort(memory, k + 156);
-									hotPosition.z = Utils.ReadShort(memory, k + 158);
-									
-									Vector3 finalPos = (hotPosition + box.LocalPosition) / 1000.0f;
+									Vector3 finalPos = (box.HotPosition + box.LocalPosition) / 1000.0f;
 									finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z) + roomObject.localPosition;
 									hotPoint.transform.position = finalPos;
 
-									float range = Utils.ReadShort(memory, k + 148);
-									hotPoint.transform.localScale = new Vector3(range, range, range) / 500.0f;
+									int boxSize = box.HotBoxSize;
+									hotPoint.transform.localScale = new Vector3(boxSize, boxSize, boxSize) / 500.0f;
 									hotPoint.AlwaysOnTop = Camera.main.orthographic;
 								}
 								else if (hotPoint != null)
@@ -234,18 +249,14 @@ public class DosBox : MonoBehaviour
 									Destroy(hotPoint.gameObject);
 									box.BoxHotPoint = null;
 								}
-							}
-
-							int anim = Utils.ReadShort(memory, k + 62);
-							int keyframe = Utils.ReadShort(memory, k + 74);
+							}						
 
 							if (ShowAITD1Vars)
 							{
-								int endframe = Utils.ReadShort(memory, k + 78);
-								int endanim = Utils.ReadShort(memory, k + 80);
-
-								if(anim != box.Anim || keyframe != box.Keyframe || endframe == 1 || endanim == 1)
+								if(box.PreviousAnim != box.Anim || box.PreviousKeyFrame != box.Keyframe || box.Endframe == 1 || box.EndAnim == 1)
 								{
+									box.PreviousAnim = box.Anim;
+									box.PreviousKeyFrame = box.Keyframe;
 									box.lastKeyFrameChange.Reset();
 								}
 
@@ -259,11 +270,8 @@ public class DosBox : MonoBehaviour
 								}
 							}
 
-							box.Anim = anim;
-							box.Keyframe = keyframe;
-
 							//player
-							if (objectid == lastValidPlayerIndex)
+							if (box.ID == lastValidPlayerIndex)
 							{
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
@@ -303,6 +311,7 @@ public class DosBox : MonoBehaviour
 										worldPos = Instantiate(BoxPrefab);
 										worldPos.name = "WorldPos";
 										worldPos.Color = new Color32(255, 0, 0, 128);
+										Destroy(worldPos.gameObject.GetComponent<BoxCollider>());
 										box.BoxWorldPos = worldPos;
 									}
 
@@ -310,7 +319,7 @@ public class DosBox : MonoBehaviour
 									finalPos = new Vector3(finalPos.x, boxPosition.y, finalPos.z) + roomObject.localPosition;
 									worldPos.transform.position = finalPos;
 									worldPos.transform.localScale = box.transform.localScale;
-									worldPos.AlwaysOnTop = Camera.main.orthographic;									
+									worldPos.AlwaysOnTop = Camera.main.orthographic;
 								}
 								else if (worldPos != null)
 								{
@@ -342,8 +351,6 @@ public class DosBox : MonoBehaviour
 					{
 						box.gameObject.SetActive(false);
 					}
-
-					i++;
 				}
 
 				if (ShowAITD1Vars)

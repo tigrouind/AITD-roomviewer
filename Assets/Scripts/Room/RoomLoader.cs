@@ -485,13 +485,6 @@ public class RoomLoader : MonoBehaviour
 			mousePosition.y > 0 && mousePosition.y < Screen.height)
 		{
 			hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
-			if(hitInfos != null && hitInfos.Length > 0)
-			{
-				hitInfos = hitInfos
-					.Where(x => x.collider.GetComponent<Box>().name != "HotPoint" 
-							 && x.collider.GetComponent<Box>().name != "WorldPos")
-					.ToArray();
-			}			
 		}
 
 		if (hitInfos != null && hitInfos.Length > 0 

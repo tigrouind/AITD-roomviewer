@@ -28,6 +28,10 @@ public class Box : MonoBehaviour
 	public int AnimType;
 	public int ActionType;
 	public int Keyframe;
+	public int PreviousAnim;
+	public int PreviousKeyFrame;
+	public int Endframe;
+	public int EndAnim;
 	public int TotalFrames;
 	public int Speed;
 	public int Room;
@@ -46,6 +50,8 @@ public class Box : MonoBehaviour
 	public Vector3 Angles;
 	public int LastOffset;
 	public float LastDistance;
+	public int HotBoxSize;
+	public Vector3 HotPosition;
 	public Box BoxHotPoint;
 	public Box BoxWorldPos;
 	public int OldAngle; 
