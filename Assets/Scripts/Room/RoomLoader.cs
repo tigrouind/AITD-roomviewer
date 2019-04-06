@@ -133,12 +133,6 @@ public class RoomLoader : MonoBehaviour
 					box.gameObject.SetActive(showcolliders && (showallrooms || currentRoom));
 					box.Alpha = (byte)((showallroomstransparent && !currentRoom) ? 40 : 255);
 				}
-
-				if (box.name == "Camera")
-				{
-					var camera = box.transform.GetChild(0).gameObject.GetComponent<Box>();
-					camera.gameObject.SetActive(box.HighLight && ShowAdditionalInfo.BoolValue);
-				}
 			}
 			roomIndex++;
 		}
@@ -530,8 +524,7 @@ public class RoomLoader : MonoBehaviour
 					HighLightedBox.HighLight = false;
 					if(HighLightedBox.name == "Camera")
 					{
-						HighLightedBox.GetComponent<Renderer>().sharedMaterial.renderQueue = 3000;
-						SetCameraVisibility(HighLightedBox, false);
+						HighLightedBox.GetComponent<Renderer>().sharedMaterial.renderQueue = 3000;						
 					}
 				}
 
@@ -540,7 +533,6 @@ public class RoomLoader : MonoBehaviour
 				if(box.name == "Camera")
 				{
 					box.GetComponent<Renderer>().sharedMaterial.renderQueue = 3500;
-					SetCameraVisibility(box, true);
 				}
 
 				HighLightedBox = box;
@@ -560,7 +552,6 @@ public class RoomLoader : MonoBehaviour
 		}
 		else if (HighLightedBox != null)
 		{
-			SetCameraVisibility(HighLightedBox, false);
 			HighLightedBox.HighLight = false;
 			HighLightedBox = null;
 			BoxInfo.Clear(true);
@@ -576,11 +567,14 @@ public class RoomLoader : MonoBehaviour
 		{
 			if (SelectedBox != HighLightedBox)
 			{
+				SetCameraVisibility(SelectedBox, false);
+				SetCameraVisibility(HighLightedBox, true);
 				SelectedBox = HighLightedBox;
 				SelectedBoxId = HighLightedBox.ID;
 			}
 			else
 			{
+				SetCameraVisibility(SelectedBox, false);
 				SelectedBox = null;
 				defaultBoxSelectionTimer.Restart();
 			}
@@ -588,6 +582,7 @@ public class RoomLoader : MonoBehaviour
 
 		if (!DosBoxEnabled)
 		{
+			SetCameraVisibility(SelectedBox, false);
 			SelectedBox = null;
 		}
 
@@ -801,7 +796,6 @@ public class RoomLoader : MonoBehaviour
 
 			case KeyCode.E:
 				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
-				SetRoomObjectsVisibility(room);
 				break;
 
 			case KeyCode.Mouse2:
@@ -905,10 +899,10 @@ public class RoomLoader : MonoBehaviour
 
 	void SetCameraVisibility(Box box, bool visible)
 	{
-		if (box.name == "Camera")
+		if (box != null && box.name == "Camera")
 		{
 			var camera = box.transform.GetChild(0).gameObject.GetComponent<Box>();
-			camera.gameObject.SetActive(visible && ShowAdditionalInfo.BoolValue);
+			camera.gameObject.SetActive(visible && DosBoxEnabled);
 		}
 	}
 
@@ -962,6 +956,7 @@ public class RoomLoader : MonoBehaviour
 		addLine(quad[5], quad[6]);
 		addLine(quad[6], quad[7]);
 		addLine(quad[7], quad[4]);
+		addLine(new Vector3(-500.0f, 0.0f, 0.0f), new Vector3(500.0f, 0.0f, 0.0f));
 
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices.ToArray();
