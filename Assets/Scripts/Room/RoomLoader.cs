@@ -956,7 +956,17 @@ public class RoomLoader : MonoBehaviour
 		addLine(quad[5], quad[6]);
 		addLine(quad[6], quad[7]);
 		addLine(quad[7], quad[4]);
-		addLine(new Vector3(-500.0f, 0.0f, 0.0f), new Vector3(500.0f, 0.0f, 0.0f));
+
+		var quad2 = new Vector3[] { 
+			new Vector3(-15.0f, 2.0f, 0.0f), 
+			new Vector3(-15.0f,-2.0f, 0.0f), 
+			new Vector3( 15.0f,-2.0f, 0.0f),
+			new Vector3( 15.0f, 2.0f, 0.0f)
+		};
+		addLine(quad2[0], quad2[1]);
+		addLine(quad2[1], quad2[2]);
+		addLine(quad2[2], quad2[3]);
+		addLine(quad2[3], quad2[0]);
 
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices.ToArray();
