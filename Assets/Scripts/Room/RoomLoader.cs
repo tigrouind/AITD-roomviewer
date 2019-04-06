@@ -26,6 +26,7 @@ public class RoomLoader : MonoBehaviour
 	public Text LeftText;
 	public BoxInfo BottomText;
 	public Box BoxPrefab;
+	public Mesh CubeMesh;
 
 	public BoxInfo BoxInfo;
 	private Box HighLightedBox;
@@ -131,6 +132,12 @@ public class RoomLoader : MonoBehaviour
 				{
 					box.gameObject.SetActive(showcolliders && (showallrooms || currentRoom));
 					box.Alpha = (byte)((showallroomstransparent && !currentRoom) ? 40 : 255);
+				}
+
+				if (box.name == "Camera")
+				{
+					var camera = box.transform.GetChild(0).gameObject.GetComponent<Box>();
+					camera.gameObject.SetActive(box.HighLight && ShowAdditionalInfo.BoolValue);
 				}
 			}
 			roomIndex++;
@@ -333,6 +340,27 @@ public class RoomLoader : MonoBehaviour
 					filter.sharedMesh = GetMeshFromPoints(points, indices);
 					Destroy(box.gameObject.GetComponent<BoxCollider>());
 					box.gameObject.AddComponent<MeshCollider>();
+
+					Vector3 cameraRotation = new Vector3(Utils.ReadShort(allPointsB, cameraHeader + 0),
+							Utils.ReadShort(allPointsB, cameraHeader + 2),
+							Utils.ReadShort(allPointsB, cameraHeader + 4));
+
+					Vector3 cameraPosition = new Vector3(Utils.ReadShort(allPointsB, cameraHeader + 6),
+							Utils.ReadShort(allPointsB, cameraHeader + 8),
+							Utils.ReadShort(allPointsB, cameraHeader + 10));
+
+					Vector3 cameraFocal = new Vector3(Utils.ReadShort(allPointsB, cameraHeader + 12),
+							Utils.ReadShort(allPointsB, cameraHeader + 14),
+							Utils.ReadShort(allPointsB, cameraHeader + 16));
+
+					Box camera = Instantiate(BoxPrefab);
+					camera.name = "3DCamera";
+					camera.transform.parent = box.transform;
+					camera.Color = new Color32(255, 128, 0, 255);
+					camera.HighLight = true;
+					SetupCamera(camera, cameraPosition, cameraRotation, cameraFocal, cameraID);
+					Destroy(camera.gameObject.GetComponent<BoxCollider>());
+					camera.gameObject.SetActive(false);
 				}
 			}
 
@@ -503,6 +531,7 @@ public class RoomLoader : MonoBehaviour
 					if(HighLightedBox.name == "Camera")
 					{
 						HighLightedBox.GetComponent<Renderer>().sharedMaterial.renderQueue = 3000;
+						SetCameraVisibility(HighLightedBox, false);
 					}
 				}
 
@@ -511,6 +540,7 @@ public class RoomLoader : MonoBehaviour
 				if(box.name == "Camera")
 				{
 					box.GetComponent<Renderer>().sharedMaterial.renderQueue = 3500;
+					SetCameraVisibility(box, true);
 				}
 
 				HighLightedBox = box;
@@ -530,6 +560,7 @@ public class RoomLoader : MonoBehaviour
 		}
 		else if (HighLightedBox != null)
 		{
+			SetCameraVisibility(HighLightedBox, false);
 			HighLightedBox.HighLight = false;
 			HighLightedBox = null;
 			BoxInfo.Clear(true);
@@ -770,6 +801,7 @@ public class RoomLoader : MonoBehaviour
 
 			case KeyCode.E:
 				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+				SetRoomObjectsVisibility(room);
 				break;
 
 			case KeyCode.Mouse2:
@@ -862,13 +894,83 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		// Create the mesh
-		Mesh msh = new Mesh();
-		msh.vertices = vertices;
-		msh.triangles = indices.ToArray();
-		msh.RecalculateNormals();
-		msh.RecalculateBounds();
+		Mesh mesh = new Mesh();
+		mesh.vertices = vertices;
+		mesh.triangles = indices.ToArray();
+		mesh.RecalculateNormals();
+		mesh.RecalculateBounds();
 
-		return msh;
+		return mesh;
+	}
 
+	void SetCameraVisibility(Box box, bool visible)
+	{
+		if (box.name == "Camera")
+		{
+			var camera = box.transform.GetChild(0).gameObject.GetComponent<Box>();
+			camera.gameObject.SetActive(visible && ShowAdditionalInfo.BoolValue);
+		}
+	}
+
+	void SetupCamera(Box camera, Vector3 cameraPosition, Vector3 cameraRotation, Vector3 cameraFocal, int id)
+	{
+		Vector3 rot = cameraRotation / 1024.0f * 360.0f;
+		var qrot = Quaternion.Euler(rot.x, rot.y, rot.z);
+
+		camera.transform.position = new Vector3(cameraPosition.x, cameraPosition.y, -cameraPosition.z) / 100.0f
+			- qrot * new Vector3(0.0f, 0.0f, cameraFocal.x) / 1000.0f;
+		camera.transform.localRotation = qrot;		
+		
+		var pos = new Vector3(320.0f / cameraFocal.y * 0.5f, 200.0f / cameraFocal.z * 0.5f, 1.0f);
+		var quad = new Vector3[] { 
+			new Vector3( pos.x, pos.y, pos.z) * 4.0f, 
+			new Vector3( pos.x,-pos.y, pos.z) * 4.0f, 
+			new Vector3(-pos.x,-pos.y, pos.z) * 4.0f,
+			new Vector3(-pos.x, pos.y, pos.z) * 4.0f,
+			new Vector3( pos.x, pos.y, pos.z) * 0.4f, 
+			new Vector3( pos.x,-pos.y, pos.z) * 0.4f, 
+			new Vector3(-pos.x,-pos.y, pos.z) * 0.4f,
+			new Vector3(-pos.x, pos.y, pos.z) * 0.4f };
+
+		List<Vector3> vertices = new List<Vector3>();
+		List<int> indices = new List<int>();
+		float linesize = 0.04f;
+
+		Action<Vector3, Vector3> addLine = (Vector3 a, Vector3 b) => 
+		{			
+			Vector3 directionVector = a - b;
+			Vector3 middle = (a + b) / 2.0f;
+			Quaternion rotation = Quaternion.LookRotation(directionVector);
+			
+			indices.AddRange(CubeMesh.triangles.Select(x => x + vertices.Count));
+			vertices.AddRange(CubeMesh.vertices.Select(x =>
+				rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
+				+ middle));
+		};
+
+		addLine(quad[4], quad[0]);
+		addLine(quad[5], quad[1]);
+		addLine(quad[6], quad[2]);
+		addLine(quad[7], quad[3]);
+
+		addLine(quad[0], quad[1]);
+		addLine(quad[1], quad[2]);
+		addLine(quad[2], quad[3]);
+		addLine(quad[3], quad[0]);
+
+		addLine(quad[4], quad[5]);
+		addLine(quad[5], quad[6]);
+		addLine(quad[6], quad[7]);
+		addLine(quad[7], quad[4]);
+
+		Mesh mesh = new Mesh();
+		mesh.vertices = vertices.ToArray();
+		mesh.triangles = indices.ToArray();
+
+		mesh.RecalculateNormals();
+		mesh.RecalculateBounds();
+
+		MeshFilter filter = camera.GetComponent<MeshFilter>();
+		filter.sharedMesh = mesh;
 	}
 }

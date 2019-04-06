@@ -6989,6 +6989,7 @@ MonoBehaviour:
   LeftText: {fileID: 974882473}
   BottomText: {fileID: 440051174}
   BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}
+  CubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   BoxInfo: {fileID: 1957303515}
   DetectedGame: 0
   Actors: {fileID: 1100510531}

@@ -89,6 +89,10 @@ public class Box : MonoBehaviour
 			highlighted = value;
 			RefreshMaterial();
 		}
+		get
+		{
+			return highlighted;
+		}
 	}
 
 	public byte Alpha
@@ -197,7 +201,7 @@ public class Box : MonoBehaviour
 		info.Clear();
 		info.Append("TYPE", name.ToUpperInvariant());
 		info.Append("ID", ID);
-			
+		
 		if (name == "Collider" || name == "Trigger" || name == "Actor")
 		{
 			info.Append("FLAGS", "0x{0:X4}", Flags);
@@ -281,6 +285,16 @@ public class Box : MonoBehaviour
 				info.Append("HITFORCE", HitForce);
 			if (ShowAdditionalInfo)
 				info.Append("SLOT", Slot);
+		}
+
+		if (name == "Camera")
+		{
+			var camera = transform.GetChild(0).gameObject.GetComponent<Box>();
+			if (camera.gameObject.activeSelf)
+			{
+				var rotation = camera.transform.rotation.eulerAngles;
+				info.Append("PITCH", "{0:N1}", rotation.x);
+			}			
 		}
 
 		info.UpdateText();
