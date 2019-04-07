@@ -21,6 +21,7 @@ public class RoomLoader : MonoBehaviour
 	private float defaultCameraZoom = 10.0f;
 	private Timer defaultBoxSelectionTimer = new Timer();
 	private bool speedRunMode;
+	private Vector3 startDragPosition;
 	private bool dragging;
 
 	public Text LeftText;
@@ -415,8 +416,8 @@ public class RoomLoader : MonoBehaviour
 			//start drag
 			if (Input.GetMouseButtonDown(0))
 			{
-				dragging = false;				
-				mousePosition = Input.mousePosition;
+				dragging = false;
+				mousePosition = startDragPosition = Input.mousePosition;
 			}
 
 			//dragging
@@ -431,7 +432,10 @@ public class RoomLoader : MonoBehaviour
 
 					Camera.main.transform.position += mouseDelta;
 					mousePosition = newMousePosition;
-					dragging = true;
+					if((startDragPosition - newMousePosition).magnitude > 4.0f)
+					{
+						dragging = true;
+					}
 				}
 			}
 		}
