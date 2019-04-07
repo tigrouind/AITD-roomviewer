@@ -287,16 +287,6 @@ public class Box : MonoBehaviour
 				info.Append("SLOT", Slot);
 		}
 
-		if (name == "Camera")
-		{
-			var camera = transform.GetChild(0).gameObject.GetComponent<Box>();
-			if (camera.gameObject.activeSelf)
-			{
-				var rotation = camera.transform.rotation.eulerAngles;
-				info.Append("PITCH", "{0:N1}", rotation.x);
-			}			
-		}
-
 		info.UpdateText();
 	}
 }

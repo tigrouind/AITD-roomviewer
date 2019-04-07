@@ -23,6 +23,7 @@ public class RoomLoader : MonoBehaviour
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
 	private bool dragging;
+	private Box CurrentCamera;
 
 	public Text LeftText;
 	public BoxInfo BottomText;
@@ -353,7 +354,7 @@ public class RoomLoader : MonoBehaviour
 					camera.transform.parent = box.transform;
 					camera.Color = new Color32(255, 128, 0, 255);
 					camera.HighLight = true;
-					SetupCamera(camera, cameraPosition, cameraRotation, cameraFocal, cameraID);
+					SetupCamera(camera, cameraPosition, cameraRotation, cameraFocal);
 					Destroy(camera.gameObject.GetComponent<BoxCollider>());
 					camera.gameObject.SetActive(false);
 				}
@@ -569,24 +570,27 @@ public class RoomLoader : MonoBehaviour
 			&& !(GetComponent<WarpDialog>().warpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
 				&& RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
-			if (SelectedBox != HighLightedBox)
+			if (HighLightedBox.name == "Camera")
 			{
-				SetCameraVisibility(SelectedBox, false);
-				SetCameraVisibility(HighLightedBox, true);
-				SelectedBox = HighLightedBox;
-				SelectedBoxId = HighLightedBox.ID;
+				SetCameraVisibility(HighLightedBox);
 			}
 			else
 			{
-				SetCameraVisibility(SelectedBox, false);
-				SelectedBox = null;
-				defaultBoxSelectionTimer.Restart();
+				if (SelectedBox != HighLightedBox)
+				{
+					SelectedBox = HighLightedBox;
+					SelectedBoxId = HighLightedBox.ID;	
+				}
+				else
+				{
+					SelectedBox = null;
+					defaultBoxSelectionTimer.Restart();
+				}
 			}
 		}
 
 		if (!DosBoxEnabled)
 		{
-			SetCameraVisibility(SelectedBox, false);
 			SelectedBox = null;
 		}
 
@@ -901,16 +905,31 @@ public class RoomLoader : MonoBehaviour
 		return mesh;
 	}
 
-	void SetCameraVisibility(Box box, bool visible)
+	void SetCameraVisibility(Box box)
 	{
-		if (box != null && box.name == "Camera")
+		if(box != CurrentCamera)
 		{
-			var camera = box.transform.GetChild(0).gameObject.GetComponent<Box>();
-			camera.gameObject.SetActive(visible && DosBoxEnabled);
+			SetCameraVisibility(CurrentCamera, false);
+			SetCameraVisibility(box, true);
+			CurrentCamera = box;
+		}
+		else
+		{
+			SetCameraVisibility(box, false);
+			CurrentCamera = null;
 		}
 	}
 
-	void SetupCamera(Box camera, Vector3 cameraPosition, Vector3 cameraRotation, Vector3 cameraFocal, int id)
+	void SetCameraVisibility(Box box, bool visible)
+	{
+		if(box != null)
+		{
+			var camera = box.transform.GetChild(0).gameObject.GetComponent<Box>();
+			camera.gameObject.SetActive(visible);
+		}
+	}
+
+	void SetupCamera(Box camera, Vector3 cameraPosition, Vector3 cameraRotation, Vector3 cameraFocal)
 	{
 		Vector3 rot = cameraRotation / 1024.0f * 360.0f;
 		var qrot = Quaternion.Euler(rot.x, rot.y, rot.z);
