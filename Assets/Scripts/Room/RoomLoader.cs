@@ -917,14 +917,13 @@ public class RoomLoader : MonoBehaviour
 		
 		var pos = new Vector3(320.0f / cameraFocal.y * 0.5f, 200.0f / cameraFocal.z * 0.5f, 1.0f);
 		var quad = new Vector3[] { 
-			new Vector3( pos.x, pos.y, pos.z) * 4.0f, 
-			new Vector3( pos.x,-pos.y, pos.z) * 4.0f, 
-			new Vector3(-pos.x,-pos.y, pos.z) * 4.0f,
-			new Vector3(-pos.x, pos.y, pos.z) * 4.0f,
-			new Vector3( pos.x, pos.y, pos.z) * 0.4f, 
-			new Vector3( pos.x,-pos.y, pos.z) * 0.4f, 
-			new Vector3(-pos.x,-pos.y, pos.z) * 0.4f,
-			new Vector3(-pos.x, pos.y, pos.z) * 0.4f };
+			new Vector3( 1.0f, 1.0f, 1.0f), 
+			new Vector3( 1.0f,-1.0f, 1.0f), 
+			new Vector3(-1.0f,-1.0f, 1.0f),
+			new Vector3(-1.0f, 1.0f, 1.0f) };
+
+		var quad1 = quad.Select(x => Vector3.Scale(x, pos) * 4.0f).ToArray();
+		var quad2 = quad.Select(x => Vector3.Scale(x, pos) * 0.4f).ToArray();
 
 		List<Vector3> vertices = new List<Vector3>();
 		List<int> indices = new List<int>();
@@ -942,31 +941,29 @@ public class RoomLoader : MonoBehaviour
 				+ middle));
 		};
 
-		addLine(quad[4], quad[0]);
-		addLine(quad[5], quad[1]);
-		addLine(quad[6], quad[2]);
-		addLine(quad[7], quad[3]);
+		addLine(quad2[0], quad1[0]);
+		addLine(quad2[1], quad1[1]);
+		addLine(quad2[2], quad1[2]);
+		addLine(quad2[3], quad1[3]);
 
-		addLine(quad[0], quad[1]);
-		addLine(quad[1], quad[2]);
-		addLine(quad[2], quad[3]);
-		addLine(quad[3], quad[0]);
+		addLine(quad1[0], quad1[1]);
+		addLine(quad1[1], quad1[2]);
+		addLine(quad1[2], quad1[3]);
+		addLine(quad1[3], quad1[0]);
 
-		addLine(quad[4], quad[5]);
-		addLine(quad[5], quad[6]);
-		addLine(quad[6], quad[7]);
-		addLine(quad[7], quad[4]);
-
-		var quad2 = new Vector3[] { 
-			new Vector3(-15.0f, 2.0f, 0.0f), 
-			new Vector3(-15.0f,-2.0f, 0.0f), 
-			new Vector3( 15.0f,-2.0f, 0.0f),
-			new Vector3( 15.0f, 2.0f, 0.0f)
-		};
 		addLine(quad2[0], quad2[1]);
 		addLine(quad2[1], quad2[2]);
 		addLine(quad2[2], quad2[3]);
 		addLine(quad2[3], quad2[0]);
+
+		var quad3 = new Vector3[] { 
+			new Vector3(-500.0f, 2.0f, 0.0f), 
+			new Vector3(-500.0f,-2.0f, 0.0f), 
+			new Vector3( 500.0f,-2.0f, 0.0f),
+			new Vector3( 500.0f, 2.0f, 0.0f)
+		};
+		addLine(quad3[1], quad3[2]);
+		addLine(quad3[3], quad3[0]);
 
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices.ToArray();
