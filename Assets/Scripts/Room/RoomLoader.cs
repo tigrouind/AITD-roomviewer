@@ -324,18 +324,18 @@ public class RoomLoader : MonoBehaviour
 				{
 					int colorRGB = cameraColors[cameraID % cameraColors.Length];
 
-					Box box = Instantiate(BoxPrefab);
-					box.name = "Camera";
-					box.transform.parent = room;
-					box.transform.localPosition = Vector3.zero;
-					box.Color = new Color32((byte)((colorRGB >> 16) & 0xFF), (byte)((colorRGB >> 8) & 0xFF), (byte)(colorRGB & 0xFF), 100);
-					box.ID = cameraID;
-					MeshFilter filter = box.GetComponent<MeshFilter>();
+					Box area = Instantiate(BoxPrefab);
+					area.name = "Camera";
+					area.transform.parent = room;
+					area.transform.localPosition = Vector3.zero;
+					area.Color = new Color32((byte)((colorRGB >> 16) & 0xFF), (byte)((colorRGB >> 8) & 0xFF), (byte)(colorRGB & 0xFF), 100);
+					area.ID = cameraID;
+					MeshFilter filter = area.GetComponent<MeshFilter>();
 
 					// Use the triangulator to get indices for creating triangles
 					filter.sharedMesh = GetMeshFromPoints(points, indices);
-					Destroy(box.gameObject.GetComponent<BoxCollider>());
-					box.gameObject.AddComponent<MeshCollider>();
+					Destroy(area.gameObject.GetComponent<BoxCollider>());
+					area.gameObject.AddComponent<MeshCollider>();
 
 					//setup camera
 					Vector3 cameraRotation = new Vector3(Utils.ReadShort(allPointsB, cameraHeader + 0),
@@ -351,12 +351,12 @@ public class RoomLoader : MonoBehaviour
 							Utils.ReadShort(allPointsB, cameraHeader + 16));
 
 					Box camera = Instantiate(BoxPrefab);
-					camera.name = "Frustum";
+					camera.name = "CameraFrustum";
 					camera.transform.parent = room;
 					camera.Color = new Color32(255, 128, 0, 255);
 					camera.HighLight = true;					
 					cameraHelper.SetupTransform(camera, cameraPosition, cameraRotation, cameraFocal);
-					box.Camera = camera;
+					area.Camera = camera;
 					
 					filter = camera.GetComponent<MeshFilter>();
 					filter.sharedMesh = cameraHelper.CreateMesh(cameraFocal);
