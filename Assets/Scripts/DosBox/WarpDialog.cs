@@ -53,6 +53,16 @@ public class WarpDialog : MonoBehaviour
 						RotateActor(1);
 					}
 
+ 					if (Input.GetKey(KeyCode.Keypad3))
+					{
+						MoveActor(new Vector3(0.0f, -1.0f, 0.0f));
+					}
+
+					if (Input.GetKey(KeyCode.Keypad1))
+					{
+						MoveActor(new Vector3(0.0f, 1.0f, 0.0f));
+					}
+
 					if (Input.GetKey(KeyCode.Keypad4))
 					{
 						MoveActor(new Vector3(-1.0f, 0.0f, 0.0f));
@@ -74,7 +84,9 @@ public class WarpDialog : MonoBehaviour
 					}
 				}
 
-				if (Input.GetKeyUp(KeyCode.Keypad4) ||
+				if (Input.GetKeyUp(KeyCode.Keypad1) ||
+					Input.GetKeyUp(KeyCode.Keypad3) ||
+					Input.GetKeyUp(KeyCode.Keypad4) ||
 					Input.GetKeyUp(KeyCode.Keypad8) ||
 					Input.GetKeyUp(KeyCode.Keypad6) ||
 					Input.GetKeyUp(KeyCode.Keypad2) ||
