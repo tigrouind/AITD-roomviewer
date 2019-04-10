@@ -352,10 +352,11 @@ public class RoomLoader : MonoBehaviour
 
 					Box camera = Instantiate(BoxPrefab);
 					camera.name = "Frustum";
-					camera.transform.parent = box.transform;
+					camera.transform.parent = room;
 					camera.Color = new Color32(255, 128, 0, 255);
-					camera.HighLight = true;
+					camera.HighLight = true;					
 					cameraHelper.SetupTransform(camera, cameraPosition, cameraRotation, cameraFocal);
+					box.Camera = camera;
 					
 					filter = camera.GetComponent<MeshFilter>();
 					filter.sharedMesh = cameraHelper.CreateMesh(cameraFocal);
@@ -928,8 +929,7 @@ public class RoomLoader : MonoBehaviour
 	{
 		if(box != null)
 		{
-			var camera = box.transform.GetChild(0).gameObject.GetComponent<Box>();
-			camera.gameObject.SetActive(visible);
+			box.Camera.gameObject.SetActive(visible);
 		}
 	}
 }

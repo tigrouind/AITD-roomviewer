@@ -57,6 +57,7 @@ public class Box : MonoBehaviour
 	public int OldAngle; 
 	public int NewAngle;
 	public int RotateTime;
+	public Box Camera;
 
 	public Vector3 BoundingPos
 	{
