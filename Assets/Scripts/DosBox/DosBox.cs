@@ -82,7 +82,8 @@ public class DosBox : MonoBehaviour
 			{
 				//read actors info
 				int i = 0;
-				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+				var boxes = Actors.GetComponentsInChildren<Box>(true);
+				foreach (Box box in boxes)
 				{
 					int k = i * ActorStructSize[dosBoxPattern];
 					box.ID = Utils.ReadShort(memory, k + 0);
@@ -165,7 +166,7 @@ public class DosBox : MonoBehaviour
 				}
 
 				//find player + switch floor if necessary
-				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+				foreach (Box box in boxes)
 				{
 					bool isActive = box.ID != -1;
 					if (isActive)
@@ -189,7 +190,7 @@ public class DosBox : MonoBehaviour
 				}
 
 				//update all boxes
-				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+				foreach (Box box in boxes)
 				{
 					if (box.ID != -1)
 					{
