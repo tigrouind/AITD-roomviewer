@@ -297,8 +297,7 @@ public class DosBox : MonoBehaviour
 									1.0f);
 
 								//player is white
-								box.Color = new Color32(255, 255, 255, 255);
-								box.AlwaysOnTop = Camera.main.orthographic;
+								box.Color = new Color32(255, 255, 255, 255);								
 								Arrow.AlwaysOnTop = Camera.main.orthographic;
 								player = box;
 
@@ -341,6 +340,7 @@ public class DosBox : MonoBehaviour
 								}
 							}
 
+							box.AlwaysOnTop = Camera.main.orthographic;
 							box.gameObject.SetActive(true);
 						}
 						else
