@@ -1315,7 +1315,7 @@ Prefab:
     - target: {fileID: 114846519685537734, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
       propertyPath: Items.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 224457636725803840, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
@@ -1420,7 +1420,7 @@ Prefab:
     - target: {fileID: 114846519685537734, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
       propertyPath: Items.Array.data[2]
-      value: All
+      value: Current room / Adjacent
       objectReference: {fileID: 0}
     - target: {fileID: 114633407962285906, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
@@ -1441,6 +1441,11 @@ Prefab:
         type: 2}
       propertyPath: selectedIndex
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114846519685537734, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
+        type: 2}
+      propertyPath: Items.Array.data[3]
+      value: All
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 1a766bd9cbdc78c48b00492edb3ff2c6, type: 2}
@@ -6122,7 +6127,6 @@ MonoBehaviour:
   BottomText: {fileID: 440051174}
   BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}
   BoxInfo: {fileID: 1957303515}
-  DetectedGame: 0
   Actors: {fileID: 1100510531}
   Panel: {fileID: 686186030}
   ShowVars: {fileID: 588804799}

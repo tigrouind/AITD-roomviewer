@@ -17,6 +17,7 @@ public class RoomLoader : MonoBehaviour
 	private Vector3 mousePosition;
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
+	private List<List<int>> camerasPerRoom;
 	private BoxComparer boxComparer = new BoxComparer();
 	private float defaultCameraZoom = 10.0f;
 	private Timer defaultBoxSelectionTimer = new Timer();
@@ -130,7 +131,7 @@ public class RoomLoader : MonoBehaviour
 
 				if (box.name == "Camera")
 				{
-					box.gameObject.SetActive(ShowAreas.Value == 2 || (ShowAreas.Value == 1 && currentRoom));
+					box.gameObject.SetActive(ShowAreas.Value == 3 || (ShowAreas.Value == 1 && currentRoom) || (ShowAreas.Value == 2 && camerasPerRoom[room].Contains(box.ID)));
 				}
 
 				if (box.name == "Collider")
@@ -156,7 +157,7 @@ public class RoomLoader : MonoBehaviour
 		//load file
 		string filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000000");
 		byte[] allPointsA = File.ReadAllBytes(filePath);
-		List<List<int>> camerasPerRoom = new List<List<int>>();
+		camerasPerRoom = new List<List<int>>();
 
 		name = "FLOOR" + floor;
 		int maxrooms = Utils.ReadInt(allPointsA, 0) / 4;
@@ -795,7 +796,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.C:
-				ShowAreas.Value = (ShowAreas.Value + 1) % 3;
+				ShowAreas.Value = (ShowAreas.Value + 1) % 4;
 				SetRoomObjectsVisibility(room);
 				break;
 
