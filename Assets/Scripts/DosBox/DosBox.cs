@@ -325,7 +325,7 @@ public class DosBox : MonoBehaviour
 									}
 
 									Vector3 finalPos = (box.WorldPosition + box.Mod) / 1000.0f;
-									finalPos = new Vector3(finalPos.x, boxPosition.y, finalPos.z) + roomObject.localPosition;
+									finalPos = new Vector3(finalPos.x, boxPosition.y + 0.001f, finalPos.z) + roomObject.localPosition;
 									worldPos.transform.position = finalPos;
 									worldPos.transform.localScale = box.transform.localScale;
 									worldPos.AlwaysOnTop = Camera.main.orthographic;
