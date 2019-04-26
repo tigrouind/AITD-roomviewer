@@ -43,6 +43,7 @@ public class Box : MonoBehaviour
 	public int Slot;
 	public int HitForce;
 	public Timer lastKeyFrameChange = new Timer();
+	public Vector3 Mod;
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
 	public Vector3 BoundingLower;
@@ -215,8 +216,8 @@ public class Box : MonoBehaviour
 			if (ShowAdditionalInfo)
 			{
 				info.Append("ROOM", "E{0}R{1}", Floor, Room);
-				info.Append("ROOM_POS", LocalPosition);
-				info.Append("WORLD_POS", WorldPosition);
+				info.Append("ROOM_POS", LocalPosition + Mod);
+				info.Append("WORLD_POS", WorldPosition + Mod);
 				info.Append("ZV_POS", BoundingPos);
 				info.Append("ZV_SIZE", BoundingSize);
 				info.Append("OFFSET", LastOffset);

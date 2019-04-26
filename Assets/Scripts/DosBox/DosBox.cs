@@ -126,12 +126,15 @@ public class DosBox : MonoBehaviour
 						int boundingZ1 = Utils.ReadShort(memory, k + 16);
 						int boundingZ2 = Utils.ReadShort(memory, k + 18);
 
-						int modx = 0, mody = 0, modz = 0;
 						if(dosBoxPattern == 0) //AITD1 only
 						{
-							modx = Utils.ReadShort(memory, k + 90);
-							mody = Utils.ReadShort(memory, k + 92);
-							modz = Utils.ReadShort(memory, k + 94);
+							box.Mod.x = Utils.ReadShort(memory, k + 90);
+							box.Mod.y = Utils.ReadShort(memory, k + 92);
+							box.Mod.z = Utils.ReadShort(memory, k + 94);
+						}
+						else
+						{
+							box.Mod = Vector3.zero;
 						}
 
 						FixBoundingWrap(ref boundingX1, ref boundingX2);
@@ -141,13 +144,13 @@ public class DosBox : MonoBehaviour
 						box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
 						box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
 
-						box.LocalPosition.x = Utils.ReadShort(memory, k + 28) + modx;
-						box.LocalPosition.y = Utils.ReadShort(memory, k + 30) + mody;
-						box.LocalPosition.z = Utils.ReadShort(memory, k + 32) + modz;
+						box.LocalPosition.x = Utils.ReadShort(memory, k + 28);
+						box.LocalPosition.y = Utils.ReadShort(memory, k + 30);
+						box.LocalPosition.z = Utils.ReadShort(memory, k + 32);
 
-						box.WorldPosition.x = Utils.ReadShort(memory, k + 34) + modx;
-						box.WorldPosition.y = Utils.ReadShort(memory, k + 36) + mody;
-						box.WorldPosition.z = Utils.ReadShort(memory, k + 38) + modz;
+						box.WorldPosition.x = Utils.ReadShort(memory, k + 34);
+						box.WorldPosition.y = Utils.ReadShort(memory, k + 36);
+						box.WorldPosition.z = Utils.ReadShort(memory, k + 38);
 						box.ShowAITD1Vars = ShowAITD1Vars;
 						box.ShowAdditionalInfo = ShowAdditionalInfo;
 
@@ -237,7 +240,7 @@ public class DosBox : MonoBehaviour
 										box.BoxHotPoint = hotPoint;
 									}
 
-									Vector3 finalPos = (box.HotPosition + box.LocalPosition) / 1000.0f;
+									Vector3 finalPos = (box.HotPosition + box.LocalPosition + box.Mod) / 1000.0f;
 									finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z) + roomObject.localPosition;
 									hotPoint.transform.position = finalPos;
 
@@ -304,7 +307,7 @@ public class DosBox : MonoBehaviour
 								//worldpost unsync
 								Box worldPos = box.BoxWorldPos;
 
-								if (box.WorldPosition.x != box.BoundingPos.x || box.WorldPosition.z != box.BoundingPos.z)
+								if ((box.WorldPosition.x + box.Mod.x) != box.BoundingPos.x || (box.WorldPosition.z + box.Mod.z) != box.BoundingPos.z)
 								{
 									if (worldPos == null)
 									{ 
@@ -315,7 +318,7 @@ public class DosBox : MonoBehaviour
 										box.BoxWorldPos = worldPos;
 									}
 
-									Vector3 finalPos = box.WorldPosition / 1000.0f;
+									Vector3 finalPos = (box.WorldPosition + box.Mod) / 1000.0f;
 									finalPos = new Vector3(finalPos.x, boxPosition.y, finalPos.z) + roomObject.localPosition;
 									worldPos.transform.position = finalPos;
 									worldPos.transform.localScale = box.transform.localScale;
@@ -400,7 +403,7 @@ public class DosBox : MonoBehaviour
 			float angle = Player.Angles.y * 360.0f / 1024.0f;
 			float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
-			BoxInfo.Append("Position", Player.LocalPosition);
+			BoxInfo.Append("Position", Player.LocalPosition + Player.Mod);
 			BoxInfo.Append("Angle", "{0:N1} {1:N1}", angle, sideAngle);
 		}
 
