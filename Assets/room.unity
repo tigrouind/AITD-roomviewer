@@ -1772,7 +1772,7 @@ Prefab:
     - target: {fileID: 114141378281936910, guid: 8aa3b80fc6d218344b8e6178bde95664,
         type: 2}
       propertyPath: m_Text
-      value: Show VARS
+      value: Show [V]ARs
       objectReference: {fileID: 0}
     - target: {fileID: 114517055844959480, guid: 8aa3b80fc6d218344b8e6178bde95664,
         type: 2}
