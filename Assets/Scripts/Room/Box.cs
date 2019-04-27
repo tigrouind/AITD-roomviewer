@@ -220,6 +220,7 @@ public class Box : MonoBehaviour
 				info.Append("WORLD_POS", WorldPosition + Mod);
 				info.Append("ZV_POS", BoundingPos);
 				info.Append("ZV_SIZE", BoundingSize);
+				info.Append("MOD", Mod);
 				info.Append("OFFSET", LastOffset);
 				info.Append("DISTANCE", Mathf.RoundToInt(LastDistance));
 				if(Angles.x == 0.0f && Angles.z == 0.0f)
