@@ -4741,7 +4741,7 @@ Prefab:
     - target: {fileID: 114883429885122670, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
       propertyPath: m_Text
-      value: Local
+      value: Room
       objectReference: {fileID: 0}
     - target: {fileID: 224573472092331948, guid: ae31a2aa100e4854b87cfb5151edd6e1,
         type: 2}
