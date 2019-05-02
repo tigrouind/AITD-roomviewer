@@ -62,6 +62,9 @@ public class Box : MonoBehaviour
 	public int HitBy;
 	public int Hit;
 	public int ColBy;
+	public int[] Col = new int[3];
+	public int HardCol;
+	public int HardTrigger;
 
 	public Vector3 BoundingPos
 	{
@@ -158,7 +161,7 @@ public class Box : MonoBehaviour
 		}
 		else
 		{
-			return "#";
+			return "▬";
 		}
 	}
 	
@@ -302,7 +305,13 @@ public class Box : MonoBehaviour
 			if (ShowAITD1Vars)
 				info.Append("HITFORCE", HitForce);
 			if (ShowAITD1Vars)
-				info.Append("HIT/HITBY/COLBY", "{0} {1} {2}", GetActorID(Hit, actors), GetActorID(HitBy, actors), GetActorID(ColBy, actors));
+				info.Append("HIT/HITBY", "{0} {1}", GetActorID(Hit, actors), GetActorID(HitBy, actors));
+			if (ShowAITD1Vars)
+				info.Append("COL/COLBY", "{0} {1} {2} {3}", GetActorID(Col[0], actors), GetActorID(Col[1], actors), GetActorID(Col[2], actors), GetActorID(ColBy, actors));
+			if (ShowAITD1Vars)
+				info.Append("HARDCOL/TRIG", "{0} {1}", 
+					(HardCol == -1) ? "▬" : HardCol.ToString(), 
+					(HardTrigger == -1) ? "▬" : HardTrigger.ToString());
 			if (ShowAdditionalInfo)
 				info.Append("SLOT", Slot);
 		}

@@ -114,7 +114,12 @@ public class DosBox : MonoBehaviour
 						box.Speed = Utils.ReadShort(memory, k + 116);
 						box.ActionType = Utils.ReadShort(memory, k + 142);
 
+						box.Col[0] = Utils.ReadShort(memory, k + 126);
+						box.Col[1] = Utils.ReadShort(memory, k + 128);
+						box.Col[2] = Utils.ReadShort(memory, k + 130);
 						box.ColBy = Utils.ReadShort(memory, k + 132);
+						box.HardTrigger = Utils.ReadShort(memory, k + 134);
+						box.HardCol = Utils.ReadShort(memory, k + 136);
 						box.Hit = Utils.ReadShort(memory, k + 138);
 						box.HitBy = Utils.ReadShort(memory, k + 140);
 						box.HitForce = Utils.ReadShort(memory, k + 150);
