@@ -111,6 +111,10 @@ public class DosBox : MonoBehaviour
 						box.RotateTime = Utils.ReadShort(memory, k + 110);
 						box.Speed = Utils.ReadShort(memory, k + 116);
 						box.ActionType = Utils.ReadShort(memory, k + 142);
+
+						box.ColBy = Utils.ReadShort(memory, k + 132);
+						box.Hit = Utils.ReadShort(memory, k + 138);
+						box.HitBy = Utils.ReadShort(memory, k + 140);
 						box.HitForce = Utils.ReadShort(memory, k + 150);
 						box.Slot = i;
 

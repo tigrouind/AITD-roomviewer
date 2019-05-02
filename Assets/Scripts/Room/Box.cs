@@ -59,6 +59,9 @@ public class Box : MonoBehaviour
 	public int NewAngle;
 	public int RotateTime;
 	public Box Camera;
+	public int HitBy;
+	public int Hit;
+	public int ColBy;
 
 	public Vector3 BoundingPos
 	{
@@ -146,6 +149,18 @@ public class Box : MonoBehaviour
 			}
 		}
 	}
+
+	public string GetActorID(int index, Box[] actors)
+	{
+		if(index >= 0 && index < actors.Length)
+		{
+			return actors[index].ID.ToString();
+		}
+		else
+		{
+			return "#";
+		}
+	}
 	
 	private void RefreshMaterial()
 	{
@@ -198,7 +213,7 @@ public class Box : MonoBehaviour
 		}
 	}
 
-	public void UpdateText(BoxInfo info, uint timer)
+	public void UpdateText(BoxInfo info, Box[] actors, uint timer)
 	{
 		info.Clear();
 		info.Append("TYPE", name.ToUpperInvariant());
@@ -286,6 +301,8 @@ public class Box : MonoBehaviour
 				info.Append("ACTIONTYPE", actionTypeInfo[ActionType]);
 			if (ShowAITD1Vars)
 				info.Append("HITFORCE", HitForce);
+			if (ShowAITD1Vars)
+				info.Append("HIT/HITBY/COLBY", "{0} {1} {2}", GetActorID(Hit, actors), GetActorID(HitBy, actors), GetActorID(ColBy, actors));
 			if (ShowAdditionalInfo)
 				info.Append("SLOT", Slot);
 		}
