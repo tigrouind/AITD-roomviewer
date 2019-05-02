@@ -14,6 +14,7 @@ public class DosBox : MonoBehaviour
 	public GameObject Actors;
 	public Arrow Arrow;
 	public Box BoxPrefab;
+	public Box[] Boxes;
 	public uint InternalTimer;
 	public bool ShowAdditionalInfo;
 	public bool ShowAITD1Vars;
@@ -65,11 +66,13 @@ public class DosBox : MonoBehaviour
 	public void Start()
 	{
 		//game has maximum 50 actors
-		for (int i = 0; i < 50; i++)
+		Boxes = new Box[50];
+		for (int i = 0; i < Boxes.Length; i++)
 		{
 			Box box = Instantiate(BoxPrefab);
 			box.transform.parent = Actors.transform;
 			box.name = "Actor";
+			Boxes[i] = box;
 		}
 	}
 
@@ -82,8 +85,7 @@ public class DosBox : MonoBehaviour
 			{
 				//read actors info
 				int i = 0;
-				var boxes = Actors.GetComponentsInChildren<Box>(true);
-				foreach (Box box in boxes)
+				foreach (Box box in Boxes)
 				{
 					int k = i * ActorStructSize[dosBoxPattern];
 					box.ID = Utils.ReadShort(memory, k + 0);
@@ -173,7 +175,7 @@ public class DosBox : MonoBehaviour
 				}
 
 				//find player + switch floor if necessary
-				foreach (Box box in boxes)
+				foreach (Box box in Boxes)
 				{
 					bool isActive = box.ID != -1;
 					if (isActive)
@@ -197,7 +199,7 @@ public class DosBox : MonoBehaviour
 				}
 
 				//update all boxes
-				foreach (Box box in boxes)
+				foreach (Box box in Boxes)
 				{
 					if (box.ID != -1)
 					{
