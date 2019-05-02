@@ -332,8 +332,15 @@ public class DosBox : MonoBehaviour
 							}
 							else
 							{
-								//other actors are green
-								box.Color = new Color32(0, 128, 0, 255);
+								if (box.Slot == 0)
+								{
+									box.Color = new Color32(255, 255, 255, 255);
+								}
+								else
+								{
+									//other actors are green
+									box.Color = new Color32(0, 128, 0, 255);
+								}
 
 								//no world pos box for other actors
 								if (box.BoxWorldPos != null)
