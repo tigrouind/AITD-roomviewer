@@ -48,6 +48,8 @@ public class Box : MonoBehaviour
 	public Vector3 WorldPosition;
 	public Vector3 BoundingLower;
 	public Vector3 BoundingUpper;
+	public Vector2 Box2DLower;
+	public Vector2 Box2DUpper;
 	public Vector3 Angles;
 	public int LastOffset;
 	public float LastDistance;
@@ -302,6 +304,8 @@ public class Box : MonoBehaviour
 				info.Append("TRACKPOSITION", PositionInTrack);
 			if (ShowAITD1Vars && ActionType >= 0 && ActionType <= 10)
 				info.Append("ACTIONTYPE", actionTypeInfo[ActionType]);
+			if (ShowAITD1Vars)
+				info.Append("2DBOX", "{0} {1}; {2} {3}", Box2DLower.x, Box2DLower.y, Box2DUpper.x, Box2DUpper.y);
 			if (ShowAITD1Vars)
 				info.Append("HITFORCE", HitForce);
 			if (ShowAITD1Vars)

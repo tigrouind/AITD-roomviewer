@@ -111,6 +111,14 @@ public class DosBox : MonoBehaviour
 						box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
 						box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
 
+						boundingX1 = Utils.ReadShort(memory, k + 20);
+						boundingX2 = Utils.ReadShort(memory, k + 22);
+						boundingY1 = Utils.ReadShort(memory, k + 24);
+						boundingY2 = Utils.ReadShort(memory, k + 26);
+
+						box.Box2DLower = new Vector2(boundingX1, boundingY1);
+						box.Box2DUpper = new Vector2(boundingX2, boundingY2);
+
 						box.LocalPosition.x = Utils.ReadShort(memory, k + 28);
 						box.LocalPosition.y = Utils.ReadShort(memory, k + 30);
 						box.LocalPosition.z = Utils.ReadShort(memory, k + 32);
