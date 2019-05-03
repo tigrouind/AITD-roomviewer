@@ -72,6 +72,8 @@ public class DosBox : MonoBehaviour
 			Box box = Instantiate(BoxPrefab);
 			box.transform.parent = Actors.transform;
 			box.name = "Actor";
+			box.Slot = i;
+			box.DosBox = this;
 			Boxes[i] = box;
 		}
 	}
@@ -179,10 +181,6 @@ public class DosBox : MonoBehaviour
 						box.HotPosition.x = Utils.ReadShort(memory, k + 154);
 						box.HotPosition.y = Utils.ReadShort(memory, k + 156);
 						box.HotPosition.z = Utils.ReadShort(memory, k + 158);
-						
-						box.Slot = i;
-						box.ShowAITD1Vars = ShowAITD1Vars;
-						box.ShowAdditionalInfo = ShowAdditionalInfo;
 					}
 
 					i++;

@@ -558,7 +558,7 @@ public class RoomLoader : MonoBehaviour
 			BoxInfo.transform.position = new Vector3(position.x, position.y, 0.0f);
 
 			//text
-			box.UpdateText(BoxInfo, GetComponent<DosBox>().Boxes, GetComponent<DosBox>().InternalTimer);
+			box.UpdateText(BoxInfo);
 		}
 		else if (HighLightedBox != null)
 		{
@@ -604,7 +604,7 @@ public class RoomLoader : MonoBehaviour
 			if (SelectedBox.ID == SelectedBoxId)
 			{
 				//display selected box info
-				SelectedBox.UpdateText(BottomText, GetComponent<DosBox>().Boxes, GetComponent<DosBox>().InternalTimer);
+				SelectedBox.UpdateText(BottomText);
 			}
 			else
 			{

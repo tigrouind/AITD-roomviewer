@@ -14,8 +14,6 @@ public class Box : MonoBehaviour
 	private static string[] trackModeInfo = new string[] { "NONE", "MANUAL", "FOLLOW", "TRACK" };
 	private static string[] actionTypeInfo = new string[] { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
 
-	public bool ShowAITD1Vars;
-	public bool ShowAdditionalInfo;
 	public int ID;
 	public int Flags;
 	public int ColFlags;
@@ -67,6 +65,7 @@ public class Box : MonoBehaviour
 	public int[] Col = new int[3];
 	public int HardCol;
 	public int HardTrigger;
+	public DosBox DosBox;
 
 	public Vector3 BoundingPos
 	{
@@ -155,11 +154,11 @@ public class Box : MonoBehaviour
 		}
 	}
 
-	public string GetActorID(int index, Box[] actors)
+	public string GetActorID(int index)
 	{
-		if(index >= 0 && index < actors.Length)
+		if(index >= 0 && index < DosBox.Boxes.Length)
 		{
-			return actors[index].ID.ToString();
+			return DosBox.Boxes[index].ID.ToString();
 		}
 		else
 		{
@@ -218,7 +217,7 @@ public class Box : MonoBehaviour
 		}
 	}
 
-	public void UpdateText(BoxInfo info, Box[] actors, uint timer)
+	public void UpdateText(BoxInfo info)
 	{
 		info.Clear();
 		info.Append("TYPE", name.ToUpperInvariant());
@@ -233,7 +232,7 @@ public class Box : MonoBehaviour
 		{
 			info.Append("COL_FLAGS", "0x{0:X4}", ColFlags);
 
-			if (ShowAdditionalInfo)
+			if (DosBox.ShowAdditionalInfo)
 			{
 				info.Append("ROOM", "E{0}R{1}", Floor, Room);
 				info.Append("ROOM_POS", LocalPosition + Mod);
@@ -267,12 +266,12 @@ public class Box : MonoBehaviour
 			{
 				if(Anim != -1)
 				{
-					if(ShowAITD1Vars && NextAnim != -1)
+					if(DosBox.ShowAITD1Vars && NextAnim != -1)
 						info.Append("BODY/ANIM", "{0}; {1}; {2}", Body, Anim, NextAnim);
 					else
 						info.Append("BODY/ANIM", "{0}; {1}", Body, Anim);
 
-					if (ShowAITD1Vars && AnimType >= 0 && AnimType <= 2)
+					if (DosBox.ShowAITD1Vars && AnimType >= 0 && AnimType <= 2)
 					{
 						info.Append("ANIMTYPE", animTypeInfo[AnimType]);
 					}
@@ -281,7 +280,7 @@ public class Box : MonoBehaviour
 					info.Append("BODY", Body);
 			}
 
-			if (ShowAITD1Vars && Anim != -1)
+			if (DosBox.ShowAITD1Vars && Anim != -1)
 			{
 				if (Keyframe != -1)
 				{
@@ -292,31 +291,31 @@ public class Box : MonoBehaviour
 				info.Append("SPEED", Speed);
 			}
 
-			if (ShowAITD1Vars && Chrono != 0)
-				info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((timer - Chrono) / 60), (timer - Chrono) % 60);
-			if (ShowAITD1Vars && RoomChrono != 0)
-				info.Append("ROOM_CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((timer - RoomChrono) / 60), (timer - RoomChrono) % 60);
-			if (ShowAdditionalInfo && TrackMode >= 0 && TrackMode <= 3)
+			if (DosBox.ShowAITD1Vars && Chrono != 0)
+				info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer - Chrono) / 60), (DosBox.InternalTimer - Chrono) % 60);
+			if (DosBox.ShowAITD1Vars && RoomChrono != 0)
+				info.Append("ROOM_CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer - RoomChrono) / 60), (DosBox.InternalTimer - RoomChrono) % 60);
+			if (DosBox.ShowAdditionalInfo && TrackMode >= 0 && TrackMode <= 3)
 				info.Append("TRACKMODE", trackModeInfo[TrackMode]);
-			if (ShowAITD1Vars && TrackNumber != -1)
+			if (DosBox.ShowAITD1Vars && TrackNumber != -1)
 				info.Append("TRACKNUMBER", TrackNumber);
-			if (ShowAITD1Vars && PositionInTrack != -1)
+			if (DosBox.ShowAITD1Vars && PositionInTrack != -1)
 				info.Append("TRACKPOSITION", PositionInTrack);
-			if (ShowAITD1Vars && ActionType >= 0 && ActionType <= 10)
+			if (DosBox.ShowAITD1Vars && ActionType >= 0 && ActionType <= 10)
 				info.Append("ACTIONTYPE", actionTypeInfo[ActionType]);
-			if (ShowAITD1Vars)
+			if (DosBox.ShowAITD1Vars)
 				info.Append("2DBOX", "{0} {1}; {2} {3}", Box2DLower.x, Box2DLower.y, Box2DUpper.x, Box2DUpper.y);
-			if (ShowAITD1Vars)
+			if (DosBox.ShowAITD1Vars)
 				info.Append("HITFORCE", HitForce);
-			if (ShowAITD1Vars)
-				info.Append("HIT/HITBY", "{0} {1}", GetActorID(Hit, actors), GetActorID(HitBy, actors));
-			if (ShowAITD1Vars)
-				info.Append("COL/COLBY", "{0} {1} {2} {3}", GetActorID(Col[0], actors), GetActorID(Col[1], actors), GetActorID(Col[2], actors), GetActorID(ColBy, actors));
-			if (ShowAITD1Vars)
+			if (DosBox.ShowAITD1Vars)
+				info.Append("HIT/HITBY", "{0} {1}", GetActorID(Hit), GetActorID(HitBy));
+			if (DosBox.ShowAITD1Vars)
+				info.Append("COL/COLBY", "{0} {1} {2} {3}", GetActorID(Col[0]), GetActorID(Col[1]), GetActorID(Col[2]), GetActorID(ColBy));
+			if (DosBox.ShowAITD1Vars)
 				info.Append("HARDCOL/TRIG", "{0} {1}", 
 					(HardCol == -1) ? "▬" : HardCol.ToString(), 
 					(HardTrigger == -1) ? "▬" : HardTrigger.ToString());
-			if (ShowAdditionalInfo)
+			if (DosBox.ShowAdditionalInfo)
 				info.Append("SLOT", Slot);
 		}
 
