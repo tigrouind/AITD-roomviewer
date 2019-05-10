@@ -467,7 +467,7 @@ public class RoomLoader : MonoBehaviour
 				warpDialog.LoadActor(HighLightedBox);
 				warpDialog.warpMenuEnabled = true;
 			}
-			else if (!GetComponent<Vars>().enabled)
+			else
 			{
 				menuEnabled = true;
 			}
@@ -735,7 +735,6 @@ public class RoomLoader : MonoBehaviour
 					Actors.SetActive(false);
 					DosBoxEnabled = false;
 
-					GetComponent<Vars>().enabled = false; //hide vars
 					GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp
 				}
 				LinkToDOSBox.BoolValue = DosBoxEnabled;
@@ -782,8 +781,7 @@ public class RoomLoader : MonoBehaviour
 			case KeyCode.V:
 				if (isAITD1 && DosBoxEnabled)
 				{
-					GetComponent<Vars>().enabled = !GetComponent<Vars>().enabled;
-					menuEnabled = false;
+					SceneManager.LoadScene("vars");
 				}
 				break;
 

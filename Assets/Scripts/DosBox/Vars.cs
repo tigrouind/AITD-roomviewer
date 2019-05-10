@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class Vars : MonoBehaviour
 {
@@ -13,11 +14,12 @@ public class Vars : MonoBehaviour
 	private Var[] cvars = new Var[44];
 	private VarParser varParser = new VarParser();
 
-	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 };
-	private long varsMemoryAddress = -1;
+	public static ProcessMemoryReader ProcessReader;
+	private static byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 };
+	private static long varsMemoryAddress = -1;
 
-	private byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 };
-	private long cvarsMemoryAddress = -1;
+	private static byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 };
+	private static long cvarsMemoryAddress = -1;
 
 	private bool compare;
 	private bool oldcompare;
@@ -72,7 +74,7 @@ public class Vars : MonoBehaviour
 
 	void Update()
 	{
-		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
+		ProcessMemoryReader processReader = ProcessReader;
 		if (processReader != null)
 		{
 			if (!pauseVarsTracking)
@@ -96,7 +98,7 @@ public class Vars : MonoBehaviour
 		//hide table
 		if (Input.GetMouseButtonDown(1))
 		{
-			this.enabled = false;
+			SceneManager.LoadScene("room");
 		}
 
 		UpdateCellSize();
@@ -275,7 +277,7 @@ public class Vars : MonoBehaviour
 			if (newValueInt != var.value)
 			{
 				//write new value to memory
-				ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
+				ProcessMemoryReader processReader = ProcessReader;
 				byte[] wordValue = new byte[2];
 				Utils.Write((short)newValueInt, wordValue, 0);
 				processReader.Write(wordValue, var.memoryAddress, wordValue.Length);
@@ -329,7 +331,7 @@ public class Vars : MonoBehaviour
 		ToggleButtonState(button, compare);
 	}
 	
-	public void SearchForPatterns(ProcessMemoryReader reader)
+	public static void SearchForPatterns(ProcessMemoryReader reader)
 	{
 		varsMemoryAddress = reader.SearchForBytePattern(varsMemoryPattern);
 		cvarsMemoryAddress = reader.SearchForBytePattern(cvarsMemoryPattern);

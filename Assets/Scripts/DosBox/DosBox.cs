@@ -602,7 +602,7 @@ public class DosBox : MonoBehaviour
 					linkroom = room;
 
 					memoryAddress = address + MemoryOffsets[patternIndex];
-					ProcessReader = reader;
+					Vars.ProcessReader = ProcessReader = reader;
 					memory = new byte[ActorStructSize[patternIndex] * 50];
 					dosBoxPattern = patternIndex;
 
@@ -613,7 +613,7 @@ public class DosBox : MonoBehaviour
 					//vars
 					if (patternIndex == 0) //AITD1 only
 					{
-						GetComponent<Vars>().SearchForPatterns(reader);
+						Vars.SearchForPatterns(reader);
 					}
 					RightText.text = string.Empty;
 					return true;
@@ -630,7 +630,7 @@ public class DosBox : MonoBehaviour
 	public void UnlinkDosBox()
 	{
 		ProcessReader.Close();
-		ProcessReader = null;
+		Vars.ProcessReader = ProcessReader = null;
 		BoxInfo.Clear(true);
 		RightText.text = string.Empty;
 		lastValidPlayerIndex = -1;
