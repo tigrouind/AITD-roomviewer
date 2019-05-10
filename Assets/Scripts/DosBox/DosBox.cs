@@ -36,6 +36,9 @@ public class DosBox : MonoBehaviour
 		}
 	};
 
+	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 };
+	private byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 };
+
 	private int[] MemoryOffsets = new [] { -188, -28, -28 };
 	//offset to apply to get beginning of actors array
 	private int[] ActorStructSize = new [] { 160, 180, 182 };
@@ -75,6 +78,14 @@ public class DosBox : MonoBehaviour
 			box.Slot = i;
 			box.DosBox = this;
 			Boxes[i] = box;
+		}
+	}
+
+	void OnDestroy()
+	{
+		if (ProcessReader != null)
+		{
+			ProcessReader.Close();
 		}
 	}
 
@@ -559,63 +570,51 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	#region Room loader
-
-	public bool LinkToDosBOX(int floor, int room)
+	int[] GetAllDOSBOXProcesses()
 	{
 		int[] processIds = Process.GetProcesses()
-		.Where(x =>
-			{
-				string name;
-				try
+			.Where(x =>
 				{
-					name = x.ProcessName;
-				}
-				catch
-				{
-					name = string.Empty;
-				}
-				return name.StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase);
-			})
-		.Select(x => x.Id)
-		.ToArray();
+					string name;
+					try
+					{
+						name = x.ProcessName;
+					}
+					catch
+					{
+						name = string.Empty;
+					}
+					return name.StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase);
+				})
+			.Select(x => x.Id)
+			.ToArray();
 
+		return processIds;
+	}
+
+	bool SearchDOSBOXProcess(int patternIndex, out int processId, out long address)
+	{
+		int[] processIds = GetAllDOSBOXProcesses();
 		if (!processIds.Any())
 		{
 			RightText.text = "Cannot find DOSBOX process";
+			processId = -1;
+			address = -1;
 			return false;
 		}
 
-		//search player position in DOSBOX processes
-		int detectedGame = GetComponent<RoomLoader>().DetectedGame;
-		int patternIndex = detectedGame - 1;
-		foreach (int processId in processIds)
+		foreach (int pid in processIds)
 		{
-			ProcessMemoryReader reader = new ProcessMemoryReader(processId);
+			ProcessMemoryReader reader = new ProcessMemoryReader(pid);
 			foreach (var pattern in PlayerInitialPosition[patternIndex])
 			{
-				long address = reader.SearchForBytePattern(pattern);
-				if (address != -1)
+				long foundAddress = reader.SearchForBytePattern(pattern);
+				if (foundAddress != -1)
 				{
-					//force reload
-					linkfloor = floor;
-					linkroom = room;
+					processId = pid;
+					address = foundAddress + MemoryOffsets[patternIndex];
 
-					memoryAddress = address + MemoryOffsets[patternIndex];
-					Vars.ProcessReader = ProcessReader = reader;
-					memory = new byte[ActorStructSize[patternIndex] * 50];
-					dosBoxPattern = patternIndex;
-
-					//check if CDROM/floppy version (AITD1 only)				
-					byte[] cdPattern = ASCIIEncoding.ASCII.GetBytes("CD Not Found");
-					IsCDROMVersion = detectedGame == 1 && reader.SearchForBytePattern(cdPattern) != -1;
-
-					//vars
-					if (patternIndex == 0) //AITD1 only
-					{
-						Vars.SearchForPatterns(reader);
-					}
-					RightText.text = string.Empty;
+					reader.Close();
 					return true;
 				}
 			}
@@ -623,14 +622,64 @@ public class DosBox : MonoBehaviour
 			reader.Close();
 		}
 
+		processId = -1;
+		address = -1;
 		RightText.text = "Cannot find player data in DOSBOX process memory.";
 		return false;
+	}
+
+	#region Room loader
+
+	public bool LinkToDosBOX(int floor, int room, int detectedGame)
+	{
+		//search player position in DOSBOX processes
+		int patternIndex = detectedGame - 1;
+
+		int processId = Shared.ProcessId;
+		if (processId == -1)
+		{
+			if (!SearchDOSBOXProcess(patternIndex, out processId, out memoryAddress))
+			{
+				return false;
+			}
+			
+			Shared.ProcessId = processId;
+			Shared.ActorsMemoryAdress = memoryAddress;
+			ProcessReader = new ProcessMemoryReader(processId);
+
+			//vars
+			if (patternIndex == 0) //AITD1 only
+			{
+				Shared.VarsMemoryAddress = ProcessReader.SearchForBytePattern(varsMemoryPattern);
+				Shared.CvarsMemoryAddress = ProcessReader.SearchForBytePattern(cvarsMemoryPattern);
+			}
+		}
+		else
+		{
+			memoryAddress = Shared.ActorsMemoryAdress;
+			ProcessReader = new ProcessMemoryReader(processId);
+		}
+
+		//force reload
+		linkfloor = floor;
+		linkroom = room;
+		
+		memory = new byte[ActorStructSize[patternIndex] * 50];
+		dosBoxPattern = patternIndex;
+
+		//check if CDROM/floppy version (AITD1 only)				
+		byte[] cdPattern = ASCIIEncoding.ASCII.GetBytes("CD Not Found");
+		IsCDROMVersion = detectedGame == 1 && ProcessReader.SearchForBytePattern(cdPattern) != -1;
+
+		RightText.text = string.Empty;
+		return true;
 	}
 
 	public void UnlinkDosBox()
 	{
 		ProcessReader.Close();
-		Vars.ProcessReader = ProcessReader = null;
+		ProcessReader = null;
+		Shared.ProcessId = -1;
 		BoxInfo.Clear(true);
 		RightText.text = string.Empty;
 		lastValidPlayerIndex = -1;

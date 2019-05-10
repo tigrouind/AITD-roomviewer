@@ -36,7 +36,7 @@ public class RoomLoader : MonoBehaviour
 
 	private bool DosBoxEnabled;
 	private bool isAITD1;
-	public int DetectedGame;
+	private int detectedGame;
 	public GameObject Actors;
 
 	public RectTransform Panel;
@@ -62,8 +62,8 @@ public class RoomLoader : MonoBehaviour
 			.Select(x => int.Parse(x.Substring(5, 2)))
 			.ToList();
 		floor = floors.FirstOrDefault();
-		DetectedGame = DetectGame();
-		isAITD1 = DetectedGame == 1;
+		detectedGame = DetectGame();
+		isAITD1 = detectedGame == 1;
 
 		CheckCommandLine();
 		if (floors.Count > 0)
@@ -71,6 +71,10 @@ public class RoomLoader : MonoBehaviour
 			RefreshRooms();
 		}
 		ToggleMenuDOSBoxOptions(false);
+		if (Shared.ProcessId != -1)
+		{
+			ProcessKey(KeyCode.L);
+		}
 	}
 
 	void RefreshRooms()
@@ -704,7 +708,7 @@ public class RoomLoader : MonoBehaviour
 			case KeyCode.L:
 				if (!DosBoxEnabled)
 				{
-					DosBoxEnabled = (GetComponent<DosBox>().LinkToDosBOX(floor, room));
+					DosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);
 
 					//set follow mode to player
 					CameraFollow.Value = 2;

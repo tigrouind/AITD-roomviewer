@@ -14,12 +14,9 @@ public class Vars : MonoBehaviour
 	private Var[] cvars = new Var[44];
 	private VarParser varParser = new VarParser();
 
-	public static ProcessMemoryReader ProcessReader;
-	private static byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 };
-	private static long varsMemoryAddress = -1;
-
-	private static byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 };
-	private static long cvarsMemoryAddress = -1;
+	private ProcessMemoryReader processReader;
+	private long varsMemoryAddress;
+	private long cvarsMemoryAddress;
 
 	private bool compare;
 	private bool oldcompare;
@@ -45,6 +42,18 @@ public class Vars : MonoBehaviour
 		if (File.Exists(varPath))
 		{
 			varParser.Parse(varPath);
+		}
+
+		processReader = new ProcessMemoryReader(Shared.ProcessId);
+		varsMemoryAddress = Shared.VarsMemoryAddress;
+		cvarsMemoryAddress = Shared.CvarsMemoryAddress;
+	}
+
+	void OnDestroy()
+	{
+		if (processReader != null)
+		{
+			processReader.Close();
 		}
 	}
 
@@ -74,21 +83,24 @@ public class Vars : MonoBehaviour
 
 	void Update()
 	{
-		ProcessMemoryReader processReader = ProcessReader;
 		if (processReader != null)
 		{
 			if (!pauseVarsTracking)
 			{
-				if (varsMemoryAddress != -1)
+				if (varsMemoryAddress != -1 && cvarsMemoryAddress != -1)
 				{
-					processReader.Read(memory, varsMemoryAddress, 207 * 2);
-					CheckDifferences(memory, vars, varsMemoryAddress);
-				}
-
-				if (cvarsMemoryAddress != -1)
-				{
-					processReader.Read(memory, cvarsMemoryAddress, 44 * 2);
-					CheckDifferences(memory, cvars, cvarsMemoryAddress);
+					if (processReader.Read(memory, varsMemoryAddress, 207 * 2) > 0 
+					 && processReader.Read(memory, cvarsMemoryAddress, 44 * 2) > 0)
+					{
+						CheckDifferences(memory, vars, varsMemoryAddress);
+						CheckDifferences(memory, cvars, cvarsMemoryAddress);
+					}	
+					else
+					{
+						Shared.ProcessId = -1;
+						processReader.Close();
+						processReader = null;
+					}
 				}
 
 				ignoreDifferences = false;
@@ -268,21 +280,24 @@ public class Vars : MonoBehaviour
 
 	void OnCellChange(InputField cell, Var var)
 	{
-		int newValueInt;
-		if (int.TryParse(cell.text, out newValueInt) || cell.text == string.Empty)
+		if (processReader != null)
 		{
-			if (newValueInt > short.MaxValue) newValueInt = short.MaxValue;
-			if (newValueInt < short.MinValue) newValueInt = short.MinValue;
-
-			if (newValueInt != var.value)
+			int newValueInt;
+			if (int.TryParse(cell.text, out newValueInt) || cell.text == string.Empty)
 			{
-				//write new value to memory
-				ProcessMemoryReader processReader = ProcessReader;
-				byte[] wordValue = new byte[2];
-				Utils.Write((short)newValueInt, wordValue, 0);
-				processReader.Write(wordValue, var.memoryAddress, wordValue.Length);
+				if (newValueInt > short.MaxValue) newValueInt = short.MaxValue;
+				if (newValueInt < short.MinValue) newValueInt = short.MinValue;
+
+				if (newValueInt != var.value)
+				{
+					//write new value to memory
+					byte[] wordValue = new byte[2];
+					Utils.Write((short)newValueInt, wordValue, 0);
+					processReader.Write(wordValue, var.memoryAddress, wordValue.Length);
+				}
 			}
 		}
+		
 	}
 
 	public void FreezeClick(Button button)
@@ -329,12 +344,6 @@ public class Vars : MonoBehaviour
 		}
 		oldcompare = compare;
 		ToggleButtonState(button, compare);
-	}
-	
-	public static void SearchForPatterns(ProcessMemoryReader reader)
-	{
-		varsMemoryAddress = reader.SearchForBytePattern(varsMemoryPattern);
-		cvarsMemoryAddress = reader.SearchForBytePattern(cvarsMemoryPattern);
 	}
 
 	public class Var
