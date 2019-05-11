@@ -50,7 +50,7 @@ public class DosBox : MonoBehaviour
 	private int linkfloor = 0;
 	private int linkroom = 0;
 	private long memoryAddress;
-	private byte[] memory;
+	private byte[] memory = new byte[16384];
 
 	//fps
 	private int oldFramesCount;
@@ -664,7 +664,6 @@ public class DosBox : MonoBehaviour
 		linkfloor = floor;
 		linkroom = room;
 		
-		memory = new byte[ActorStructSize[patternIndex] * 50];
 		dosBoxPattern = patternIndex;
 
 		//check if CDROM/floppy version (AITD1 only)				

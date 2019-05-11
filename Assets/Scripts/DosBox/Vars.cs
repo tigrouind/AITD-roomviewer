@@ -19,8 +19,9 @@ public class Vars : MonoBehaviour
 	private long cvarsMemoryAddress;
 
 	private bool compare;
-	private bool oldcompare;
-	private bool ignoreDifferences;
+	private bool ignoreDifferences = true;
+	private int screenWidth = -1;
+	private int screenHeight = -1; 
 
 	public RectTransform Panel;
 	public RectTransform TabA;
@@ -28,12 +29,6 @@ public class Vars : MonoBehaviour
 	public RectTransform TableHeaderPrefab;
 	public InputField TableCellPrefab;
 	public RectTransform ToolTip;
-
-	public Vars()
-	{
-		InitVars(vars);
-		InitVars(cvars);
-	}
 
 	public void Start()
 	{
@@ -43,6 +38,10 @@ public class Vars : MonoBehaviour
 		{
 			varParser.Parse(varPath);
 		}
+
+		InitVars(vars);
+		InitVars(cvars);
+		BuildTables();
 
 		processReader = new ProcessMemoryReader(Shared.ProcessId);
 		varsMemoryAddress = Shared.VarsMemoryAddress;
@@ -65,49 +64,46 @@ public class Vars : MonoBehaviour
 		}
 	}
 
-	public void OnEnable()
+	bool RefreshVARS()
 	{
-		ignoreDifferences = !compare;
-		BuildTables();
-		UpdateCellSize();
-		Panel.gameObject.SetActive(true);
-	}
+		if (varsMemoryAddress != -1)
+		{
+			if (processReader.Read(memory, varsMemoryAddress, 207 * 2) <= 0)
+			{
+				return false;
+			}
 
-	public void OnDisable()
-	{
-		if(Panel != null)
-			Panel.gameObject.SetActive(false);
-		if(ToolTip != null)
-			ToolTip.gameObject.SetActive(false);
+			CheckDifferences(memory, vars, varsMemoryAddress);
+		}
+
+		if (cvarsMemoryAddress != -1) 
+		{
+			if (processReader.Read(memory, cvarsMemoryAddress, 44 * 2) <= 0)
+			{
+				return false;
+			}
+			
+			CheckDifferences(memory, cvars, cvarsMemoryAddress);
+		}
+		
+		return true;
 	}
 
 	void Update()
 	{
-		if (processReader != null)
+		if (processReader != null && !pauseVarsTracking)
 		{
-			if (!pauseVarsTracking)
+			if (!RefreshVARS())
 			{
-				if (varsMemoryAddress != -1 && cvarsMemoryAddress != -1)
-				{
-					if (processReader.Read(memory, varsMemoryAddress, 207 * 2) > 0 
-					 && processReader.Read(memory, cvarsMemoryAddress, 44 * 2) > 0)
-					{
-						CheckDifferences(memory, vars, varsMemoryAddress);
-						CheckDifferences(memory, cvars, cvarsMemoryAddress);
-					}	
-					else
-					{
-						Shared.ProcessId = -1;
-						processReader.Close();
-						processReader = null;
-					}
-				}
-
-				ignoreDifferences = false;
+				Shared.ProcessId = -1;
+				processReader.Close();
+				processReader = null;
 			}
 		}
 
-		//hide table
+		ignoreDifferences = false;
+
+		//quit
 		if (Input.GetMouseButtonDown(1))
 		{
 			SceneManager.LoadScene("room");
@@ -118,10 +114,16 @@ public class Vars : MonoBehaviour
 
 	void UpdateCellSize()
 	{
-		//set cell size
-		Vector2 cellSize = new Vector2(Screen.width / 21.0f, (Screen.height - 30.0f) / 16.0f);
-		TabA.GetComponent<GridLayoutGroup>().cellSize = cellSize;
-		TabB.GetComponent<GridLayoutGroup>().cellSize = cellSize;
+		if (screenWidth != Screen.width || screenHeight != Screen.height)
+		{
+			screenHeight = Screen.height;
+			screenWidth = Screen.width;
+
+			//set cell size
+			Vector2 cellSize = new Vector2(screenWidth / 21.0f, (screenHeight - 30.0f) / 16.0f);
+			TabA.GetComponent<GridLayoutGroup>().cellSize = cellSize;
+			TabB.GetComponent<GridLayoutGroup>().cellSize = cellSize;
+		}		
 	}
 
 	void BuildTables()
@@ -132,44 +134,41 @@ public class Vars : MonoBehaviour
 
 	void BuildTable(RectTransform tab, string sectionName, Var[] data)
 	{
-		if (tab.childCount == 0)
-		{
-			//empty
-			GameObject empty = new GameObject(string.Empty, typeof(RectTransform));
-			empty.AddComponent<Image>().color = TableHeaderPrefab.GetComponent<Image>().color;
-			empty.transform.SetParent(tab.transform);
+		//empty
+		GameObject empty = new GameObject(string.Empty, typeof(RectTransform));
+		empty.AddComponent<Image>().color = TableHeaderPrefab.GetComponent<Image>().color;
+		empty.transform.SetParent(tab.transform);
 
-			for (int i = 0; i < 20; i++)
+		for (int i = 0; i < 20; i++)
+		{
+			RectTransform header = Instantiate(TableHeaderPrefab);
+			header.transform.SetParent(tab.transform);
+			header.GetComponentInChildren<Text>().text = i.ToString();
+		}
+
+		for (int i = 0; i < data.Length; i++)
+		{
+			if (i % 20 == 0)
 			{
 				RectTransform header = Instantiate(TableHeaderPrefab);
 				header.transform.SetParent(tab.transform);
-				header.GetComponentInChildren<Text>().text = i.ToString();
+				Text textComponent = header.GetComponentInChildren<Text>();
+				textComponent.GetComponentInChildren<RectTransform>().offsetMax = new Vector2(-5, 0);
+				textComponent.alignment = TextAnchor.MiddleRight;
+				textComponent.text = i.ToString();
 			}
 
-			for (int i = 0; i < data.Length; i++)
-			{
-				if (i % 20 == 0)
-				{
-					RectTransform header = Instantiate(TableHeaderPrefab);
-					header.transform.SetParent(tab.transform);
-					Text textComponent = header.GetComponentInChildren<Text>();
-					textComponent.GetComponentInChildren<RectTransform>().offsetMax = new Vector2(-5, 0);
-					textComponent.alignment = TextAnchor.MiddleRight;
-					textComponent.text = i.ToString();
-				}
+			InputField cell = Instantiate(TableCellPrefab);
+			cell.transform.SetParent(tab.transform);
 
-				InputField cell = Instantiate(TableCellPrefab);
-				cell.transform.SetParent(tab.transform);
+			Var var = data[i];
+			cell.onEndEdit.AddListener((value) => OnCellChange(cell, var));
 
-				Var var = data[i];
-				cell.onEndEdit.AddListener((value) => OnCellChange(cell, var));
-
-				int cellIndex = i;
-				UIPointerHandler pointerHandler = cell.GetComponent<UIPointerHandler>();
-				pointerHandler.PointerEnter.AddListener((value) => OnCellPointerEnter(cell, sectionName, cellIndex));
-				pointerHandler.PointerExit.AddListener((value) => OnCellPointerExit());
-				var.inputField = cell;
-			}
+			int cellIndex = i;
+			UIPointerHandler pointerHandler = cell.GetComponent<UIPointerHandler>();
+			pointerHandler.PointerEnter.AddListener((value) => OnCellPointerEnter(cell, sectionName, cellIndex));
+			pointerHandler.PointerExit.AddListener((value) => OnCellPointerExit());
+			var.inputField = cell;
 		}
 	}
 
@@ -297,7 +296,6 @@ public class Vars : MonoBehaviour
 				}
 			}
 		}
-		
 	}
 
 	public void FreezeClick(Button button)
@@ -338,11 +336,10 @@ public class Vars : MonoBehaviour
 	{
 		compare = !compare;
 
-		if (!compare && oldcompare)
+		if (!compare)
 		{
 			ignoreDifferences = true;
 		}
-		oldcompare = compare;
 		ToggleButtonState(button, compare);
 	}
 
