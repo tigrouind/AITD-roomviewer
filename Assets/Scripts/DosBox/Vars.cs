@@ -36,7 +36,7 @@ public class Vars : MonoBehaviour
 		string varPath = @"GAMEDATA\vars.txt";
 		if (File.Exists(varPath))
 		{
-			varParser.Parse(varPath);
+			varParser.Parse(varPath, "VARS", "C_VARS");
 		}
 
 		InitVars(vars);

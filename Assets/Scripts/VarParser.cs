@@ -23,21 +23,26 @@ public class VarParser
 		return string.Empty;
 	}
 
-	public void Parse(string filePath)
+	public void Parse(string filePath, params string[] sectionsToParse)
 	{
 		var allLines = System.IO.File.ReadAllLines(filePath);
-		Regex section = new Regex("^[A-Z](.*)$");
 		Regex item = new Regex("^(?<linenumber>[0-9]+)(-(?<next>[0-9]+))?(?<text>.*)");
 		Dictionary<int, string> currentSection = null;
 
 		foreach (string line in allLines)
 		{
 			//check if new section
-			Match sectionMatch = section.Match(line);
-			if (sectionMatch.Success)
+			if (line.Length > 0 && line[0] >= 'A' && line[0] <= 'Z')
 			{
-				currentSection = new Dictionary<int, string>();
-				sections.Add(sectionMatch.Value.Trim(), currentSection);
+				if (sectionsToParse.Length == 0 || Array.IndexOf(sectionsToParse, line) >= 0)
+				{
+					currentSection = new Dictionary<int, string>();
+					sections.Add(line.Trim(), currentSection);
+				}
+				else
+				{
+					currentSection = null;
+				}
 			}
 			else if (currentSection != null)
 			{

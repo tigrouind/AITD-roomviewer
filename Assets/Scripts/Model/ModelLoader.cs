@@ -639,7 +639,7 @@ public class ModelLoader : MonoBehaviour
 		string varPath = @"GAMEDATA\vars.txt";
 		if (File.Exists(varPath))
 		{
-			varParser.Parse(varPath);
+			varParser.Parse(varPath, "BODYS", "ANIMS");
 		}
 
 		if(!Directory.Exists(modelFolders[1]))
