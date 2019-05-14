@@ -338,7 +338,7 @@ public class ModelLoader : MonoBehaviour
 						if ((polyType == 3 || polyType == 4 || polyType == 5 || polyType == 6) && GradientMaterial.BoolValue)
 						{
 							gradientPolygonType.Add(polyType);
-							gradientPolygonList.Add(SphereMesh.triangles.Select(x => x + allVertices.Count).ToList());
+							gradientPolygonList.Add(Enumerable.Range(allVertices.Count, SphereMesh.vertices.Length).ToList());
 						}
 
 						uv.AddRange(SphereMesh.uv.Select(x => x * uvScale));
