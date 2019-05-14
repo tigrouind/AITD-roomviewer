@@ -155,7 +155,7 @@ public class DosBox : MonoBehaviour
 						box.NextAnim = Utils.ReadShort(memory, k + 66);
 						box.Keyframe = Utils.ReadShort(memory, k + 74);
 						box.TotalFrames = Utils.ReadShort(memory, k + 76);
-						box.Endframe = Utils.ReadShort(memory, k + 78);
+						box.EndFrame = Utils.ReadShort(memory, k + 78);
 						box.EndAnim = Utils.ReadShort(memory, k + 80);
 						
 						box.TrackMode = Utils.ReadShort(memory, k + trackModeOffset);
@@ -286,7 +286,7 @@ public class DosBox : MonoBehaviour
 
 							if (ShowAITD1Vars)
 							{
-								if(box.PreviousAnim != box.Anim || box.PreviousKeyFrame != box.Keyframe || box.Endframe == 1 || box.EndAnim == 1)
+								if(box.PreviousAnim != box.Anim || box.PreviousKeyFrame != box.Keyframe || box.EndFrame == 1 || box.EndAnim == 1)
 								{
 									box.PreviousAnim = box.Anim;
 									box.PreviousKeyFrame = box.Keyframe;

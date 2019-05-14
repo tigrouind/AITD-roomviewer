@@ -28,7 +28,7 @@ public class Box : MonoBehaviour
 	public int Keyframe;
 	public int PreviousAnim;
 	public int PreviousKeyFrame;
-	public int Endframe;
+	public int EndFrame;
 	public int EndAnim;
 	public int TotalFrames;
 	public int Speed;
@@ -154,6 +154,14 @@ public class Box : MonoBehaviour
 		}
 	}
 
+	public string DashIfEmpty(int value)
+	{
+		if (value == -1)
+			return "▬";
+		else
+			return value.ToString();
+	}
+
 	public string GetActorID(int index)
 	{
 		if(index >= 0 && index < DosBox.Boxes.Length)
@@ -223,14 +231,21 @@ public class Box : MonoBehaviour
 		info.Append("TYPE", name.ToUpperInvariant());
 		info.Append("ID", ID);
 		
-		if (name == "Collider" || name == "Trigger" || name == "Actor")
+		if (name == "Collider" || name == "Trigger")
 		{
 			info.Append("FLAGS", "0x{0:X4}", Flags);
 		}
 
 		if (name == "Actor")
 		{
-			info.Append("COL_FLAGS", "0x{0:X4}", ColFlags);
+			if(DosBox.ShowAdditionalInfo)
+			{
+				info.Append("FLAGS/COL", "0x{0:X4} 0x{1:X4}", Flags, ColFlags);
+			}
+			else
+			{
+				info.Append("FLAGS", "0x{0:X4}", Flags);
+			}
 
 			if (DosBox.ShowAdditionalInfo)
 			{
@@ -258,9 +273,17 @@ public class Box : MonoBehaviour
 			}
 
 			if (Life != -1)
-				info.Append("LIFE", Life);
-			if (LifeMode != -1)
-				info.Append("LIFEMODE", LifeMode);
+			{
+				if(DosBox.ShowAdditionalInfo)
+				{
+					info.Append("LIFE/LIFEMODE", "{0}; {1}", Life, LifeMode);
+				}
+				else
+				{
+					info.Append("LIFE", Life);
+				}
+				
+			}
 
 			if (Body != -1)
 			{
@@ -284,7 +307,7 @@ public class Box : MonoBehaviour
 			{
 				if (Keyframe != -1)
 				{
-					info.Append("KEYFRAME", "{0}/{1}", Keyframe, TotalFrames - 1);
+					info.Append("KEYFRAME", "{0}/{1}; {2} {3}", Keyframe, TotalFrames - 1, EndFrame, EndAnim);
 					info.Append("SUB_KEYFRAME", Mathf.FloorToInt(lastKeyFrameChange.Elapsed * 60.0f));
 				}
 
@@ -298,9 +321,7 @@ public class Box : MonoBehaviour
 			if (DosBox.ShowAdditionalInfo && TrackMode >= 0 && TrackMode <= 3)
 				info.Append("TRACKMODE", trackModeInfo[TrackMode]);
 			if (DosBox.ShowAITD1Vars && TrackNumber != -1)
-				info.Append("TRACKNUMBER", TrackNumber);
-			if (DosBox.ShowAITD1Vars && PositionInTrack != -1)
-				info.Append("TRACKPOSITION", PositionInTrack);
+				info.Append("TRACKNUM/POS", "{0} {1}", DashIfEmpty(TrackNumber), DashIfEmpty(PositionInTrack));
 			if (DosBox.ShowAITD1Vars && ActionType >= 0 && ActionType <= 10)
 				info.Append("ACTIONTYPE", actionTypeInfo[ActionType]);
 			if (DosBox.ShowAITD1Vars)
@@ -308,13 +329,9 @@ public class Box : MonoBehaviour
 			if (DosBox.ShowAITD1Vars)
 				info.Append("HITFORCE", HitForce);
 			if (DosBox.ShowAITD1Vars)
-				info.Append("HIT/HITBY", "{0} {1}", GetActorID(Hit), GetActorID(HitBy));
+				info.Append("HIT/BY COL/BY", "{0} {1}  {2} {3} {4} {5}", GetActorID(Hit), GetActorID(HitBy), GetActorID(Col[0]), GetActorID(Col[1]), GetActorID(Col[2]), GetActorID(ColBy));
 			if (DosBox.ShowAITD1Vars)
-				info.Append("COL/COLBY", "{0} {1} {2} {3}", GetActorID(Col[0]), GetActorID(Col[1]), GetActorID(Col[2]), GetActorID(ColBy));
-			if (DosBox.ShowAITD1Vars)
-				info.Append("HARDCOL/TRIG", "{0} {1}", 
-					(HardCol == -1) ? "▬" : HardCol.ToString(), 
-					(HardTrigger == -1) ? "▬" : HardTrigger.ToString());
+				info.Append("HARDCOL/TRIG", "{0} {1}", DashIfEmpty(HardCol), DashIfEmpty(HardTrigger));
 			if (DosBox.ShowAdditionalInfo)
 				info.Append("SLOT", Slot);
 		}
