@@ -845,6 +845,24 @@ public class ModelLoader : MonoBehaviour
 		}
 	}
 
+	Vector2 WorldToViewportPoint(Camera cam,Vector3 pos)
+	{
+		//same as Camera.WorldToViewportPoint() but handle points behind camera correctly (when temp.w < 0)
+		Matrix4x4 mat = cam.projectionMatrix * cam.worldToCameraMatrix;
+		Vector4 temp = mat * new Vector4(pos.x, pos.y, pos.z, 1.0f);
+
+		if (temp.w == 0.0f)
+		{
+			return Vector3.zero;
+		}
+		else
+		{
+			temp.x = (temp.x / Mathf.Abs(temp.w) + 1.0f) * 0.5f;
+			temp.y = (temp.y / Mathf.Abs(temp.w) + 1.0f) * 0.5f;
+			return new Vector2(temp.x, temp.y);
+		}
+	}
+
 	void UpdateGradientsUVs()
 	{
 		Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
@@ -863,7 +881,6 @@ public class ModelLoader : MonoBehaviour
 		float gmaxY = 0.0f;
 		float gminY = 1.0f;
 
-		bool pointBehindCameraForAnyPoly = false; 
 		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
 		{
 			float maxX = 0.0f;
@@ -873,18 +890,10 @@ public class ModelLoader : MonoBehaviour
 
 			int polyType = gradientPolygonType[i];
 
-			bool pointBehindCamera = false;
 			foreach(int vertexIndex in gradientPolygonList[i])
 			{
 				Vector3 poly = allVertices[vertexIndex];
-				Vector3 point = Camera.main.WorldToViewportPoint(transform.TransformPoint(poly));
-
-				if (point.z <= 0.0f)
-				{
-					pointBehindCamera = true;
-					pointBehindCameraForAnyPoly = true;
-					break;
-				}
+				Vector3 point = WorldToViewportPoint(Camera.main, transform.TransformPoint(poly));
 
 				if (point.y > maxY)
 				{
@@ -917,48 +926,47 @@ public class ModelLoader : MonoBehaviour
 				}
 			}
 
-			if (!pointBehindCamera)
+			minX = Mathf.Clamp01(minX);
+			maxX = Mathf.Clamp01(maxX);
+			minY = Mathf.Clamp01(minY);
+			maxY = Mathf.Clamp01(maxY);
+
+			foreach (int vertexIndex in gradientPolygonList[i])
 			{
-				minX = Mathf.Clamp01(minX);
-				maxX = Mathf.Clamp01(maxX);
-				minY = Mathf.Clamp01(minY);
-				maxY = Mathf.Clamp01(maxY);
-
-				foreach (int vertexIndex in gradientPolygonList[i])
+				switch (polyType)
 				{
-					switch (polyType)
-					{
-						case 4:
-						case 5: //vertical gradient
-							uv[vertexIndex] = new Vector2(maxY, 0.0f);    
-							break;
+					case 4: //vertical gradient
+					case 5: //vertical gradient (2X)
+						uv[vertexIndex] = new Vector2(maxY, 0.0f);
+						break;
 
-						case 3: //horizontal
-							uv[vertexIndex] = new Vector2(minX, maxX);    
-							break;
+					case 3: //horizontal
+						uv[vertexIndex] = new Vector2(minX, maxX);
+						break;
 
-						case 6: //horizontal (reversed)
-							uv[vertexIndex] = new Vector2(maxX, minX);    
-							break;
-					}
+					case 6: //horizontal (reversed)
+						uv[vertexIndex] = new Vector2(maxX, minX);
+						break;
 				}
 			}
 		}
 
-		if (!pointBehindCameraForAnyPoly)
+		gminY = Mathf.Clamp01(gminY);
+		gmaxY = Mathf.Clamp01(gmaxY);
+
+		for (int i = 0; i < gradientPolygonList.Count; i++)
 		{
-			for (int i = 0; i < gradientPolygonList.Count; i++)
+			foreach (int vertexIndex in gradientPolygonList[i])
 			{
-				foreach (int polyIndex in gradientPolygonList[i])
+				int polyType = gradientPolygonType[i];
+				if (polyType == 4 || polyType == 5)
 				{
-					int polyType = gradientPolygonType[i];
-					if (polyType == 4 || polyType == 5)
-					{
-						uv[polyIndex] = new Vector2(uv[polyIndex].x, gmaxY - gminY);    
-					}
+					float maxY = uv[vertexIndex].x;
+					uv[vertexIndex] = new Vector2(maxY, gmaxY - gminY);
 				}
 			}
 		}
+
 		mesh.SetUVs(0, uv);
 	}
 
