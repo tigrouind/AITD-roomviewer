@@ -7,6 +7,9 @@ public class CameraHelper : MonoBehaviour
 {
 	public Mesh CubeMesh;
 
+	private readonly List<Vector3> vertices = new List<Vector3>();
+	private readonly List<int> indices = new List<int>();
+
 	private static readonly Vector3[] quadA = new Vector3[] 
 	{
 		new Vector3( 1.0f, 1.0f, 1.0f), 
@@ -35,37 +38,32 @@ public class CameraHelper : MonoBehaviour
 
 	public Mesh CreateMesh(Vector3 cameraFocal)
 	{
-		var pos = new Vector3(320.0f / cameraFocal.y * 0.5f, 200.0f / cameraFocal.z * 0.5f, 1.0f);
+		var pos = new Vector3(160.0f / cameraFocal.y, 100.0f / cameraFocal.z, 1.0f);
 		
 		var pts1 = quadA.Select(x => Vector3.Scale(x, pos) * 4.0f).ToArray();
 		var pts2 = quadA.Select(x => Vector3.Scale(x, pos) * 0.4f).ToArray();
 		var pts3 = quadB;
 
-		List<Vector3> vertices = new List<Vector3>();
-		List<int> indices = new List<int>();
+		vertices.Clear();
+		indices.Clear();
 
-		Action<Vector3, Vector3> addLine = (Vector3 a, Vector3 b) => 
-		{
-			AddLine(indices, vertices, a, b);
-		};
+		AddLine(pts2[0], pts1[0]);
+		AddLine(pts2[1], pts1[1]);
+		AddLine(pts2[2], pts1[2]);
+		AddLine(pts2[3], pts1[3]);
 
-		addLine(pts2[0], pts1[0]);
-		addLine(pts2[1], pts1[1]);
-		addLine(pts2[2], pts1[2]);
-		addLine(pts2[3], pts1[3]);
+		AddLine(pts1[0], pts1[1]);
+		AddLine(pts1[1], pts1[2]);
+		AddLine(pts1[2], pts1[3]);
+		AddLine(pts1[3], pts1[0]);
 
-		addLine(pts1[0], pts1[1]);
-		addLine(pts1[1], pts1[2]);
-		addLine(pts1[2], pts1[3]);
-		addLine(pts1[3], pts1[0]);
+		AddLine(pts2[0], pts2[1]);
+		AddLine(pts2[1], pts2[2]);
+		AddLine(pts2[2], pts2[3]);
+		AddLine(pts2[3], pts2[0]);
 
-		addLine(pts2[0], pts2[1]);
-		addLine(pts2[1], pts2[2]);
-		addLine(pts2[2], pts2[3]);
-		addLine(pts2[3], pts2[0]);
-
-		addLine(pts3[1], pts3[2]);
-		addLine(pts3[3], pts3[0]);
+		AddLine(pts3[1], pts3[2]);
+		AddLine(pts3[3], pts3[0]);
 
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices.ToArray();
@@ -77,16 +75,15 @@ public class CameraHelper : MonoBehaviour
 		return mesh;
 	}
 
-	private void AddLine(List<int> indices, List<Vector3> vertices, Vector3 a, Vector3 b) 
+	private void AddLine(Vector3 a, Vector3 b) 
 	{
 		const float linesize = 0.04f;
 		Vector3 directionVector = a - b;
 		Vector3 middle = (a + b) / 2.0f;
 		Quaternion rotation = Quaternion.LookRotation(directionVector);
+		Vector3 scale = new Vector3(linesize, linesize, directionVector.magnitude);
 		
 		indices.AddRange(CubeMesh.triangles.Select(x => x + vertices.Count));
-		vertices.AddRange(CubeMesh.vertices.Select(x =>
-			rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
-			+ middle));
+		vertices.AddRange(CubeMesh.vertices.Select(x => rotation * Vector3.Scale(x, scale) + middle));
 	}
 }
