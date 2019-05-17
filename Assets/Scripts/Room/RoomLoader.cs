@@ -335,6 +335,7 @@ public class RoomLoader : MonoBehaviour
 					area.transform.localPosition = Vector3.zero;
 					area.Color = new Color32((byte)((colorRGB >> 16) & 0xFF), (byte)((colorRGB >> 8) & 0xFF), (byte)(colorRGB & 0xFF), 100);
 					area.ID = cameraID;
+					area.DosBox = GetComponent<DosBox>();
 					MeshFilter filter = area.GetComponent<MeshFilter>();
 
 					// Use the triangulator to get indices for creating triangles

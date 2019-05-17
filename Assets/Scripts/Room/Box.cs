@@ -236,6 +236,17 @@ public class Box : MonoBehaviour
 			info.Append("FLAGS", "0x{0:X4}", Flags);
 		}
 
+		if (name == "Camera" && DosBox != null && DosBox.ShowAdditionalInfo)
+		{
+			Vector3 position = Camera.transform.localPosition * 1000.0f;
+			Vector3 rotation = Camera.transform.rotation.eulerAngles;
+			info.Append("POSITION", "{0:F0} {1:F0} {2:F0}", position.x, -position.y, position.z);
+			info.Append("ANGLE", "{0:N1} {1:N1} {2:N1}",
+				rotation.x > 180.0f ? (rotation.x - 360.0f) : rotation.x,
+				(-rotation.y + 540.0f) % 360.0f,
+				rotation.z > 180.0f ? (rotation.z - 360.0f) : rotation.z);
+		}
+
 		if (name == "Actor")
 		{
 			if(DosBox.ShowAdditionalInfo)
