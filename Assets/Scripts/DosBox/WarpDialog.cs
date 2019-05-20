@@ -110,7 +110,7 @@ public class WarpDialog : MonoBehaviour
 					warpActor = GetComponent<DosBox>().Player;
 				}
 
-				Vector3 offset = GetComponent<DosBox>().GetMousePosition(warpActor.Room, warpActor.Floor) - warpActor.LocalPosition;
+				Vector3 offset = GetComponent<DosBox>().GetMousePosition(warpActor.Room, warpActor.Floor) - (warpActor.LocalPosition + warpActor.Mod);
 				offset = new Vector3(Mathf.RoundToInt(offset.x), 0.0f, Mathf.RoundToInt(offset.z));
 				MoveActor(offset);
 			}
@@ -137,7 +137,8 @@ public class WarpDialog : MonoBehaviour
 
 		if (!AdvancedMode.BoolValue)
 		{
-			TryParsePosition(positionX, positionY, positionZ, out local, warpActor.LocalPosition);
+			TryParsePosition(positionX, positionY, positionZ, out local, warpActor.LocalPosition + warpActor.Mod);
+			local -= warpActor.Mod;
 
 			//apply offset to world/bound
 			Vector3 offset = local - warpActor.LocalPosition;
@@ -149,8 +150,10 @@ public class WarpDialog : MonoBehaviour
 		{
 			Vector3 boundingPos;
 			TryParsePosition(boundingPosX, boundingPosY, boundingPosZ, out boundingPos, warpActor.BoundingPos);
-			TryParsePosition(localPosX, localPosY, localPosZ, out local, warpActor.LocalPosition);
-			TryParsePosition(worldPosX, worldPosY, worldPosZ, out world, warpActor.WorldPosition);
+			TryParsePosition(localPosX, localPosY, localPosZ, out local, warpActor.LocalPosition + warpActor.Mod);
+			TryParsePosition(worldPosX, worldPosY, worldPosZ, out world, warpActor.WorldPosition + warpActor.Mod);
+			local -= warpActor.Mod;
+			world -= warpActor.Mod;
 
 			Vector3 offset = boundingPos - warpActor.BoundingPos;
 			lowerBound = warpActor.BoundingLower + offset;
@@ -185,7 +188,7 @@ public class WarpDialog : MonoBehaviour
 		lastTimeKeyPressed = Time.time;
 	}
 
-	//input keys
+	//input keys or warp
 	void MoveActor(Vector3 offset)
 	{
 		Vector3 local = warpActor.LocalPosition + offset;
@@ -203,12 +206,12 @@ public class WarpDialog : MonoBehaviour
 		boundingPosX.text = actor.BoundingPos.x.ToString();
 		boundingPosY.text = actor.BoundingPos.y.ToString();
 		boundingPosZ.text = actor.BoundingPos.z.ToString();
-		localPosX.text = positionX.text = actor.LocalPosition.x.ToString();
-		localPosY.text = positionY.text = actor.LocalPosition.y.ToString();
-		localPosZ.text = positionZ.text = actor.LocalPosition.z.ToString();
-		worldPosX.text = actor.WorldPosition.x.ToString();
-		worldPosY.text = actor.WorldPosition.y.ToString();
-		worldPosZ.text = actor.WorldPosition.z.ToString();
+		localPosX.text = positionX.text = (actor.LocalPosition.x + actor.Mod.x).ToString();
+		localPosY.text = positionY.text = (actor.LocalPosition.y + actor.Mod.y).ToString();
+		localPosZ.text = positionZ.text = (actor.LocalPosition.z + actor.Mod.z).ToString();
+		worldPosX.text = (actor.WorldPosition.x + actor.Mod.x).ToString();
+		worldPosY.text = (actor.WorldPosition.y + actor.Mod.y).ToString();
+		worldPosZ.text = (actor.WorldPosition.z + actor.Mod.z).ToString();
 	}
 
 	void UpdateAngleInputField(Box actor)
