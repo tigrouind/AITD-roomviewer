@@ -19,10 +19,11 @@ public class WarpDialog : MonoBehaviour
 	public InputField angle;
 	public ToggleButton AdvancedMode;
 
-	private float lastTimeKeyPressed;
+	private Timer timer = new Timer();
 
 	void Start ()
 	{
+		timer.Start();
 		ToggleAdvanceMode(false);
 	}
 
@@ -40,8 +41,7 @@ public class WarpDialog : MonoBehaviour
 		{
 			if(!Panel.GetComponentsInChildren<InputField>().Any(x => x.isFocused))
 			{
-				bool enoughTimeElapsed = (Time.time - lastTimeKeyPressed) > 0.1f;
-				if (enoughTimeElapsed)
+				if (timer.Elapsed > 0.1f)
 				{
 					if (Input.GetKey(KeyCode.Keypad9))
 					{
@@ -94,7 +94,7 @@ public class WarpDialog : MonoBehaviour
 					Input.GetKeyUp(KeyCode.Keypad9) ||
 					Input.GetKey(KeyCode.Keypad0))
 				{
-					lastTimeKeyPressed = 0.0f;
+					timer.Elapsed = 1.0f;
 				}
 			}
 		}
@@ -185,7 +185,7 @@ public class WarpDialog : MonoBehaviour
 		int angle = (int)warpActor.Angles.y + offset;
 		WriteActorAngle(warpActor, (angle + 1024) % 1024);
 		UpdateAngleInputField(warpActor);
-		lastTimeKeyPressed = Time.time;
+		timer.Restart();
 	}
 
 	//input keys or warp
@@ -198,7 +198,7 @@ public class WarpDialog : MonoBehaviour
 
 		WriteActorPosition(warpActor, boundLow, boundUpper, local, world);
 		UpdatePositionInputFields(warpActor);
-		lastTimeKeyPressed = Time.time;
+		timer.Restart();
 	}
 
 	void UpdatePositionInputFields(Box actor)

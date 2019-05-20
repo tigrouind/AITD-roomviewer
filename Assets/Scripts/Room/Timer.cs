@@ -27,13 +27,13 @@ public class Timer
 
 	public void Restart()
 	{
-		elapsed = 0;
+		elapsed = 0.0f;
 		started = Time.time;
 		running = true;
 	}
 		
 	public void Reset() {
-		elapsed = 0;
+		elapsed = 0.0f;
 		running = false;
 	}
 		
@@ -48,6 +48,16 @@ public class Timer
 			}
 
 			return time;
+		}
+
+		set
+		{
+			if (running)
+			{
+				started = Time.time;
+			}
+			
+			elapsed = value;
 		}
 	}
 }
