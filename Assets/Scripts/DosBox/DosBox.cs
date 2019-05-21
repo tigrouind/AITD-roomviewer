@@ -31,8 +31,8 @@ public class DosBox : MonoBehaviour
 		new byte[][] { new byte[] { 0x43, 0x01, 0x00, 0x00, 0xD0, 0xE4, 0x43, 0x01, 0x00, 0x00, 0xD0, 0xE4 } }, //AIID2
 		new byte[][]
 		{
-			new byte[] { 0x3F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x3F, 0x03, 0x00, 0x00, 0x00, 0x00 }, //AITD3
-			new byte[] { 0x27, 0x03, 0x00, 0x00, 0x00, 0x00, 0x27, 0x03, 0x00, 0x00, 0x00, 0x00 }  //AITD3 (after restart)
+			new byte[] { 0x27, 0x03, 0x00, 0x00, 0x00, 0x00, 0x27, 0x03, 0x00, 0x00, 0x00, 0x00 }, //AITD3
+			new byte[] { 0x3F, 0x03, 0x00, 0x00, 0x00, 0x00, 0x3F, 0x03, 0x00, 0x00, 0x00, 0x00 }  //AITD3 (after restart)
 		}
 	};
 
@@ -592,7 +592,7 @@ public class DosBox : MonoBehaviour
 		return processIds;
 	}
 
-	bool SearchDOSBOXProcess(int patternIndex, out int processId, out long address)
+	bool SearchForBytePattern(int patternIndex, out int processId, out long address)
 	{
 		int[] processIds = GetAllDOSBOXProcesses();
 		if (!processIds.Any())
@@ -638,7 +638,7 @@ public class DosBox : MonoBehaviour
 		int processId = Shared.ProcessId;
 		if (processId == -1)
 		{
-			if (!SearchDOSBOXProcess(patternIndex, out processId, out memoryAddress))
+			if (!SearchForBytePattern(patternIndex, out processId, out memoryAddress))
 			{
 				return false;
 			}

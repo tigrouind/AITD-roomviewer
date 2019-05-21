@@ -101,7 +101,7 @@ public class ProcessMemoryReader
 				&& (int)mem_info.RegionSize >= 1024 * 1024 * 16)
 			{
 				long readPosition = (long)mem_info.BaseAddress;
-				int bytesToRead = (int)mem_info.RegionSize;
+				int bytesToRead = Math.Min((int)mem_info.RegionSize, 1024 * 640); //scan first 640K only
 
 				long bytesRead;
 				while (bytesToRead > 0 && (bytesRead = Read(buffer, readPosition, Math.Min(buffer.Length, bytesToRead))) > 0)
@@ -128,7 +128,7 @@ public class ProcessMemoryReader
 	private int IndexOf(byte[] x, byte[] y, int count)
 	{
 		for (int i = 0; i < count - y.Length + 1; i++)
-			if (IsMatch(x, y, i))
+			if (x[i] == y[0] && IsMatch(x, y, i))
 				return i;
 		return -1;
 	}
