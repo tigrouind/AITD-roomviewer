@@ -128,16 +128,27 @@ public class ProcessMemoryReader
 	private int IndexOf(byte[] x, byte[] y, int count)
 	{
 		for (int i = 0; i < count - y.Length + 1; i++)
-			if (x[i] == y[0] && IsMatch(x, y, i))
+		{
+			if (IsMatch(x, y, i))
+			{
 				return i;
+			}
+		}
+
 		return -1;
 	}
 
 	private bool IsMatch(byte[] x, byte[] y, int index)
 	{
-		for (int j = 0; j < y.Length; j++)
-			if (x[j + index] != y[j])
+		for (int i = 0; i < y.Length; i++)
+		{
+			byte val = y[i];
+			if (x[i + index] != val && val != 0xFF)
+			{
 				return false;
+			}
+		}
+
 		return true;
 	}
 }
