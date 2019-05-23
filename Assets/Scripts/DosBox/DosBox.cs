@@ -329,30 +329,33 @@ public class DosBox : MonoBehaviour
 								Arrow.AlwaysOnTop = Camera.main.orthographic;
 								player = box;
 
-								//worldpost unsync
-								Box worldPos = box.BoxWorldPos;
-
-								if ((box.WorldPosition.x + box.Mod.x) != box.BoundingPos.x || (box.WorldPosition.z + box.Mod.z) != box.BoundingPos.z)
+								if (isAITD1)
 								{
-									if (worldPos == null)
-									{ 
-										worldPos = Instantiate(BoxPrefab);
-										worldPos.name = "WorldPos";
-										worldPos.Color = new Color32(255, 0, 0, 128);
-										Destroy(worldPos.gameObject.GetComponent<BoxCollider>());
-										box.BoxWorldPos = worldPos;
+									//worldpost unsync
+									Box worldPos = box.BoxWorldPos;
+
+									if ((box.WorldPosition.x + box.Mod.x) != box.BoundingPos.x || (box.WorldPosition.z + box.Mod.z) != box.BoundingPos.z)
+									{
+										if (worldPos == null)
+										{ 
+											worldPos = Instantiate(BoxPrefab);
+											worldPos.name = "WorldPos";
+											worldPos.Color = new Color32(255, 0, 0, 128);
+											Destroy(worldPos.gameObject.GetComponent<BoxCollider>());
+											box.BoxWorldPos = worldPos;
+										}
+
+										Vector3 finalPos = (box.WorldPosition + box.Mod) / 1000.0f;
+										finalPos = new Vector3(finalPos.x, boxPosition.y + 0.001f, finalPos.z) + roomObject.localPosition;
+										worldPos.transform.position = finalPos;
+										worldPos.transform.localScale = box.transform.localScale;
+										worldPos.AlwaysOnTop = Camera.main.orthographic;
 									}
-
-									Vector3 finalPos = (box.WorldPosition + box.Mod) / 1000.0f;
-									finalPos = new Vector3(finalPos.x, boxPosition.y + 0.001f, finalPos.z) + roomObject.localPosition;
-									worldPos.transform.position = finalPos;
-									worldPos.transform.localScale = box.transform.localScale;
-									worldPos.AlwaysOnTop = Camera.main.orthographic;
-								}
-								else if (worldPos != null)
-								{
-									Destroy(worldPos.gameObject);
-									box.BoxWorldPos = null;
+									else if (worldPos != null)
+									{
+										Destroy(worldPos.gameObject);
+										box.BoxWorldPos = null;
+									}
 								}
 							}
 							else
