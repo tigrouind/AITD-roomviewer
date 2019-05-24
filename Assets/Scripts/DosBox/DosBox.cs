@@ -87,7 +87,7 @@ public class DosBox : MonoBehaviour
 
 	public void UpdateAllActors()
 	{
-		Box player = null;
+		Player = null;
 		if (ProcessReader != null)
 		{
 			if (ProcessReader.Read(memory, memoryAddress, memory.Length) > 0)
@@ -243,41 +243,12 @@ public class DosBox : MonoBehaviour
 							box.transform.localScale = (box.BoundingSize + delta) / 1000.0f;
 
 							//make sure very small actors are visible
-							box.transform.localScale = new Vector3(
-								Mathf.Max(box.transform.localScale.x, 0.1f),
-								Mathf.Max(box.transform.localScale.y, 0.1f),
-								Mathf.Max(box.transform.localScale.z, 0.1f));
-
+							box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.1f);
+							
 							bool isAITD1 = dosBoxPattern == 0;
 							if (isAITD1)
 							{
-								//hot point
-								Box hotPoint = box.BoxHotPoint;
-
-								if (box.ActionType == 2)
-								{
-									if (hotPoint == null)
-									{ 
-										hotPoint = Instantiate(BoxPrefab);
-										hotPoint.name = "HotPoint";
-										hotPoint.Color = new Color32(255, 0, 0, 255);
-										Destroy(hotPoint.gameObject.GetComponent<BoxCollider>());
-										box.BoxHotPoint = hotPoint;
-									}
-
-									Vector3 finalPos = (box.HotPosition + box.LocalPosition + box.Mod) / 1000.0f;
-									finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z) + roomObject.localPosition;
-									hotPoint.transform.position = finalPos;
-
-									int boxSize = box.HotBoxSize;
-									hotPoint.transform.localScale = new Vector3(boxSize, boxSize, boxSize) / 500.0f;
-									hotPoint.AlwaysOnTop = Camera.main.orthographic;
-								}
-								else if (hotPoint != null)
-								{
-									Destroy(hotPoint.gameObject);
-									box.BoxHotPoint = null;
-								}
+								UpdateHotPointBox(box, roomObject.localPosition);
 							}						
 
 							if (ShowAITD1Vars)
@@ -300,7 +271,8 @@ public class DosBox : MonoBehaviour
 							}
 
 							//player
-							if (box.ID == lastValidPlayerIndex)
+							bool isPlayer = box.ID == lastValidPlayerIndex;
+							if (isPlayer)
 							{
 								//check if player has moved
 								if (box.transform.position != lastPlayerPosition)
@@ -327,36 +299,7 @@ public class DosBox : MonoBehaviour
 								//player is white
 								box.Color = new Color32(255, 255, 255, 255);								
 								Arrow.AlwaysOnTop = Camera.main.orthographic;
-								player = box;
-
-								if (isAITD1)
-								{
-									//worldpost unsync
-									Box worldPos = box.BoxWorldPos;
-
-									if ((box.WorldPosition.x + box.Mod.x) != box.BoundingPos.x || (box.WorldPosition.z + box.Mod.z) != box.BoundingPos.z)
-									{
-										if (worldPos == null)
-										{ 
-											worldPos = Instantiate(BoxPrefab);
-											worldPos.name = "WorldPos";
-											worldPos.Color = new Color32(255, 0, 0, 128);
-											Destroy(worldPos.gameObject.GetComponent<BoxCollider>());
-											box.BoxWorldPos = worldPos;
-										}
-
-										Vector3 finalPos = (box.WorldPosition + box.Mod) / 1000.0f;
-										finalPos = new Vector3(finalPos.x, boxPosition.y + 0.001f, finalPos.z) + roomObject.localPosition;
-										worldPos.transform.position = finalPos;
-										worldPos.transform.localScale = box.transform.localScale;
-										worldPos.AlwaysOnTop = Camera.main.orthographic;
-									}
-									else if (worldPos != null)
-									{
-										Destroy(worldPos.gameObject);
-										box.BoxWorldPos = null;
-									}
-								}
+								Player = box;
 							}
 							else
 							{
@@ -369,15 +312,13 @@ public class DosBox : MonoBehaviour
 									//other actors are green
 									box.Color = new Color32(0, 128, 0, 255);
 								}
-
-								//no world pos box for other actors
-								if (box.BoxWorldPos != null)
-								{
-									Destroy(box.BoxWorldPos.gameObject);
-									box.BoxWorldPos = null;
-								}
 							}
-
+							
+							if (isAITD1) 
+							{
+								UpdateWorldPosBox(box, roomObject.localPosition, isPlayer);
+							}
+							
 							box.AlwaysOnTop = Camera.main.orthographic;
 							box.gameObject.SetActive(true);
 						}
@@ -424,10 +365,69 @@ public class DosBox : MonoBehaviour
 
 		//arrow is only active if actors are active and player is active
 		Arrow.gameObject.SetActive(Actors.activeSelf
-			&& player != null
-			&& player.gameObject.activeSelf
-			&& player.transform.localScale.magnitude > 0.01f);
-		Player = player;
+			&& Player != null
+			&& Player.gameObject.activeSelf
+			&& Player.transform.localScale.magnitude > 0.01f);
+	}
+	
+	void UpdateHotPointBox(Box box, Vector3 roomPosition)
+	{
+		//hot point
+		Box hotPoint = box.BoxHotPoint;
+
+		if (box.ActionType == 2)
+		{
+			if (hotPoint == null)
+			{ 
+				hotPoint = Instantiate(BoxPrefab);
+				hotPoint.name = "HotPoint";
+				hotPoint.Color = new Color32(255, 0, 0, 255);
+				Destroy(hotPoint.gameObject.GetComponent<BoxCollider>());
+				box.BoxHotPoint = hotPoint;
+			}
+
+			Vector3 finalPos = (box.HotPosition + box.LocalPosition + box.Mod) / 1000.0f;
+			finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z) + roomPosition;
+			hotPoint.transform.position = finalPos;
+
+			hotPoint.transform.localScale = Vector3.one * (box.HotBoxSize / 500.0f);
+			hotPoint.AlwaysOnTop = Camera.main.orthographic;
+		}
+		else if (hotPoint != null)
+		{
+			Destroy(hotPoint.gameObject);
+			box.BoxHotPoint = null;
+		}
+	}
+	
+	void UpdateWorldPosBox(Box box, Vector3 roomPosition, bool isPlayer)
+	{
+		//worldpost unsync
+		Box worldPos = box.BoxWorldPos;
+			
+		if (isPlayer && ((box.WorldPosition.x + box.Mod.x) != box.BoundingPos.x || (box.WorldPosition.z + box.Mod.z) != box.BoundingPos.z))
+		{			
+			if (worldPos == null)
+			{ 
+				worldPos = Instantiate(BoxPrefab);
+				worldPos.name = "WorldPos";
+				worldPos.Color = new Color32(255, 0, 0, 128);
+				Destroy(worldPos.gameObject.GetComponent<BoxCollider>());
+				box.BoxWorldPos = worldPos;
+			}
+
+			Vector3 finalPos = (box.WorldPosition + box.Mod) / 1000.0f;
+			float height = -box.BoundingPos.y / 1000.0f;
+			finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z) + roomPosition;
+			worldPos.transform.position = finalPos;
+			worldPos.transform.localScale = box.transform.localScale;
+			worldPos.AlwaysOnTop = Camera.main.orthographic;
+		}
+		else if (worldPos != null)
+		{
+			Destroy(worldPos.gameObject);
+			box.BoxWorldPos = null;
+		}
 	}
 
 	public void UpdateBoxInfo()
