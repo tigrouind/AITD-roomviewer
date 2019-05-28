@@ -13,6 +13,7 @@ public class Box : MonoBehaviour
 	private static string[] animTypeInfo = new string[] { "ONCE", "REPEAT", "UNINTERRUPT" };
 	private static string[] trackModeInfo = new string[] { "NONE", "MANUAL", "FOLLOW", "TRACK" };
 	private static string[] actionTypeInfo = new string[] { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
+	private static string[] lifeModeInfo = new string[] { "FLOOR", "ROOM", "CAMERA" };
 
 	public int ID;
 	public int Flags;
@@ -285,9 +286,9 @@ public class Box : MonoBehaviour
 
 			if (Life != -1)
 			{
-				if(DosBox.ShowAdditionalInfo)
+				if(DosBox.ShowAdditionalInfo && LifeMode >= 0 && LifeMode <= 2)
 				{
-					info.Append("LIFE/LIFEMODE", "{0}; {1}", Life, LifeMode);
+					info.Append("LIFE/LIFEMODE", "{0}; {1}", Life, lifeModeInfo[LifeMode]);
 				}
 				else
 				{
