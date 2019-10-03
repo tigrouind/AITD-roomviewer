@@ -114,7 +114,6 @@ public class DosBox : MonoBehaviour
 						int boundingZ2 = Utils.ReadShort(memory, k + 18);
 
 						FixBoundingWrap(ref boundingX1, ref boundingX2);
-						FixBoundingWrap(ref boundingY1, ref boundingY2);
 						FixBoundingWrap(ref boundingZ1, ref boundingZ2);
 
 						box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
