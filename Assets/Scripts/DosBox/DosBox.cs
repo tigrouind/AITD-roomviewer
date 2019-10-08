@@ -571,23 +571,24 @@ public class DosBox : MonoBehaviour
 	int[] GetAllDOSBOXProcesses()
 	{
 		int[] processIds = Process.GetProcesses()
-			.Where(x =>
-				{
-					string name;
-					try
-					{
-						name = x.ProcessName;
-					}
-					catch
-					{
-						name = string.Empty;
-					}
-					return name.StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase);
-				})
+			.Where(x => GetProcessName(x).StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase))
 			.Select(x => x.Id)
 			.ToArray();
 
 		return processIds;
+	}
+	
+	string GetProcessName(Process process)
+	{
+		try
+		{
+			//could fail because not enough permissions (eg : admin process)
+			return process.ProcessName;
+		}
+		catch
+		{
+			return string.Empty;
+		}
 	}
 
 	bool SearchForBytePattern(int patternIndex, out int processId, out long address)
@@ -672,8 +673,12 @@ public class DosBox : MonoBehaviour
 
 	public void UnlinkDosBox()
 	{
-		ProcessReader.Close();
-		ProcessReader = null;
+		if (ProcessReader != null) 
+		{
+			ProcessReader.Close();
+			ProcessReader = null;
+		}
+		
 		Shared.ProcessId = -1;
 		BoxInfo.Clear(true);
 		RightText.text = string.Empty;
