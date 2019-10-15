@@ -34,6 +34,7 @@ public class RoomLoader : MonoBehaviour
 	private Box HighLightedBox;
 	private Box SelectedBox;
 	private int SelectedBoxId;
+	private int targetSlot = -1;
 
 	private bool DosBoxEnabled;
 	private bool isAITD1;
@@ -511,6 +512,25 @@ public class RoomLoader : MonoBehaviour
 				}
 			}
 		}
+
+		//exchange actor slot
+		if (HighLightedBox != null)
+		{
+			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+			{
+				InputDigit(ref targetSlot);
+			}
+					
+			if (Input.GetKeyUp(KeyCode.LeftControl) || Input.GetKeyUp(KeyCode.RightControl))
+			{
+				if(targetSlot >= 0 && targetSlot < 50 && isAITD1)
+				{
+					GetComponent<DosBox>().ExchangeActorSlots(HighLightedBox.Slot, targetSlot);
+				}
+
+				targetSlot = -1;
+			}
+		}
 	}
 
 	private void RefreshHighLightedBox()
@@ -934,6 +954,24 @@ public class RoomLoader : MonoBehaviour
 		if(box != null)
 		{
 			box.Camera.gameObject.SetActive(visible);
+		}
+	}
+
+	void InputDigit(ref int value)
+	{
+		var keys = new[] { KeyCode.Keypad0, KeyCode.Keypad1, KeyCode.Keypad2, KeyCode.Keypad3, KeyCode.Keypad4, KeyCode.Keypad5, KeyCode.Keypad6, KeyCode.Keypad7, KeyCode.Keypad8, KeyCode.Keypad9 };
+		var key = keys.FirstOrDefault(x => Input.GetKeyUp(x));
+		if(key != KeyCode.None)
+		{
+			int currentDigit = key - KeyCode.Keypad0;
+			if(value == -1)
+			{
+				value = currentDigit;
+			}
+			else
+			{
+				value = currentDigit + value * 10;
+			}
 		}
 	}
 }

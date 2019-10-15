@@ -34,6 +34,7 @@ public class DosBox : MonoBehaviour
 
 	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 };
 	private byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 };
+	private byte[] objectMemoryPattern = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x03, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x77, 0xEA };
 
 	private int[] MemoryOffsets = new [] { -188, -28, -28 };
 	//offset to apply to get beginning of actors array
@@ -649,6 +650,7 @@ public class DosBox : MonoBehaviour
 			{
 				Shared.VarsMemoryAddress = ProcessReader.SearchForBytePattern(varsMemoryPattern);
 				Shared.CvarsMemoryAddress = ProcessReader.SearchForBytePattern(cvarsMemoryPattern);
+				Shared.ObjectMemoryAddress = ProcessReader.SearchForBytePattern(objectMemoryPattern);
 			}
 		}
 		else
@@ -706,6 +708,44 @@ public class DosBox : MonoBehaviour
 			mousePosition -= roomObject.position;
 		}
 		return mousePosition * 1000.0f;
+	}
+
+	#endregion
+
+	#region Exchange slots
+
+	public void ExchangeActorSlots(int slotFrom, int slotTo)
+	{
+		if(ProcessReader != null && Shared.ObjectMemoryAddress != -1 && slotFrom != slotTo)
+		{
+			int actorSize = ActorStructSize[dosBoxPattern];
+			long offsetFrom = GetActorMemoryAddress(slotFrom);
+			long offsetTo = GetActorMemoryAddress(slotTo);
+
+			byte[] memoryFrom = new byte[actorSize];
+			byte[] memoryTo = new byte[actorSize];
+
+			//exchange slots
+			ProcessReader.Read(memoryFrom, offsetFrom, actorSize);
+			ProcessReader.Read(memoryTo, offsetTo, actorSize);
+
+			ProcessReader.Write(memoryTo, offsetFrom, actorSize);
+			ProcessReader.Write(memoryFrom, offsetTo, actorSize);
+
+			UpdateObjectOwnerID(slotFrom, (short)slotTo);
+			UpdateObjectOwnerID(slotTo, (short)slotFrom);
+		}
+	}
+
+	void UpdateObjectOwnerID(int slotIndex, short ownerID)
+	{
+		int objectID = Boxes[slotIndex].ID;
+		if (objectID != -1)
+		{
+			long address = Shared.ObjectMemoryAddress + objectID * 52;
+			Utils.Write(ownerID, memory, 0);
+			ProcessReader.Write(memory, address, 2);
+		}
 	}
 
 	#endregion
