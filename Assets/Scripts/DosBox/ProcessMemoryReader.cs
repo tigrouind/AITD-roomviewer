@@ -83,13 +83,14 @@ public class ProcessMemoryReader
 		}
 	}
 
-	public long SearchForBytePattern(byte[] pattern)
+	public long SearchForBytePattern(byte[] pattern, bool wildcard = false)
 	{
 		MEMORY_BASIC_INFORMATION mem_info = new MEMORY_BASIC_INFORMATION();
 
 		long min_address = 0;
 		long max_address = 0x7FFFFFFF;
 		byte[] buffer = new byte[81920];
+		PatternSearch patternSearch = new PatternSearch(buffer, pattern, wildcard);
 
 		//scan process memory regions
 		while (min_address < max_address
@@ -107,7 +108,7 @@ public class ProcessMemoryReader
 				while (bytesToRead > 0 && (bytesRead = Read(buffer, readPosition, Math.Min(buffer.Length, bytesToRead))) > 0)
 				{
 					//search bytes pattern
-					int index = IndexOf(buffer, pattern, (int)bytesRead);
+					int index = patternSearch.IndexOf((int)bytesRead);
 					if (index != -1)
 					{
 						return readPosition + index;
@@ -123,32 +124,5 @@ public class ProcessMemoryReader
 		}
 
 		return -1;
-	}
-
-	private int IndexOf(byte[] x, byte[] y, int count)
-	{
-		for (int i = 0; i < count - y.Length + 1; i++)
-		{
-			if (IsMatch(x, y, i))
-			{
-				return i;
-			}
-		}
-
-		return -1;
-	}
-
-	private bool IsMatch(byte[] x, byte[] y, int index)
-	{
-		for (int i = 0; i < y.Length; i++)
-		{
-			byte val = y[i];
-			if (x[i + index] != val && val != 0xFF)
-			{
-				return false;
-			}
-		}
-
-		return true;
 	}
 }
