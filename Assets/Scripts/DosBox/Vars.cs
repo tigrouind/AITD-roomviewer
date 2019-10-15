@@ -15,8 +15,6 @@ public class Vars : MonoBehaviour
 	private VarParser varParser = new VarParser();
 
 	private ProcessMemoryReader processReader;
-	private long varsMemoryAddress;
-	private long cvarsMemoryAddress;
 
 	private bool compare;
 	private bool ignoreDifferences = true;
@@ -44,8 +42,6 @@ public class Vars : MonoBehaviour
 		BuildTables();
 
 		processReader = new ProcessMemoryReader(Shared.ProcessId);
-		varsMemoryAddress = Shared.VarsMemoryAddress;
-		cvarsMemoryAddress = Shared.CvarsMemoryAddress;
 	}
 
 	void OnDestroy()
@@ -66,24 +62,24 @@ public class Vars : MonoBehaviour
 
 	bool RefreshVARS()
 	{
-		if (varsMemoryAddress != -1)
+		if (Shared.VarsMemoryAddress != -1)
 		{
-			if (processReader.Read(memory, varsMemoryAddress, 207 * 2) <= 0)
+			if (processReader.Read(memory, Shared.VarsMemoryAddress, 207 * 2) <= 0)
 			{
 				return false;
 			}
 
-			CheckDifferences(memory, vars, varsMemoryAddress);
+			CheckDifferences(memory, vars, Shared.VarsMemoryAddress);
 		}
 
-		if (cvarsMemoryAddress != -1) 
+		if (Shared.CvarsMemoryAddress != -1) 
 		{
-			if (processReader.Read(memory, cvarsMemoryAddress, 44 * 2) <= 0)
+			if (processReader.Read(memory, Shared.CvarsMemoryAddress, 44 * 2) <= 0)
 			{
 				return false;
 			}
 			
-			CheckDifferences(memory, cvars, cvarsMemoryAddress);
+			CheckDifferences(memory, cvars, Shared.CvarsMemoryAddress);
 		}
 		
 		return true;

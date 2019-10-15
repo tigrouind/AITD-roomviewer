@@ -41,78 +41,88 @@ public class WarpDialog : MonoBehaviour
 		{
 			if (!Panel.GetComponentsInChildren<InputField>().Any(x => x.isFocused) && warpActor != null)
 			{
-				//move actor
-				if (timer.Elapsed > 0.1f)
-				{
-					if (Input.GetKey(KeyCode.Keypad9))
-					{
-						RotateActor(warpActor, -1);
-					}
-
-					if (Input.GetKey(KeyCode.Keypad7))
-					{
-						RotateActor(warpActor, 1);
-					}
-
- 					if (Input.GetKey(KeyCode.Keypad3))
-					{
-						MoveActor(warpActor, new Vector3(0.0f, -1.0f, 0.0f));
-					}
-
-					if (Input.GetKey(KeyCode.Keypad1))
-					{
-						MoveActor(warpActor, new Vector3(0.0f, 1.0f, 0.0f));
-					}
-
-					if (Input.GetKey(KeyCode.Keypad4))
-					{
-						MoveActor(warpActor, new Vector3(-1.0f, 0.0f, 0.0f));
-					}
-
-					if (Input.GetKey(KeyCode.Keypad6))
-					{
-						MoveActor(warpActor, new Vector3(1.0f, 0.0f, 0.0f));
-					}
-
-					if (Input.GetKey(KeyCode.Keypad2))
-					{
-						MoveActor(warpActor, new Vector3(0.0f, 0.0f, -1.0f));
-					}
-
-					if (Input.GetKey(KeyCode.Keypad8))
-					{
-						MoveActor(warpActor, new Vector3(0.0f, 0.0f, 1.0f));
-					}
-				}
-
-				if (Input.GetKeyUp(KeyCode.Keypad1) ||
-					Input.GetKeyUp(KeyCode.Keypad3) ||
-					Input.GetKeyUp(KeyCode.Keypad4) ||
-					Input.GetKeyUp(KeyCode.Keypad8) ||
-					Input.GetKeyUp(KeyCode.Keypad6) ||
-					Input.GetKeyUp(KeyCode.Keypad2) ||
-					Input.GetKeyUp(KeyCode.Keypad7) ||
-					Input.GetKeyUp(KeyCode.Keypad9) ||
-					Input.GetKey(KeyCode.Keypad0))
-				{
-					timer.Elapsed = 1.0f;
-				}
+				MoveOrRotateActor(warpActor);
 			}
 			
 			//warp to mouse position
 			if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.W))
 			{
-				//select player by default
-				if (warpActor == null)
-				{
-					warpActor = GetComponent<DosBox>().Player;
-				}
-
-				Vector3 offset = GetComponent<DosBox>().GetMousePosition(warpActor.Room, warpActor.Floor) - (warpActor.LocalPosition + warpActor.Mod);
-				offset = new Vector3(Mathf.RoundToInt(offset.x), 0.0f, Mathf.RoundToInt(offset.z));
-				MoveActor(warpActor, offset);
+				WarpActor(warpActor);
 			}
 		}
+	}
+
+	void MoveOrRotateActor(Box actor)
+	{
+		//move actor
+		if (timer.Elapsed > 0.1f)
+		{
+			if (Input.GetKey(KeyCode.Keypad9))
+			{
+				RotateActor(actor, -1);
+			}
+
+			if (Input.GetKey(KeyCode.Keypad7))
+			{
+				RotateActor(actor, 1);
+			}
+
+			if (Input.GetKey(KeyCode.Keypad3))
+			{
+				MoveActor(actor, new Vector3(0.0f, -1.0f, 0.0f));
+			}
+
+			if (Input.GetKey(KeyCode.Keypad1))
+			{
+				MoveActor(actor, new Vector3(0.0f, 1.0f, 0.0f));
+			}
+
+			if (Input.GetKey(KeyCode.Keypad4))
+			{
+				MoveActor(actor, new Vector3(-1.0f, 0.0f, 0.0f));
+			}
+
+			if (Input.GetKey(KeyCode.Keypad6))
+			{
+				MoveActor(actor, new Vector3(1.0f, 0.0f, 0.0f));
+			}
+
+			if (Input.GetKey(KeyCode.Keypad2))
+			{
+				MoveActor(actor, new Vector3(0.0f, 0.0f, -1.0f));
+			}
+
+			if (Input.GetKey(KeyCode.Keypad8))
+			{
+				MoveActor(actor, new Vector3(0.0f, 0.0f, 1.0f));
+			}
+		}
+
+		if (Input.GetKeyUp(KeyCode.Keypad1) ||
+			Input.GetKeyUp(KeyCode.Keypad3) ||
+			Input.GetKeyUp(KeyCode.Keypad4) ||
+			Input.GetKeyUp(KeyCode.Keypad8) ||
+			Input.GetKeyUp(KeyCode.Keypad6) ||
+			Input.GetKeyUp(KeyCode.Keypad2) ||
+			Input.GetKeyUp(KeyCode.Keypad7) ||
+			Input.GetKeyUp(KeyCode.Keypad9) ||
+			Input.GetKey(KeyCode.Keypad0))
+		{
+			timer.Elapsed = 1.0f;
+		}
+	}
+
+	void WarpActor(Box actor)
+	{
+		//select player by default
+		if (actor == null)
+		{
+			actor = GetComponent<DosBox>().Player;
+		}
+
+		Vector3 offset = GetComponent<DosBox>().GetMousePosition(actor.Room, actor.Floor) - (actor.LocalPosition + actor.Mod);
+		offset = new Vector3(Mathf.RoundToInt(offset.x), 0.0f, Mathf.RoundToInt(offset.z));
+		MoveActor(actor, offset);
 	}
 
 	public void LoadActor(Box actor)
@@ -173,7 +183,7 @@ public class WarpDialog : MonoBehaviour
 		ToggleAdvanceMode(AdvancedMode.BoolValue);
 	}
 
-	public void ToggleAdvanceMode(bool enabled)
+	void ToggleAdvanceMode(bool enabled)
 	{
 		positionX.transform.parent.parent.gameObject.SetActive(!enabled);
 		localPosX.transform.parent.parent.gameObject.SetActive(enabled);
