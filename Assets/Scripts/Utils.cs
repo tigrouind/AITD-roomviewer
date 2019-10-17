@@ -2,7 +2,7 @@
 
 public static class Utils
 {
-	public static uint ReadUnsignedInt(byte[] data, int offset)
+	public static uint ReadUnsignedInt(this byte[] data, int offset)
 	{
 		unchecked
 		{
@@ -10,7 +10,7 @@ public static class Utils
 		}
 	}
 
-	public static int ReadInt(byte[] data, int offset)
+	public static int ReadInt(this byte[] data, int offset)
 	{
 		unchecked
 		{
@@ -18,7 +18,7 @@ public static class Utils
 		}
 	}
 
-	public static short ReadShort(byte[] data, int offset)
+	public static short ReadShort(this byte[] data, int offset)
 	{
 		unchecked
 		{
@@ -26,7 +26,7 @@ public static class Utils
 		}
 	}
 
-	public static ushort ReadUnsignedShort(byte[] data, int offset)
+	public static ushort ReadUnsignedShort(this byte[] data, int offset)
 	{
 		unchecked
 		{
@@ -34,7 +34,7 @@ public static class Utils
 		}
 	}
 
-	public static void Write(byte[] data, short value, int offset)
+	public static void Write(this byte[] data, short value, int offset)
 	{
 		unchecked
 		{
@@ -43,7 +43,7 @@ public static class Utils
 		}
 	}
 
-	public static void Write(byte[] data, ushort value, int offset)
+	public static void Write(this byte[] data, ushort value, int offset)
 	{
 		unchecked
 		{
@@ -52,7 +52,7 @@ public static class Utils
 		}
 	}
 
-	public static void Write(byte[] data, uint value,  int offset)
+	public static void Write(this byte[] data, uint value,  int offset)
 	{
 		unchecked
 		{

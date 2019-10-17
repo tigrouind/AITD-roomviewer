@@ -161,11 +161,11 @@ public class RoomLoader : MonoBehaviour
 		camerasPerRoom = new List<List<int>>();
 
 		name = "FLOOR" + floor;
-		int maxrooms = Utils.ReadInt(allPointsA, 0) / 4;
+		int maxrooms = allPointsA.ReadInt(0) / 4;
 		for (int currentroom = 0; currentroom < maxrooms; currentroom++)
 		{
 			int i = currentroom * 4;
-			int roomheader = Utils.ReadInt(allPointsA, i + 0);
+			int roomheader = allPointsA.ReadInt(i + 0);
 			if (roomheader > allPointsA.Length || roomheader == 0)
 			{
 				//all rooms parsed
@@ -177,15 +177,15 @@ public class RoomLoader : MonoBehaviour
 			roomObject.name = "ROOM" + currentroom;
 			roomObject.transform.parent = transform;
 
-			int roomx = Utils.ReadShort(allPointsA, roomheader + 4);
-			int roomy = Utils.ReadShort(allPointsA, roomheader + 6);
-			int roomz = Utils.ReadShort(allPointsA, roomheader + 8);
+			int roomx = allPointsA.ReadShort(roomheader + 4);
+			int roomy = allPointsA.ReadShort(roomheader + 6);
+			int roomz = allPointsA.ReadShort(roomheader + 8);
 
 			roomObject.transform.localPosition = new Vector3(roomx, roomy, -roomz) / 100.0f;
 
 			//colliders
-			i = roomheader + Utils.ReadShort(allPointsA, roomheader + 0);
-			int totalpoint = Utils.ReadShort(allPointsA, i + 0);
+			i = roomheader + allPointsA.ReadShort(roomheader + 0);
+			int totalpoint = allPointsA.ReadShort(i + 0);
 			i += 2;
 
 			for (int count = 0; count < totalpoint; count++)
@@ -195,16 +195,16 @@ public class RoomLoader : MonoBehaviour
 				box.Room = currentroom;
 				box.transform.parent = roomObject.transform;
 
-				box.transform.localPosition = new Vector3((Utils.ReadShort(allPointsA, i + 0) + Utils.ReadShort(allPointsA, i + 2)),
-					-(Utils.ReadShort(allPointsA, i + 4) + Utils.ReadShort(allPointsA, i + 6)),
-					(Utils.ReadShort(allPointsA, i + 8) + Utils.ReadShort(allPointsA, i + 10))) / 2000.0f;
+				box.transform.localPosition = new Vector3((allPointsA.ReadShort(i + 0) + allPointsA.ReadShort(i + 2)),
+					-(allPointsA.ReadShort(i + 4) + allPointsA.ReadShort(i + 6)),
+					(allPointsA.ReadShort(i + 8) + allPointsA.ReadShort(i + 10))) / 2000.0f;
 
-				box.transform.localScale = new Vector3((Utils.ReadShort(allPointsA, i + 2) - Utils.ReadShort(allPointsA, i + 0)),
-					(Utils.ReadShort(allPointsA, i + 6) - Utils.ReadShort(allPointsA, i + 4)),
-					(Utils.ReadShort(allPointsA, i + 10) - Utils.ReadShort(allPointsA, i + 8))) / 1000.0f;
+				box.transform.localScale = new Vector3((allPointsA.ReadShort(i + 2) - allPointsA.ReadShort(i + 0)),
+					(allPointsA.ReadShort(i + 6) - allPointsA.ReadShort(i + 4)),
+					(allPointsA.ReadShort(i + 10) - allPointsA.ReadShort(i + 8))) / 1000.0f;
 
-				box.ID = Utils.ReadShort(allPointsA, i + 12);
-				box.Flags = Utils.ReadShort(allPointsA, i + 14);
+				box.ID = allPointsA.ReadShort(i + 12);
+				box.Flags = allPointsA.ReadShort(i + 14);
 
 				box.Color = new Color32(143, 143, 143, 255);
 				if ((box.Flags & 2) == 2)
@@ -222,8 +222,8 @@ public class RoomLoader : MonoBehaviour
 			}
 
 			//triggers
-			i = roomheader + Utils.ReadShort(allPointsA, roomheader + 2);
-			totalpoint = Utils.ReadShort(allPointsA, i + 0);
+			i = roomheader + allPointsA.ReadShort(roomheader + 2);
+			totalpoint = allPointsA.ReadShort(i + 0);
 			i += 2;
 
 			for (int count = 0; count < totalpoint; count++)
@@ -234,16 +234,16 @@ public class RoomLoader : MonoBehaviour
 				box.Room = currentroom;
 				box.transform.parent = roomObject.transform;
 
-				box.transform.localPosition = new Vector3((Utils.ReadShort(allPointsA, i + 0) + Utils.ReadShort(allPointsA, i + 2)),
-					-(Utils.ReadShort(allPointsA, i + 4) + Utils.ReadShort(allPointsA, i + 6)),
-					(Utils.ReadShort(allPointsA, i + 8) + Utils.ReadShort(allPointsA, i + 10))) / 2000.0f;
+				box.transform.localPosition = new Vector3((allPointsA.ReadShort(i + 0) + allPointsA.ReadShort(i + 2)),
+					-(allPointsA.ReadShort(i + 4) + allPointsA.ReadShort(i + 6)),
+					(allPointsA.ReadShort(i + 8) + allPointsA.ReadShort(i + 10))) / 2000.0f;
 
-				box.transform.localScale = new Vector3((Utils.ReadShort(allPointsA, i + 2) - Utils.ReadShort(allPointsA, i + 0)),
-					(Utils.ReadShort(allPointsA, i + 6) - Utils.ReadShort(allPointsA, i + 4)),
-					(Utils.ReadShort(allPointsA, i + 10) - Utils.ReadShort(allPointsA, i + 8))) / 1000.0f;
+				box.transform.localScale = new Vector3((allPointsA.ReadShort(i + 2) - allPointsA.ReadShort(i + 0)),
+					(allPointsA.ReadShort(i + 6) - allPointsA.ReadShort(i + 4)),
+					(allPointsA.ReadShort(i + 10) - allPointsA.ReadShort(i + 8))) / 1000.0f;
 
-				box.ID = Utils.ReadShort(allPointsA, i + 12);
-				box.Flags = Utils.ReadShort(allPointsA, i + 14);
+				box.ID = allPointsA.ReadShort(i + 12);
+				box.Flags = allPointsA.ReadShort(i + 14);
 
 				if (box.Flags == 9) //custom trigger
 				{
@@ -266,11 +266,11 @@ public class RoomLoader : MonoBehaviour
 			}
 
 			//cameras
-			int cameraCount = Utils.ReadShort(allPointsA, roomheader + 10);
+			int cameraCount = allPointsA.ReadShort(roomheader + 10);
 			List<int> cameraInRoom = new List<int>();
 			for (int cameraIndex = 0; cameraIndex < cameraCount; cameraIndex++)
 			{
-				int cameraID = Utils.ReadShort(allPointsA, roomheader + cameraIndex * 2 + 12);	 //camera
+				int cameraID = allPointsA.ReadShort(roomheader + cameraIndex * 2 + 12);	 //camera
 				cameraInRoom.Add(cameraID);
 			}
 
@@ -287,8 +287,8 @@ public class RoomLoader : MonoBehaviour
 		{
 			foreach (int cameraID in camerasPerRoom[roomIndex])
 			{
-				int cameraHeader = Utils.ReadShort(allPointsB, cameraID * 4 + 0);
-				int numentries = Utils.ReadShort(allPointsB, cameraHeader + 0x12);
+				int cameraHeader = allPointsB.ReadShort(cameraID * 4 + 0);
+				int numentries = allPointsB.ReadShort(cameraHeader + 0x12);
 
 				List<Vector2> points = new List<Vector2>();
 				List<int> indices = new List<int>();
@@ -296,24 +296,24 @@ public class RoomLoader : MonoBehaviour
 				for (int k = 0; k < numentries; k++)
 				{
 					int i = cameraHeader + 0x14 + k * (isAITD1 ? 12 : 16);
-					int cameraRoom = Utils.ReadShort(allPointsB, i + 0);
+					int cameraRoom = allPointsB.ReadShort(i + 0);
 
 					if (cameraRoom == roomIndex)
 					{
-						i = cameraHeader + Utils.ReadShort(allPointsB, i + 4);
-						int totalAreas = Utils.ReadShort(allPointsB, i + 0);
+						i = cameraHeader + allPointsB.ReadShort(i + 4);
+						int totalAreas = allPointsB.ReadShort(i + 0);
 						i += 2;
 
 						for (int g = 0; g < totalAreas; g++)
 						{
-							int totalPoints = Utils.ReadShort(allPointsB, i + 0);
+							int totalPoints = allPointsB.ReadShort(i + 0);
 							i += 2;
 
 							List<Vector2> pts = new List<Vector2>();
 							for (int u = 0; u < totalPoints; u++)
 							{
-								short px = Utils.ReadShort(allPointsB, i + 0);
-								short pz = Utils.ReadShort(allPointsB, i + 2);
+								short px = allPointsB.ReadShort(i + 0);
+								short pz = allPointsB.ReadShort(i + 2);
 								pts.Add(new Vector2(px, pz) / 100.0f);
 								i += 4;
 							}
@@ -345,17 +345,17 @@ public class RoomLoader : MonoBehaviour
 					area.gameObject.AddComponent<MeshCollider>();
 
 					//setup camera
-					Vector3 cameraRotation = new Vector3(Utils.ReadShort(allPointsB, cameraHeader + 0),
-							Utils.ReadShort(allPointsB, cameraHeader + 2),
-							Utils.ReadShort(allPointsB, cameraHeader + 4));
+					Vector3 cameraRotation = new Vector3(allPointsB.ReadShort(cameraHeader + 0),
+							allPointsB.ReadShort(cameraHeader + 2),
+							allPointsB.ReadShort(cameraHeader + 4));
 
-					Vector3 cameraPosition = new Vector3(Utils.ReadShort(allPointsB, cameraHeader + 6),
-							Utils.ReadShort(allPointsB, cameraHeader + 8),
-							Utils.ReadShort(allPointsB, cameraHeader + 10));
+					Vector3 cameraPosition = new Vector3(allPointsB.ReadShort(cameraHeader + 6),
+							allPointsB.ReadShort(cameraHeader + 8),
+							allPointsB.ReadShort(cameraHeader + 10));
 
-					Vector3 cameraFocal = new Vector3(Utils.ReadShort(allPointsB, cameraHeader + 12),
-							Utils.ReadShort(allPointsB, cameraHeader + 14),
-							Utils.ReadShort(allPointsB, cameraHeader + 16));
+					Vector3 cameraFocal = new Vector3(allPointsB.ReadShort(cameraHeader + 12),
+							allPointsB.ReadShort(cameraHeader + 14),
+							allPointsB.ReadShort(cameraHeader + 16));
 
 					Box camera = Instantiate(BoxPrefab);
 					camera.name = "CameraFrustum";

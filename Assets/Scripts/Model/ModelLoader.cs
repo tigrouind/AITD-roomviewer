@@ -88,29 +88,29 @@ public class ModelLoader : MonoBehaviour
 		int i = 0;
 
 		//header
-		int flags = Utils.ReadShort(allbytes, i + 0);
+		int flags = allbytes.ReadShort(i + 0);
 
 		//bounding box
-		int x1 = Utils.ReadShort(allbytes, i + 2);
-		int x2 = Utils.ReadShort(allbytes, i + 4);
-		int y1 = Utils.ReadShort(allbytes, i + 6);
-		int y2 = Utils.ReadShort(allbytes, i + 8);
-		int z1 = Utils.ReadShort(allbytes, i + 10);
-		int z2 = Utils.ReadShort(allbytes, i + 12);
+		int x1 = allbytes.ReadShort(i + 2);
+		int x2 = allbytes.ReadShort(i + 4);
+		int y1 = allbytes.ReadShort(i + 6);
+		int y2 = allbytes.ReadShort(i + 8);
+		int z1 = allbytes.ReadShort(i + 10);
+		int z2 = allbytes.ReadShort(i + 12);
 		boundingLower = new Vector3(x1, y1, z1);
 		boundingUpper = new Vector3(x2, y2, z2);
 
 		i += 0xE;
-		i += Utils.ReadShort(allbytes, i + 0) + 2;
+		i += allbytes.ReadShort(i + 0) + 2;
 
 		//vertexes
-		int count = Utils.ReadShort(allbytes, i + 0);
+		int count = allbytes.ReadShort(i + 0);
 		i += 2;
 
 		List<Vector3> vertices = new List<Vector3>();
 		for (int j = 0; j < count; j++)
 		{
-			Vector3 position = new Vector3(Utils.ReadShort(allbytes, i + 0), -Utils.ReadShort(allbytes, i + 2), Utils.ReadShort(allbytes, i + 4));
+			Vector3 position = new Vector3(allbytes.ReadShort(i + 0), -allbytes.ReadShort(i + 2), allbytes.ReadShort(i + 4));
 			vertices.Add(position / 1000.0f);
 			i += 6;
 		}
@@ -124,7 +124,7 @@ public class ModelLoader : MonoBehaviour
 		if ((flags & 2) == 2)
 		{
 			//bones
-			count = Utils.ReadShort(allbytes, i + 0);
+			count = allbytes.ReadShort(i + 0);
 			i += 2;
 			i += count * 2;
 
@@ -133,9 +133,9 @@ public class ModelLoader : MonoBehaviour
 			bonesPerIndex.Add(255, transform);
 			for (int n = 0; n < count; n++)
 			{
-				int startindex = Utils.ReadShort(allbytes, i + 0) / 6;
-				int numpoints = Utils.ReadShort(allbytes, i + 2);
-				int vertexindex = Utils.ReadShort(allbytes, i + 4) / 6;
+				int startindex = allbytes.ReadShort(i + 0) / 6;
+				int numpoints = allbytes.ReadShort(i + 2);
+				int vertexindex = allbytes.ReadShort(i + 4) / 6;
 				int parentindex = allbytes[i + 6];
 				int boneindex = allbytes[i + 7];
 
@@ -184,7 +184,7 @@ public class ModelLoader : MonoBehaviour
 		float noisesize = 0.8f / bounds.size.magnitude;
 
 		//primitives
-		count = Utils.ReadShort(allbytes, i + 0);
+		count = allbytes.ReadShort(i + 0);
 		i += 2;
 
 		//load palette
@@ -219,8 +219,8 @@ public class ModelLoader : MonoBehaviour
 						i += 2;
 
 						Color32 color = paletteColors[colorIndex];
-						int pointIndexA = Utils.ReadShort(allbytes, i + 0) / 6;
-						int pointIndexB = Utils.ReadShort(allbytes, i + 2) / 6;
+						int pointIndexA = allbytes.ReadShort(i + 0) / 6;
+						int pointIndexB = allbytes.ReadShort(i + 2) / 6;
 						Vector3 directionVector = vertices[pointIndexA] - vertices[pointIndexB];
 						Vector3 middle = (vertices[pointIndexA] + vertices[pointIndexB]) / 2.0f;
 						Quaternion rotation = Quaternion.LookRotation(directionVector);
@@ -252,7 +252,7 @@ public class ModelLoader : MonoBehaviour
 						int verticesCount = allVertices.Count;
 						for (int m = 0; m < numPoints; m++)
 						{
-							int pointIndex = Utils.ReadShort(allbytes, i + 0) / 6;
+							int pointIndex = allbytes.ReadShort(i + 0) / 6;
 							i += 2;
 
 							colors.Add(color);
@@ -326,9 +326,9 @@ public class ModelLoader : MonoBehaviour
 
 						i += 2;
 
-						int size = Utils.ReadShort(allbytes, i + 0);
+						int size = allbytes.ReadShort(i + 0);
 						i += 2;
-						int pointSphereIndex = Utils.ReadShort(allbytes, i + 0) / 6;
+						int pointSphereIndex = allbytes.ReadShort(i + 0) / 6;
 						i += 2;
 
 						Vector3 position = vertices[pointSphereIndex];
@@ -356,7 +356,7 @@ public class ModelLoader : MonoBehaviour
 						i++;
 						int colorIndex = allbytes[i];
 						i += 2;
-						int cubeIndex = Utils.ReadShort(allbytes, i + 0) / 6;
+						int cubeIndex = allbytes.ReadShort(i + 0) / 6;
 						i += 2;
 
 						Color32 color = paletteColors[colorIndex];
@@ -491,27 +491,27 @@ public class ModelLoader : MonoBehaviour
 
 		int i = 0;
 		byte[] allbytes = File.ReadAllBytes(filename);
-		int frameCount = Utils.ReadShort(allbytes, i + 0);
-		int boneCount = Utils.ReadShort(allbytes, i + 2);
+		int frameCount = allbytes.ReadShort(i + 0);
+		int boneCount = allbytes.ReadShort(i + 2);
 		i += 4;
 
 		animFrames = new List<Frame>();
 		for(int frame = 0 ; frame < frameCount ; frame++)
 		{
 			Frame f = new Frame();
-			f.Time = Utils.ReadShort(allbytes, i + 0);
-			f.OffsetX = Utils.ReadShort(allbytes, i + 2);
-			f.OffsetY = Utils.ReadShort(allbytes, i + 4);
-			f.OffsetZ = Utils.ReadShort(allbytes, i + 6);
+			f.Time = allbytes.ReadShort(i + 0);
+			f.OffsetX = allbytes.ReadShort(i + 2);
+			f.OffsetY = allbytes.ReadShort(i + 4);
+			f.OffsetZ = allbytes.ReadShort(i + 6);
 
 			f.Bones = new List<Vector4>();
 			i += 8;
 			for(int bone = 0 ; bone < boneCount ; bone++)
 			{
-				int type = Utils.ReadShort(allbytes, i + 0);
-				int x = Utils.ReadShort(allbytes, i + 2);
-				int y = Utils.ReadShort(allbytes, i + 4);
-				int z = Utils.ReadShort(allbytes, i + 6);
+				int type = allbytes.ReadShort(i + 0);
+				int x = allbytes.ReadShort(i + 2);
+				int y = allbytes.ReadShort(i + 4);
+				int z = allbytes.ReadShort(i + 6);
 
 				if(type == 0) //rotate
 				{

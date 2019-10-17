@@ -191,7 +191,7 @@ public class Vars : MonoBehaviour
 			}
 			else
 			{
-				value = Utils.ReadShort(memory, i * 2 + 0);
+				value = memory.ReadShort(i * 2 + 0);
 			}
 
 			var.value = value;
@@ -287,7 +287,7 @@ public class Vars : MonoBehaviour
 				{
 					//write new value to memory
 					byte[] wordValue = new byte[2];
-					Utils.Write(wordValue, (short)newValueInt, 0);
+					wordValue.Write((short)newValueInt, 0);
 					processReader.Write(wordValue, var.memoryAddress, wordValue.Length);
 				}
 			}

@@ -97,21 +97,21 @@ public class DosBox : MonoBehaviour
 				foreach (Box box in Boxes)
 				{
 					int k = i * ActorStructSize[dosBoxPattern];
-					box.ID = Utils.ReadShort(memory, k + 0);
+					box.ID = memory.ReadShort(k + 0);
 
 					if (box.ID != -1)
 					{						
 						int trackModeOffset = TrackModeOffsets[dosBoxPattern];
-						box.Body = Utils.ReadShort(memory, k + 2);
-						box.Flags = Utils.ReadShort(memory, k + 4);
-						box.ColFlags = Utils.ReadShort(memory, k + 6);
+						box.Body = memory.ReadShort(k + 2);
+						box.Flags = memory.ReadShort(k + 4);
+						box.ColFlags = memory.ReadShort(k + 6);
 						
-						int boundingX1 = Utils.ReadShort(memory, k + 8);
-						int boundingX2 = Utils.ReadShort(memory, k + 10);
-						int boundingY1 = Utils.ReadShort(memory, k + 12);
-						int boundingY2 = Utils.ReadShort(memory, k + 14);
-						int boundingZ1 = Utils.ReadShort(memory, k + 16);
-						int boundingZ2 = Utils.ReadShort(memory, k + 18);
+						int boundingX1 = memory.ReadShort(k + 8);
+						int boundingX2 = memory.ReadShort(k + 10);
+						int boundingY1 = memory.ReadShort(k + 12);
+						int boundingY2 = memory.ReadShort(k + 14);
+						int boundingZ1 = memory.ReadShort(k + 16);
+						int boundingZ2 = memory.ReadShort(k + 18);
 
 						FixBoundingWrap(ref boundingX1, ref boundingX2);
 						FixBoundingWrap(ref boundingZ1, ref boundingZ2);
@@ -119,74 +119,74 @@ public class DosBox : MonoBehaviour
 						box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
 						box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
 
-						boundingX1 = Utils.ReadShort(memory, k + 20);
-						boundingX2 = Utils.ReadShort(memory, k + 22);
-						boundingY1 = Utils.ReadShort(memory, k + 24);
-						boundingY2 = Utils.ReadShort(memory, k + 26);
+						boundingX1 = memory.ReadShort(k + 20);
+						boundingX2 = memory.ReadShort(k + 22);
+						boundingY1 = memory.ReadShort(k + 24);
+						boundingY2 = memory.ReadShort(k + 26);
 
 						box.Box2DLower = new Vector2(boundingX1, boundingY1);
 						box.Box2DUpper = new Vector2(boundingX2, boundingY2);
 
-						box.LocalPosition.x = Utils.ReadShort(memory, k + 28);
-						box.LocalPosition.y = Utils.ReadShort(memory, k + 30);
-						box.LocalPosition.z = Utils.ReadShort(memory, k + 32);
+						box.LocalPosition.x = memory.ReadShort(k + 28);
+						box.LocalPosition.y = memory.ReadShort(k + 30);
+						box.LocalPosition.z = memory.ReadShort(k + 32);
 
-						box.WorldPosition.x = Utils.ReadShort(memory, k + 34);
-						box.WorldPosition.y = Utils.ReadShort(memory, k + 36);
-						box.WorldPosition.z = Utils.ReadShort(memory, k + 38);
+						box.WorldPosition.x = memory.ReadShort(k + 34);
+						box.WorldPosition.y = memory.ReadShort(k + 36);
+						box.WorldPosition.z = memory.ReadShort(k + 38);
 
-						box.Angles.x = Utils.ReadShort(memory, k + 40);
-						box.Angles.y = Utils.ReadShort(memory, k + 42);
-						box.Angles.z = Utils.ReadShort(memory, k + 44);
+						box.Angles.x = memory.ReadShort(k + 40);
+						box.Angles.y = memory.ReadShort(k + 42);
+						box.Angles.z = memory.ReadShort(k + 44);
 
-						box.Floor = Utils.ReadShort(memory, k + 46);
-						box.Room = Utils.ReadShort(memory, k + 48);
-						box.LifeMode = Utils. ReadShort(memory, k + 50);
-						box.Life = Utils.ReadShort(memory, k + 52);
-						box.Chrono = Utils.ReadUnsignedInt(memory, k + 54);
-						box.RoomChrono = Utils.ReadUnsignedInt(memory, k + 58);
-						box.Anim = Utils.ReadShort(memory, k + 62);
-						box.AnimType = Utils.ReadShort(memory, k + 64);
-						box.NextAnim = Utils.ReadShort(memory, k + 66);
-						box.Keyframe = Utils.ReadShort(memory, k + 74);
-						box.TotalFrames = Utils.ReadShort(memory, k + 76);
-						box.EndFrame = Utils.ReadShort(memory, k + 78);
-						box.EndAnim = Utils.ReadShort(memory, k + 80);
+						box.Floor = memory.ReadShort(k + 46);
+						box.Room = memory.ReadShort(k + 48);
+						box.LifeMode = memory. ReadShort(k + 50);
+						box.Life = memory.ReadShort(k + 52);
+						box.Chrono = memory.ReadUnsignedInt(k + 54);
+						box.RoomChrono = memory.ReadUnsignedInt(k + 58);
+						box.Anim = memory.ReadShort(k + 62);
+						box.AnimType = memory.ReadShort(k + 64);
+						box.NextAnim = memory.ReadShort(k + 66);
+						box.Keyframe = memory.ReadShort(k + 74);
+						box.TotalFrames = memory.ReadShort(k + 76);
+						box.EndFrame = memory.ReadShort(k + 78);
+						box.EndAnim = memory.ReadShort(k + 80);
 						
-						box.TrackMode = Utils.ReadShort(memory, k + trackModeOffset);
-						box.TrackNumber = Utils.ReadShort(memory, k + 84);
-						box.PositionInTrack = Utils.ReadShort(memory, k + 88);
+						box.TrackMode = memory.ReadShort(k + trackModeOffset);
+						box.TrackNumber = memory.ReadShort(k + 84);
+						box.PositionInTrack = memory.ReadShort(k + 88);
 
 						if(dosBoxPattern == 0) //AITD1 only
 						{
-							box.Mod.x = Utils.ReadShort(memory, k + 90);
-							box.Mod.y = Utils.ReadShort(memory, k + 92);
-							box.Mod.z = Utils.ReadShort(memory, k + 94);
+							box.Mod.x = memory.ReadShort(k + 90);
+							box.Mod.y = memory.ReadShort(k + 92);
+							box.Mod.z = memory.ReadShort(k + 94);
 						}
 						else
 						{
 							box.Mod = Vector3.zero;
 						}
 
-						box.OldAngle = Utils.ReadShort(memory, k + 106);
-						box.NewAngle = Utils.ReadShort(memory, k + 108);
-						box.RotateTime = Utils.ReadShort(memory, k + 110);
-						box.Speed = Utils.ReadShort(memory, k + 116);
+						box.OldAngle = memory.ReadShort(k + 106);
+						box.NewAngle = memory.ReadShort(k + 108);
+						box.RotateTime = memory.ReadShort(k + 110);
+						box.Speed = memory.ReadShort(k + 116);
 						
-						box.Col[0] = Utils.ReadShort(memory, k + 126);
-						box.Col[1] = Utils.ReadShort(memory, k + 128);
-						box.Col[2] = Utils.ReadShort(memory, k + 130);
-						box.ColBy = Utils.ReadShort(memory, k + 132);
-						box.HardTrigger = Utils.ReadShort(memory, k + 134);
-						box.HardCol = Utils.ReadShort(memory, k + 136);
-						box.Hit = Utils.ReadShort(memory, k + 138);
-						box.HitBy = Utils.ReadShort(memory, k + 140);
-						box.ActionType = Utils.ReadShort(memory, k + 142);
-						box.HotBoxSize = Utils.ReadShort(memory, k + 148);
-						box.HitForce = Utils.ReadShort(memory, k + 150);
-						box.HotPosition.x = Utils.ReadShort(memory, k + 154);
-						box.HotPosition.y = Utils.ReadShort(memory, k + 156);
-						box.HotPosition.z = Utils.ReadShort(memory, k + 158);
+						box.Col[0] = memory.ReadShort(k + 126);
+						box.Col[1] = memory.ReadShort(k + 128);
+						box.Col[2] = memory.ReadShort(k + 130);
+						box.ColBy = memory.ReadShort(k + 132);
+						box.HardTrigger = memory.ReadShort(k + 134);
+						box.HardCol = memory.ReadShort(k + 136);
+						box.Hit = memory.ReadShort(k + 138);
+						box.HitBy = memory.ReadShort(k + 140);
+						box.ActionType = memory.ReadShort(k + 142);
+						box.HotBoxSize = memory.ReadShort(k + 148);
+						box.HitForce = memory.ReadShort(k + 150);
+						box.HotPosition.x = memory.ReadShort(k + 154);
+						box.HotPosition.y = memory.ReadShort(k + 156);
+						box.HotPosition.z = memory.ReadShort(k + 158);
 					}
 
 					i++;
@@ -336,19 +336,19 @@ public class DosBox : MonoBehaviour
 				{
 					//internal timer
 					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6, 4);
-					InternalTimer = Utils.ReadUnsignedInt(memory, 0);
+					InternalTimer = memory.ReadUnsignedInt(0);
 
 					//internal timer 2
 					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0xA5CE, 2);
-					internalTimer2 = Utils.ReadUnsignedShort(memory, 0);
+					internalTimer2 = memory.ReadUnsignedShort(0);
 
 					//inventory
 					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 - 0x1A4, 2);
-					allowInventory = Utils.ReadShort(memory, 0) == 1;
+					allowInventory = memory.ReadShort(0) == 1;
 
 					//inhand
 					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 + 0xA33C, 2);
-					inHand = Utils.ReadShort(memory, 0);
+					inHand = memory.ReadShort(0);
 
 					//set by AITD when long running code is started (eg: loading ressource)
 					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0x13EA, 4);
@@ -487,14 +487,14 @@ public class DosBox : MonoBehaviour
 		{
 			//internal timer 1
 			InternalTimer -= 60 * 5; //back 5 frames
-			Utils.Write(memory, InternalTimer, 0);
+			memory.Write(InternalTimer, 0);
 			ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6, 4);
 		}
 		if (Input.GetKeyDown(KeyCode.Alpha2) && ProcessReader != null)
 		{
 			//internal timer 2
 			internalTimer2 -= 60 * 5; //back 5 frames
-			Utils.Write(memory, internalTimer2, 0);
+			memory.Write(internalTimer2, 0);
 			ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0xA5CE, 2);
 		}
 	}
@@ -505,11 +505,11 @@ public class DosBox : MonoBehaviour
 		{
 			//fps
 			ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6, 2);
-			int fps = Utils.ReadShort(memory, 0);
+			int fps = memory.ReadShort(0);
 
 			//frames counter (reset to zero when every second by AITD)
 			ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 + 0x7464, 2);
-			int frames = Utils.ReadShort(memory, 0);
+			int frames = memory.ReadShort(0);
 
 			//check how much frames elapsed since last time
 			int diff;
@@ -743,7 +743,7 @@ public class DosBox : MonoBehaviour
 		if (objectID != -1)
 		{
 			long address = Shared.ObjectMemoryAddress + objectID * 52;
-			Utils.Write(memory, ownerID, 0);
+			memory.Write(ownerID, 0);
 			ProcessReader.Write(memory, address, 2);
 		}
 	}
