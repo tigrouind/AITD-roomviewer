@@ -63,7 +63,7 @@ public class Box : MonoBehaviour
 	public int HitBy;
 	public int Hit;
 	public int ColBy;
-	public int[] Col = new int[3];
+	public Vector3 Col;
 	public int HardCol;
 	public int HardTrigger;
 	public DosBox DosBox;
@@ -341,7 +341,7 @@ public class Box : MonoBehaviour
 			if (DosBox.ShowAITD1Vars)
 				info.Append("HITFORCE", HitForce);
 			if (DosBox.ShowAITD1Vars)
-				info.Append("HIT/BY COL/BY", "{0} {1}  {2} {3} {4} {5}", GetActorID(Hit), GetActorID(HitBy), GetActorID(Col[0]), GetActorID(Col[1]), GetActorID(Col[2]), GetActorID(ColBy));
+				info.Append("HIT/BY COL/BY", "{0} {1}  {2} {3} {4} {5}", GetActorID(Hit), GetActorID(HitBy), GetActorID((int)Col.x), GetActorID((int)Col.y), GetActorID((int)Col.z), GetActorID(ColBy));
 			if (DosBox.ShowAITD1Vars)
 				info.Append("HARDCOL/TRIG", "{0} {1}", DashIfEmpty(HardCol), DashIfEmpty(HardTrigger));
 			if (DosBox.ShowAdditionalInfo)

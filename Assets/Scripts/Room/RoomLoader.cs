@@ -177,11 +177,8 @@ public class RoomLoader : MonoBehaviour
 			roomObject.name = "ROOM" + currentroom;
 			roomObject.transform.parent = transform;
 
-			int roomx = allPointsA.ReadShort(roomheader + 4);
-			int roomy = allPointsA.ReadShort(roomheader + 6);
-			int roomz = allPointsA.ReadShort(roomheader + 8);
-
-			roomObject.transform.localPosition = new Vector3(roomx, roomy, -roomz) / 100.0f;
+			Vector3 roomPosition = allPointsA.ReadVector(roomheader + 4);
+			roomObject.transform.localPosition = new Vector3(roomPosition.x, roomPosition.y, -roomPosition.z) / 100.0f;
 
 			//colliders
 			i = roomheader + allPointsA.ReadShort(roomheader + 0);
@@ -195,13 +192,12 @@ public class RoomLoader : MonoBehaviour
 				box.Room = currentroom;
 				box.transform.parent = roomObject.transform;
 
-				box.transform.localPosition = new Vector3((allPointsA.ReadShort(i + 0) + allPointsA.ReadShort(i + 2)),
-					-(allPointsA.ReadShort(i + 4) + allPointsA.ReadShort(i + 6)),
-					(allPointsA.ReadShort(i + 8) + allPointsA.ReadShort(i + 10))) / 2000.0f;
+				Vector3 lower, upper;
+				allPointsA.ReadBoundingBox(i + 0, out lower, out upper);
 
-				box.transform.localScale = new Vector3((allPointsA.ReadShort(i + 2) - allPointsA.ReadShort(i + 0)),
-					(allPointsA.ReadShort(i + 6) - allPointsA.ReadShort(i + 4)),
-					(allPointsA.ReadShort(i + 10) - allPointsA.ReadShort(i + 8))) / 1000.0f;
+				Vector3 position = lower + upper;
+				box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
+				box.transform.localScale = (upper - lower) / 1000.0f;
 
 				box.ID = allPointsA.ReadShort(i + 12);
 				box.Flags = allPointsA.ReadShort(i + 14);
@@ -228,19 +224,17 @@ public class RoomLoader : MonoBehaviour
 
 			for (int count = 0; count < totalpoint; count++)
 			{
-
 				Box box = Instantiate(BoxPrefab);
 				box.name = "Trigger";
 				box.Room = currentroom;
 				box.transform.parent = roomObject.transform;
 
-				box.transform.localPosition = new Vector3((allPointsA.ReadShort(i + 0) + allPointsA.ReadShort(i + 2)),
-					-(allPointsA.ReadShort(i + 4) + allPointsA.ReadShort(i + 6)),
-					(allPointsA.ReadShort(i + 8) + allPointsA.ReadShort(i + 10))) / 2000.0f;
+				Vector3 lower, upper;
+				allPointsA.ReadBoundingBox(i + 0, out lower, out upper);
 
-				box.transform.localScale = new Vector3((allPointsA.ReadShort(i + 2) - allPointsA.ReadShort(i + 0)),
-					(allPointsA.ReadShort(i + 6) - allPointsA.ReadShort(i + 4)),
-					(allPointsA.ReadShort(i + 10) - allPointsA.ReadShort(i + 8))) / 1000.0f;
+				Vector3 position = lower + upper;
+				box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
+				box.transform.localScale = (upper - lower) / 1000.0f;
 
 				box.ID = allPointsA.ReadShort(i + 12);
 				box.Flags = allPointsA.ReadShort(i + 14);
@@ -345,17 +339,9 @@ public class RoomLoader : MonoBehaviour
 					area.gameObject.AddComponent<MeshCollider>();
 
 					//setup camera
-					Vector3 cameraRotation = new Vector3(allPointsB.ReadShort(cameraHeader + 0),
-							allPointsB.ReadShort(cameraHeader + 2),
-							allPointsB.ReadShort(cameraHeader + 4));
-
-					Vector3 cameraPosition = new Vector3(allPointsB.ReadShort(cameraHeader + 6),
-							allPointsB.ReadShort(cameraHeader + 8),
-							allPointsB.ReadShort(cameraHeader + 10));
-
-					Vector3 cameraFocal = new Vector3(allPointsB.ReadShort(cameraHeader + 12),
-							allPointsB.ReadShort(cameraHeader + 14),
-							allPointsB.ReadShort(cameraHeader + 16));
+					Vector3 cameraRotation = allPointsB.ReadVector(cameraHeader + 0);
+					Vector3 cameraPosition = allPointsB.ReadVector(cameraHeader + 6);
+					Vector3 cameraFocal = allPointsB.ReadVector(cameraHeader + 12);
 
 					Box camera = Instantiate(BoxPrefab);
 					camera.name = "CameraFrustum";

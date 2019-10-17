@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine.UI;
-using System.Collections;
 
 public class DosBox : MonoBehaviour
 {
@@ -105,39 +104,17 @@ public class DosBox : MonoBehaviour
 						box.Body = memory.ReadShort(k + 2);
 						box.Flags = memory.ReadShort(k + 4);
 						box.ColFlags = memory.ReadShort(k + 6);
-						
-						int boundingX1 = memory.ReadShort(k + 8);
-						int boundingX2 = memory.ReadShort(k + 10);
-						int boundingY1 = memory.ReadShort(k + 12);
-						int boundingY2 = memory.ReadShort(k + 14);
-						int boundingZ1 = memory.ReadShort(k + 16);
-						int boundingZ2 = memory.ReadShort(k + 18);
 
-						FixBoundingWrap(ref boundingX1, ref boundingX2);
-						FixBoundingWrap(ref boundingZ1, ref boundingZ2);
+						memory.ReadBoundingBox(k + 8, out box.BoundingLower, out box.BoundingUpper);
 
-						box.BoundingLower = new Vector3(boundingX1, boundingY1, boundingZ1);
-						box.BoundingUpper = new Vector3(boundingX2, boundingY2, boundingZ2);
+						FixBoundingWrap(ref box.BoundingLower.x, ref box.BoundingUpper.x);
+						FixBoundingWrap(ref box.BoundingLower.z, ref box.BoundingUpper.z);
 
-						boundingX1 = memory.ReadShort(k + 20);
-						boundingX2 = memory.ReadShort(k + 22);
-						boundingY1 = memory.ReadShort(k + 24);
-						boundingY2 = memory.ReadShort(k + 26);
+						memory.ReadBoundingBox(k + 20, out box.Box2DLower, out box.Box2DUpper);
 
-						box.Box2DLower = new Vector2(boundingX1, boundingY1);
-						box.Box2DUpper = new Vector2(boundingX2, boundingY2);
-
-						box.LocalPosition.x = memory.ReadShort(k + 28);
-						box.LocalPosition.y = memory.ReadShort(k + 30);
-						box.LocalPosition.z = memory.ReadShort(k + 32);
-
-						box.WorldPosition.x = memory.ReadShort(k + 34);
-						box.WorldPosition.y = memory.ReadShort(k + 36);
-						box.WorldPosition.z = memory.ReadShort(k + 38);
-
-						box.Angles.x = memory.ReadShort(k + 40);
-						box.Angles.y = memory.ReadShort(k + 42);
-						box.Angles.z = memory.ReadShort(k + 44);
+						box.LocalPosition = memory.ReadVector(k + 28);
+						box.WorldPosition = memory.ReadVector(k + 34);
+						box.Angles = memory.ReadVector(k + 40);
 
 						box.Floor = memory.ReadShort(k + 46);
 						box.Room = memory.ReadShort(k + 48);
@@ -159,9 +136,7 @@ public class DosBox : MonoBehaviour
 
 						if(dosBoxPattern == 0) //AITD1 only
 						{
-							box.Mod.x = memory.ReadShort(k + 90);
-							box.Mod.y = memory.ReadShort(k + 92);
-							box.Mod.z = memory.ReadShort(k + 94);
+							box.Mod = memory.ReadVector(k + 90);
 						}
 						else
 						{
@@ -173,9 +148,7 @@ public class DosBox : MonoBehaviour
 						box.RotateTime = memory.ReadShort(k + 110);
 						box.Speed = memory.ReadShort(k + 116);
 						
-						box.Col[0] = memory.ReadShort(k + 126);
-						box.Col[1] = memory.ReadShort(k + 128);
-						box.Col[2] = memory.ReadShort(k + 130);
+						box.Col = memory.ReadVector(k + 126);
 						box.ColBy = memory.ReadShort(k + 132);
 						box.HardTrigger = memory.ReadShort(k + 134);
 						box.HardCol = memory.ReadShort(k + 136);
@@ -184,9 +157,7 @@ public class DosBox : MonoBehaviour
 						box.ActionType = memory.ReadShort(k + 142);
 						box.HotBoxSize = memory.ReadShort(k + 148);
 						box.HitForce = memory.ReadShort(k + 150);
-						box.HotPosition.x = memory.ReadShort(k + 154);
-						box.HotPosition.y = memory.ReadShort(k + 156);
-						box.HotPosition.z = memory.ReadShort(k + 158);
+						box.HotPosition = memory.ReadVector(k + 154);
 					}
 
 					i++;
@@ -553,17 +524,17 @@ public class DosBox : MonoBehaviour
 		}		
 	}
 
-	void FixBoundingWrap(ref int a, ref int b)
+	void FixBoundingWrap(ref float a, ref float b)
 	{
 		if(a > b)
 		{
-			if((Int16.MaxValue - a) > (b - Int16.MinValue))
+			if(a < -b)
 			{
-				b += 65536;
+				b += 65536.0f;
 			}
 			else
 			{
-				a -= 65536;
+				a -= 65536.0f;
 			}
 		}
 	}

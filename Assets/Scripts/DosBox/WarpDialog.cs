@@ -297,21 +297,12 @@ public class WarpDialog : MonoBehaviour
 			//update to memory
 			//bounds
 			byte[] buffer = new byte[12];
-			buffer.Write((short)lowerBound.x, 0);
-			buffer.Write((short)upperBound.x, 2);
-			buffer.Write((short)lowerBound.y, 4);
-			buffer.Write((short)upperBound.y, 6);
-			buffer.Write((short)lowerBound.z, 8);
-			buffer.Write((short)upperBound.z, 10);
+			buffer.Write(lowerBound, upperBound, 0);
 			processReader.Write(buffer, offset + 8, 12);
 
 			//local+world
-			buffer.Write((short)localPosition.x, 0);
-			buffer.Write((short)localPosition.y, 2);
-			buffer.Write((short)localPosition.z, 4);
-			buffer.Write((short)worldPosition.x, 6);
-			buffer.Write((short)worldPosition.y, 8);
-			buffer.Write((short)worldPosition.z, 10);
+			buffer.Write(localPosition, 0);
+			buffer.Write(worldPosition, 6);
 			processReader.Write(buffer, offset + 28, 12);
 
 			actor.LocalPosition = localPosition;

@@ -39,8 +39,8 @@ public class ModelLoader : MonoBehaviour
 	public Vector3 boundingLower;
 	public Vector3 boundingUpper; 
 
-	private Vector2 cameraRotation = new Vector2();
-	private Vector2 cameraPosition = new Vector2();
+	private Vector2 cameraRotation;
+	private Vector2 cameraPosition;
 	private float cameraZoom = 2.0f;
 
 	private Vector3 mousePosition;
@@ -91,14 +91,7 @@ public class ModelLoader : MonoBehaviour
 		int flags = allbytes.ReadShort(i + 0);
 
 		//bounding box
-		int x1 = allbytes.ReadShort(i + 2);
-		int x2 = allbytes.ReadShort(i + 4);
-		int y1 = allbytes.ReadShort(i + 6);
-		int y2 = allbytes.ReadShort(i + 8);
-		int z1 = allbytes.ReadShort(i + 10);
-		int z2 = allbytes.ReadShort(i + 12);
-		boundingLower = new Vector3(x1, y1, z1);
-		boundingUpper = new Vector3(x2, y2, z2);
+		allbytes.ReadBoundingBox(i + 2, out boundingLower, out boundingUpper);
 
 		i += 0xE;
 		i += allbytes.ReadShort(i + 0) + 2;
@@ -477,9 +470,7 @@ public class ModelLoader : MonoBehaviour
 	class Frame
 	{
 		public float Time;
-		public float OffsetX;
-		public float OffsetY;
-		public float OffsetZ;
+		public Vector3 Offset;
 		public List<Vector4> Bones;
 	}
 
@@ -500,31 +491,27 @@ public class ModelLoader : MonoBehaviour
 		{
 			Frame f = new Frame();
 			f.Time = allbytes.ReadShort(i + 0);
-			f.OffsetX = allbytes.ReadShort(i + 2);
-			f.OffsetY = allbytes.ReadShort(i + 4);
-			f.OffsetZ = allbytes.ReadShort(i + 6);
+			f.Offset = allbytes.ReadVector(i + 2);
 
 			f.Bones = new List<Vector4>();
 			i += 8;
 			for(int bone = 0 ; bone < boneCount ; bone++)
 			{
 				int type = allbytes.ReadShort(i + 0);
-				int x = allbytes.ReadShort(i + 2);
-				int y = allbytes.ReadShort(i + 4);
-				int z = allbytes.ReadShort(i + 6);
+				Vector3 boneTransform = allbytes.ReadVector(i + 2);
 
 				if(type == 0) //rotate
 				{
-					f.Bones.Add(new Vector4(-x * 360 / 1024.0f, -y * 360 / 1024.0f, -z * 360 / 1024.0f, type));
+					f.Bones.Add(new Vector4(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f, type));
 				}
 
 				else if(type == 1) //translate
 				{
-					f.Bones.Add(new Vector4(x / 1000.0f, -y / 1000.0f, z / 1000.0f, type));
+					f.Bones.Add(new Vector4(boneTransform.x / 1000.0f, -boneTransform.y / 1000.0f, boneTransform.z / 1000.0f, type));
 				}
 				else //scale
 				{
-					f.Bones.Add(new Vector4(x / 1024.0f + 1.0f, y / 1024.0f + 1.0f, z / 1024.0f + 1.0f, type));
+					f.Bones.Add(new Vector4(boneTransform.x / 1024.0f + 1.0f, boneTransform.y / 1024.0f + 1.0f, boneTransform.z / 1024.0f + 1.0f, type));
 				}
 				i += 8;
 			}
@@ -994,7 +981,7 @@ public class ModelLoader : MonoBehaviour
 			int index = 0;
 			foreach(Frame frame in animFrames)
 			{
-				stringBuilder.AppendFormat("Frame {0}: <color=#00c864>{1} {2} {3} {4}</color>\r\n", index, frame.Time, frame.OffsetX, frame.OffsetY, -frame.OffsetZ);
+				stringBuilder.AppendFormat("Frame {0}: <color=#00c864>{1} {2} {3} {4}</color>\r\n", index, frame.Time, frame.Offset.x, frame.Offset.y, -frame.Offset.z);
 				index++;
 			}
 		}
