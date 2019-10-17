@@ -287,7 +287,7 @@ public class Vars : MonoBehaviour
 				{
 					//write new value to memory
 					byte[] wordValue = new byte[2];
-					Utils.Write((short)newValueInt, wordValue, 0);
+					Utils.Write(wordValue, (short)newValueInt, 0);
 					processReader.Write(wordValue, var.memoryAddress, wordValue.Length);
 				}
 			}

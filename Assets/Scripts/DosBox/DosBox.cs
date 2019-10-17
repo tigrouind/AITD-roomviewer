@@ -487,14 +487,14 @@ public class DosBox : MonoBehaviour
 		{
 			//internal timer 1
 			InternalTimer -= 60 * 5; //back 5 frames
-			Utils.Write(InternalTimer, memory, 0);
+			Utils.Write(memory, InternalTimer, 0);
 			ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6, 4);
 		}
 		if (Input.GetKeyDown(KeyCode.Alpha2) && ProcessReader != null)
 		{
 			//internal timer 2
 			internalTimer2 -= 60 * 5; //back 5 frames
-			Utils.Write(internalTimer2, memory, 0);
+			Utils.Write(memory, internalTimer2, 0);
 			ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0xA5CE, 2);
 		}
 	}
@@ -743,7 +743,7 @@ public class DosBox : MonoBehaviour
 		if (objectID != -1)
 		{
 			long address = Shared.ObjectMemoryAddress + objectID * 52;
-			Utils.Write(ownerID, memory, 0);
+			Utils.Write(memory, ownerID, 0);
 			ProcessReader.Write(memory, address, 2);
 		}
 	}

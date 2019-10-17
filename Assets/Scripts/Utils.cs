@@ -34,7 +34,7 @@ public static class Utils
 		}
 	}
 
-	public static void Write(short value, byte[] data, int offset)
+	public static void Write(byte[] data, short value, int offset)
 	{
 		unchecked
 		{
@@ -43,7 +43,7 @@ public static class Utils
 		}
 	}
 
-	public static void Write(ushort value, byte[] data, int offset)
+	public static void Write(byte[] data, ushort value, int offset)
 	{
 		unchecked
 		{
@@ -52,7 +52,7 @@ public static class Utils
 		}
 	}
 
-	public static void Write(uint value, byte[] data, int offset)
+	public static void Write(byte[] data, uint value,  int offset)
 	{
 		unchecked
 		{

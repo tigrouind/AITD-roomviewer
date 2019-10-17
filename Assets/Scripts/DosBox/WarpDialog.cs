@@ -277,7 +277,7 @@ public class WarpDialog : MonoBehaviour
 		{
 			long offset = GetComponent<DosBox>().GetActorMemoryAddress(index);
 			byte[] position = new byte[2];
-			Utils.Write((short)angle, position, 0);
+			Utils.Write( position, (short)angle,0);
 			processReader.Write(position, offset + 42, 2);
 
 			actor.Angles.y = angle;
@@ -297,21 +297,21 @@ public class WarpDialog : MonoBehaviour
 			//update to memory
 			//bounds
 			byte[] buffer = new byte[12];
-			Utils.Write((short)lowerBound.x, buffer, 0);
-			Utils.Write((short)upperBound.x, buffer, 2);
-			Utils.Write((short)lowerBound.y, buffer, 4);
-			Utils.Write((short)upperBound.y, buffer, 6);
-			Utils.Write((short)lowerBound.z, buffer, 8);
-			Utils.Write((short)upperBound.z, buffer, 10);
+			Utils.Write(buffer, (short)lowerBound.x, 0);
+			Utils.Write(buffer, (short)upperBound.x, 2);
+			Utils.Write(buffer, (short)lowerBound.y, 4);
+			Utils.Write(buffer, (short)upperBound.y, 6);
+			Utils.Write(buffer, (short)lowerBound.z, 8);
+			Utils.Write(buffer, (short)upperBound.z, 10);
 			processReader.Write(buffer, offset + 8, 12);
 
 			//local+world
-			Utils.Write((short)localPosition.x, buffer, 0);
-			Utils.Write((short)localPosition.y, buffer, 2);
-			Utils.Write((short)localPosition.z, buffer, 4);
-			Utils.Write((short)worldPosition.x, buffer, 6);
-			Utils.Write((short)worldPosition.y, buffer, 8);
-			Utils.Write((short)worldPosition.z, buffer, 10);
+			Utils.Write(buffer, (short)localPosition.x, 0);
+			Utils.Write(buffer, (short)localPosition.y, 2);
+			Utils.Write(buffer, (short)localPosition.z, 4);
+			Utils.Write(buffer, (short)worldPosition.x, 6);
+			Utils.Write(buffer, (short)worldPosition.y, 8);
+			Utils.Write(buffer, (short)worldPosition.z, 10);
 			processReader.Write(buffer, offset + 28, 12);
 
 			actor.LocalPosition = localPosition;
