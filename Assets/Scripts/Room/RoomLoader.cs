@@ -34,7 +34,7 @@ public class RoomLoader : MonoBehaviour
 	private Box HighLightedBox;
 	private Box SelectedBox;
 	private int SelectedBoxId;
-	private int targetSlot = -1;
+	private int targetSlot;
 
 	private bool DosBoxEnabled;
 	private bool isAITD1;
@@ -502,6 +502,11 @@ public class RoomLoader : MonoBehaviour
 		//exchange actor slot
 		if (HighLightedBox != null)
 		{
+			if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl))
+			{
+				targetSlot = -1;
+			}
+			
 			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
 			{
 				InputDigit(ref targetSlot);
@@ -513,8 +518,6 @@ public class RoomLoader : MonoBehaviour
 				{
 					GetComponent<DosBox>().ExchangeActorSlots(HighLightedBox.Slot, targetSlot);
 				}
-
-				targetSlot = -1;
 			}
 		}
 	}
@@ -945,19 +948,32 @@ public class RoomLoader : MonoBehaviour
 
 	void InputDigit(ref int value)
 	{
-		var keys = new[] { KeyCode.Keypad0, KeyCode.Keypad1, KeyCode.Keypad2, KeyCode.Keypad3, KeyCode.Keypad4, KeyCode.Keypad5, KeyCode.Keypad6, KeyCode.Keypad7, KeyCode.Keypad8, KeyCode.Keypad9 };
-		var key = keys.FirstOrDefault(x => Input.GetKeyUp(x));
-		if(key != KeyCode.None)
+		int digit;
+		if (IsKeypadKeyDown(out digit))
 		{
-			int currentDigit = key - KeyCode.Keypad0;
-			if(value == -1)
+			if (value == -1)
 			{
-				value = currentDigit;
+				value = digit;
 			}
 			else
 			{
-				value = currentDigit + value * 10;
+				value = digit + value * 10;
 			}
 		}
+	}
+	
+	bool IsKeypadKeyDown(out int value)
+	{
+		for(int digit = 0 ; digit <= 9 ; digit++)
+		{
+			if (Input.GetKeyDown(KeyCode.Keypad0 + digit))
+			{
+				value = digit;
+				return true;
+			}
+		}
+
+		value = -1;
+		return false;
 	}
 }
