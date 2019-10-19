@@ -1,19 +1,19 @@
 public class PatternSearch
 {
-	byte[] x;
-	byte[] y;
+	byte[] buffer;
+	byte[] pattern;
 	bool wildcard;
 
-	public PatternSearch(byte[] x, byte[] y, bool wildcard)
+	public PatternSearch(byte[] buffer, byte[] pattern, bool wildcard)
 	{
-		this.x = x;
-		this.y = y;
+		this.buffer = buffer;
+		this.pattern = pattern;
 		this.wildcard = wildcard;
 	}
 	
 	public int IndexOf(int count)
 	{
-		for (int i = 0; i < count - y.Length + 1; i++)
+		for (int i = 0; i < count - pattern.Length + 1 ; i++)
 		{
 			if (IsMatch(i))
 			{
@@ -26,15 +26,15 @@ public class PatternSearch
 
 	bool IsMatch(int index)
 	{
-		for (int i = 0; i < y.Length; i++)
+		for (int i = 0; i < pattern.Length; i++)
 		{
-			byte val = y[i];
+			byte val = pattern[i];
 			if(wildcard && val == 0xFF)
 			{
 				continue;
 			}
 
-			if (x[i + index] != val)
+			if (buffer[i + index] != val)
 			{
 				return false;
 			}
