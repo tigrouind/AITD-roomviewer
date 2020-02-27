@@ -10,8 +10,6 @@ public class Vars : MonoBehaviour
 	private bool pauseVarsTracking;
 
 	private byte[] memory = new byte[512];
-	private Var[] vars = new Var[207];
-	private Var[] cvars = new Var[44];
 	private VarParser varParser = new VarParser();
 
 	private ProcessMemoryReader processReader;
@@ -37,8 +35,18 @@ public class Vars : MonoBehaviour
 			varParser.Parse(varPath, "VARS", "C_VARS");
 		}
 
-		InitVars(vars);
-		InitVars(cvars);
+		if(Shared.Vars == null)
+		{
+			Shared.Vars = new Var[207];
+			InitVars(Shared.Vars);
+		}
+
+		if(Shared.Cvars == null)
+		{
+			Shared.Cvars = new Var[44];
+			InitVars(Shared.Cvars);
+		}
+
 		BuildTables();
 
 		processReader = new ProcessMemoryReader(Shared.ProcessId);
@@ -69,7 +77,7 @@ public class Vars : MonoBehaviour
 				return false;
 			}
 
-			CheckDifferences(memory, vars, Shared.VarsMemoryAddress);
+			CheckDifferences(memory, Shared.Vars, Shared.VarsMemoryAddress);
 		}
 
 		if (Shared.CvarsMemoryAddress != -1)
@@ -79,7 +87,7 @@ public class Vars : MonoBehaviour
 				return false;
 			}
 
-			CheckDifferences(memory, cvars, Shared.CvarsMemoryAddress);
+			CheckDifferences(memory, Shared.Cvars, Shared.CvarsMemoryAddress);
 		}
 
 		return true;
@@ -124,8 +132,8 @@ public class Vars : MonoBehaviour
 
 	void BuildTables()
 	{
-		BuildTable(TabA, "VARS", vars);
-		BuildTable(TabB, "C_VARS", cvars);
+		BuildTable(TabA, "VARS", Shared.Vars);
+		BuildTable(TabB, "C_VARS", Shared.Cvars);
 	}
 
 	void BuildTable(RectTransform tab, string sectionName, Var[] data)
@@ -324,8 +332,8 @@ public class Vars : MonoBehaviour
 
 	public void SaveStateClick()
 	{
-		SaveState(vars);
-		SaveState(cvars);
+		SaveState(Shared.Vars);
+		SaveState(Shared.Cvars);
 	}
 
 	public void CompareClick(Button button)
@@ -337,14 +345,5 @@ public class Vars : MonoBehaviour
 			ignoreDifferences = true;
 		}
 		ToggleButtonState(button, compare);
-	}
-
-	public class Var
-	{
-		public int value;
-		public int saveState; //value set there when using SaveState button
-		public float time;	//time since last difference
-		public long memoryAddress;
-		public InputField inputField;
 	}
 }
