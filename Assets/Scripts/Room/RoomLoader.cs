@@ -400,13 +400,16 @@ public class RoomLoader : MonoBehaviour
 		}
 		else if (mouseWheel < 0.0f)
 		{
-			if (Camera.main.orthographic)
+			if (!(DosBoxEnabled && GetComponent<DosBox>().AreAllActorVisible()))
 			{
-				Camera.main.orthographicSize *= 1.0f / 0.9f;
-			}
-			else
-			{
-				Camera.main.transform.position = Vector3.Scale(Camera.main.transform.position, new Vector3(1.0f, 1.0f / 0.9f, 1.0f));
+				if (Camera.main.orthographic)
+				{
+					Camera.main.orthographicSize *= 1.0f / 0.9f;
+				}
+				else
+				{
+					Camera.main.transform.position = Vector3.Scale(Camera.main.transform.position, new Vector3(1.0f, 1.0f / 0.9f, 1.0f));
+				}
 			}
 		}
 

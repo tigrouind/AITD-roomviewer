@@ -525,6 +525,23 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	public bool AreAllActorVisible()
+	{
+		foreach (Box box in Boxes)
+		{
+			if (box.ID != -1)
+			{
+				Vector3 position = Camera.main.WorldToViewportPoint(box.transform.position);
+				if (position.x < 0.0f || position.x > 1.0f || position.y < 0.0f || position.y > 1.0f)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
 	void FixBoundingWrap(ref float a, ref float b)
 	{
 		if(a > b)
