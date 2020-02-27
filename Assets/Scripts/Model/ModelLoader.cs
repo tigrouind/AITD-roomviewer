@@ -37,7 +37,7 @@ public class ModelLoader : MonoBehaviour
 	private List<Vector3> allVertices;
 	private List<Vector2> uv;
 	public Vector3 boundingLower;
-	public Vector3 boundingUpper; 
+	public Vector3 boundingUpper;
 
 	private Vector2 cameraRotation;
 	private Vector2 cameraPosition;
@@ -240,7 +240,7 @@ public class ModelLoader : MonoBehaviour
 						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
 						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
 
-						//add vertices					
+						//add vertices
 						List<int> polyVertices = new List<int>();
 						int verticesCount = allVertices.Count;
 						for (int m = 0; m < numPoints; m++)
@@ -253,7 +253,7 @@ public class ModelLoader : MonoBehaviour
 							allVertices.Add(vertices[pointIndex]);
 							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
 						}
-							
+
 						if ((polyType == 3 || polyType == 4 || polyType == 5 || polyType == 6) && GradientMaterial.BoolValue)
 						{
 							gradientPolygonType.Add(polyType);
@@ -407,7 +407,7 @@ public class ModelLoader : MonoBehaviour
 		filter.localBounds = msh.bounds;
 		filter.sharedMesh = msh;
 	}
-		
+
 	int GetTriangleListIndex(int polyType)
 	{
 		switch (polyType)
@@ -421,12 +421,12 @@ public class ModelLoader : MonoBehaviour
 					return 2;
 				else
 					return 0;
-				
+
 			case 2: //transparent
 				return 1;
 
 			case 3: //gradient
-			case 6: 
+			case 6:
 				if (GradientMaterial.BoolValue)
 					return 3;
 				else
@@ -853,7 +853,7 @@ public class ModelLoader : MonoBehaviour
 	void UpdateGradientsUVs()
 	{
 		Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
-		
+
 		if (EnableAnimation.BoolValue)
 		{
 			if (bakedMesh == null)
@@ -970,8 +970,8 @@ public class ModelLoader : MonoBehaviour
 		if(ShowAdditionalInfo.BoolValue)
 		{
 			stringBuilder.Append("\r\n\r\n");
-			stringBuilder.AppendFormat("Bounding box: <color=#00c864>{0} {1} {2}</color>\r\n", 
-				boundingUpper.x - boundingLower.x, 
+			stringBuilder.AppendFormat("Bounding box: <color=#00c864>{0} {1} {2}</color>\r\n",
+				boundingUpper.x - boundingLower.x,
 				boundingUpper.y - boundingLower.y,
 				boundingUpper.z - boundingLower.z);
 		}
@@ -1022,7 +1022,7 @@ public class ModelLoader : MonoBehaviour
 	{
 		var args = System.Environment.GetCommandLineArgs();
 		if (args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
-		{			
+		{
 			ProcessKey(KeyCode.E); //extra info
 			ProcessKey(KeyCode.A); //animation
 		}

@@ -1,10 +1,10 @@
 ﻿Shader "Custom/ArrowOnTop"
 {
-	Properties 
+	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
 	}
-	SubShader 
+	SubShader
 	{
 		Tags { "Queue"="Overlay" "RenderType"="Overlay"  }
 		ZTest Always
@@ -12,7 +12,7 @@
 		CGPROGRAM
 		#pragma surface surf Lambert alpha
 
-		struct Input 
+		struct Input
 		{
 			float4 color : COLOR;
 			float2 uv_MainTex;

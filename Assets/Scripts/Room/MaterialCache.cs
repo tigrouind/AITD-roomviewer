@@ -7,7 +7,7 @@ public class MaterialCache : MonoBehaviour
 	private static Dictionary<KeyValuePair<Color32, bool>, Material> materialsCache = new Dictionary<KeyValuePair<Color32, bool>, Material>();
 	public Material TransparentMaterial;
 	public Material OpaqueMaterial;
-	public Material AlwaysOnTopMaterial;	
+	public Material AlwaysOnTopMaterial;
 
 	public Material GetMaterialFromCache(Color32 color, bool alwaysOnTop)
 	{
@@ -17,7 +17,7 @@ public class MaterialCache : MonoBehaviour
 		{
 			if (alwaysOnTop)
 			{
-				material = new Material(AlwaysOnTopMaterial);				
+				material = new Material(AlwaysOnTopMaterial);
 			}
 			else
 			{

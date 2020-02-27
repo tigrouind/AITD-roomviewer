@@ -347,10 +347,10 @@ public class RoomLoader : MonoBehaviour
 					camera.name = "CameraFrustum";
 					camera.transform.parent = room;
 					camera.Color = new Color32(255, 128, 0, 255);
-					camera.HighLight = true;					
+					camera.HighLight = true;
 					cameraHelper.SetupTransform(camera, cameraPosition, cameraRotation, cameraFocal);
 					area.Camera = camera;
-					
+
 					filter = camera.GetComponent<MeshFilter>();
 					filter.sharedMesh = cameraHelper.CreateMesh(cameraFocal);
 					Destroy(camera.gameObject.GetComponent<BoxCollider>());
@@ -476,8 +476,8 @@ public class RoomLoader : MonoBehaviour
 		{
 			Panel.gameObject.SetActive(menuEnabled);
 		}
-		
-		DosBox dosBox = GetComponent<DosBox>(); 		
+
+		DosBox dosBox = GetComponent<DosBox>();
 		dosBox.ShowAdditionalInfo = ShowAdditionalInfo.BoolValue && DosBoxEnabled;
 		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && isAITD1 && dosBox.IsCDROMVersion;
 
@@ -506,12 +506,12 @@ public class RoomLoader : MonoBehaviour
 			{
 				targetSlot = -1;
 			}
-			
+
 			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
 			{
 				InputDigit(ref targetSlot);
 			}
-					
+
 			if (Input.GetKeyUp(KeyCode.LeftControl) || Input.GetKeyUp(KeyCode.RightControl))
 			{
 				if(targetSlot >= 0 && targetSlot < 50 && isAITD1)
@@ -534,7 +534,7 @@ public class RoomLoader : MonoBehaviour
 			hitInfos = Physics.RaycastAll(Camera.main.ScreenPointToRay(mousePosition));
 		}
 
-		if (hitInfos != null && hitInfos.Length > 0 
+		if (hitInfos != null && hitInfos.Length > 0
 			&& !menuEnabled && !GetComponent<WarpDialog>().warpMenuEnabled)
 		{
 			//sort colliders by priority
@@ -549,7 +549,7 @@ public class RoomLoader : MonoBehaviour
 					HighLightedBox.HighLight = false;
 					if(HighLightedBox.name == "Camera")
 					{
-						HighLightedBox.GetComponent<Renderer>().sharedMaterial.renderQueue = 3000;						
+						HighLightedBox.GetComponent<Renderer>().sharedMaterial.renderQueue = 3000;
 					}
 				}
 
@@ -599,7 +599,7 @@ public class RoomLoader : MonoBehaviour
 				if (SelectedBox != HighLightedBox)
 				{
 					SelectedBox = HighLightedBox;
-					SelectedBoxId = HighLightedBox.ID;	
+					SelectedBoxId = HighLightedBox.ID;
 				}
 				else
 				{
@@ -961,7 +961,7 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 	}
-	
+
 	bool IsKeypadKeyDown(out int value)
 	{
 		for(int digit = 0 ; digit <= 9 ; digit++)

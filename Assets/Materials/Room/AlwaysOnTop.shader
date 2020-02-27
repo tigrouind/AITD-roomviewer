@@ -1,10 +1,10 @@
 Shader "Custom/AlwaysOnTop"
 {
-	Properties 
+	Properties
 	{
 		_Color ("Main Color", Color) = (1,1,1,1)
 	}
-	SubShader 
+	SubShader
 	{
 		Tags { "Queue"="Overlay" "RenderType"="Overlay"  }
 		ZTest Always
@@ -12,7 +12,7 @@ Shader "Custom/AlwaysOnTop"
 		CGPROGRAM
 		#pragma surface surf Lambert alpha
 
-		struct Input 
+		struct Input
 		{
 			float4 color : COLOR;
 		};

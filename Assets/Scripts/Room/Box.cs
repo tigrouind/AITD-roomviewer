@@ -56,7 +56,7 @@ public class Box : MonoBehaviour
 	public Vector3 HotPosition;
 	public Box BoxHotPoint;
 	public Box BoxWorldPos;
-	public int OldAngle; 
+	public int OldAngle;
 	public int NewAngle;
 	public int RotateTime;
 	public Box Camera;
@@ -142,7 +142,7 @@ public class Box : MonoBehaviour
 				if(diff > 0)
 				{
 					return "▲";
-				}									
+				}
 				else
 				{
 					return "▼";
@@ -174,7 +174,7 @@ public class Box : MonoBehaviour
 			return "▬";
 		}
 	}
-	
+
 	private void RefreshMaterial()
 	{
 		Color32 materialColor = color;
@@ -231,7 +231,7 @@ public class Box : MonoBehaviour
 		info.Clear();
 		info.Append("TYPE", name.ToUpperInvariant());
 		info.Append("ID", ID);
-		
+
 		if (name == "Collider" || name == "Trigger")
 		{
 			info.Append("FLAGS", "0x{0:X4}", Flags);
@@ -294,7 +294,7 @@ public class Box : MonoBehaviour
 				{
 					info.Append("LIFE", Life);
 				}
-				
+
 			}
 
 			if (Body != -1)

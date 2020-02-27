@@ -28,7 +28,7 @@ public class BoxInfo : MonoBehaviour
 
 	public void AppendLine()
 	{
-		AppendLineIfNecessary();	
+		AppendLineIfNecessary();
 	}
 
 	public void Append(string name, Vector3 value)
@@ -65,8 +65,8 @@ public class BoxInfo : MonoBehaviour
 	public void UpdateText()
 	{
 		gameObject.SetActive(names.Length > 0);
-		LeftText.text = names.ToString();	
-		RightText.text = values.ToString();	
+		LeftText.text = names.ToString();
+		RightText.text = values.ToString();
 	}
 }
 

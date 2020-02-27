@@ -4,7 +4,7 @@
 	{
 		Tags { "RenderType" = "Transparent" "Queue" = "Transparent" }
 		Pass
-		{			 
+		{
 			Zwrite off
 			Blend SrcAlpha OneMinusSrcAlpha
 
@@ -15,7 +15,7 @@
 			struct vertInput {
 				float4 pos : POSITION;
 				float4 color : COLOR0;
-			}; 
+			};
 
 			struct vertOutput {
 				float4 pos : SV_POSITION;
@@ -31,7 +31,7 @@
 			}
 
 			fixed4 frag (vertOutput output) : SV_Target
-			{					
+			{
 				return output.color;
 			}
 			ENDCG

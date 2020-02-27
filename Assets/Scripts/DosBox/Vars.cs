@@ -19,7 +19,7 @@ public class Vars : MonoBehaviour
 	private bool compare;
 	private bool ignoreDifferences = true;
 	private int screenWidth = -1;
-	private int screenHeight = -1; 
+	private int screenHeight = -1;
 
 	public RectTransform Panel;
 	public RectTransform TabA;
@@ -72,16 +72,16 @@ public class Vars : MonoBehaviour
 			CheckDifferences(memory, vars, Shared.VarsMemoryAddress);
 		}
 
-		if (Shared.CvarsMemoryAddress != -1) 
+		if (Shared.CvarsMemoryAddress != -1)
 		{
 			if (processReader.Read(memory, Shared.CvarsMemoryAddress, 44 * 2) <= 0)
 			{
 				return false;
 			}
-			
+
 			CheckDifferences(memory, cvars, Shared.CvarsMemoryAddress);
 		}
-		
+
 		return true;
 	}
 
@@ -119,7 +119,7 @@ public class Vars : MonoBehaviour
 			Vector2 cellSize = new Vector2(screenWidth / 21.0f, (screenHeight - 30.0f) / 16.0f);
 			TabA.GetComponent<GridLayoutGroup>().cellSize = cellSize;
 			TabB.GetComponent<GridLayoutGroup>().cellSize = cellSize;
-		}		
+		}
 	}
 
 	void BuildTables()

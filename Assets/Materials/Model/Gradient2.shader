@@ -19,7 +19,7 @@
 				float4 pos : POSITION;
 				float4 color : COLOR0;
 				float4 uv : TEXCOORD0;
-			}; 
+			};
 
 			struct vertOutput {
 				float4 pos : SV_POSITION;

@@ -43,7 +43,7 @@ public class WarpDialog : MonoBehaviour
 			{
 				MoveOrRotateActor(warpActor);
 			}
-			
+
 			//warp to mouse position
 			if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.W))
 			{
@@ -310,5 +310,5 @@ public class WarpDialog : MonoBehaviour
 			actor.BoundingLower = lowerBound;
 			actor.BoundingUpper = upperBound;
 		}
-	}		
+	}
 }

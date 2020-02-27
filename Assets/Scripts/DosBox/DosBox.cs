@@ -99,7 +99,7 @@ public class DosBox : MonoBehaviour
 					box.ID = memory.ReadShort(k + 0);
 
 					if (box.ID != -1)
-					{						
+					{
 						int trackModeOffset = TrackModeOffsets[dosBoxPattern];
 						box.Body = memory.ReadShort(k + 2);
 						box.Flags = memory.ReadShort(k + 4);
@@ -129,7 +129,7 @@ public class DosBox : MonoBehaviour
 						box.TotalFrames = memory.ReadShort(k + 76);
 						box.EndFrame = memory.ReadShort(k + 78);
 						box.EndAnim = memory.ReadShort(k + 80);
-						
+
 						box.TrackMode = memory.ReadShort(k + trackModeOffset);
 						box.TrackNumber = memory.ReadShort(k + 84);
 						box.PositionInTrack = memory.ReadShort(k + 88);
@@ -147,7 +147,7 @@ public class DosBox : MonoBehaviour
 						box.NewAngle = memory.ReadShort(k + 108);
 						box.RotateTime = memory.ReadShort(k + 110);
 						box.Speed = memory.ReadShort(k + 116);
-						
+
 						box.Col = memory.ReadVector(k + 126);
 						box.ColBy = memory.ReadShort(k + 132);
 						box.HardTrigger = memory.ReadShort(k + 134);
@@ -194,7 +194,7 @@ public class DosBox : MonoBehaviour
 					{
 						Transform roomObject = GetComponent<RoomLoader>().GetRoom(box.Floor, box.Room);
 						if (roomObject != null)
-						{							
+						{
 							//local to global position
 							Vector3 boxPosition = box.BoundingPos / 1000.0f;
 							boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z) + roomObject.localPosition;
@@ -214,12 +214,12 @@ public class DosBox : MonoBehaviour
 
 							//make sure very small actors are visible
 							box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.1f);
-							
+
 							bool isAITD1 = dosBoxPattern == 0;
 							if (isAITD1)
 							{
 								UpdateHotPointBox(box, roomObject.localPosition);
-							}						
+							}
 
 							if (ShowAITD1Vars)
 							{
@@ -267,7 +267,7 @@ public class DosBox : MonoBehaviour
 									1.0f);
 
 								//player is white
-								box.Color = new Color32(255, 255, 255, 255);								
+								box.Color = new Color32(255, 255, 255, 255);
 								Arrow.AlwaysOnTop = Camera.main.orthographic;
 								Player = box;
 							}
@@ -283,12 +283,12 @@ public class DosBox : MonoBehaviour
 									box.Color = new Color32(0, 128, 0, 255);
 								}
 							}
-							
-							if (isAITD1) 
+
+							if (isAITD1)
 							{
 								UpdateWorldPosBox(box, roomObject.localPosition, isPlayer);
 							}
-							
+
 							box.AlwaysOnTop = Camera.main.orthographic;
 							box.gameObject.SetActive(true);
 						}
@@ -339,7 +339,7 @@ public class DosBox : MonoBehaviour
 			&& Player.gameObject.activeSelf
 			&& Player.transform.localScale.magnitude > 0.01f);
 	}
-	
+
 	void UpdateHotPointBox(Box box, Vector3 roomPosition)
 	{
 		//hot point
@@ -348,7 +348,7 @@ public class DosBox : MonoBehaviour
 		if (box.ActionType == 2)
 		{
 			if (hotPoint == null)
-			{ 
+			{
 				hotPoint = Instantiate(BoxPrefab);
 				hotPoint.name = "HotPoint";
 				hotPoint.Color = new Color32(255, 0, 0, 255);
@@ -369,16 +369,16 @@ public class DosBox : MonoBehaviour
 			box.BoxHotPoint = null;
 		}
 	}
-	
+
 	void UpdateWorldPosBox(Box box, Vector3 roomPosition, bool isPlayer)
 	{
 		//worldpost unsync
 		Box worldPos = box.BoxWorldPos;
-			
+
 		if (isPlayer && ((box.WorldPosition.x + box.Mod.x) != box.BoundingPos.x || (box.WorldPosition.z + box.Mod.z) != box.BoundingPos.z))
-		{			
+		{
 			if (worldPos == null)
-			{ 
+			{
 				worldPos = Instantiate(BoxPrefab);
 				worldPos.name = "WorldPos";
 				worldPos.Color = new Color32(255, 0, 0, 128);
@@ -415,10 +415,10 @@ public class DosBox : MonoBehaviour
 		if (ShowAITD1Vars || ShowAdditionalInfo)
 		{
 			if(Player != null) BoxInfo.AppendLine();
-			
+
 			if (ShowAITD1Vars)
 			{
-				int calculatedFps = previousFramesCount.Sum();							
+				int calculatedFps = previousFramesCount.Sum();
 				TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
 
 				BoxInfo.Append("Timer 1", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer / 60), InternalTimer % 60);
@@ -428,11 +428,11 @@ public class DosBox : MonoBehaviour
 			}
 
 			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
-			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));				
-			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));	
+			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
+			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
 
 			if (ShowAITD1Vars)
-			{		
+			{
 				BoxInfo.Append("Allow inventory", allowInventory ? "Yes" : "No");
 				BoxInfo.Append("In hand", inHand);
 			}
@@ -489,7 +489,7 @@ public class DosBox : MonoBehaviour
 			else
 				diff = fps - oldFramesCount + frames; //special case: eg: 60 - 58 + 3
 			oldFramesCount = frames;
-			
+
 			if(delayCounter.Elapsed >= 0.1f) //100ms
 			{
 				lastDelay = delayCounter.Elapsed;
@@ -502,7 +502,7 @@ public class DosBox : MonoBehaviour
 				totalDelay.Stop();
 			}
 			else
-			{	
+			{
 				delayCounter.Start();
 				totalDelay.Start();
 			}
@@ -515,13 +515,13 @@ public class DosBox : MonoBehaviour
 			}
 
 			//remove any frame info older than one second
-			while (previousFrameTime.Count > 0 && 
+			while (previousFrameTime.Count > 0 &&
 				previousFrameTime.Peek() < (time - 1.0f))
 			{
 				previousFramesCount.Dequeue();
 				previousFrameTime.Dequeue();
 			}
-		}		
+		}
 	}
 
 	void FixBoundingWrap(ref float a, ref float b)
@@ -548,7 +548,7 @@ public class DosBox : MonoBehaviour
 
 		return processIds;
 	}
-	
+
 	string GetProcessName(Process process)
 	{
 		try
@@ -611,7 +611,7 @@ public class DosBox : MonoBehaviour
 			{
 				return false;
 			}
-			
+
 			Shared.ProcessId = processId;
 			Shared.ActorsMemoryAdress = memoryAddress;
 			ProcessReader = new ProcessMemoryReader(processId);
@@ -637,10 +637,10 @@ public class DosBox : MonoBehaviour
 		//force reload
 		linkfloor = floor;
 		linkroom = room;
-		
+
 		dosBoxPattern = patternIndex;
 
-		//check if CDROM/floppy version (AITD1 only)				
+		//check if CDROM/floppy version (AITD1 only)
 		byte[] cdPattern = ASCIIEncoding.ASCII.GetBytes("CD Not Found");
 		IsCDROMVersion = detectedGame == 1 && ProcessReader.SearchForBytePattern(cdPattern) != -1;
 
@@ -650,12 +650,12 @@ public class DosBox : MonoBehaviour
 
 	public void UnlinkDosBox()
 	{
-		if (ProcessReader != null) 
+		if (ProcessReader != null)
 		{
 			ProcessReader.Close();
 			ProcessReader = null;
 		}
-		
+
 		Shared.ProcessId = -1;
 		BoxInfo.Clear(true);
 		RightText.text = string.Empty;

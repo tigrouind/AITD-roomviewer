@@ -15,7 +15,7 @@ public class Timer
 			running = true;
 		}
 	}
-		
+
 	public void Stop()
 	{
 		if (running)
@@ -31,12 +31,12 @@ public class Timer
 		started = Time.time;
 		running = true;
 	}
-		
+
 	public void Reset() {
 		elapsed = 0.0f;
 		running = false;
 	}
-		
+
 	public float Elapsed
 	{
 		get
@@ -56,7 +56,7 @@ public class Timer
 			{
 				started = Time.time;
 			}
-			
+
 			elapsed = value;
 		}
 	}

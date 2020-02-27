@@ -10,7 +10,7 @@ public class PatternSearch
 		this.pattern = pattern;
 		this.wildcard = wildcard;
 	}
-	
+
 	public int IndexOf(int count)
 	{
 		for (int i = 0; i < count - pattern.Length + 1 ; i++)
