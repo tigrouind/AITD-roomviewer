@@ -18,6 +18,7 @@ public class DosBox : MonoBehaviour
 	public bool ShowAdditionalInfo;
 	public bool ShowAITD1Vars;
 	public bool IsCDROMVersion;
+	public bool SpeedRunMode;
 
 	public ProcessMemoryReader ProcessReader;
 	public Box Player;

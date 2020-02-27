@@ -165,14 +165,17 @@ public class Box : MonoBehaviour
 
 	public string GetActorID(int index)
 	{
+		if(DosBox.SpeedRunMode && index >= 0)
+		{
+			return index.ToString();
+		}
+
 		if(index >= 0 && index < DosBox.Boxes.Length)
 		{
 			return DosBox.Boxes[index].ID.ToString();
 		}
-		else
-		{
-			return "▬";
-		}
+
+		return "▬";
 	}
 
 	private void RefreshMaterial()
@@ -320,7 +323,7 @@ public class Box : MonoBehaviour
 				if (Keyframe != -1)
 				{
 					info.Append("KEYFRAME", "{0}/{1}; {2} {3}", Keyframe, TotalFrames - 1, EndFrame, EndAnim);
-					info.Append("SUB_KEYFRAME", Mathf.FloorToInt(lastKeyFrameChange.Elapsed * 60.0f));
+					info.Append("FRAME", Mathf.FloorToInt(lastKeyFrameChange.Elapsed * 60.0f));
 				}
 
 				info.Append("SPEED", Speed);
