@@ -400,7 +400,7 @@ public class RoomLoader : MonoBehaviour
 		}
 		else if (mouseWheel < 0.0f)
 		{
-			if (!(DosBoxEnabled && GetComponent<DosBox>().AreAllActorVisible()))
+			if (!(DosBoxEnabled && ShowActors.BoolValue && GetComponent<DosBox>().AreAllActorVisible()))
 			{
 				if (Camera.main.orthographic)
 				{

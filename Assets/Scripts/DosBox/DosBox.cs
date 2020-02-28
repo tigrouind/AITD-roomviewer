@@ -525,21 +525,36 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	bool IsPointVisible(Vector3 point)
+	{
+		Vector3 screen = Camera.main.WorldToViewportPoint(point);
+		return screen.x >= 0.0f && screen.x <= 1.0f && screen.y >= 0.0f && screen.y <= 1.0f;
+	}
+
+	bool IsBoxVisible(Box box)
+	{
+		var collider = box.GetComponent<Collider>();
+		var bounds = collider.bounds;
+		var min = bounds.min;
+		var max = bounds.max;
+		
+		var point0 = new Vector3(min.x, min.y, min.z);
+		var point1 = new Vector3(min.x, min.y, max.z);
+		var point2 = new Vector3(min.x, max.y, min.z);
+		var point3 = new Vector3(min.x, max.y, max.z);
+		var point4 = new Vector3(max.x, min.y, min.z);
+		var point5 = new Vector3(max.x, min.y, max.z);
+		var point6 = new Vector3(max.x, max.y, min.z);
+		var point7 = new Vector3(max.x, max.y, max.z);
+		
+		return IsPointVisible(point0) && IsPointVisible(point1) && IsPointVisible(point2) && IsPointVisible(point3)
+			&& IsPointVisible(point4) && IsPointVisible(point5) && IsPointVisible(point6) && IsPointVisible(point7);
+	}
+
 	public bool AreAllActorVisible()
 	{
-		foreach (Box box in Boxes)
-		{
-			if (box.ID != -1)
-			{
-				Vector3 position = Camera.main.WorldToViewportPoint(box.transform.position);
-				if (position.x < 0.0f || position.x > 1.0f || position.y < 0.0f || position.y > 1.0f)
-				{
-					return false;
-				}
-			}
-		}
-
-		return true;
+		var actors = Boxes.Where(x => x.ID != -1 && x.gameObject.activeSelf);
+		return actors.Any() && actors.All(IsBoxVisible);
 	}
 
 	void FixBoundingWrap(ref float a, ref float b)
