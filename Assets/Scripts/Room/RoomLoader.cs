@@ -52,6 +52,7 @@ public class RoomLoader : MonoBehaviour
 	public ToggleButton ShowAreas;
 	public ToggleButton CameraFollow;
 	public ToggleButton CameraMode;
+	public GameObject Border;
 
 	void Start()
 	{
@@ -77,6 +78,39 @@ public class RoomLoader : MonoBehaviour
 		{
 			ProcessKey(KeyCode.L);
 		}
+
+		SetupBorder();
+	}
+
+	void SetupBorder()
+	{
+		var triangles = new int[]
+		{
+			0, 1, 5, 0, 5, 4,
+			6, 3, 2, 6, 7, 3,
+			0, 4, 2, 4, 6, 2,
+			1, 3, 7, 5, 1, 7
+		};
+
+		var vertices = new Vector3[]
+		{
+			new Vector3(-4000f, 0f,  4000f),
+			new Vector3( 4000f, 0f,  4000f),
+			new Vector3(-4000f, 0f, -4000f),
+			new Vector3( 4000f, 0f, -4000f),
+
+			new Vector3(-32.768f, 0f,  32.768f),
+			new Vector3( 32.768f, 0f,  32.768f),
+			new Vector3(-32.768f, 0f, -32.768f),
+			new Vector3( 32.768f, 0f, -32.768f)
+		};
+
+		Mesh mesh = new Mesh();
+		mesh.vertices = vertices;
+		mesh.triangles = triangles;
+
+		mesh.RecalculateBounds();
+		Border.GetComponent<MeshFilter>().mesh = mesh;
 	}
 
 	void RefreshRooms()
@@ -122,7 +156,11 @@ public class RoomLoader : MonoBehaviour
 		foreach (Transform roomTransform in transform.Cast<Transform>().Where(x => x.name != "DELETED"))
 		{
 			bool currentRoom = room == roomIndex;
-			//roomTransform.gameObject.SetActive(showallrooms || currentRoom);
+			if (currentRoom)
+			{
+				Border.transform.position = roomTransform.position;
+			}
+
 			foreach (Box box in roomTransform.GetComponentsInChildren<Box>(true))
 			{
 				if (box.name == "Trigger")
@@ -385,18 +423,19 @@ public class RoomLoader : MonoBehaviour
 
 	bool IsPointVisible(Vector3 point)
 	{
-		Vector3 screen = Camera.main.WorldToViewportPoint(point / 1000.0f);
+		Vector3 screen = Camera.main.WorldToViewportPoint(point);
 		return screen.x >= 0.0f && screen.x <= 1.0f && screen.y >= 0.0f && screen.y <= 1.0f;
 	}
 
 	public bool ZoomCoverEverything()
 	{
-		return IsPointVisible(new Vector3(-32678.0f, 0.0f, -32678.0f))
-		    && IsPointVisible(new Vector3(-32678.0f, 0.0f,  32678.0f))
-		    && IsPointVisible(new Vector3( 32678.0f, 0.0f,  32678.0f))
-		    && IsPointVisible(new Vector3( 32678.0f, 0.0f, -32678.0f));
+		var position = Border.transform.position;
+		return IsPointVisible(new Vector3(-32.678f, 0.0f, -32.678f) + position)
+		    && IsPointVisible(new Vector3(-32.678f, 0.0f,  32.678f) + position)
+		    && IsPointVisible(new Vector3( 32.678f, 0.0f,  32.678f) + position)
+		    && IsPointVisible(new Vector3( 32.678f, 0.0f, -32.678f) + position);
 	}
-	
+
 	void Update()
 	{
 		float mouseWheel = Input.GetAxis("Mouse ScrollWheel");
@@ -414,7 +453,7 @@ public class RoomLoader : MonoBehaviour
 		}
 		else if (mouseWheel < 0.0f)
 		{
-			if (!ZoomCoverEverything())
+			if (!(DosBoxEnabled && ZoomCoverEverything()))
 			{
 				if (Camera.main.orthographic)
 				{
@@ -744,6 +783,7 @@ public class RoomLoader : MonoBehaviour
 					GetComponent<DosBox>().ResetCamera(floor, room);
 
 					Actors.SetActive(DosBoxEnabled && ShowActors.BoolValue);
+					Border.SetActive(DosBoxEnabled);
 
 					//select player by default
 					if (SelectedBox == null)
@@ -766,6 +806,7 @@ public class RoomLoader : MonoBehaviour
 					GetComponent<DosBox>().UnlinkDosBox();
 
 					Actors.SetActive(false);
+					Border.SetActive(false);
 					DosBoxEnabled = false;
 
 					GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp

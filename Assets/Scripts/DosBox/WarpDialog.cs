@@ -277,7 +277,7 @@ public class WarpDialog : MonoBehaviour
 		{
 			long offset = GetComponent<DosBox>().GetActorMemoryAddress(index);
 			byte[] position = new byte[2];
-			 position.Write((short)angle,0);
+			position.Write((short)angle,0);
 			processReader.Write(position, offset + 42, 2);
 
 			actor.Angles.y = angle;
