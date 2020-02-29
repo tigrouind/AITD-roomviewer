@@ -427,43 +427,31 @@ public class RoomLoader : MonoBehaviour
 		return screen.x >= 0.0f && screen.x <= 1.0f && screen.y >= 0.0f && screen.y <= 1.0f;
 	}
 
-	public bool ZoomCoverEverything()
-	{
-		var position = Border.transform.position;
-		return IsPointVisible(new Vector3(-32.678f, 0.0f, -32.678f) + position)
-		    && IsPointVisible(new Vector3(-32.678f, 0.0f,  32.678f) + position)
-		    && IsPointVisible(new Vector3( 32.678f, 0.0f,  32.678f) + position)
-		    && IsPointVisible(new Vector3( 32.678f, 0.0f, -32.678f) + position);
-	}
-
 	void Update()
 	{
 		float mouseWheel = Input.GetAxis("Mouse ScrollWheel");
-		if (mouseWheel > 0.0f)
+		if(mouseWheel != 0.0f)
 		{
+			Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
+			Vector3 mouseBeforeZoom = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
+
+			float scale = 0.9f;
+			if (mouseWheel < 0.0f)
+			{
+				scale = 1.0f / scale;
+			}
+
 			if (Camera.main.orthographic)
 			{
-				Camera.main.orthographicSize *= 0.9f;
+				Camera.main.orthographicSize *= scale;
 			}
 			else
 			{
-				Camera.main.transform.position = Vector3.Scale(Camera.main.transform.position, new Vector3(1.0f, 0.9f, 1.0f));
+				Camera.main.transform.position = Vector3.Scale(Camera.main.transform.position, new Vector3(1.0f, scale, 1.0f));
 			}
 
-		}
-		else if (mouseWheel < 0.0f)
-		{
-			if (!(DosBoxEnabled && ZoomCoverEverything()))
-			{
-				if (Camera.main.orthographic)
-				{
-					Camera.main.orthographicSize *= 1.0f / 0.9f;
-				}
-				else
-				{
-					Camera.main.transform.position = Vector3.Scale(Camera.main.transform.position, new Vector3(1.0f, 1.0f / 0.9f, 1.0f));
-				}
-			}
+			cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
+			Camera.main.transform.position += mouseBeforeZoom - Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
 		}
 
 		if (!menuEnabled && !GetComponent<WarpDialog>().warpMenuEnabled)
