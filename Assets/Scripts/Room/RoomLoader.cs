@@ -383,6 +383,20 @@ public class RoomLoader : MonoBehaviour
 			return 1;
 	}
 
+	bool IsPointVisible(Vector3 point)
+	{
+		Vector3 screen = Camera.main.WorldToViewportPoint(point / 1000.0f);
+		return screen.x >= 0.0f && screen.x <= 1.0f && screen.y >= 0.0f && screen.y <= 1.0f;
+	}
+
+	public bool ZoomCoverEverything()
+	{
+		return IsPointVisible(new Vector3(-32678.0f, 0.0f, -32678.0f))
+		    && IsPointVisible(new Vector3(-32678.0f, 0.0f,  32678.0f))
+		    && IsPointVisible(new Vector3( 32678.0f, 0.0f,  32678.0f))
+		    && IsPointVisible(new Vector3( 32678.0f, 0.0f, -32678.0f));
+	}
+	
 	void Update()
 	{
 		float mouseWheel = Input.GetAxis("Mouse ScrollWheel");
@@ -400,7 +414,7 @@ public class RoomLoader : MonoBehaviour
 		}
 		else if (mouseWheel < 0.0f)
 		{
-			if (!(DosBoxEnabled && ShowActors.BoolValue && GetComponent<DosBox>().AreAllActorVisible()))
+			if (!ZoomCoverEverything())
 			{
 				if (Camera.main.orthographic)
 				{
