@@ -16,7 +16,7 @@ public class WarpDialog : MonoBehaviour
 	public InputField boundingPosX, boundingPosY, boundingPosZ;
 	public RectTransform Panel;
 
-	public InputField angle;
+	public InputField angleX, angleY, angleZ;
 	public ToggleButton AdvancedMode;
 
 	private Timer timer = new Timer();
@@ -140,8 +140,8 @@ public class WarpDialog : MonoBehaviour
 	void SetPosition(Box actor)
 	{
 		//parse angle
-		int angleInt;
-		TryParseAngle(angle, out angleInt, (int)actor.Angles.y);
+		Vector3 angleInt;
+		TryParseAngle(angleX, angleY, angleZ, out angleInt, actor.Angles);
 		WriteActorAngle(actor, angleInt);
 		UpdateAngleInputField(actor);
 
@@ -196,7 +196,9 @@ public class WarpDialog : MonoBehaviour
 	void RotateActor(Box actor, int offset)
 	{
 		int angle = (int)actor.Angles.y + offset;
-		WriteActorAngle(actor, (angle + 1024) % 1024);
+		angle = (angle + 1024) % 1024;
+
+		WriteActorAngle(actor, new Vector3(actor.Angles.x, angle, actor.Angles.z));
 		UpdateAngleInputField(actor);
 		timer.Restart();
 	}
@@ -229,7 +231,19 @@ public class WarpDialog : MonoBehaviour
 
 	void UpdateAngleInputField(Box actor)
 	{
-		angle.text = (actor.Angles.y * 360.0f / 1024.0f).ToString("N1");
+		angleX.text = (actor.Angles.x * 360.0f / 1024.0f).ToString("N1");
+		angleY.text = (actor.Angles.y * 360.0f / 1024.0f).ToString("N1");
+		angleZ.text = (actor.Angles.z * 360.0f / 1024.0f).ToString("N1");
+	}
+
+	void TryParseAngle(InputField angleX, InputField angleY, InputField angleZ, out Vector3 intValue, Vector3 defaultValue)
+	{
+		int x, y, z;
+		TryParseAngle(angleX, out x, (int)defaultValue.x);
+		TryParseAngle(angleY, out y, (int)defaultValue.y);
+		TryParseAngle(angleZ, out z, (int)defaultValue.z);
+
+		intValue = new Vector3(x, y, z);
 	}
 
 	void TryParseAngle(InputField inputField, out int intValue, int defaultValue)
@@ -268,7 +282,7 @@ public class WarpDialog : MonoBehaviour
 		}
 	}
 
-	void WriteActorAngle(Box actor, int angle)
+	void WriteActorAngle(Box actor, Vector3 angle)
 	{
 		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 
@@ -276,11 +290,11 @@ public class WarpDialog : MonoBehaviour
 		if (index != -1)
 		{
 			long offset = GetComponent<DosBox>().GetActorMemoryAddress(index);
-			byte[] position = new byte[2];
-			position.Write((short)angle,0);
-			processReader.Write(position, offset + 42, 2);
+			byte[] position = new byte[6];
+			position.Write(angle, 0);
+			processReader.Write(position, offset + 40, position.Length);
 
-			actor.Angles.y = angle;
+			actor.Angles = angle;
 		}
 	}
 
