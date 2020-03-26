@@ -1013,7 +1013,8 @@ public class RoomLoader : MonoBehaviour
 	{
 		for(int digit = 0 ; digit <= 9 ; digit++)
 		{
-			if (Input.GetKeyDown(KeyCode.Keypad0 + digit))
+			if (Input.GetKeyDown(KeyCode.Keypad0 + digit)
+			 || Input.GetKeyDown(KeyCode.Alpha0 + digit))
 			{
 				value = digit;
 				return true;
