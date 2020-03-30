@@ -631,7 +631,7 @@ public class RoomLoader : MonoBehaviour
 	private void RefreshSelectedBox()
 	{
 		//toggle selected box
-		if (Input.GetMouseButtonUp(0) && HighLightedBox != null && !dragging
+		if (Input.GetMouseButtonUp(0) && HighLightedBox != null && !dragging && DosBoxEnabled
 			&& !(GetComponent<WarpDialog>().warpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
 				&& RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
@@ -652,11 +652,6 @@ public class RoomLoader : MonoBehaviour
 					defaultBoxSelectionTimer.Restart();
 				}
 			}
-		}
-
-		if (!DosBoxEnabled)
-		{
-			SelectedBox = null;
 		}
 
 		if (SelectedBox != null)
@@ -770,35 +765,32 @@ public class RoomLoader : MonoBehaviour
 					CameraFollow.Value = 2;
 					GetComponent<DosBox>().ResetCamera(floor, room);
 
-					Actors.SetActive(DosBoxEnabled && ShowActors.BoolValue);
-					Border.SetActive(DosBoxEnabled);
-
 					//select player by default
-					if (SelectedBox == null)
+					GetComponent<DosBox>().UpdateAllActors();
+					SelectedBox = GetComponent<DosBox>().Player;
+					if (SelectedBox != null)
 					{
-						GetComponent<DosBox>().UpdateAllActors();
-						SelectedBox = GetComponent<DosBox>().Player;
-						if (SelectedBox != null)
-						{
-							SelectedBoxId = SelectedBox.ID;
-						}
+						SelectedBoxId = SelectedBox.ID;
 					}
 				}
 				else
 				{
+					DosBoxEnabled = false;
+					GetComponent<DosBox>().UnlinkDosBox();
+
 					//follow player => room
 					if (CameraFollow.Value == 2)
 					{
 						CameraFollow.Value = 1;
 					}
-					GetComponent<DosBox>().UnlinkDosBox();
 
-					Actors.SetActive(false);
-					Border.SetActive(false);
-					DosBoxEnabled = false;
-
+					SelectedBox = null;
 					GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp
 				}
+
+				Actors.SetActive(DosBoxEnabled && ShowActors.BoolValue);
+				Border.SetActive(DosBoxEnabled);
+
 				LinkToDOSBox.BoolValue = DosBoxEnabled;
 				ToggleMenuDOSBoxOptions(DosBoxEnabled);
 				menuEnabled = false; //hide menu
