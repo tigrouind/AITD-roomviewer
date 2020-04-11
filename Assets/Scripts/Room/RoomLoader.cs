@@ -545,25 +545,23 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//exchange actor slot
-		if (HighLightedBox != null)
+		if (HighLightedBox != null && !GetComponent<WarpDialog>().warpMenuEnabled)
 		{
-			if (Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.RightControl))
-			{
-				targetSlot = -1;
-			}
+			InputDigit(ref targetSlot);
 
-			if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+			if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
 			{
-				InputDigit(ref targetSlot);
-			}
-
-			if (Input.GetKeyUp(KeyCode.LeftControl) || Input.GetKeyUp(KeyCode.RightControl))
-			{
-				if(targetSlot >= 0 && targetSlot < 50 && isAITD1)
+				if (targetSlot >= 0 && targetSlot < 50 && isAITD1)
 				{
 					GetComponent<DosBox>().ExchangeActorSlots(HighLightedBox.Slot, targetSlot);
 				}
+
+				targetSlot = -1;
 			}
+		}
+		else
+		{
+			targetSlot = -1;
 		}
 	}
 
@@ -994,7 +992,7 @@ public class RoomLoader : MonoBehaviour
 			{
 				value = digit;
 			}
-			else
+			else if (value < 100)
 			{
 				value = digit + value * 10;
 			}

@@ -34,7 +34,7 @@ public class DosBox : MonoBehaviour
 
 	private byte[] varsMemoryPattern = new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2E, 0x00, 0x2F, 0x00, 0x00, 0x00, 0x00 };
 	private byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 };
-	private byte[] objectMemoryPattern = new byte[] { 0x61, 0x00, 0x02, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x9F, 0x0C, 0x00, 0x00, 0xF4, 0xF9 };
+	private byte[] objectMemoryPattern = new byte[] { 0x61, 0x00, 0x02, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF };
 
 	private int[] MemoryOffsets = new [] { -188, -28, -28 };
 	//offset to apply to get beginning of actors array
@@ -627,6 +627,11 @@ public class DosBox : MonoBehaviour
 				if (Shared.ObjectMemoryAddress != -1)
 				{
 					Shared.ObjectMemoryAddress -= 4 + 52;
+
+					//adjust actor offset (needed if player has been swapped)
+					ProcessReader.Read(memory, Shared.ObjectMemoryAddress + 52, 2);
+					int playerSlotID = memory.ReadShort(0);
+					Shared.ActorsMemoryAdress += (1 - playerSlotID) * 160;
 				}
 			}
 		}
@@ -693,24 +698,31 @@ public class DosBox : MonoBehaviour
 
 	public void ExchangeActorSlots(int slotFrom, int slotTo)
 	{
-		if(ProcessReader != null && Shared.ObjectMemoryAddress != -1 && slotFrom != slotTo)
+		if (ProcessReader != null && Shared.ObjectMemoryAddress != -1)
 		{
-			int actorSize = ActorStructSize[dosBoxPattern];
-			long offsetFrom = GetActorMemoryAddress(slotFrom);
-			long offsetTo = GetActorMemoryAddress(slotTo);
+			if (slotFrom != slotTo)
+			{
+				int actorSize = ActorStructSize[dosBoxPattern];
+				long offsetFrom = GetActorMemoryAddress(slotFrom);
+				long offsetTo = GetActorMemoryAddress(slotTo);
 
-			byte[] memoryFrom = new byte[actorSize];
-			byte[] memoryTo = new byte[actorSize];
+				byte[] memoryFrom = new byte[actorSize];
+				byte[] memoryTo = new byte[actorSize];
 
-			//exchange slots
-			ProcessReader.Read(memoryFrom, offsetFrom, actorSize);
-			ProcessReader.Read(memoryTo, offsetTo, actorSize);
+				//exchange slots
+				ProcessReader.Read(memoryFrom, offsetFrom, actorSize);
+				ProcessReader.Read(memoryTo, offsetTo, actorSize);
 
-			ProcessReader.Write(memoryTo, offsetFrom, actorSize);
-			ProcessReader.Write(memoryFrom, offsetTo, actorSize);
+				ProcessReader.Write(memoryTo, offsetFrom, actorSize);
+				ProcessReader.Write(memoryFrom, offsetTo, actorSize);
 
-			UpdateObjectOwnerID(slotFrom, (short)slotTo);
-			UpdateObjectOwnerID(slotTo, (short)slotFrom);
+				UpdateObjectOwnerID(slotFrom, (short)slotTo);
+				UpdateObjectOwnerID(slotTo, (short)slotFrom);
+			}
+		}
+		else
+		{
+			RightText.text = "Actor swap is not available";
 		}
 	}
 
