@@ -544,25 +544,7 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 
-		//exchange actor slot
-		if (HighLightedBox != null && !GetComponent<WarpDialog>().warpMenuEnabled)
-		{
-			InputDigit(ref targetSlot);
-
-			if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-			{
-				if (targetSlot >= 0 && targetSlot < 50 && isAITD1)
-				{
-					GetComponent<DosBox>().ExchangeActorSlots(HighLightedBox.Slot, targetSlot);
-				}
-
-				targetSlot = -1;
-			}
-		}
-		else
-		{
-			targetSlot = -1;
-		}
+		UpdateTargetSlot();
 	}
 
 	private void RefreshHighLightedBox()
@@ -983,7 +965,45 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	void InputDigit(ref int value)
+	void UpdateTargetSlot()
+	{
+		if (HighLightedBox != null && !GetComponent<WarpDialog>().warpMenuEnabled)
+		{
+			if (InputDigit(ref targetSlot))
+			{
+				UpdateTargetSlotText();
+			}
+
+			if (Input.GetKeyDown(KeyCode.Backspace))
+			{
+				targetSlot = targetSlot >= 10 ? targetSlot / 10 : -1;
+				UpdateTargetSlotText();
+			}
+
+			if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+			{
+				if (targetSlot >= 0 && targetSlot < 50 && isAITD1)
+				{
+					GetComponent<DosBox>().ExchangeActorSlots(HighLightedBox.Slot, targetSlot);
+				}
+
+				targetSlot = -1;
+				UpdateTargetSlotText();
+			}
+		}
+		else if (targetSlot != -1)
+		{
+			targetSlot = -1;
+			UpdateTargetSlotText();
+		}
+	}
+
+	void UpdateTargetSlotText()
+	{
+		GetComponent<DosBox>().RightText.text = (targetSlot == -1) ? string.Empty : string.Format("SLOT {0}", targetSlot);
+	}
+
+	bool InputDigit(ref int value)
 	{
 		int digit;
 		if (IsKeypadKeyDown(out digit))
@@ -992,11 +1012,19 @@ public class RoomLoader : MonoBehaviour
 			{
 				value = digit;
 			}
-			else if (value < 100)
+			else
 			{
-				value = digit + value * 10;
+				int newValue = digit + value * 10;
+				if (newValue < 50)
+				{
+					value = newValue;
+				}
 			}
+
+			return true;
 		}
+
+		return false;
 	}
 
 	bool IsKeypadKeyDown(out int value)
