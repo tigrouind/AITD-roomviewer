@@ -1069,9 +1069,12 @@ MonoBehaviour:
   - {fileID: 2800000, guid: c0878cc6c32d82a48a6a1f5a9bbe9adf, type: 3}
   - {fileID: 2800000, guid: 4b31818a291beb543a3744b792568af2, type: 3}
   - {fileID: 2800000, guid: a19c1244574785e4d8fc0bf3a447fef7, type: 3}
+  - {fileID: 2800000, guid: 1e1c312be29f96341a8342f78134f93c, type: 3}
   LeftText: {fileID: 692489841}
   SphereMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   CubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  boundingLower: {x: 0, y: 0, z: 0}
+  boundingUpper: {x: 0, y: 0, z: 0}
   Panel: {fileID: 1196216666}
   ModelInput: {fileID: 708951445}
   AnimationInput: {fileID: 1537273363}

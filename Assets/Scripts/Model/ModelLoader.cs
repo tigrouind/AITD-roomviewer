@@ -155,7 +155,14 @@ public class ModelLoader : MonoBehaviour
 					startindex++;
 				}
 
-				i += 0x10;
+				if((flags & 8) == 8)
+				{
+					i += 0x18;
+				}
+				else
+				{
+					i += 0x10;
+				}
 			}
 		}
 		else
@@ -648,8 +655,10 @@ public class ModelLoader : MonoBehaviour
 			return 3;
 		else if (modelFiles.Count > 500)
 			return 2;
-		else
+		else if (modelFiles.Count > 200)
 			return 1;
+		else
+			return 4;
 	}
 
 	void SetPalette()
