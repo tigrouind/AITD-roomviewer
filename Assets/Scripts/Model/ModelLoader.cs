@@ -25,6 +25,7 @@ public class ModelLoader : MonoBehaviour
 	private List<Frame> animFrames;
 	private List<Transform> bones;
 	private List<Vector3> initialBonesPosition;
+	private int modelFlags;
 
 	private int PaletteIndex;
 	public Texture2D[] PaletteTexture;
@@ -88,7 +89,7 @@ public class ModelLoader : MonoBehaviour
 		int i = 0;
 
 		//header
-		int flags = allbytes.ReadShort(i + 0);
+		modelFlags = allbytes.ReadShort(i + 0);
 
 		//bounding box
 		allbytes.ReadBoundingBox(i + 2, out boundingLower, out boundingUpper);
@@ -108,13 +109,12 @@ public class ModelLoader : MonoBehaviour
 			i += 6;
 		}
 
-		//check if model has bones
 		bones = new List<Transform>();
 		List<Matrix4x4> bindPoses = new List<Matrix4x4>();
 		Dictionary<int, int> bonesPerVertex = new Dictionary<int, int>();
 		List<Vector3> vertexNoTransform = vertices.ToList();
 
-		if ((flags & 2) == 2)
+		if ((modelFlags & 2) == 2) //check if model has bones
 		{
 			//bones
 			count = allbytes.ReadShort(i + 0);
@@ -155,7 +155,7 @@ public class ModelLoader : MonoBehaviour
 					startindex++;
 				}
 
-				if((flags & 8) == 8)
+				if((modelFlags & 8) == 8)
 				{
 					i += 0x18;
 				}
@@ -474,13 +474,6 @@ public class ModelLoader : MonoBehaviour
 		return color;
 	}
 
-	class Frame
-	{
-		public float Time;
-		public Vector3 Offset;
-		public List<Vector4> Bones;
-	}
-
 	void LoadAnim(string filename)
 	{
 		string varName = varParser.GetText("ANIMS", animIndex);
@@ -500,27 +493,41 @@ public class ModelLoader : MonoBehaviour
 			f.Time = allbytes.ReadShort(i + 0);
 			f.Offset = allbytes.ReadVector(i + 2);
 
-			f.Bones = new List<Vector4>();
+			f.Bones = new List<Bone>();
 			i += 8;
 			for(int bone = 0 ; bone < boneCount ; bone++)
 			{
-				int type = allbytes.ReadShort(i + 0);
+				Bone b = new Bone();
+				b.Type = allbytes.ReadShort(i + 0);
 				Vector3 boneTransform = allbytes.ReadVector(i + 2);
 
-				if(type == 0) //rotate
+				switch(b.Type)
 				{
-					f.Bones.Add(new Vector4(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f, type));
+					case 0: //rotate
+						if((modelFlags & 8) != 8)
+						{
+							b.Rotate = new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f);
+						}
+						break;
+
+					case 1: //translate
+						b.Position = new Vector3(boneTransform.x / 1000.0f, -boneTransform.y / 1000.0f, boneTransform.z / 1000.0f);
+						break;
+
+					case 2: //scale
+						b.Scale = new Vector3(boneTransform.x / 1024.0f + 1.0f, boneTransform.y / 1024.0f + 1.0f, boneTransform.z / 1024.0f + 1.0f);
+						break;
 				}
 
-				else if(type == 1) //translate
-				{
-					f.Bones.Add(new Vector4(boneTransform.x / 1000.0f, -boneTransform.y / 1000.0f, boneTransform.z / 1000.0f, type));
-				}
-				else //scale
-				{
-					f.Bones.Add(new Vector4(boneTransform.x / 1024.0f + 1.0f, boneTransform.y / 1024.0f + 1.0f, boneTransform.z / 1024.0f + 1.0f, type));
-				}
 				i += 8;
+				if ((modelFlags & 8) == 8)
+				{
+					boneTransform = allbytes.ReadVector(i + 0);
+					b.Rotate = new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f);
+					i += 8;
+				}
+
+				f.Bones.Add(b);
 			}
 
 			animFrames.Add(f);
@@ -554,56 +561,56 @@ public class ModelLoader : MonoBehaviour
 		for (int i = 0 ; i < bones.Count; i++)
 		{
 			Transform boneTransform = bones[i].transform;
+			Vector3 position = initialBonesPosition[i];
+			Quaternion rotation = Quaternion.identity;
+			Vector3 scale = Vector3.one;
 
-			if(i >= currentFrame.Bones.Count)
+			if (i < currentFrame.Bones.Count) //there is more bones in model than anim
 			{
-				//there is more bones in model than anim
-				boneTransform.localPosition = initialBonesPosition[i];
-				boneTransform.localRotation = Quaternion.identity;
-				boneTransform.localScale = Vector3.one;
-				continue;
+				var currentBone = currentFrame.Bones[i];
+				var nextBone = nextFrame.Bones[i];
+
+				//interpolate
+				if (nextBone.Type == 0 || (modelFlags & 8) == 8) //rotation
+				{
+					rotation = Quaternion.Slerp(
+							Quaternion.AngleAxis(currentBone.Rotate.z, Vector3.forward) *
+							Quaternion.AngleAxis(currentBone.Rotate.x, Vector3.right) *
+							Quaternion.AngleAxis(currentBone.Rotate.y, Vector3.up),
+							Quaternion.AngleAxis(nextBone.Rotate.z, Vector3.forward) *
+							Quaternion.AngleAxis(nextBone.Rotate.x, Vector3.right) *
+							Quaternion.AngleAxis(nextBone.Rotate.y, Vector3.up),
+							framePosition);
+				}
+
+				if (nextBone.Type == 1) //position
+				{
+					position = initialBonesPosition[i] +
+						Vector3.Lerp(
+							new Vector3(currentBone.Position.x, currentBone.Position.y, currentBone.Position.z),
+							new Vector3(nextBone.Position.x, nextBone.Position.y, nextBone.Position.z),
+							framePosition);
+				}
+
+				if (nextBone.Type == 2) //scaling
+				{
+					scale = Vector3.Lerp(
+							new Vector3(currentBone.Scale.x, currentBone.Scale.y, currentBone.Scale.z),
+							new Vector3(nextBone.Scale.x, nextBone.Scale.y, nextBone.Scale.z),
+							framePosition);
+				}
 			}
 
-			var currentBone = currentFrame.Bones[i];
-			var nextBone = nextFrame.Bones[i];
+			boneTransform.localPosition = position;
+			boneTransform.localScale = scale;
 
-			//interpolate
-			if (nextBone.w == 0.0f)
+			if ((modelFlags & 8) == 8)
 			{
-				//rotation
-				boneTransform.localPosition = initialBonesPosition[i];
-				boneTransform.localScale = Vector3.one;
-				boneTransform.localRotation =
-					Quaternion.Slerp(
-						Quaternion.AngleAxis(currentBone.z, Vector3.forward) *
-						Quaternion.AngleAxis(currentBone.x, Vector3.right) *
-						Quaternion.AngleAxis(currentBone.y, Vector3.up),
-						Quaternion.AngleAxis(nextBone.z, Vector3.forward) *
-						Quaternion.AngleAxis(nextBone.x, Vector3.right) *
-						Quaternion.AngleAxis(nextBone.y, Vector3.up),
-						framePosition);
-			}
-			else if (nextBone.w == 1.0f)
-			{
-				//position
-				boneTransform.localRotation = Quaternion.identity;
-				boneTransform.localScale = Vector3.one;
-				boneTransform.localPosition = initialBonesPosition[i] +
-					Vector3.Lerp(
-						new Vector3(currentBone.x, currentBone.y, currentBone.z),
-						new Vector3(nextBone.x, nextBone.y, nextBone.z),
-						framePosition);
+				boneTransform.rotation = transform.rotation * rotation;
 			}
 			else
 			{
-				//scaling
-				boneTransform.localRotation = Quaternion.identity;
-				boneTransform.localPosition = initialBonesPosition[i];
-				boneTransform.localScale =
-					Vector3.Lerp(
-						new Vector3(currentBone.x, currentBone.y, currentBone.z),
-						new Vector3(nextBone.x, nextBone.y, nextBone.z),
-						framePosition);
+				boneTransform.localRotation = rotation;
 			}
 		}
 	}
@@ -817,7 +824,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//animate
-		if(animFrames != null)
+		if(animFrames != null && (modelFlags & 2) == 2)
 		{
 			AnimateModel();
 		}
