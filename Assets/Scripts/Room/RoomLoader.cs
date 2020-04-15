@@ -417,6 +417,8 @@ public class RoomLoader : MonoBehaviour
 			return 2;
 		else if (floors.Count >= 14)
 			return 3;
+		else if (floors.Count == 1 && Directory.Exists("GAMEDATA\\ETAGE16"))
+			return 4; //JITD
 		else
 			return 1;
 	}
@@ -967,7 +969,7 @@ public class RoomLoader : MonoBehaviour
 
 	void UpdateTargetSlot()
 	{
-		if (HighLightedBox != null && !GetComponent<WarpDialog>().warpMenuEnabled)
+		if (HighLightedBox != null && !GetComponent<WarpDialog>().warpMenuEnabled && isAITD1)
 		{
 			if (InputDigit(ref targetSlot))
 			{
@@ -982,7 +984,7 @@ public class RoomLoader : MonoBehaviour
 
 			if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
 			{
-				if (targetSlot >= 0 && targetSlot < 50 && isAITD1)
+				if (targetSlot >= 0 && targetSlot < 50)
 				{
 					GetComponent<DosBox>().ExchangeActorSlots(HighLightedBox.Slot, targetSlot);
 				}
