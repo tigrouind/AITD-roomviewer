@@ -20,8 +20,8 @@ public class ModelLoader : MonoBehaviour
 
 	private string[] modelFolders = new string[] { "GAMEDATA\\LISTBODY", "GAMEDATA\\LISTBOD2" };
 	private string[] animFolders = new string[] { "GAMEDATA\\LISTANIM", "GAMEDATA\\LISTANI2" };
-	private List<string> modelFiles = new List<string>();
-	private List<string> animFiles = new List<string>();
+	private List<KeyValuePair<int, string>> modelFiles = new List<KeyValuePair<int, string>>();
+	private List<KeyValuePair<int, string>> animFiles = new List<KeyValuePair<int, string>>();
 	private List<Frame> animFrames;
 	private List<Transform> bones;
 	private List<Vector3> initialBonesPosition;
@@ -61,11 +61,12 @@ public class ModelLoader : MonoBehaviour
 	public ToggleButton EnableAnimation;
 	public ToggleButton ShowAdditionalInfo;
 
-	void LoadBody(string filename, bool resetcamera = true)
+	void LoadBody(bool resetcamera = true)
 	{
-		string varName = varParser.GetText("BODYS", modelIndex);
+		int fileIndex = modelFiles[modelIndex].Key;
+		string varName = varParser.GetText("BODYS", fileIndex);
 		string folderName = modelFolders[modelFolderIndex];
-		LeftTextBody = folderName.Substring(folderName.Length - 4) + " " + modelIndex + "/" + (modelFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
+		LeftTextBody = folderName.Substring(folderName.Length - 4) + " " + fileIndex + "/" + modelFiles[modelFiles.Count - 1].Key + " <color=#00c864>" + varName + "</color>";
 		RefreshLeftText();
 
 		//camera
@@ -85,6 +86,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//load data
+		string filename = modelFiles[modelIndex].Value;
 		byte[] allbytes = File.ReadAllBytes(filename);
 		int i = 0;
 
@@ -474,13 +476,15 @@ public class ModelLoader : MonoBehaviour
 		return color;
 	}
 
-	void LoadAnim(string filename)
+	void LoadAnim()
 	{
-		string varName = varParser.GetText("ANIMS", animIndex);
+		int fileIndex = animFiles[animIndex].Key;
+		string varName = varParser.GetText("ANIMS", fileIndex);
 		string folderName = animFolders[modelFolderIndex];
-		LeftTextAnim = folderName.Substring(folderName.Length - 4) + " " + animIndex + "/" + (animFiles.Count - 1) + " <color=#00c864>" + varName + "</color>";
+		LeftTextAnim = folderName.Substring(folderName.Length - 4) + " " + fileIndex + "/" + animFiles[animFiles.Count - 1].Key + " <color=#00c864>" + varName + "</color>";
 
 		int i = 0;
+		string filename = animFiles[animIndex].Value;
 		byte[] allbytes = File.ReadAllBytes(filename);
 		int frameCount = allbytes.ReadShort(i + 0);
 		int boneCount = allbytes.ReadShort(i + 2);
@@ -686,10 +690,12 @@ public class ModelLoader : MonoBehaviour
 		if (Directory.Exists(foldername))
 		{
 			modelFiles = Directory.GetFiles(foldername)
-				.OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();
+				.Select(x => new KeyValuePair<int, string>(int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber), x))
+				.OrderBy(x => x.Key)
+				.ToList();
 
 			SetPalette();
-			LoadBody(modelFiles[modelIndex]);
+			LoadBody();
 		}
 		else
 		{
@@ -702,11 +708,13 @@ public class ModelLoader : MonoBehaviour
 		if (Directory.Exists(foldername))
 		{
 			animFiles = Directory.GetFiles(foldername)
-				.OrderBy(x => int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber)).ToList();
+				.Select(x => new KeyValuePair<int, string>(int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber), x))
+				.OrderBy(x => x.Key)
+				.ToList();
 
 			if(EnableAnimation.BoolValue)
 			{
-				LoadAnim(animFiles[animIndex]);
+				LoadAnim();
 			}
 		}
 	}
@@ -787,8 +795,8 @@ public class ModelLoader : MonoBehaviour
 				menuEnabled = !menuEnabled;
 				if (menuEnabled)
 				{
-					ModelInput.text = modelIndex.ToString();
-					AnimationInput.text = animIndex.ToString();
+					ModelInput.text = modelFiles[modelIndex].Key.ToString();
+					AnimationInput.text = animFiles[animIndex].Key.ToString();
 				}
 			}
 		}
@@ -807,14 +815,14 @@ public class ModelLoader : MonoBehaviour
 		//load new model if needed
 		if (modelFiles.Count > 0 && oldModelIndex != modelIndex)
 		{
-			ModelInput.text = modelIndex.ToString();
-			LoadBody(modelFiles[modelIndex]);
+			ModelInput.text = modelFiles[modelIndex].Key.ToString();
+			LoadBody();
 		}
 
 		if (animFiles.Count > 0 && oldAnimIndex != animIndex)
 		{
-			AnimationInput.text = animIndex.ToString();
-			LoadAnim(animFiles[animIndex]);
+			AnimationInput.text = animFiles[animIndex].Key.ToString();
+			LoadAnim();
 		}
 
 		//rotate model
@@ -825,7 +833,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//animate
-		if(animFrames != null && (modelFlags & 2) == 2)
+		if(animFrames != null && (modelFlags & 2) == 2 && animFrames.Count > 0)
 		{
 			AnimateModel();
 		}
@@ -1013,26 +1021,43 @@ public class ModelLoader : MonoBehaviour
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 
+	bool TryFindFileIndex(List<KeyValuePair<int, string>> source, int fileName, out int index)
+	{
+		for (int i = source.Count - 1 ; i >= 0 ; i--)
+		{
+			if(source[i].Key <= fileName)
+			{
+				index = i;
+				return true;
+			}
+		}
+
+		index = source.FindIndex(x => x.Key > fileName);
+		return index != -1;
+	}
+
 	public void ModelIndexInputChanged()
 	{
-		int newModelIndex;
-		if(int.TryParse(ModelInput.text, out newModelIndex) && newModelIndex != modelIndex)
+		int fileName, fileIndex;
+		if (int.TryParse(ModelInput.text, out fileName) && TryFindFileIndex(modelFiles, fileName, out fileIndex) && fileIndex != modelIndex)
 		{
-			modelIndex = Math.Min(Math.Max(newModelIndex, 0), modelFiles.Count - 1);
-			ModelInput.text = modelIndex.ToString();
-			LoadBody(modelFiles[modelIndex]);
+			modelIndex = fileIndex;
+			LoadBody();
 		}
+
+		ModelInput.text = modelFiles[modelIndex].Key.ToString();
 	}
 
 	public void AnimationIndexInputChanged()
 	{
-		int newAnimIndex;
-		if(int.TryParse(AnimationInput.text, out newAnimIndex) && newAnimIndex != animIndex)
+		int fileName, fileIndex;
+		if (int.TryParse(AnimationInput.text, out fileName) && TryFindFileIndex(animFiles, fileName, out fileIndex) && fileIndex != animIndex)
 		{
-			animIndex = Math.Min(Math.Max(newAnimIndex, 0), animFiles.Count - 1);
-			AnimationInput.text = animIndex.ToString();
-			LoadAnim(animFiles[animIndex]);
+			animIndex = fileIndex;
+			LoadAnim();
 		}
+
+		AnimationInput.text = animFiles[animIndex].Key.ToString();
 	}
 
 	void CheckCommandLine()
@@ -1118,12 +1143,12 @@ public class ModelLoader : MonoBehaviour
 					ToggleAnimationMenuItems(EnableAnimation.BoolValue);
 					if (EnableAnimation.BoolValue)
 					{
-						LoadAnim(animFiles[animIndex]);
+						LoadAnim();
 					}
 					else
 					{
 						animFrames = null;
-						LoadBody(modelFiles[modelIndex], false);
+						LoadBody(false);
 					}
 				}
 				break;
@@ -1135,12 +1160,12 @@ public class ModelLoader : MonoBehaviour
 
 			case KeyCode.G:
 				GradientMaterial.BoolValue = !GradientMaterial.BoolValue;
-				LoadBody(modelFiles[modelIndex], false);
+				LoadBody(false);
 				break;
 
 			case KeyCode.N:
 				NoiseMaterial.BoolValue = !NoiseMaterial.BoolValue;
-				LoadBody(modelFiles[modelIndex], false);
+				LoadBody(false);
 				break;
 
 			case KeyCode.R:
