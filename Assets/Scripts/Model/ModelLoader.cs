@@ -486,6 +486,7 @@ public class ModelLoader : MonoBehaviour
 		int boneCount = allbytes.ReadShort(i + 2);
 		i += 4;
 
+		var isAITD2 = ((boneCount * 16 + 8) * frameCount + 4) == allbytes.Length;
 		animFrames = new List<Frame>();
 		for(int frame = 0 ; frame < frameCount ; frame++)
 		{
@@ -504,7 +505,7 @@ public class ModelLoader : MonoBehaviour
 				switch(b.Type)
 				{
 					case 0: //rotate
-						if((modelFlags & 8) != 8)
+						if(isAITD2)
 						{
 							b.Rotate = new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f);
 						}
@@ -520,7 +521,7 @@ public class ModelLoader : MonoBehaviour
 				}
 
 				i += 8;
-				if ((modelFlags & 8) == 8)
+				if (isAITD2)
 				{
 					boneTransform = allbytes.ReadVector(i + 0);
 					b.Rotate = new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f);
