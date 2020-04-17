@@ -557,7 +557,7 @@ public class ModelLoader : MonoBehaviour
 
 		Frame currentFrame = animFrames[frame % animFrames.Count];
 		Frame nextFrame = animFrames[(frame + 1) % animFrames.Count];
-		float framePosition = (time - (totaltime - nextFrame.Time)) / nextFrame.Time;
+		float framePosition = (nextFrame.Time == 0.0f) ? 0.0f : (time - (totaltime - nextFrame.Time)) / nextFrame.Time;
 
 		for (int i = 0 ; i < bones.Count; i++)
 		{
