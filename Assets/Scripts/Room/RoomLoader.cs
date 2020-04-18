@@ -613,7 +613,7 @@ public class RoomLoader : MonoBehaviour
 	private void RefreshSelectedBox()
 	{
 		//toggle selected box
-		if (Input.GetMouseButtonUp(0) && HighLightedBox != null && !dragging && DosBoxEnabled
+		if (Input.GetMouseButtonUp(0) && HighLightedBox != null && !dragging
 			&& !(GetComponent<WarpDialog>().warpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
 				&& RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
