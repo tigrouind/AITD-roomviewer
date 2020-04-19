@@ -37,11 +37,11 @@ public class DosBox : MonoBehaviour
 	private byte[] cvarsMemoryPattern = new byte[] { 0x31, 0x00, 0x0E, 0x01, 0xBC, 0x02, 0x12, 0x00, 0x06, 0x00, 0x13, 0x00, 0x14, 0x00, 0x01 };
 	private byte[] objectMemoryPattern = new byte[] { 0x61, 0x00, 0x02, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF };
 
-	private int[] PlayerInitialSlot = new [] { 1, 0, 0, 6 };
+	private int[] playerInitialSlot = new [] { 1, 0, 0, 6 };
 	//offset to apply to get beginning of actors array
-	private int[] ActorStructSize = new [] { 160, 180, 182, 180 };
+	private int[] actorStructSize = new [] { 160, 180, 182, 180 };
 	//size of one actor
-	private int[] TrackModeOffsets = new [] { 82, 90, 90, 90 };
+	private int[] trackModeOffsets = new [] { 82, 90, 90, 90 };
 
 	private Vector3 lastPlayerPosition;
 	private int lastValidPlayerIndex = -1;
@@ -97,12 +97,12 @@ public class DosBox : MonoBehaviour
 				int i = 0;
 				foreach (Box box in Boxes)
 				{
-					int k = i * ActorStructSize[dosBoxPattern];
+					int k = i * actorStructSize[dosBoxPattern];
 					box.ID = memory.ReadShort(k + 0);
 
 					if (box.ID != -1)
 					{
-						int trackModeOffset = TrackModeOffsets[dosBoxPattern];
+						int trackModeOffset = trackModeOffsets[dosBoxPattern];
 						box.Body = memory.ReadShort(k + 2);
 						box.Flags = memory.ReadShort(k + 4);
 						box.ColFlags = memory.ReadShort(k + 6);
@@ -583,7 +583,7 @@ public class DosBox : MonoBehaviour
 			if (foundAddress != -1)
 			{
 				processId = pid;
-				address = foundAddress - 28 - PlayerInitialSlot[patternIndex] * ActorStructSize[patternIndex];
+				address = foundAddress - 28 - playerInitialSlot[patternIndex] * actorStructSize[patternIndex];
 
 				reader.Close();
 				return true;
@@ -678,7 +678,7 @@ public class DosBox : MonoBehaviour
 
 	public long GetActorMemoryAddress(int index)
 	{
-		return Shared.ActorsMemoryAdress + index * ActorStructSize[dosBoxPattern];
+		return Shared.ActorsMemoryAdress + index * actorStructSize[dosBoxPattern];
 	}
 
 	public Vector3 GetMousePosition(int room, int floor)
@@ -703,7 +703,7 @@ public class DosBox : MonoBehaviour
 		{
 			if (slotFrom != slotTo)
 			{
-				int actorSize = ActorStructSize[dosBoxPattern];
+				int actorSize = actorStructSize[dosBoxPattern];
 				long offsetFrom = GetActorMemoryAddress(slotFrom);
 				long offsetTo = GetActorMemoryAddress(slotTo);
 

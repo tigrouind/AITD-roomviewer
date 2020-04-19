@@ -24,19 +24,19 @@ public class RoomLoader : MonoBehaviour
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
 	private bool dragging;
-	private Box CurrentCamera;
+	private Box currentCamera;
 
 	public Text LeftText;
 	public BoxInfo BottomText;
 	public Box BoxPrefab;
 
 	public BoxInfo BoxInfo;
-	private Box HighLightedBox;
-	private Box SelectedBox;
-	private int SelectedBoxId;
 	private int targetSlot;
+	private Box highLightedBox;
+	private Box selectedBox;
+	private int selectedBoxId;
 
-	private bool DosBoxEnabled;
+	private bool dosBoxEnabled;
 	private bool isAITD1;
 	private int detectedGame;
 	public GameObject Actors;
@@ -501,9 +501,9 @@ public class RoomLoader : MonoBehaviour
 					warpDialog.warpActor = null; //reset to player
 				}
 			}
-			else if (DosBoxEnabled && HighLightedBox != null && HighLightedBox.name == "Actor")
+			else if (dosBoxEnabled && highLightedBox != null && highLightedBox.name == "Actor")
 			{
-				warpDialog.LoadActor(HighLightedBox);
+				warpDialog.LoadActor(highLightedBox);
 				warpDialog.warpMenuEnabled = true;
 			}
 			else
@@ -524,7 +524,7 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		DosBox dosBox = GetComponent<DosBox>();
-		dosBox.ShowAdditionalInfo = ShowAdditionalInfo.BoolValue && DosBoxEnabled;
+		dosBox.ShowAdditionalInfo = ShowAdditionalInfo.BoolValue && dosBoxEnabled;
 		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && isAITD1 && dosBox.IsCDROMVersion;
 		dosBox.SpeedRunMode = speedRunMode;
 
@@ -569,14 +569,14 @@ public class RoomLoader : MonoBehaviour
 			Array.Sort(hitInfos, boxComparer);
 
 			Box box = hitInfos[0].collider.GetComponent<Box>();
-			if (box != HighLightedBox)
+			if (box != highLightedBox)
 			{
-				if (HighLightedBox != null)
+				if (highLightedBox != null)
 				{
-					HighLightedBox.HighLight = false;
-					if(HighLightedBox.name == "Camera")
+					highLightedBox.HighLight = false;
+					if(highLightedBox.name == "Camera")
 					{
-						HighLightedBox.GetComponent<Renderer>().sharedMaterial.renderQueue = 3000;
+						highLightedBox.GetComponent<Renderer>().sharedMaterial.renderQueue = 3000;
 					}
 				}
 
@@ -587,7 +587,7 @@ public class RoomLoader : MonoBehaviour
 					box.GetComponent<Renderer>().sharedMaterial.renderQueue = 3500;
 				}
 
-				HighLightedBox = box;
+				highLightedBox = box;
 			}
 
 			//display info
@@ -602,10 +602,10 @@ public class RoomLoader : MonoBehaviour
 			//text
 			box.UpdateText(BoxInfo);
 		}
-		else if (HighLightedBox != null)
+		else if (highLightedBox != null)
 		{
-			HighLightedBox.HighLight = false;
-			HighLightedBox = null;
+			highLightedBox.HighLight = false;
+			highLightedBox = null;
 			BoxInfo.Clear(true);
 		}
 	}
@@ -613,44 +613,44 @@ public class RoomLoader : MonoBehaviour
 	private void RefreshSelectedBox()
 	{
 		//toggle selected box
-		if (Input.GetMouseButtonUp(0) && HighLightedBox != null && !dragging
+		if (Input.GetMouseButtonUp(0) && highLightedBox != null && !dragging
 			&& !(GetComponent<WarpDialog>().warpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
 				&& RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
-			if (HighLightedBox.name == "Camera")
+			if (highLightedBox.name == "Camera")
 			{
 				RefreshSelectedCamera();
 			}
 			else
 			{
-				if (SelectedBox != HighLightedBox)
+				if (selectedBox != highLightedBox)
 				{
-					SelectedBox = HighLightedBox;
-					SelectedBoxId = HighLightedBox.ID;
+					selectedBox = highLightedBox;
+					selectedBoxId = highLightedBox.ID;
 				}
 				else
 				{
-					SelectedBox = null;
+					selectedBox = null;
 					defaultBoxSelectionTimer.Restart();
 				}
 			}
 		}
 
-		if (SelectedBox != null)
+		if (selectedBox != null)
 		{
-			if (SelectedBox.ID == SelectedBoxId)
+			if (selectedBox.ID == selectedBoxId)
 			{
 				//display selected box info
-				SelectedBox.UpdateText(BottomText);
+				selectedBox.UpdateText(BottomText);
 			}
 			else
 			{
 				//if actor is no more available (eg : after room switch) search for it
 				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
 				{
-					if (box.ID == SelectedBoxId)
+					if (box.ID == selectedBoxId)
 					{
-						SelectedBox = box;
+						selectedBox = box;
 						break;
 					}
 				}
@@ -663,10 +663,10 @@ public class RoomLoader : MonoBehaviour
 			if(speedRunMode && defaultBoxSelectionTimer.Elapsed > 1.0f)
 			{
 				//select player by default
-				SelectedBox = GetComponent<DosBox>().Player;
-				if (SelectedBox != null)
+				selectedBox = GetComponent<DosBox>().Player;
+				if (selectedBox != null)
 				{
-					SelectedBoxId = SelectedBox.ID;
+					selectedBoxId = selectedBox.ID;
 				}
 			}
 		}
@@ -706,7 +706,7 @@ public class RoomLoader : MonoBehaviour
 
 	public Box GetSelectedBox()
 	{
-		return SelectedBox;
+		return selectedBox;
 	}
 
 	#endregion
@@ -739,9 +739,9 @@ public class RoomLoader : MonoBehaviour
 		switch (keyCode)
 		{
 			case KeyCode.L:
-				if (!DosBoxEnabled)
+				if (!dosBoxEnabled)
 				{
-					DosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);
+					dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);
 
 					//set follow mode to player
 					CameraFollow.Value = 2;
@@ -749,15 +749,15 @@ public class RoomLoader : MonoBehaviour
 
 					//select player by default
 					GetComponent<DosBox>().UpdateAllActors();
-					SelectedBox = GetComponent<DosBox>().Player;
-					if (SelectedBox != null)
+					selectedBox = GetComponent<DosBox>().Player;
+					if (selectedBox != null)
 					{
-						SelectedBoxId = SelectedBox.ID;
+						selectedBoxId = selectedBox.ID;
 					}
 				}
 				else
 				{
-					DosBoxEnabled = false;
+					dosBoxEnabled = false;
 					GetComponent<DosBox>().UnlinkDosBox();
 
 					//follow player => room
@@ -766,15 +766,15 @@ public class RoomLoader : MonoBehaviour
 						CameraFollow.Value = 1;
 					}
 
-					SelectedBox = null;
+					selectedBox = null;
 					GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp
 				}
 
-				Actors.SetActive(DosBoxEnabled && ShowActors.BoolValue);
-				Border.SetActive(DosBoxEnabled);
+				Actors.SetActive(dosBoxEnabled && ShowActors.BoolValue);
+				Border.SetActive(dosBoxEnabled);
 
-				LinkToDOSBox.BoolValue = DosBoxEnabled;
-				ToggleMenuDOSBoxOptions(DosBoxEnabled);
+				LinkToDOSBox.BoolValue = dosBoxEnabled;
+				ToggleMenuDOSBoxOptions(dosBoxEnabled);
 				menuEnabled = false; //hide menu
 				break;
 
@@ -802,7 +802,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.F:
-				CameraFollow.Value = (CameraFollow.Value + 1) % (!DosBoxEnabled ? 2 : 3);
+				CameraFollow.Value = (CameraFollow.Value + 1) % (!dosBoxEnabled ? 2 : 3);
 				if (CameraFollow.Value == 1) //room
 				{
 					CenterCamera(room);
@@ -815,7 +815,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.V:
-				if (isAITD1 && DosBoxEnabled)
+				if (isAITD1 && dosBoxEnabled)
 				{
 					SceneManager.LoadScene("vars");
 				}
@@ -838,7 +838,7 @@ public class RoomLoader : MonoBehaviour
 
 			case KeyCode.A:
 				ShowActors.BoolValue = !ShowActors.BoolValue;
-				Actors.SetActive(DosBoxEnabled && ShowActors.BoolValue);
+				Actors.SetActive(dosBoxEnabled && ShowActors.BoolValue);
 				break;
 
 			case KeyCode.E:
@@ -946,16 +946,16 @@ public class RoomLoader : MonoBehaviour
 
 	void RefreshSelectedCamera()
 	{
-		if(HighLightedBox != CurrentCamera)
+		if(highLightedBox != currentCamera)
 		{
-			SetCameraVisibility(CurrentCamera, false);
-			SetCameraVisibility(HighLightedBox, true);
-			CurrentCamera = HighLightedBox;
+			SetCameraVisibility(currentCamera, false);
+			SetCameraVisibility(highLightedBox, true);
+			currentCamera = highLightedBox;
 		}
 		else
 		{
-			SetCameraVisibility(HighLightedBox, false);
-			CurrentCamera = null;
+			SetCameraVisibility(highLightedBox, false);
+			currentCamera = null;
 		}
 	}
 
