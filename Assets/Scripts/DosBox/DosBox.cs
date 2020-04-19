@@ -62,6 +62,7 @@ public class DosBox : MonoBehaviour
 	private bool allowInventory;
 	private bool saveTimerFlag;
 	private ushort internalTimer2;
+	private int targetSlot;
 
 	public void Start()
 	{
@@ -697,7 +698,85 @@ public class DosBox : MonoBehaviour
 
 	#region Exchange slots
 
-	public void ExchangeActorSlots(int slotFrom, int slotTo)
+	public void UpdateTargetSlot(Box highLightedBox)
+	{
+		if (highLightedBox != null && !GetComponent<WarpDialog>().warpMenuEnabled)
+		{
+			if (InputDigit(ref targetSlot))
+			{
+				UpdateTargetSlotText();
+			}
+
+			if (Input.GetKeyDown(KeyCode.Backspace))
+			{
+				targetSlot = targetSlot >= 10 ? targetSlot / 10 : -1;
+				UpdateTargetSlotText();
+			}
+
+			if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+			{
+				if (targetSlot >= 0 && targetSlot < 50)
+				{
+					ExchangeActorSlots(highLightedBox.Slot, targetSlot);
+				}
+
+				targetSlot = -1;
+				UpdateTargetSlotText();
+			}
+		}
+		else if (targetSlot != -1)
+		{
+			targetSlot = -1;
+			UpdateTargetSlotText();
+		}
+	}
+
+	void UpdateTargetSlotText()
+	{
+		RightText.text = (targetSlot == -1) ? string.Empty : string.Format("SLOT {0}", targetSlot);
+	}
+
+	bool InputDigit(ref int value)
+	{
+		int digit;
+		if (IsKeypadKeyDown(out digit))
+		{
+			if (value == -1)
+			{
+				value = digit;
+			}
+			else
+			{
+				int newValue = digit + value * 10;
+				if (newValue < 50)
+				{
+					value = newValue;
+				}
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool IsKeypadKeyDown(out int value)
+	{
+		for(int digit = 0 ; digit <= 9 ; digit++)
+		{
+			if (Input.GetKeyDown(KeyCode.Keypad0 + digit)
+			 || Input.GetKeyDown(KeyCode.Alpha0 + digit))
+			{
+				value = digit;
+				return true;
+			}
+		}
+
+		value = -1;
+		return false;
+	}
+
+	void ExchangeActorSlots(int slotFrom, int slotTo)
 	{
 		if (ProcessReader != null && Shared.ObjectMemoryAddress != -1)
 		{
