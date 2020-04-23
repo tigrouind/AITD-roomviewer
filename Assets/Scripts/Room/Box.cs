@@ -330,9 +330,9 @@ public class Box : MonoBehaviour
 			}
 
 			if (DosBox.ShowAITD1Vars && Chrono != 0)
-				info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer - Chrono) / 60), (DosBox.InternalTimer - Chrono) % 60);
+				info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer1 - Chrono) / 60), (DosBox.InternalTimer1 - Chrono) % 60);
 			if (DosBox.ShowAITD1Vars && RoomChrono != 0)
-				info.Append("ROOM_CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer - RoomChrono) / 60), (DosBox.InternalTimer - RoomChrono) % 60);
+				info.Append("ROOM_CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer1 - RoomChrono) / 60), (DosBox.InternalTimer1 - RoomChrono) % 60);
 			if (DosBox.ShowAdditionalInfo && TrackMode >= 0 && TrackMode <= 3)
 				info.Append("TRACKMODE", trackModeInfo[TrackMode]);
 			if (DosBox.ShowAITD1Vars && TrackNumber != -1)

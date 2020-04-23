@@ -14,7 +14,7 @@ public class DosBox : MonoBehaviour
 	public Arrow Arrow;
 	public Box BoxPrefab;
 	public Box[] Boxes;
-	public uint InternalTimer;
+	public uint InternalTimer1;
 	public bool ShowAdditionalInfo;
 	public bool ShowAITD1Vars;
 	public bool IsCDROMVersion;
@@ -310,7 +310,7 @@ public class DosBox : MonoBehaviour
 				{
 					//internal timer
 					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6, 4);
-					InternalTimer = memory.ReadUnsignedInt(0);
+					InternalTimer1 = memory.ReadUnsignedInt(0);
 
 					//internal timer 2
 					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0xA5CE, 2);
@@ -424,7 +424,7 @@ public class DosBox : MonoBehaviour
 				int calculatedFps = previousFramesCount.Sum();
 				TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
 
-				BoxInfo.Append("Timer 1", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer / 60), InternalTimer % 60);
+				BoxInfo.Append("Timer 1", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer1 / 60), InternalTimer1 % 60);
 				BoxInfo.Append("Timer 2", "{0}.{1:D2}", TimeSpan.FromSeconds(internalTimer2 / 60), internalTimer2 % 60);
 				BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
 				BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
@@ -457,20 +457,24 @@ public class DosBox : MonoBehaviour
 				box.LastDistance = 0.0f;
 			}
 		}
-		if (Input.GetKeyDown(KeyCode.Alpha1) && ProcessReader != null)
+		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && IsCDROMVersion && ProcessReader != null)
 		{
-			//internal timer 1
-			InternalTimer -= 60 * 5; //back 5 frames
-			memory.Write(InternalTimer, 0);
-			ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6, 4);
+			if (Input.GetKeyDown(KeyCode.Alpha1))
+			{
+				//internal timer 1
+				InternalTimer1 -= 60 * 5; //back 5 frames
+				memory.Write(InternalTimer1, 0);
+				ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6, 4);
+			}
+			if (Input.GetKeyDown(KeyCode.Alpha2))
+			{
+				//internal timer 2
+				internalTimer2 -= 60 * 5; //back 5 frames
+				memory.Write(internalTimer2, 0);
+				ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0xA5CE, 2);
+			}
 		}
-		if (Input.GetKeyDown(KeyCode.Alpha2) && ProcessReader != null)
-		{
-			//internal timer 2
-			internalTimer2 -= 60 * 5; //back 5 frames
-			memory.Write(internalTimer2, 0);
-			ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0xA5CE, 2);
-		}
+
 	}
 
 	public void CalculateFPS()
