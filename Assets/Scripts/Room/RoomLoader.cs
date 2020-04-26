@@ -245,6 +245,11 @@ public class RoomLoader : MonoBehaviour
 					//underground floor
 					box.Color = new Color32(100, 100, 100, 255);
 				}
+				if ((box.Flags & 4) == 4)
+				{
+					//room link
+					box.Color = new Color32(0, 100, 128, 255);
+				}
 				if ((box.Flags & 8) == 8)
 				{
 					//interactive box
