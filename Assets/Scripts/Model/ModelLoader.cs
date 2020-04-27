@@ -895,17 +895,17 @@ public class ModelLoader : MonoBehaviour
 			bakedMesh.GetVertices(allVertices);
 		}
 
-		float gmaxY = 0.0f;
-		float gminY = 1.0f;
+		float gmaxY = float.MinValue;
+		float gminY = float.MaxValue;
 		float gmaxZ = float.MinValue;
 		float gminZ = float.MaxValue;
 
 		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
 		{
-			float maxX = 0.0f;
-			float minX = 1.0f;
-			float maxY = 0.0f;
-			float minY = 1.0f;
+			float maxX = float.MinValue;
+			float minX = float.MaxValue;
+			float maxY = float.MinValue;
+			float minY = float.MaxValue;
 			float maxZ = float.MinValue;
 
 			int polyType = gradientPolygonType[i];
@@ -960,11 +960,6 @@ public class ModelLoader : MonoBehaviour
 					gminZ = point.z;
 				}
 			}
-
-			minX = Mathf.Clamp01(minX);
-			maxX = Mathf.Clamp01(maxX);
-			minY = Mathf.Clamp01(minY);
-			maxY = Mathf.Clamp01(maxY);
 
 			foreach (int vertexIndex in gradientPolygonList[i])
 			{
