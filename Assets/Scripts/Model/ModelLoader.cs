@@ -37,6 +37,7 @@ public class ModelLoader : MonoBehaviour
 	private Mesh bakedMesh;
 	private List<Vector3> allVertices;
 	private List<Vector2> uv;
+	private List<Vector2> uvDepth;
 	public Vector3 boundingLower;
 	public Vector3 boundingUpper;
 
@@ -195,6 +196,7 @@ public class ModelLoader : MonoBehaviour
 		List<BoneWeight> boneWeights = new List<BoneWeight>();
 		allVertices = new List<Vector3>();
 		uv = new List<Vector2>();
+		uvDepth = new List<Vector2>();
 		List<Color32> colors = new List<Color32>();
 		List<int>[] indices = new List<int>[5];
 
@@ -228,6 +230,7 @@ public class ModelLoader : MonoBehaviour
 						Quaternion rotation = Quaternion.LookRotation(directionVector);
 
 						uv.AddRange(CubeMesh.uv);
+						uvDepth.AddRange(CubeMesh.vertices.Select(x => Vector2.zero));
 						indices[0].AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x =>
 							rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
@@ -263,11 +266,8 @@ public class ModelLoader : MonoBehaviour
 							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
 						}
 
-						if ((polyType == 3 || polyType == 4 || polyType == 5 || polyType == 6) && GradientMaterial.BoolValue)
-						{
-							gradientPolygonType.Add(polyType);
-							gradientPolygonList.Add(polyVertices);
-						}
+						gradientPolygonType.Add(polyType);
+						gradientPolygonList.Add(polyVertices);
 
 						if (polyType == 1 && NoiseMaterial.BoolValue)
 						{
@@ -288,6 +288,8 @@ public class ModelLoader : MonoBehaviour
 						{
 							uv.AddRange(polyVertices.Select(x => Vector2.zero));
 						}
+
+						uvDepth.AddRange(polyVertices.Select(x => Vector2.zero));
 
 						//triangulate
 						int v0 = 0;
@@ -344,6 +346,7 @@ public class ModelLoader : MonoBehaviour
 						}
 
 						uv.AddRange(SphereMesh.uv.Select(x => x * uvScale));
+						uvDepth.AddRange(SphereMesh.vertices.Select(x => Vector2.zero));
 						triangleList.AddRange(SphereMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(SphereMesh.vertices.Select(x => x * scale + position));
 						colors.AddRange(SphereMesh.vertices.Select(x => color));
@@ -375,6 +378,7 @@ public class ModelLoader : MonoBehaviour
 						}
 
 						uv.AddRange(CubeMesh.uv);
+						uvDepth.AddRange(CubeMesh.vertices.Select(x => Vector2.zero));
 						indices[0].AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x => x * pointsize + position));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
@@ -401,6 +405,7 @@ public class ModelLoader : MonoBehaviour
 		msh.SetTriangles(indices[3], 3);
 		msh.SetTriangles(indices[4], 4);
 		msh.SetUVs(0, uv);
+		msh.SetUVs(1, uvDepth);
 		msh.RecalculateNormals();
 		msh.RecalculateBounds();
 
@@ -851,13 +856,13 @@ public class ModelLoader : MonoBehaviour
 		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
 		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
 
-		if (GradientMaterial.BoolValue && gradientPolygonList != null)
+		if (gradientPolygonList != null)
 		{
 			UpdateGradientsUVs();
 		}
 	}
 
-	Vector2 WorldToViewportPoint(Camera cam,Vector3 pos)
+	Vector3 WorldToViewportPoint(Camera cam, Vector3 pos)
 	{
 		//same as Camera.WorldToViewportPoint() but handle points behind camera correctly (when temp.w < 0)
 		Matrix4x4 mat = cam.projectionMatrix * cam.worldToCameraMatrix;
@@ -871,7 +876,7 @@ public class ModelLoader : MonoBehaviour
 		{
 			temp.x = (temp.x / Mathf.Abs(temp.w) + 1.0f) * 0.5f;
 			temp.y = (temp.y / Mathf.Abs(temp.w) + 1.0f) * 0.5f;
-			return new Vector2(temp.x, temp.y);
+			return new Vector3(temp.x, temp.y, temp.w);
 		}
 	}
 
@@ -892,6 +897,8 @@ public class ModelLoader : MonoBehaviour
 
 		float gmaxY = 0.0f;
 		float gminY = 1.0f;
+		float gmaxZ = float.MinValue;
+		float gminZ = float.MaxValue;
 
 		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
 		{
@@ -899,6 +906,7 @@ public class ModelLoader : MonoBehaviour
 			float minX = 1.0f;
 			float maxY = 0.0f;
 			float minY = 1.0f;
+			float maxZ = float.MinValue;
 
 			int polyType = gradientPolygonType[i];
 
@@ -936,6 +944,21 @@ public class ModelLoader : MonoBehaviour
 				{
 					minX = point.x;
 				}
+
+				if (point.z > maxZ)
+				{
+					maxZ = point.z;
+				}
+
+				if (point.z > gmaxZ)
+				{
+					gmaxZ = point.z;
+				}
+
+				if (point.z < gminZ)
+				{
+					gminZ = point.z;
+				}
 			}
 
 			minX = Mathf.Clamp01(minX);
@@ -960,11 +983,13 @@ public class ModelLoader : MonoBehaviour
 						uv[vertexIndex] = new Vector2(maxX, minX);
 						break;
 				}
+
+				uvDepth[vertexIndex] = new Vector2(maxZ, 0.0f);
 			}
 		}
 
-		gminY = Mathf.Clamp01(gminY);
-		gmaxY = Mathf.Clamp01(gmaxY);
+		float range = gmaxZ - gminZ;
+		if(range == 0.0f) range = 1.0f;
 
 		for (int i = 0; i < gradientPolygonList.Count; i++)
 		{
@@ -976,10 +1001,13 @@ public class ModelLoader : MonoBehaviour
 					float maxY = uv[vertexIndex].x;
 					uv[vertexIndex] = new Vector2(maxY, gmaxY - gminY);
 				}
+
+				uvDepth[vertexIndex] = new Vector2((uvDepth[vertexIndex].x - gminZ) / range, 0.0f);
 			}
 		}
 
 		mesh.SetUVs(0, uv);
+		mesh.SetUVs(1, uvDepth);
 	}
 
 	void RefreshLeftText()

@@ -5,7 +5,7 @@ It has been created mostly for speedrunning.
 
 AITD2, AITD3 and JITD are also supported.
 
-## Instructions 
+## Instructions
 1. Extract AITD room viewer archive somewhere (eg : on your desktop)
 2. Create a folder named "GAMEDATA" inside AITD room viewer folder
 3. Make sure you have original version of the game installed on your computer.
@@ -24,7 +24,7 @@ AITD2, AITD3 and JITD are also supported.
 - Left right arrows : change room
 - Esc : quit (only in fullscreen mode)
 
-## Shortcuts 
+## Shortcuts
 
 - L : link DosBox
 - D : display mode
@@ -43,7 +43,7 @@ Gray boxes are colliders which player cannot passthrough
 Blue boxes are colliders that player can interact with
 Red and amber boxes are triggers. It is usually used to switch from one room to another. It can also trigger other things like enemies, sounds, scripted sequences, ...
 
-## Link to DOSBOX process: 
+## Link to DOSBOX process:
 This feature allows to view all active entities in the game, displayed and updated in realtime from DOSBOX.
 
 To do this :
@@ -51,7 +51,7 @@ To do this :
 - Start DOSBOX
 - Start AIDT
 - Start a new game in AIDT
-- Skip intro, when player is in the attic, don't move 
+- Skip intro, when player is in the attic, don't move
 - In the menu options, choose "Link to DOSBOX"
 
 If everything is OK, you should now view a white square with an arrow, this is player position.
@@ -64,24 +64,24 @@ When the game is linked to DOSBOX, it is possible to change the position of an a
 - 7, 9 : rotate actor left / right
 - If you hold 0 while pressing the numpad keys above, position is updated at a higher rate.
 
-# Model viewer 
+# Model viewer
 
-## Installation 
+## Installation
 
-Repeat room viewer installation steps with QuickBMS but select files LISTBODY.PAK and LISTBOD2.PAK. 
+Repeat room viewer installation steps with QuickBMS but select files LISTBODY.PAK and LISTBOD2.PAK.
 If you want to be able to view animations, unpack files LISTANIM.PAK and LISTANI2.PAK.
 
-## Commands 
+## Commands
 
-- Left, right arrows : change model 
+- Left, right arrows : change model
 - Up, down arrows : change animation
-- Space : change model folder (Edward or Emily) 
+- Space : change model folder (Edward or Emily)
 - Shift : hold it while pressing left or right keys to skip 10 models at once
 - Mouse wheel : zoom in / out
 - Left mouse button : click on model and drag to rotate it
 - Right mouse button : show options menu / move model
 
-## Shortcuts 
+## Shortcuts
 
 - N : noise material
 - G : gradient material
@@ -89,8 +89,3 @@ If you want to be able to view animations, unpack files LISTANIM.PAK and LISTANI
 - E : show extra info
 - A : enable animation
 - Tab : switch to room viewer
-
-## Known bugs/limitations :
-
-- z-fighting on some models (eg : wardrobe, oil can, vinyl, ...)  
-- gradient material emulation is not 100% accurate
