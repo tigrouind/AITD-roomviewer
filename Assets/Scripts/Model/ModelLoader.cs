@@ -355,8 +355,8 @@ public class ModelLoader : MonoBehaviour
 					}
 
 				case 2: //1x1 pixel
-				case 6: //square
-				case 7:
+				case 6: //2x2 square
+				case 7: //NxN square, size depends projected z-value
 					{
 						i++;
 						int colorIndex = allbytes[i];
@@ -385,6 +385,11 @@ public class ModelLoader : MonoBehaviour
 						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[cubeIndex], weight0 = 1 }));
 						break;
 					}
+
+				case 4:
+				case 5: //should be ignored
+					break;
+
 				default:
 					throw new UnityException("unknown primitive " + primitiveType.ToString() + " at " + i.ToString());
 			}
