@@ -519,7 +519,7 @@ public class ModelLoader : MonoBehaviour
 				switch(b.Type)
 				{
 					case 0: //rotate
-						if(isAITD2)
+						if(!isAITD2)
 						{
 							b.Rotate = new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f);
 						}
