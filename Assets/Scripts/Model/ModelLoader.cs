@@ -806,7 +806,10 @@ public class ModelLoader : MonoBehaviour
 				if (menuEnabled)
 				{
 					ModelInput.text = modelFiles[modelIndex].Key.ToString();
-					AnimationInput.text = animFiles[animIndex].Key.ToString();
+					if (animFiles.Count > 0)
+					{
+						AnimationInput.text = animFiles[animIndex].Key.ToString();
+					}
 				}
 			}
 		}
