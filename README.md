@@ -34,7 +34,6 @@ AITD2, AITD3 and JITD are also supported.
 - T : trigger's visibility
 - A : actor's visibility
 - E : show extra info (AITD1 only)
-- V : show vars (AITD1 only)
 - Page up / down : camera rotate
 - Tab : switch to model viewer
 

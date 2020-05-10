@@ -41,7 +41,6 @@ public class RoomLoader : MonoBehaviour
 	public GameObject Actors;
 
 	public RectTransform Panel;
-	public Button ShowVars;
 	public ToggleButton LinkToDOSBox;
 	public ToggleButton ShowAdditionalInfo;
 	public ToggleButton ShowActors;
@@ -727,7 +726,6 @@ public class RoomLoader : MonoBehaviour
 	{
 		ShowActors.transform.parent.gameObject.SetActive(enabled);
 		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled);
-		ShowVars.transform.gameObject.SetActive(enabled && isAITD1);
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 
@@ -814,13 +812,6 @@ public class RoomLoader : MonoBehaviour
 				{
 					//make sure camear snap back
 					GetComponent<DosBox>().ResetCamera(floor, room);
-				}
-				break;
-
-			case KeyCode.V:
-				if (isAITD1 && dosBoxEnabled)
-				{
-					SceneManager.LoadScene("vars");
 				}
 				break;
 
