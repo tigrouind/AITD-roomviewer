@@ -93,10 +93,10 @@ public class RoomLoader : MonoBehaviour
 
 		var vertices = new Vector3[]
 		{
-			new Vector3(-4000f, 0f,  4000f),
-			new Vector3( 4000f, 0f,  4000f),
-			new Vector3(-4000f, 0f, -4000f),
-			new Vector3( 4000f, 0f, -4000f),
+			new Vector3(-34f, 0f,  34f),
+			new Vector3( 34f, 0f,  34f),
+			new Vector3(-34f, 0f, -34f),
+			new Vector3( 34f, 0f, -34f),
 
 			new Vector3(-32.768f, 0f,  32.768f),
 			new Vector3( 32.768f, 0f,  32.768f),
