@@ -330,7 +330,7 @@ public class DosBox : MonoBehaviour
 			else
 			{
 				//unlink DOSBOX
-				GetComponent<RoomLoader>().ProcessKey(KeyCode.L);
+				GetComponent<RoomLoader>().LinkToDosBox();
 			}
 		}
 
@@ -572,7 +572,6 @@ public class DosBox : MonoBehaviour
 		int[] processIds = GetAllDOSBOXProcesses();
 		if (!processIds.Any())
 		{
-			RightText.text = "Cannot find DOSBOX process";
 			processId = -1;
 			address = -1;
 			return false;
@@ -597,7 +596,6 @@ public class DosBox : MonoBehaviour
 
 		processId = -1;
 		address = -1;
-		RightText.text = "Cannot find player data in DOSBOX process memory.";
 		return false;
 	}
 
@@ -652,7 +650,6 @@ public class DosBox : MonoBehaviour
 		byte[] cdPattern = ASCIIEncoding.ASCII.GetBytes("CD Not Found");
 		IsCDROMVersion = detectedGame == 1 && ProcessReader.SearchForBytePattern(cdPattern) != -1;
 
-		RightText.text = string.Empty;
 		return true;
 	}
 
@@ -666,7 +663,6 @@ public class DosBox : MonoBehaviour
 
 		Shared.ProcessId = -1;
 		BoxInfo.Clear(true);
-		RightText.text = string.Empty;
 		lastValidPlayerIndex = -1;
 	}
 

@@ -42,7 +42,6 @@ public class RoomLoader : MonoBehaviour
 	public GameObject Actors;
 
 	public RectTransform Panel;
-	public ToggleButton LinkToDOSBox;
 	public ToggleButton ShowAdditionalInfo;
 	public ToggleButton ShowActors;
 	public Slider CameraRotation;
@@ -544,24 +543,17 @@ public class RoomLoader : MonoBehaviour
 			{
 				if (Input.GetKeyDown(key))
 				{
-					ProcessKey(key, true);
+					ProcessKey(key);
 				}
 			}
 		}
 
 		//automatic link
-		if(!dosBoxEnabled && !menuEnabled && linkToDosBoxTimer.Elapsed > 1.0f)
+		if(!dosBoxEnabled && linkToDosBoxTimer.Elapsed > 1.0f)
 		{
 			LinkToDosBox();
 			linkToDosBoxTimer.Restart();
 		}
-	}
-
-	void LinkToDosBox()
-	{
-		string previousMessage = GetComponent<DosBox>().RightText.text;
-		ProcessKey(KeyCode.L);
-		GetComponent<DosBox>().RightText.text = dosBoxEnabled ? string.Empty : previousMessage;
 	}
 
 	private void RefreshHighLightedBox()
@@ -724,6 +716,47 @@ public class RoomLoader : MonoBehaviour
 		return selectedBox;
 	}
 
+	public void LinkToDosBox()
+	{
+		if (!dosBoxEnabled)
+		{
+			dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);
+			if (dosBoxEnabled)
+			{
+				//set follow mode to player
+				CameraFollow.Value = 2;
+				GetComponent<DosBox>().ResetCamera(floor, room);
+
+				//select player by default
+				GetComponent<DosBox>().UpdateAllActors();
+				selectedBox = GetComponent<DosBox>().Player;
+				if (selectedBox != null)
+				{
+					selectedBoxId = selectedBox.ID;
+				}
+			}
+		}
+		else
+		{
+			dosBoxEnabled = false;
+			GetComponent<DosBox>().UnlinkDosBox();
+
+			//follow player => room
+			if (CameraFollow.Value == 2)
+			{
+				CameraFollow.Value = 1;
+			}
+
+			selectedBox = null;
+			GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp
+		}
+
+		Actors.SetActive(dosBoxEnabled && ShowActors.BoolValue);
+		Border.SetActive(dosBoxEnabled);
+
+		ToggleMenuDOSBoxOptions(dosBoxEnabled);
+	}
+
 	#endregion
 
 	#region GUI
@@ -745,59 +778,13 @@ public class RoomLoader : MonoBehaviour
 	public void ProcessKey(string keyCode)
 	{
 		KeyCode keyCodeEnum = (KeyCode)Enum.Parse(typeof(KeyCode), keyCode, true);
-		ProcessKey(keyCodeEnum, true);
+		ProcessKey(keyCodeEnum);
 	}
 
-	public void ProcessKey(KeyCode keyCode, bool userTriggered = false)
+	public void ProcessKey(KeyCode keyCode)
 	{
 		switch (keyCode)
 		{
-			case KeyCode.L:
-				if (!dosBoxEnabled)
-				{
-					dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);
-					if (dosBoxEnabled)
-					{
-						//set follow mode to player
-						CameraFollow.Value = 2;
-						GetComponent<DosBox>().ResetCamera(floor, room);
-
-						//select player by default
-						GetComponent<DosBox>().UpdateAllActors();
-						selectedBox = GetComponent<DosBox>().Player;
-						if (selectedBox != null)
-						{
-							selectedBoxId = selectedBox.ID;
-						}
-					}
-
-					if (userTriggered) linkToDosBoxTimer.Restart();
-				}
-				else
-				{
-					dosBoxEnabled = false;
-					GetComponent<DosBox>().UnlinkDosBox();
-
-					//follow player => room
-					if (CameraFollow.Value == 2)
-					{
-						CameraFollow.Value = 1;
-					}
-
-					selectedBox = null;
-					GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp
-
-					if (userTriggered) linkToDosBoxTimer.Reset();
-				}
-
-				Actors.SetActive(dosBoxEnabled && ShowActors.BoolValue);
-				Border.SetActive(dosBoxEnabled);
-
-				LinkToDOSBox.BoolValue = dosBoxEnabled;
-				ToggleMenuDOSBoxOptions(dosBoxEnabled);
-				menuEnabled = false; //hide menu
-				break;
-
 			case KeyCode.Tab:
 				SceneManager.LoadScene("model");
 				break;
