@@ -90,7 +90,7 @@ public class DosBox : MonoBehaviour
 		Player = null;
 		if (ProcessReader != null)
 		{
-			if (ProcessReader.Read(memory, Shared.ActorsMemoryAdress, memory.Length) > 0)
+			if (ProcessReader.Read(memory, Shared.ActorsMemoryAddress, memory.Length) > 0)
 			{
 				//read actors info
 				int i = 0;
@@ -307,23 +307,23 @@ public class DosBox : MonoBehaviour
 				if (ShowAITD1Vars)
 				{
 					//internal timer
-					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6, 4);
+					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6, 4);
 					InternalTimer1 = memory.ReadUnsignedInt(0);
 
 					//internal timer 2
-					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0xA5CE, 2);
+					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6 + 0xA5CE, 2);
 					internalTimer2 = memory.ReadUnsignedShort(0);
 
 					//inventory
-					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 - 0x1A4, 2);
+					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6 - 0x1A4, 2);
 					allowInventory = memory.ReadShort(0) == 1;
 
 					//inhand
-					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 + 0xA33C, 2);
+					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 + 0xA33C, 2);
 					inHand = memory.ReadShort(0);
 
 					//set by AITD when long running code is started (eg: loading ressource)
-					ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0x13EA, 4);
+					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6 + 0x13EA, 4);
 					saveTimerFlag = memory[0] == 1;
 				}
 			}
@@ -462,14 +462,14 @@ public class DosBox : MonoBehaviour
 				//internal timer 1
 				InternalTimer1 -= 60 * 5; //back 5 frames
 				memory.Write(InternalTimer1, 0);
-				ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6, 4);
+				ProcessReader.Write(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6, 4);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha2))
 			{
 				//internal timer 2
 				internalTimer2 -= 60 * 5; //back 5 frames
 				memory.Write(internalTimer2, 0);
-				ProcessReader.Write(memory, Shared.ActorsMemoryAdress - 0x83B6 - 6 + 0xA5CE, 2);
+				ProcessReader.Write(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6 + 0xA5CE, 2);
 			}
 		}
 
@@ -480,11 +480,11 @@ public class DosBox : MonoBehaviour
 		if (ProcessReader != null && ShowAITD1Vars)
 		{
 			//fps
-			ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6, 2);
+			ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6, 2);
 			int fps = memory.ReadShort(0);
 
 			//frames counter (reset to zero when every second by AITD)
-			ProcessReader.Read(memory, Shared.ActorsMemoryAdress - 0x83B6 + 0x7464, 2);
+			ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 + 0x7464, 2);
 			int frames = memory.ReadShort(0);
 
 			//check how much frames elapsed since last time
@@ -616,7 +616,7 @@ public class DosBox : MonoBehaviour
 			}
 
 			Shared.ProcessId = processId;
-			Shared.ActorsMemoryAdress = memoryAddress;
+			Shared.ActorsMemoryAddress = memoryAddress;
 			ProcessReader = new ProcessMemoryReader(processId);
 
 			//vars
@@ -631,7 +631,7 @@ public class DosBox : MonoBehaviour
 					//adjust actor offset (needed if player has been swapped)
 					ProcessReader.Read(memory, Shared.ObjectMemoryAddress + 52, 2);
 					int playerSlotID = memory.ReadShort(0);
-					Shared.ActorsMemoryAdress += (1 - playerSlotID) * 160;
+					Shared.ActorsMemoryAddress += (1 - playerSlotID) * 160;
 				}
 			}
 		}
@@ -675,7 +675,7 @@ public class DosBox : MonoBehaviour
 
 	public long GetActorMemoryAddress(int index)
 	{
-		return Shared.ActorsMemoryAdress + index * actorStructSize[dosBoxPattern];
+		return Shared.ActorsMemoryAddress + index * actorStructSize[dosBoxPattern];
 	}
 
 	public Vector3 GetMousePosition(int room, int floor)
