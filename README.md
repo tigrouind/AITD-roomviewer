@@ -26,7 +26,6 @@ AITD2, AITD3 and JITD are also supported.
 
 ## Shortcuts
 
-- L : link DosBox
 - D : display mode
 - F : camera follow mode
 - R : room's visibility
@@ -47,15 +46,16 @@ This feature allows to view all active entities in the game, displayed and updat
 
 To do this :
 
-- Start DOSBOX
-- Start AIDT
-- Start a new game in AIDT
+- Start room viewer
+- Start a new game in AIDT.
 - Skip intro, when player is in the attic, don't move
-- In the menu options, choose "Link to DOSBOX"
 
 If everything is OK, you should now view a white square with an arrow, this is player position.
 If you leave current room, next room is switched automatically.
 Note : once game is linked, you can start another new game, or load a saved game, it will continue to work.
+
+Common issue: if AITD has been started with administrator rights, room viewer will not be able to see AITD process.
+To fix this, run AITD with non administrator rights or run room viewer with administrator rights.
 
 ## Warp actor
 When the game is linked to DOSBOX, it is possible to change the position of an actor by selecting it, then pressing CTRL-W. The actor will be warped to mouse position. It is also possible to manually edit positions of an actor by right clicking on it or by pressing numpad keys :
