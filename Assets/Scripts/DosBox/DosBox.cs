@@ -17,7 +17,6 @@ public class DosBox : MonoBehaviour
 	public uint InternalTimer1;
 	public bool ShowAdditionalInfo;
 	public bool ShowAITD1Vars;
-	public bool IsCDROMVersion;
 	public bool SpeedRunMode;
 
 	public ProcessMemoryReader ProcessReader;
@@ -455,7 +454,7 @@ public class DosBox : MonoBehaviour
 				box.LastDistance = 0.0f;
 			}
 		}
-		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && IsCDROMVersion && ProcessReader != null)
+		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Shared.IsCDROMVersion && ProcessReader != null)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
@@ -544,14 +543,19 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	int[] GetAllDOSBOXProcesses()
+	int SearchDosBoxProcess()
 	{
-		int[] processIds = Process.GetProcesses()
-			.Where(x => GetProcessName(x).StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase))
-			.Select(x => x.Id)
-			.ToArray();
+		int? processId = Process.GetProcesses()
+				.Where(x => GetProcessName(x).StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase))
+				.Select(x => (int?)x.Id)
+				.FirstOrDefault();
 
-		return processIds;
+		if(processId.HasValue)
+		{
+			return processId.Value;
+		}
+
+		return -1;
 	}
 
 	string GetProcessName(Process process)
@@ -567,35 +571,23 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	bool SearchForBytePattern(int patternIndex, out int processId, out long address)
+	bool GetDosBoxMemoryRegion(out ProcessMemoryReader reader, out long memoryRegion)
 	{
-		int[] processIds = GetAllDOSBOXProcesses();
-		if (!processIds.Any())
+		int processId = SearchDosBoxProcess();
+		if (processId != -1)
 		{
-			processId = -1;
-			address = -1;
-			return false;
-		}
-
-		foreach (int pid in processIds)
-		{
-			ProcessMemoryReader reader = new ProcessMemoryReader(pid);
-			var pattern = PlayerInitialPosition[patternIndex];
-			long foundAddress = reader.SearchForBytePattern(pattern, true);
-			if (foundAddress != -1)
+			reader = new ProcessMemoryReader(processId);
+			memoryRegion = reader.SearchFor16MRegion();
+			if (memoryRegion != -1)
 			{
-				processId = pid;
-				address = foundAddress - 28 - playerInitialSlot[patternIndex] * actorStructSize[patternIndex];
-
-				reader.Close();
 				return true;
 			}
 
 			reader.Close();
 		}
 
-		processId = -1;
-		address = -1;
+		reader = null;
+		memoryRegion = -1;
 		return false;
 	}
 
@@ -603,27 +595,33 @@ public class DosBox : MonoBehaviour
 
 	public bool LinkToDosBOX(int floor, int room, int detectedGame)
 	{
-		//search player position in DOSBOX processes
 		int patternIndex = detectedGame - 1;
 
 		int processId = Shared.ProcessId;
 		if (processId == -1)
 		{
-			long memoryAddress;
-			if (!SearchForBytePattern(patternIndex, out processId, out memoryAddress))
+			long memoryRegion;
+			if (!GetDosBoxMemoryRegion(out ProcessReader, out memoryRegion))
 			{
 				return false;
 			}
 
-			Shared.ProcessId = processId;
-			Shared.ActorsMemoryAddress = memoryAddress;
-			ProcessReader = new ProcessMemoryReader(processId);
-
-			//vars
-			if (patternIndex == 0) //AITD1 only
+			//search player position in DOSBOX processes
+			var pattern = PlayerInitialPosition[patternIndex];
+			long foundAddress = ProcessReader.SearchForBytePattern(pattern, memoryRegion, 640 * 1024, true);
+			if (foundAddress == -1)
 			{
-				Shared.ObjectMemoryAddress = ProcessReader.SearchForBytePattern(objectMemoryPattern);
+				ProcessReader.Close();
+				ProcessReader = null;
+				return false;
+			}
 
+			Shared.ProcessId = processId;
+			Shared.ActorsMemoryAddress = foundAddress - 28 - playerInitialSlot[patternIndex] * actorStructSize[patternIndex];
+
+			if (detectedGame == 1) //AITD1 only
+			{
+				Shared.ObjectMemoryAddress = ProcessReader.SearchForBytePattern(objectMemoryPattern, memoryRegion);
 				if (Shared.ObjectMemoryAddress != -1)
 				{
 					Shared.ObjectMemoryAddress -= 4 + 52;
@@ -634,6 +632,10 @@ public class DosBox : MonoBehaviour
 					Shared.ActorsMemoryAddress += (1 - playerSlotID) * 160;
 				}
 			}
+
+			//check if CDROM/floppy version (AITD1 only)
+			byte[] cdPattern = Encoding.ASCII.GetBytes("CD Not Found");
+			Shared.IsCDROMVersion = detectedGame == 1 && ProcessReader.SearchForBytePattern(cdPattern, memoryRegion) != -1;
 		}
 		else
 		{
@@ -645,10 +647,6 @@ public class DosBox : MonoBehaviour
 		linkroom = room;
 
 		dosBoxPattern = patternIndex;
-
-		//check if CDROM/floppy version (AITD1 only)
-		byte[] cdPattern = ASCIIEncoding.ASCII.GetBytes("CD Not Found");
-		IsCDROMVersion = detectedGame == 1 && ProcessReader.SearchForBytePattern(cdPattern) != -1;
 
 		return true;
 	}

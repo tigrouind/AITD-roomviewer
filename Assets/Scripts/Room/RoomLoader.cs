@@ -526,7 +526,7 @@ public class RoomLoader : MonoBehaviour
 
 		DosBox dosBox = GetComponent<DosBox>();
 		dosBox.ShowAdditionalInfo = ShowAdditionalInfo.BoolValue && dosBoxEnabled;
-		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && isAITD1 && dosBox.IsCDROMVersion;
+		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && isAITD1 && Shared.IsCDROMVersion;
 		dosBox.SpeedRunMode = speedRunMode;
 
 		dosBox.CalculateFPS();

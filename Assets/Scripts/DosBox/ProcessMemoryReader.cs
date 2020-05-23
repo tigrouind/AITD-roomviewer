@@ -1,9 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System;
-using System.Diagnostics;
-using System.Linq;
+using System.Text;
 
 public class ProcessMemoryReader
 {
@@ -83,14 +80,12 @@ public class ProcessMemoryReader
 		}
 	}
 
-	public long SearchForBytePattern(byte[] pattern, bool wildcard = false)
+	public long SearchFor16MRegion()
 	{
 		MEMORY_BASIC_INFORMATION mem_info = new MEMORY_BASIC_INFORMATION();
 
 		long min_address = 0;
 		long max_address = 0x7FFFFFFF;
-		byte[] buffer = new byte[81920];
-		PatternSearch patternSearch = new PatternSearch(buffer, pattern, wildcard);
 
 		//scan process memory regions
 		while (min_address < max_address
@@ -99,28 +94,37 @@ public class ProcessMemoryReader
 			//check if memory region is accessible
 			//skip regions smaller than 16M (default DOSBOX memory size)
 			if (mem_info.Protect == PAGE_READWRITE && mem_info.State == MEM_COMMIT && (mem_info.Type & MEM_PRIVATE) == MEM_PRIVATE
-				&& (int)mem_info.RegionSize >= 1024 * 1024 * 16)
+				&& (int)mem_info.RegionSize >= 1024 * 1024 * 16
+				&& SearchForBytePattern(Encoding.ASCII.GetBytes("CON "), (long)mem_info.BaseAddress, 4096) != -1)
 			{
-				long readPosition = (long)mem_info.BaseAddress;
-				int bytesToRead = Math.Min((int)mem_info.RegionSize, 1024 * 640); //scan first 640K only
-
-				long bytesRead;
-				while (bytesToRead > 0 && (bytesRead = Read(buffer, readPosition, Math.Min(buffer.Length, bytesToRead))) > 0)
-				{
-					//search bytes pattern
-					int index = patternSearch.IndexOf((int)bytesRead);
-					if (index != -1)
-					{
-						return readPosition + index;
-					}
-
-					readPosition += bytesRead;
-					bytesToRead -= (int)bytesRead;
-				}
+				return (long)mem_info.BaseAddress + 32; //skip Windows 32-bytes memory allocation header
 			}
 
 			// move to next memory region
 			min_address = (long)mem_info.BaseAddress + (long)mem_info.RegionSize;
+		}
+
+		return -1;
+	}
+
+	public long SearchForBytePattern(byte[] pattern, long baseAddress, int bytesToRead = 640 * 1024, bool wildcard = false)
+	{
+		byte[] buffer = new byte[81920];
+		PatternSearch patternSearch = new PatternSearch(buffer, pattern, wildcard);
+
+		long readPosition = baseAddress;
+		long bytesRead;
+		while (bytesToRead > 0 && (bytesRead = Read(buffer, readPosition, Math.Min(buffer.Length, bytesToRead))) > 0)
+		{
+			//search bytes pattern
+			int index = patternSearch.IndexOf((int)bytesRead);
+			if (index != -1)
+			{
+				return readPosition + index;
+			}
+
+			readPosition += bytesRead;
+			bytesToRead -= (int)bytesRead;
 		}
 
 		return -1;
