@@ -609,22 +609,6 @@ public class DosBox : MonoBehaviour
 		return false;
 	}
 
-	bool IsMatch(byte[] buffer, byte[] pattern)
-	{
-		for (int index = 0; index < buffer.Length - pattern.Length + 1; index++)
-		{
-			for (int i = 0; i < pattern.Length; i++)
-			{
-				if (buffer[i + index] != pattern[i])
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
 	#region Room loader
 
 	public bool LinkToDosBOX(int floor, int room, int detectedGame)
@@ -653,7 +637,7 @@ public class DosBox : MonoBehaviour
 			{
 				//check if CDROM/floppy version
 				byte[] cdPattern = Encoding.ASCII.GetBytes("CD Not Found");
-				Shared.IsCDROMVersion = detectedGame == 1 && IsMatch(memory, cdPattern);
+				Shared.IsCDROMVersion = detectedGame == 1 && Utils.IndexOf(memory, cdPattern) != -1;
 
 				if(Shared.IsCDROMVersion)
 				{

@@ -118,4 +118,35 @@ public static class Utils
 			data[offset + 3] = (byte)(value >> 24);
 		}
 	}
+
+	public static int IndexOf(byte[] buffer, byte[] pattern)
+	{
+		return IndexOf(buffer, pattern, 0, buffer.Length);
+	}
+
+	public static int IndexOf(byte[] buffer, byte[] pattern, int startIndex, int count)
+	{
+		for (int index = startIndex; index < count - pattern.Length + 1; index++)
+		{
+			if (IsMatch(buffer, pattern, index))
+			{
+				return index;
+			}
+		}
+
+		return -1;
+	}
+
+	static bool IsMatch(byte[] buffer, byte[] pattern, int index)
+	{
+		for (int i = 0; i < pattern.Length; i++)
+		{
+			if (buffer[i + index] != pattern[i])
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
 }
