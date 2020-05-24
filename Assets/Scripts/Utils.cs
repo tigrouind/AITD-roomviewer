@@ -51,7 +51,7 @@ public static class Utils
 	{
 		unchecked
 		{
-			return (data[offset] | data[offset + 1] << 8) + (data[offset + 2] << 4 | data[offset + 3] << 12);
+			return ReadUnsignedShort(data, offset) + ReadUnsignedShort(data, offset + 2) * 16;
 		}
 	}
 
@@ -121,12 +121,7 @@ public static class Utils
 
 	public static int IndexOf(byte[] buffer, byte[] pattern)
 	{
-		return IndexOf(buffer, pattern, 0, buffer.Length);
-	}
-
-	public static int IndexOf(byte[] buffer, byte[] pattern, int startIndex, int count)
-	{
-		for (int index = startIndex; index < count - pattern.Length + 1; index++)
+		for (int index = 0; index < buffer.Length - pattern.Length + 1; index++)
 		{
 			if (IsMatch(buffer, pattern, index))
 			{

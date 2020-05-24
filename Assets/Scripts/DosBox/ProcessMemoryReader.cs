@@ -86,6 +86,7 @@ public class ProcessMemoryReader
 
 		long min_address = 0;
 		long max_address = 0x7FFFFFFF;
+		byte[] memory = new byte[4096];
 
 		//scan process memory regions
 		while (min_address < max_address
@@ -95,35 +96,14 @@ public class ProcessMemoryReader
 			//skip regions smaller than 16M (default DOSBOX memory size)
 			if (mem_info.Protect == PAGE_READWRITE && mem_info.State == MEM_COMMIT && (mem_info.Type & MEM_PRIVATE) == MEM_PRIVATE
 				&& (int)mem_info.RegionSize >= 1024 * 1024 * 16
-				&& SearchForBytePattern(Encoding.ASCII.GetBytes("CON "), (long)mem_info.BaseAddress, 4096) != -1)
+				&& Read(memory, (long)mem_info.BaseAddress, memory.Length) > 0
+				&& Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CON ")) != -1)
 			{
 				return (long)mem_info.BaseAddress + 32; //skip Windows 32-bytes memory allocation header
 			}
 
 			// move to next memory region
 			min_address = (long)mem_info.BaseAddress + (long)mem_info.RegionSize;
-		}
-
-		return -1;
-	}
-
-	long SearchForBytePattern(byte[] pattern, long baseAddress, int bytesToRead = 640 * 1024)
-	{
-		byte[] buffer = new byte[81920];
-
-		long readPosition = baseAddress;
-		long bytesRead;
-		while (bytesToRead > 0 && (bytesRead = Read(buffer, readPosition, Math.Min(buffer.Length, bytesToRead))) > 0)
-		{
-			//search bytes pattern
-			int index = Utils.IndexOf(buffer, pattern, 0, (int)bytesRead);
-			if (index != -1)
-			{
-				return readPosition + index;
-			}
-
-			readPosition += bytesRead;
-			bytesToRead -= (int)bytesRead;
 		}
 
 		return -1;
