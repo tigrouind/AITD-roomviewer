@@ -47,6 +47,14 @@ public static class Utils
 		}
 	}
 
+	public static int ReadFarPointer(this byte[] data, int offset)
+	{
+		unchecked
+		{
+			return (data[offset] | data[offset + 1] << 8) + (data[offset + 2] << 4 | data[offset + 3] << 12);
+		}
+	}
+
 	public static void ReadBoundingBox(this byte[] data, int offset, out Vector3 lower, out Vector3 upper)
 	{
 		lower.x = data.ReadShort(offset + 0);

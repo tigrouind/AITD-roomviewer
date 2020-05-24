@@ -107,7 +107,7 @@ public class ProcessMemoryReader
 		return -1;
 	}
 
-	public long SearchForBytePattern(byte[] pattern, long baseAddress, int bytesToRead = 640 * 1024, bool wildcard = false)
+	long SearchForBytePattern(byte[] pattern, long baseAddress, int bytesToRead = 640 * 1024, bool wildcard = false)
 	{
 		byte[] buffer = new byte[81920];
 		PatternSearch patternSearch = new PatternSearch(buffer, pattern, wildcard);

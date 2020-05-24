@@ -24,17 +24,15 @@ public class DosBox : MonoBehaviour
 
 	//initial player position
 	private int dosBoxPattern;
-	private byte[][] PlayerInitialPosition = new byte[][] //0xFF will match any byte value (wildcard)
+	private int[] actorArrayAddress = new []
 	{
-		new byte[] { 0x9F, 0x0C, 0x00, 0x00, 0xF4, 0xF9, 0x9F, 0x0C, 0x00, 0x00, 0xF4, 0xF9 }, //AITD1
-		new byte[] { 0x43, 0x01, 0x00, 0x00, 0xD0, 0xE4, 0x43, 0x01, 0x00, 0x00, 0xD0, 0xE4 }, //AIID2
-		new byte[] { 0xFF, 0x03, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00 }, //AITD3
-		new byte[] { 0xFF, 0x09, 0x00, 0x00, 0xFF, 0xF6, 0xFF, 0x09, 0x00, 0x00, 0xFF, 0xF6, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 }  //JITD
+		0x220CE, //AITD1 cdrom (GOG)
+		0x300D0, //AITD2
+		0x38180, //AITD3
+		0x39EC4, //JACK
+		0x20542, //AITD1 floppy (demo: 0x2050A)
 	};
 
-	private byte[] objectMemoryPattern = new byte[] { 0x61, 0x00, 0x02, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF };
-
-	private int[] playerInitialSlot = new [] { 1, 0, 0, 6 };
 	//offset to apply to get beginning of actors array
 	private int[] actorStructSize = new [] { 160, 180, 182, 180 };
 	//size of one actor
@@ -44,7 +42,7 @@ public class DosBox : MonoBehaviour
 	private int lastValidPlayerIndex = -1;
 	private int linkfloor = 0;
 	private int linkroom = 0;
-	private byte[] memory = new byte[16384];
+	private byte[] memory = new byte[640 * 1024];
 
 	//fps
 	private int oldFramesCount;
@@ -60,6 +58,9 @@ public class DosBox : MonoBehaviour
 	private bool saveTimerFlag;
 	private ushort internalTimer2;
 	private int targetSlot;
+
+	private long memoryRegion;
+	private int entryPoint;
 
 	public void Start()
 	{
@@ -89,7 +90,7 @@ public class DosBox : MonoBehaviour
 		Player = null;
 		if (ProcessReader != null)
 		{
-			if (ProcessReader.Read(memory, Shared.ActorsMemoryAddress, memory.Length) > 0)
+			if (ProcessReader.Read(memory, Shared.ActorsMemoryAddress, 16384) > 0)
 			{
 				//read actors info
 				int i = 0;
@@ -306,23 +307,23 @@ public class DosBox : MonoBehaviour
 				if (ShowAITD1Vars)
 				{
 					//internal timer
-					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6, 4);
+					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x19D12, 4);
 					InternalTimer1 = memory.ReadUnsignedInt(0);
 
 					//internal timer 2
-					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6 + 0xA5CE, 2);
+					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x242E0, 2);
 					internalTimer2 = memory.ReadUnsignedShort(0);
 
 					//inventory
-					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6 - 0x1A4, 2);
+					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x19B6E, 2);
 					allowInventory = memory.ReadShort(0) == 1;
 
 					//inhand
-					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 + 0xA33C, 2);
+					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x24054, 2);
 					inHand = memory.ReadShort(0);
 
 					//set by AITD when long running code is started (eg: loading ressource)
-					ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6 + 0x13EA, 4);
+					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x1B0FC, 1);
 					saveTimerFlag = memory[0] == 1;
 				}
 			}
@@ -461,14 +462,14 @@ public class DosBox : MonoBehaviour
 				//internal timer 1
 				InternalTimer1 -= 60 * 5; //back 5 frames
 				memory.Write(InternalTimer1, 0);
-				ProcessReader.Write(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6, 4);
+				ProcessReader.Write(memory, memoryRegion + entryPoint + 0x19D12, 4);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha2))
 			{
 				//internal timer 2
 				internalTimer2 -= 60 * 5; //back 5 frames
 				memory.Write(internalTimer2, 0);
-				ProcessReader.Write(memory, Shared.ActorsMemoryAddress - 0x83B6 - 6 + 0xA5CE, 2);
+				ProcessReader.Write(memory, memoryRegion + entryPoint + 0x242E0, 2);
 			}
 		}
 
@@ -479,11 +480,11 @@ public class DosBox : MonoBehaviour
 		if (ProcessReader != null && ShowAITD1Vars)
 		{
 			//fps
-			ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6, 2);
+			ProcessReader.Read(memory, memoryRegion + entryPoint + 0x19D18, 2);
 			int fps = memory.ReadShort(0);
 
 			//frames counter (reset to zero when every second by AITD)
-			ProcessReader.Read(memory, Shared.ActorsMemoryAddress - 0x83B6 + 0x7464, 2);
+			ProcessReader.Read(memory, memoryRegion + entryPoint + 0x2117C, 2);
 			int frames = memory.ReadShort(0);
 
 			//check how much frames elapsed since last time
@@ -591,6 +592,39 @@ public class DosBox : MonoBehaviour
 		return false;
 	}
 
+	bool GetExeEntryPoint(out int entryPoint)
+	{
+		int psp = memory.ReadUnsignedShort(0x0B30) * 16;
+		if (psp > 0)
+		{
+			int exeSize = memory.ReadUnsignedShort(psp - 16 + 3) * 16;
+			if (exeSize > 100 * 1024) //is AITD exe loaded yet?
+			{
+				entryPoint = psp + 0x100;
+				return true;
+			}
+		}
+
+		entryPoint = -1;
+		return false;
+	}
+
+	bool IsMatch(byte[] buffer, byte[] pattern)
+	{
+		for (int index = 0; index < buffer.Length - pattern.Length + 1; index++)
+		{
+			for (int i = 0; i < pattern.Length; i++)
+			{
+				if (buffer[i + index] != pattern[i])
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	#region Room loader
 
 	public bool LinkToDosBOX(int floor, int room, int detectedGame)
@@ -600,42 +634,43 @@ public class DosBox : MonoBehaviour
 		int processId = Shared.ProcessId;
 		if (processId == -1)
 		{
-			long memoryRegion;
 			if (!GetDosBoxMemoryRegion(out ProcessReader, out memoryRegion))
 			{
 				return false;
 			}
 
-			//search player position in DOSBOX processes
-			var pattern = PlayerInitialPosition[patternIndex];
-			long foundAddress = ProcessReader.SearchForBytePattern(pattern, memoryRegion, 640 * 1024, true);
-			if (foundAddress == -1)
+			ProcessReader.Read(memory, memoryRegion, memory.Length);
+
+			if (!GetExeEntryPoint(out entryPoint))
 			{
 				ProcessReader.Close();
 				ProcessReader = null;
 				return false;
 			}
 
-			Shared.ProcessId = processId;
-			Shared.ActorsMemoryAddress = foundAddress - 28 - playerInitialSlot[patternIndex] * actorStructSize[patternIndex];
-
+			Shared.ObjectMemoryAddress = -1;
 			if (detectedGame == 1) //AITD1 only
 			{
-				Shared.ObjectMemoryAddress = ProcessReader.SearchForBytePattern(objectMemoryPattern, memoryRegion);
-				if (Shared.ObjectMemoryAddress != -1)
-				{
-					Shared.ObjectMemoryAddress -= 4 + 52;
+				//check if CDROM/floppy version
+				byte[] cdPattern = Encoding.ASCII.GetBytes("CD Not Found");
+				Shared.IsCDROMVersion = detectedGame == 1 && IsMatch(memory, cdPattern);
 
-					//adjust actor offset (needed if player has been swapped)
-					ProcessReader.Read(memory, Shared.ObjectMemoryAddress + 52, 2);
-					int playerSlotID = memory.ReadShort(0);
-					Shared.ActorsMemoryAddress += (1 - playerSlotID) * 160;
+				if(Shared.IsCDROMVersion)
+				{
+					int objectAddressPointer = memory.ReadFarPointer(entryPoint + 0x2400E);
+					if (objectAddressPointer > 0)
+					{
+						Shared.ObjectMemoryAddress = memoryRegion + objectAddressPointer;
+					}
+				}
+				else
+				{
+					patternIndex = 4; //AITD1 floppy
 				}
 			}
 
-			//check if CDROM/floppy version (AITD1 only)
-			byte[] cdPattern = Encoding.ASCII.GetBytes("CD Not Found");
-			Shared.IsCDROMVersion = detectedGame == 1 && ProcessReader.SearchForBytePattern(cdPattern, memoryRegion) != -1;
+			Shared.ProcessId = processId;
+			Shared.ActorsMemoryAddress = memoryRegion + entryPoint + actorArrayAddress[patternIndex];
 		}
 		else
 		{
@@ -646,7 +681,7 @@ public class DosBox : MonoBehaviour
 		linkfloor = floor;
 		linkroom = room;
 
-		dosBoxPattern = patternIndex;
+		dosBoxPattern = detectedGame - 1;
 
 		return true;
 	}
