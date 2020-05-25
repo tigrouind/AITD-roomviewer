@@ -21,6 +21,12 @@ public class DosBox : MonoBehaviour
 
 	public ProcessMemoryReader ProcessReader;
 	public Box Player;
+	public bool IsCDROMVersion;
+
+	private long actorsMemoryAddress;
+	private long objectMemoryAddress;
+	private long memoryRegion;
+	private int entryPoint;
 
 	//initial player position
 	private int dosBoxPattern;
@@ -59,9 +65,6 @@ public class DosBox : MonoBehaviour
 	private ushort internalTimer2;
 	private int targetSlot;
 
-	private long memoryRegion;
-	private int entryPoint;
-
 	public void Start()
 	{
 		//game has maximum 50 actors
@@ -90,7 +93,7 @@ public class DosBox : MonoBehaviour
 		Player = null;
 		if (ProcessReader != null)
 		{
-			if (ProcessReader.Read(memory, Shared.ActorsMemoryAddress, 16384) > 0)
+			if (ProcessReader.Read(memory, actorsMemoryAddress, 16384) > 0)
 			{
 				//read actors info
 				int i = 0;
@@ -455,7 +458,7 @@ public class DosBox : MonoBehaviour
 				box.LastDistance = 0.0f;
 			}
 		}
-		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && Shared.IsCDROMVersion && ProcessReader != null)
+		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && IsCDROMVersion && ProcessReader != null)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
@@ -615,51 +618,42 @@ public class DosBox : MonoBehaviour
 	{
 		int patternIndex = detectedGame - 1;
 
-		int processId = Shared.ProcessId;
-		if (processId == -1)
+		if (!GetDosBoxMemoryRegion(out ProcessReader, out memoryRegion))
 		{
-			if (!GetDosBoxMemoryRegion(out ProcessReader, out memoryRegion))
+			return false;
+		}
+
+		ProcessReader.Read(memory, memoryRegion, memory.Length);
+
+		if (!GetExeEntryPoint(out entryPoint))
+		{
+			ProcessReader.Close();
+			ProcessReader = null;
+			return false;
+		}
+
+		objectMemoryAddress = -1;
+		if (detectedGame == 1) //AITD1 only
+		{
+			//check if CDROM/floppy version
+			byte[] cdPattern = Encoding.ASCII.GetBytes("CD Not Found");
+			IsCDROMVersion = detectedGame == 1 && Utils.IndexOf(memory, cdPattern) != -1;
+
+			if(IsCDROMVersion)
 			{
-				return false;
-			}
-
-			ProcessReader.Read(memory, memoryRegion, memory.Length);
-
-			if (!GetExeEntryPoint(out entryPoint))
-			{
-				ProcessReader.Close();
-				ProcessReader = null;
-				return false;
-			}
-
-			Shared.ObjectMemoryAddress = -1;
-			if (detectedGame == 1) //AITD1 only
-			{
-				//check if CDROM/floppy version
-				byte[] cdPattern = Encoding.ASCII.GetBytes("CD Not Found");
-				Shared.IsCDROMVersion = detectedGame == 1 && Utils.IndexOf(memory, cdPattern) != -1;
-
-				if(Shared.IsCDROMVersion)
+				int objectAddressPointer = memory.ReadFarPointer(entryPoint + 0x2400E);
+				if (objectAddressPointer > 0)
 				{
-					int objectAddressPointer = memory.ReadFarPointer(entryPoint + 0x2400E);
-					if (objectAddressPointer > 0)
-					{
-						Shared.ObjectMemoryAddress = memoryRegion + objectAddressPointer;
-					}
-				}
-				else
-				{
-					patternIndex = 4; //AITD1 floppy
+					objectMemoryAddress = memoryRegion + objectAddressPointer;
 				}
 			}
+			else
+			{
+				patternIndex = 4; //AITD1 floppy
+			}
+		}
 
-			Shared.ProcessId = processId;
-			Shared.ActorsMemoryAddress = memoryRegion + entryPoint + actorArrayAddress[patternIndex];
-		}
-		else
-		{
-			ProcessReader = new ProcessMemoryReader(processId);
-		}
+		actorsMemoryAddress = memoryRegion + entryPoint + actorArrayAddress[patternIndex];
 
 		//force reload
 		linkfloor = floor;
@@ -678,7 +672,6 @@ public class DosBox : MonoBehaviour
 			ProcessReader = null;
 		}
 
-		Shared.ProcessId = -1;
 		BoxInfo.Clear(true);
 		lastValidPlayerIndex = -1;
 	}
@@ -692,7 +685,7 @@ public class DosBox : MonoBehaviour
 
 	public long GetActorMemoryAddress(int index)
 	{
-		return Shared.ActorsMemoryAddress + index * actorStructSize[dosBoxPattern];
+		return actorsMemoryAddress + index * actorStructSize[dosBoxPattern];
 	}
 
 	public Vector3 GetMousePosition(int room, int floor)
@@ -791,7 +784,7 @@ public class DosBox : MonoBehaviour
 
 	void ExchangeActorSlots(int slotFrom, int slotTo)
 	{
-		if (ProcessReader != null && Shared.ObjectMemoryAddress != -1)
+		if (ProcessReader != null && objectMemoryAddress != -1)
 		{
 			if (slotFrom != slotTo)
 			{
@@ -824,7 +817,7 @@ public class DosBox : MonoBehaviour
 		int objectID = Boxes[slotIndex].ID;
 		if (objectID != -1)
 		{
-			long address = Shared.ObjectMemoryAddress + objectID * 52;
+			long address = objectMemoryAddress + objectID * 52;
 			memory.Write(ownerID, 0);
 			ProcessReader.Write(memory, address, 2);
 		}
