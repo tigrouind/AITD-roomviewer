@@ -457,7 +457,7 @@ public class RoomLoader : MonoBehaviour
 			Camera.main.transform.position += mouseBeforeZoom - Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
 		}
 
-		if (!menuEnabled && !GetComponent<WarpDialog>().warpMenuEnabled)
+		if (!menuEnabled && !GetComponent<WarpDialog>().WarpMenuEnabled)
 		{
 			//start drag
 			if (Input.GetMouseButtonDown(0))
@@ -494,18 +494,18 @@ public class RoomLoader : MonoBehaviour
 			{
 				menuEnabled = false;
 			}
-			else if(warpDialog.warpMenuEnabled)
+			else if(warpDialog.WarpMenuEnabled)
 			{
-				warpDialog.warpMenuEnabled = false;
+				warpDialog.WarpMenuEnabled = false;
 				if(speedRunMode)
 				{
-					warpDialog.warpActor = null; //reset to player
+					warpDialog.WarpActorBox = null; //reset to player
 				}
 			}
 			else if (dosBoxEnabled && highLightedBox != null && highLightedBox.name == "Actor")
 			{
 				warpDialog.LoadActor(highLightedBox);
-				warpDialog.warpMenuEnabled = true;
+				warpDialog.WarpMenuEnabled = true;
 			}
 			else
 			{
@@ -537,7 +537,7 @@ public class RoomLoader : MonoBehaviour
 		RefreshSelectedBox();
 
 		//process keys
-		if (!GetComponent<WarpDialog>().warpMenuEnabled)
+		if (!GetComponent<WarpDialog>().WarpMenuEnabled)
 		{
 			foreach (var key in keyCodes)
 			{
@@ -569,7 +569,7 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		if (hitInfos != null && hitInfos.Length > 0
-			&& !menuEnabled && !GetComponent<WarpDialog>().warpMenuEnabled)
+			&& !menuEnabled && !GetComponent<WarpDialog>().WarpMenuEnabled)
 		{
 			//sort colliders by priority
 			boxComparer.Room = room;
@@ -621,7 +621,7 @@ public class RoomLoader : MonoBehaviour
 	{
 		//toggle selected box
 		if (Input.GetMouseButtonUp(0) && highLightedBox != null && !dragging
-			&& !(GetComponent<WarpDialog>().warpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
+			&& !(GetComponent<WarpDialog>().WarpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
 				&& RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
 			if (highLightedBox.name == "Camera")
@@ -748,7 +748,7 @@ public class RoomLoader : MonoBehaviour
 			}
 
 			selectedBox = null;
-			GetComponent<WarpDialog>().warpMenuEnabled = false; //hide warp
+			GetComponent<WarpDialog>().WarpMenuEnabled = false; //hide warp
 		}
 
 		Actors.SetActive(dosBoxEnabled && ShowActors.BoolValue);

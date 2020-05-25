@@ -27,7 +27,7 @@ public class ModelLoader : MonoBehaviour
 	private List<Vector3> initialBonesPosition;
 	private int modelFlags;
 
-	private int PaletteIndex;
+	private int paletteIndex;
 	public Texture2D[] PaletteTexture;
 	public Text LeftText;
 	public Mesh SphereMesh;
@@ -38,8 +38,8 @@ public class ModelLoader : MonoBehaviour
 	private List<Vector3> allVertices;
 	private List<Vector2> uv;
 	private List<Vector2> uvDepth;
-	public Vector3 boundingLower;
-	public Vector3 boundingUpper;
+	private Vector3 boundingLower;
+	private Vector3 boundingUpper;
 
 	private Vector2 cameraRotation;
 	private Vector2 cameraPosition;
@@ -50,8 +50,8 @@ public class ModelLoader : MonoBehaviour
 	private bool autoRotate;
 	private bool displayMenuAfterDrag;
 	private bool menuEnabled;
-	private string LeftTextBody;
-	private string LeftTextAnim;
+	private string leftTextBody;
+	private string leftTextAnim;
 
 	public RectTransform Panel;
 	public InputField ModelInput;
@@ -67,7 +67,7 @@ public class ModelLoader : MonoBehaviour
 		int fileIndex = modelFiles[modelIndex].Key;
 		string varName = varParser.GetText("BODYS", fileIndex);
 		string folderName = modelFolders[modelFolderIndex];
-		LeftTextBody = folderName.Substring(folderName.Length - 4) + " " + fileIndex + "/" + modelFiles[modelFiles.Count - 1].Key + " <color=#00c864>" + varName + "</color>";
+		leftTextBody = folderName.Substring(folderName.Length - 4) + " " + fileIndex + "/" + modelFiles[modelFiles.Count - 1].Key + " <color=#00c864>" + varName + "</color>";
 		RefreshLeftText();
 
 		//camera
@@ -191,7 +191,7 @@ public class ModelLoader : MonoBehaviour
 		i += 2;
 
 		//load palette
-		Color32[] paletteColors = PaletteTexture[PaletteIndex].GetPixels32();
+		Color32[] paletteColors = PaletteTexture[paletteIndex].GetPixels32();
 
 		List<BoneWeight> boneWeights = new List<BoneWeight>();
 		allVertices = new List<Vector3>();
@@ -491,7 +491,7 @@ public class ModelLoader : MonoBehaviour
 		int fileIndex = animFiles[animIndex].Key;
 		string varName = varParser.GetText("ANIMS", fileIndex);
 		string folderName = animFolders[modelFolderIndex];
-		LeftTextAnim = folderName.Substring(folderName.Length - 4) + " " + fileIndex + "/" + animFiles[animFiles.Count - 1].Key + " <color=#00c864>" + varName + "</color>";
+		leftTextAnim = folderName.Substring(folderName.Length - 4) + " " + fileIndex + "/" + animFiles[animFiles.Count - 1].Key + " <color=#00c864>" + varName + "</color>";
 
 		int i = 0;
 		string filename = animFiles[animIndex].Value;
@@ -685,14 +685,14 @@ public class ModelLoader : MonoBehaviour
 
 	void SetPalette()
 	{
-		PaletteIndex = DetectGame() - 1;
+		paletteIndex = DetectGame() - 1;
 
 		GetComponent<SkinnedMeshRenderer>().materials[2] //noise
-			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
+			.SetTexture("_Palette", PaletteTexture[paletteIndex]);
 		GetComponent<SkinnedMeshRenderer>().materials[3] //gradient
-			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
+			.SetTexture("_Palette", PaletteTexture[paletteIndex]);
 		GetComponent<SkinnedMeshRenderer>().materials[4] //gradient2
-			.SetTexture("_Palette", PaletteTexture[PaletteIndex]);
+			.SetTexture("_Palette", PaletteTexture[paletteIndex]);
 	}
 
 	void LoadModels(string foldername)
@@ -1016,11 +1016,11 @@ public class ModelLoader : MonoBehaviour
 	void RefreshLeftText()
 	{
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.Append(LeftTextBody);
+		stringBuilder.Append(leftTextBody);
 
 		if(EnableAnimation.BoolValue)
 		{
-			stringBuilder.Append("\r\n" + LeftTextAnim);
+			stringBuilder.Append("\r\n" + leftTextAnim);
 		}
 
 		if(ShowAdditionalInfo.BoolValue)

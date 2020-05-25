@@ -6306,24 +6306,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Actors: {fileID: 1100510531}
-  warpMenuEnabled: 0
-  warpActor: {fileID: 0}
-  positionX: {fileID: 362964645}
-  positionY: {fileID: 1175176948}
-  positionZ: {fileID: 390349829}
-  localPosX: {fileID: 1348771388}
-  localPosY: {fileID: 2056311782}
-  localPosZ: {fileID: 1149735261}
+  WarpMenuEnabled: 0
+  WarpActorBox: {fileID: 0}
+  PositionX: {fileID: 362964645}
+  PositionY: {fileID: 1175176948}
+  PositionZ: {fileID: 390349829}
+  LocalPosX: {fileID: 1348771388}
+  LocalPosY: {fileID: 2056311782}
+  LocalPosZ: {fileID: 1149735261}
   worldPosX: {fileID: 1697457239}
   worldPosY: {fileID: 269640763}
   worldPosZ: {fileID: 634301639}
-  boundingPosX: {fileID: 1241505976}
-  boundingPosY: {fileID: 709522643}
-  boundingPosZ: {fileID: 2040880414}
+  BoundingPosX: {fileID: 1241505976}
+  BoundingPosY: {fileID: 709522643}
+  BoundingPosZ: {fileID: 2040880414}
   Panel: {fileID: 1169686806}
-  angleX: {fileID: 1135778504}
-  angleY: {fileID: 706320918}
-  angleZ: {fileID: 1022009560}
+  AngleX: {fileID: 1135778504}
+  AngleY: {fileID: 706320918}
+  AngleZ: {fileID: 1022009560}
   AdvancedMode: {fileID: 857857136}
 --- !u!114 &2046595785
 MonoBehaviour:

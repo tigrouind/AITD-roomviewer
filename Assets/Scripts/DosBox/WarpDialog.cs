@@ -8,15 +8,15 @@ using System.Linq;
 public class WarpDialog : MonoBehaviour
 {
 	public GameObject Actors;
-	public bool warpMenuEnabled;
-	public Box warpActor;
-	public InputField positionX, positionY, positionZ;
-	public InputField localPosX, localPosY, localPosZ;
+	public bool WarpMenuEnabled;
+	public Box WarpActorBox;
+	public InputField PositionX, PositionY, PositionZ;
+	public InputField LocalPosX, LocalPosY, LocalPosZ;
 	public InputField worldPosX, worldPosY, worldPosZ;
-	public InputField boundingPosX, boundingPosY, boundingPosZ;
+	public InputField BoundingPosX, BoundingPosY, BoundingPosZ;
 	public RectTransform Panel;
 
-	public InputField angleX, angleY, angleZ;
+	public InputField AngleX, AngleY, AngleZ;
 	public ToggleButton AdvancedMode;
 
 	private Timer timer = new Timer();
@@ -32,22 +32,22 @@ public class WarpDialog : MonoBehaviour
 		if (Input.GetMouseButtonUp(0)
 			&& !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
 		{
-			warpMenuEnabled = false;
+			WarpMenuEnabled = false;
 		}
 
-		Panel.gameObject.SetActive(warpMenuEnabled);
+		Panel.gameObject.SetActive(WarpMenuEnabled);
 
 		if (GetComponent<DosBox>().ProcessReader != null)
 		{
-			if (!Panel.GetComponentsInChildren<InputField>().Any(x => x.isFocused) && warpActor != null)
+			if (!Panel.GetComponentsInChildren<InputField>().Any(x => x.isFocused) && WarpActorBox != null)
 			{
-				MoveOrRotateActor(warpActor);
+				MoveOrRotateActor(WarpActorBox);
 			}
 
 			//warp to mouse position
 			if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.W))
 			{
-				WarpActor(warpActor);
+				WarpActor(WarpActorBox);
 			}
 		}
 	}
@@ -129,19 +129,19 @@ public class WarpDialog : MonoBehaviour
 	{
 		UpdateAngleInputField(actor);
 		UpdatePositionInputFields(actor);
-		warpActor = actor;
+		WarpActorBox = actor;
 	}
 
 	public void SetPositionClick()
 	{
-		SetPosition(warpActor);
+		SetPosition(WarpActorBox);
 	}
 
 	void SetPosition(Box actor)
 	{
 		//parse angle
 		Vector3 angleInt;
-		TryParseAngle(angleX, angleY, angleZ, out angleInt, actor.Angles);
+		TryParseAngle(AngleX, AngleY, AngleZ, out angleInt, actor.Angles);
 		WriteActorAngle(actor, angleInt);
 		UpdateAngleInputField(actor);
 
@@ -150,7 +150,7 @@ public class WarpDialog : MonoBehaviour
 
 		if (!AdvancedMode.BoolValue)
 		{
-			TryParsePosition(positionX, positionY, positionZ, out local, actor.LocalPosition + actor.Mod);
+			TryParsePosition(PositionX, PositionY, PositionZ, out local, actor.LocalPosition + actor.Mod);
 			local -= actor.Mod;
 
 			//apply offset to world/bound
@@ -162,8 +162,8 @@ public class WarpDialog : MonoBehaviour
 		else
 		{
 			Vector3 boundingPos;
-			TryParsePosition(boundingPosX, boundingPosY, boundingPosZ, out boundingPos, actor.BoundingPos);
-			TryParsePosition(localPosX, localPosY, localPosZ, out local, actor.LocalPosition + actor.Mod);
+			TryParsePosition(BoundingPosX, BoundingPosY, BoundingPosZ, out boundingPos, actor.BoundingPos);
+			TryParsePosition(LocalPosX, LocalPosY, LocalPosZ, out local, actor.LocalPosition + actor.Mod);
 			TryParsePosition(worldPosX, worldPosY, worldPosZ, out world, actor.WorldPosition + actor.Mod);
 			local -= actor.Mod;
 			world -= actor.Mod;
@@ -185,10 +185,10 @@ public class WarpDialog : MonoBehaviour
 
 	void ToggleAdvanceMode(bool enabled)
 	{
-		positionX.transform.parent.parent.gameObject.SetActive(!enabled);
-		localPosX.transform.parent.parent.gameObject.SetActive(enabled);
+		PositionX.transform.parent.parent.gameObject.SetActive(!enabled);
+		LocalPosX.transform.parent.parent.gameObject.SetActive(enabled);
 		worldPosX.transform.parent.parent.gameObject.SetActive(enabled);
-		boundingPosX.transform.parent.parent.gameObject.SetActive(enabled);
+		BoundingPosX.transform.parent.parent.gameObject.SetActive(enabled);
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 
@@ -218,12 +218,12 @@ public class WarpDialog : MonoBehaviour
 
 	void UpdatePositionInputFields(Box actor)
 	{
-		boundingPosX.text = actor.BoundingPos.x.ToString();
-		boundingPosY.text = actor.BoundingPos.y.ToString();
-		boundingPosZ.text = actor.BoundingPos.z.ToString();
-		localPosX.text = positionX.text = (actor.LocalPosition.x + actor.Mod.x).ToString();
-		localPosY.text = positionY.text = (actor.LocalPosition.y + actor.Mod.y).ToString();
-		localPosZ.text = positionZ.text = (actor.LocalPosition.z + actor.Mod.z).ToString();
+		BoundingPosX.text = actor.BoundingPos.x.ToString();
+		BoundingPosY.text = actor.BoundingPos.y.ToString();
+		BoundingPosZ.text = actor.BoundingPos.z.ToString();
+		LocalPosX.text = PositionX.text = (actor.LocalPosition.x + actor.Mod.x).ToString();
+		LocalPosY.text = PositionY.text = (actor.LocalPosition.y + actor.Mod.y).ToString();
+		LocalPosZ.text = PositionZ.text = (actor.LocalPosition.z + actor.Mod.z).ToString();
 		worldPosX.text = (actor.WorldPosition.x + actor.Mod.x).ToString();
 		worldPosY.text = (actor.WorldPosition.y + actor.Mod.y).ToString();
 		worldPosZ.text = (actor.WorldPosition.z + actor.Mod.z).ToString();
@@ -231,9 +231,9 @@ public class WarpDialog : MonoBehaviour
 
 	void UpdateAngleInputField(Box actor)
 	{
-		angleX.text = (actor.Angles.x * 360.0f / 1024.0f).ToString("N1");
-		angleY.text = (actor.Angles.y * 360.0f / 1024.0f).ToString("N1");
-		angleZ.text = (actor.Angles.z * 360.0f / 1024.0f).ToString("N1");
+		AngleX.text = (actor.Angles.x * 360.0f / 1024.0f).ToString("N1");
+		AngleY.text = (actor.Angles.y * 360.0f / 1024.0f).ToString("N1");
+		AngleZ.text = (actor.Angles.z * 360.0f / 1024.0f).ToString("N1");
 	}
 
 	void TryParseAngle(InputField angleX, InputField angleY, InputField angleZ, out Vector3 intValue, Vector3 defaultValue)
