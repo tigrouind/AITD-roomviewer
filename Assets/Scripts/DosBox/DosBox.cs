@@ -739,7 +739,7 @@ public class DosBox : MonoBehaviour
 
 	void UpdateTargetSlotText()
 	{
-		RightText.text = (targetSlot == -1) ? string.Empty : string.Format("SLOT {0}", targetSlot);
+		RightText.text = (targetSlot == -1) ? string.Empty : string.Format("Exchange with SLOT {0}", targetSlot);
 	}
 
 	bool InputDigit(ref int value)
@@ -802,8 +802,12 @@ public class DosBox : MonoBehaviour
 				ProcessReader.Write(memoryTo, offsetFrom, actorSize);
 				ProcessReader.Write(memoryFrom, offsetTo, actorSize);
 
-				UpdateObjectOwnerID(slotFrom, (short)slotTo);
-				UpdateObjectOwnerID(slotTo, (short)slotFrom);
+				//update ownerID
+				int objectIdFrom = memoryFrom.ReadShort(0);
+				int objectIdTo = memoryTo.ReadShort(0);
+
+				UpdateObjectOwnerID(objectIdFrom, slotTo);
+				UpdateObjectOwnerID(objectIdTo, slotFrom);
 			}
 		}
 		else
@@ -812,13 +816,12 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	void UpdateObjectOwnerID(int slotIndex, short ownerID)
+	void UpdateObjectOwnerID(int objectID, int ownerID)
 	{
-		int objectID = Boxes[slotIndex].ID;
 		if (objectID != -1)
 		{
 			long address = objectMemoryAddress + objectID * 52;
-			memory.Write(ownerID, 0);
+			memory.Write((short)ownerID, 0);
 			ProcessReader.Write(memory, address, 2);
 		}
 	}
