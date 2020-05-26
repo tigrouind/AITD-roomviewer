@@ -88,17 +88,20 @@ public class RoomLoader : MonoBehaviour
 			1, 3, 7, 5, 1, 7
 		};
 
+		const float outerSize = 32.768f;
+		const float innerSize = outerSize + 0.3f;
+
 		var vertices = new Vector3[]
 		{
-			new Vector3(-34f, 0f,  34f),
-			new Vector3( 34f, 0f,  34f),
-			new Vector3(-34f, 0f, -34f),
-			new Vector3( 34f, 0f, -34f),
+			new Vector3(-innerSize, 0f,  innerSize),
+			new Vector3( innerSize, 0f,  innerSize),
+			new Vector3(-innerSize, 0f, -innerSize),
+			new Vector3( innerSize, 0f, -innerSize),
 
-			new Vector3(-32.768f, 0f,  32.768f),
-			new Vector3( 32.768f, 0f,  32.768f),
-			new Vector3(-32.768f, 0f, -32.768f),
-			new Vector3( 32.768f, 0f, -32.768f)
+			new Vector3(-outerSize, 0f,  outerSize),
+			new Vector3( outerSize, 0f,  outerSize),
+			new Vector3(-outerSize, 0f, -outerSize),
+			new Vector3( outerSize, 0f, -outerSize)
 		};
 
 		Mesh mesh = new Mesh();
