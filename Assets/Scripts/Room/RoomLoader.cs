@@ -701,7 +701,8 @@ public class RoomLoader : MonoBehaviour
 	{
 		if (floor == newfloor && newroom >= 0 && newroom < transform.childCount)
 		{
-			return transform.GetChild(newroom);
+			return transform.Cast<Transform>()
+				.FirstOrDefault(x => x.name == "ROOM" + newroom);
 		}
 		return null;
 	}
