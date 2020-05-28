@@ -612,10 +612,14 @@ public class RoomLoader : MonoBehaviour
 			//text
 			box.UpdateText(BoxInfo);
 		}
-		else if (highLightedBox != null)
+		else
 		{
-			highLightedBox.HighLight = false;
-			highLightedBox = null;
+			if (highLightedBox != null)
+			{
+				highLightedBox.HighLight = false;
+				highLightedBox = null;
+			}
+
 			BoxInfo.Clear(true);
 		}
 	}
@@ -646,29 +650,17 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 
-		if (selectedBox != null)
+		if (selectedBox == null)
 		{
-			if (selectedBox.ID == selectedBoxId)
+			//if actor is no more available (eg : after room switch) search for it
+			foreach (Box box in GetComponent<DosBox>().Boxes)
 			{
-				//display selected box info
-				selectedBox.UpdateText(BottomText);
-			}
-			else
-			{
-				//if actor is no more available (eg : after room switch) search for it
-				foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+				if (box != null && box.ID == selectedBoxId)
 				{
-					if (box.ID == selectedBoxId)
-					{
-						selectedBox = box;
-						break;
-					}
+					selectedBox = box;
+					break;
 				}
 			}
-		}
-		else
-		{
-			BottomText.Clear(true);
 
 			if(speedRunMode && defaultBoxSelectionTimer.Elapsed > 1.0f)
 			{
@@ -679,6 +671,16 @@ public class RoomLoader : MonoBehaviour
 					selectedBoxId = selectedBox.ID;
 				}
 			}
+		}
+
+		if (selectedBox != null)
+		{
+			//display selected box info
+			selectedBox.UpdateText(BottomText);
+		}
+		else
+		{
+			BottomText.Clear(true);
 		}
 	}
 

@@ -65,18 +65,29 @@ public class DosBox : MonoBehaviour
 	private ushort internalTimer2;
 	private int targetSlot;
 
-	public void Start()
+	Box GetActor(int index)
 	{
-		//game has maximum 50 actors
-		Boxes = new Box[50];
-		for (int i = 0; i < Boxes.Length; i++)
+		Box box = Boxes[index];
+		if (box == null)
 		{
-			Box box = Instantiate(BoxPrefab);
+			box = Instantiate(BoxPrefab);
 			box.transform.parent = Actors.transform;
 			box.name = "Actor";
-			box.Slot = i;
+			box.Slot = index;
 			box.DosBox = this;
-			Boxes[i] = box;
+			Boxes[index] = box;
+		}
+
+		return box;
+	}
+
+	void RemoveActor(int index)
+	{
+		Box box = Boxes[index];
+		if (box != null)
+		{
+			Destroy(box.gameObject);
+			Boxes[index] = null;
 		}
 	}
 
@@ -96,15 +107,15 @@ public class DosBox : MonoBehaviour
 			if (ProcessReader.Read(memory, actorsMemoryAddress, 16384) > 0)
 			{
 				//read actors info
-				int i = 0;
-				foreach (Box box in Boxes)
+				for (int i = 0 ; i < Boxes.Length ; i++) //up to 50 actors max
 				{
 					int k = i * actorStructSize[dosBoxPattern];
-					box.ID = memory.ReadShort(k + 0);
+					int id = memory.ReadShort(k + 0);
 
-					if (box.ID != -1)
+					if (id != -1)
 					{
-						int trackModeOffset = trackModeOffsets[dosBoxPattern];
+						Box box = GetActor(i);
+						box.ID = id;
 						box.Body = memory.ReadShort(k + 2);
 						box.Flags = memory.ReadShort(k + 4);
 						box.ColFlags = memory.ReadShort(k + 6);
@@ -134,6 +145,7 @@ public class DosBox : MonoBehaviour
 						box.EndFrame = memory.ReadShort(k + 78);
 						box.EndAnim = memory.ReadShort(k + 80);
 
+						int trackModeOffset = trackModeOffsets[dosBoxPattern];
 						box.TrackMode = memory.ReadShort(k + trackModeOffset);
 						box.TrackNumber = memory.ReadShort(k + 84);
 						box.PositionInTrack = memory.ReadShort(k + 88);
@@ -163,15 +175,16 @@ public class DosBox : MonoBehaviour
 						box.HitForce = memory.ReadShort(k + 150);
 						box.HotPosition = memory.ReadVector(k + 154);
 					}
-
-					i++;
+					else
+					{
+						RemoveActor(i);
+					}
 				}
 
 				//find player + switch floor if necessary
 				foreach (Box box in Boxes)
 				{
-					bool isActive = box.ID != -1;
-					if (isActive)
+					if (box != null)
 					{
 						//player
 						if (box.TrackMode == 1 || box.ID == lastValidPlayerIndex)
@@ -194,7 +207,7 @@ public class DosBox : MonoBehaviour
 				//update all boxes
 				foreach (Box box in Boxes)
 				{
-					if (box.ID != -1)
+					if (box != null)
 					{
 						Transform roomObject = GetComponent<RoomLoader>().GetRoom(box.Floor, box.Room);
 						if (roomObject != null)
@@ -294,16 +307,11 @@ public class DosBox : MonoBehaviour
 							}
 
 							box.AlwaysOnTop = Camera.main.orthographic;
-							box.gameObject.SetActive(true);
 						}
 						else
 						{
-							box.gameObject.SetActive(false);
+							RemoveActor(box.Slot);
 						}
-					}
-					else
-					{
-						box.gameObject.SetActive(false);
 					}
 				}
 
@@ -376,9 +384,9 @@ public class DosBox : MonoBehaviour
 
 	void UpdateWorldPosBox(Box box, Vector3 roomPosition, bool isPlayer)
 	{
-		//worldpost unsync
 		Box worldPos = box.BoxWorldPos;
 
+		//worldpos unsync
 		if (isPlayer && ((box.WorldPosition.x + box.Mod.x) != box.BoundingPos.x || (box.WorldPosition.z + box.Mod.z) != box.BoundingPos.z))
 		{
 			if (worldPos == null)
@@ -451,11 +459,14 @@ public class DosBox : MonoBehaviour
 		{
 			totalDelay.Reset();
 		}
-		if (Input.GetKeyDown(KeyCode.W))
+		if (Input.GetKeyDown(KeyCode.W) && !(Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
 		{
-			foreach (Box box in Actors.GetComponentsInChildren<Box>(true))
+			foreach (Box box in Boxes)
 			{
-				box.LastDistance = 0.0f;
+				if (box != null)
+				{
+					box.LastDistance = 0.0f;
+				}
 			}
 		}
 		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && IsCDROMVersion && ProcessReader != null)

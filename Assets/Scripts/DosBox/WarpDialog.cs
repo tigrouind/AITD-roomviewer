@@ -21,13 +21,13 @@ public class WarpDialog : MonoBehaviour
 
 	private Timer timer = new Timer();
 
-	void Start ()
+	void Start()
 	{
 		timer.Start();
 		ToggleAdvanceMode(false);
 	}
 
-	void Update ()
+	void Update()
 	{
 		if (Input.GetMouseButtonUp(0)
 			&& !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
@@ -120,9 +120,12 @@ public class WarpDialog : MonoBehaviour
 			actor = GetComponent<DosBox>().Player;
 		}
 
-		Vector3 offset = GetComponent<DosBox>().GetMousePosition(actor.Room, actor.Floor) - (actor.LocalPosition + actor.Mod);
-		offset = new Vector3(Mathf.RoundToInt(offset.x), 0.0f, Mathf.RoundToInt(offset.z));
-		MoveActor(actor, offset);
+		if (actor != null)
+		{
+			Vector3 offset = GetComponent<DosBox>().GetMousePosition(actor.Room, actor.Floor) - (actor.LocalPosition + actor.Mod);
+			offset = new Vector3(Mathf.RoundToInt(offset.x), 0.0f, Mathf.RoundToInt(offset.z));
+			MoveActor(actor, offset);
+		}
 	}
 
 	public void LoadActor(Box actor)
@@ -286,16 +289,12 @@ public class WarpDialog : MonoBehaviour
 	{
 		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 
-		int index = Actors.GetComponentsInChildren<Box>(true).ToList().IndexOf(actor);
-		if (index != -1)
-		{
-			long offset = GetComponent<DosBox>().GetActorMemoryAddress(index);
-			byte[] position = new byte[6];
-			position.Write(angle, 0);
-			processReader.Write(position, offset + 40, position.Length);
+		long offset = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
+		byte[] position = new byte[6];
+		position.Write(angle, 0);
+		processReader.Write(position, offset + 40, position.Length);
 
-			actor.Angles = angle;
-		}
+		actor.Angles = angle;
 	}
 
 	void WriteActorPosition(Box actor, Vector3 lowerBound, Vector3 upperBound, Vector3 localPosition, Vector3 worldPosition)
@@ -303,26 +302,22 @@ public class WarpDialog : MonoBehaviour
 		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 
 		//get object offset
-		int index = Actors.GetComponentsInChildren<Box>(true).ToList().IndexOf(actor);
-		if(index != -1)
-		{
-			long offset = GetComponent<DosBox>().GetActorMemoryAddress(index);
+		long offset = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
 
-			//update to memory
-			//bounds
-			byte[] buffer = new byte[12];
-			buffer.Write(lowerBound, upperBound, 0);
-			processReader.Write(buffer, offset + 8, 12);
+		//update to memory
+		//bounds
+		byte[] buffer = new byte[12];
+		buffer.Write(lowerBound, upperBound, 0);
+		processReader.Write(buffer, offset + 8, 12);
 
-			//local+world
-			buffer.Write(localPosition, 0);
-			buffer.Write(worldPosition, 6);
-			processReader.Write(buffer, offset + 28, 12);
+		//local+world
+		buffer.Write(localPosition, 0);
+		buffer.Write(worldPosition, 6);
+		processReader.Write(buffer, offset + 28, 12);
 
-			actor.LocalPosition = localPosition;
-			actor.WorldPosition = worldPosition;
-			actor.BoundingLower = lowerBound;
-			actor.BoundingUpper = upperBound;
-		}
+		actor.LocalPosition = localPosition;
+		actor.WorldPosition = worldPosition;
+		actor.BoundingLower = lowerBound;
+		actor.BoundingUpper = upperBound;
 	}
 }
