@@ -36,7 +36,8 @@ public class DosBox : MonoBehaviour
 		0x300D0, //AITD2
 		0x38180, //AITD3
 		0x39EC4, //JACK
-		0x20542, //AITD1 floppy (demo: 0x2050A)
+		0x20542, //AITD1 floppy
+		0x2050A  //AITD1 demo
 	};
 
 	//offset to apply to get beginning of actors array
@@ -646,21 +647,24 @@ public class DosBox : MonoBehaviour
 		objectMemoryAddress = -1;
 		if (detectedGame == 1) //AITD1 only
 		{
-			//check if CDROM/floppy version
-			byte[] cdPattern = Encoding.ASCII.GetBytes("CD Not Found");
-			IsCDROMVersion = detectedGame == 1 && Utils.IndexOf(memory, cdPattern) != -1;
-
-			if(IsCDROMVersion)
+			//check version
+			IsCDROMVersion = Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CD Not Found")) != -1;
+			if (IsCDROMVersion)
 			{
+				//CDROM
 				int objectAddressPointer = memory.ReadFarPointer(entryPoint + 0x2400E);
 				if (objectAddressPointer > 0)
 				{
 					objectMemoryAddress = memoryRegion + objectAddressPointer;
 				}
 			}
+			else if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("USA.PAK")) != -1)
+			{
+				patternIndex = 5; //demo
+			}
 			else
 			{
-				patternIndex = 4; //AITD1 floppy
+				patternIndex = 4; //floppy
 			}
 		}
 
