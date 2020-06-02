@@ -55,6 +55,7 @@ public class DosBox : MonoBehaviour
 	private int oldFramesCount;
 	private Queue<int> previousFramesCount = new Queue<int>();
 	private Queue<float> previousFrameTime = new Queue<float>();
+	private int frameCounter;
 
 	private float lastDelay;
 	private Timer delayCounter = new Timer();
@@ -436,7 +437,7 @@ public class DosBox : MonoBehaviour
 
 				BoxInfo.Append("Timer 1", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer1 / 60), InternalTimer1 % 60);
 				BoxInfo.Append("Timer 2", "{0}.{1:D2}", TimeSpan.FromSeconds(internalTimer2 / 60), internalTimer2 % 60);
-				BoxInfo.Append("FPS/Delay", "{0}; {1} ms", calculatedFps, Mathf.FloorToInt(lastDelay * 1000));
+				BoxInfo.Append("FPS/Frame/Delay", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.FloorToInt(lastDelay * 1000));
 				BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			}
 
@@ -505,10 +506,11 @@ public class DosBox : MonoBehaviour
 			//check how much frames elapsed since last time
 			int diff;
 			if (frames >= oldFramesCount)
-				diff = frames - oldFramesCount; //eg: 15 - 20
+				diff = frames - oldFramesCount; //eg: 20 - 15
 			else
 				diff = fps - oldFramesCount + frames; //special case: eg: 60 - 58 + 3
 			oldFramesCount = frames;
+			frameCounter += diff;
 
 			if(delayCounter.Elapsed >= 0.1f) //100ms
 			{
