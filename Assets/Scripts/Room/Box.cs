@@ -172,7 +172,11 @@ public class Box : MonoBehaviour
 
 		if(index >= 0 && index < DosBox.Boxes.Length)
 		{
-			return DosBox.Boxes[index].ID.ToString();
+			Box box = DosBox.Boxes[index];
+			if (box != null)
+			{
+				return box.ID.ToString();
+			}
 		}
 
 		return "▬";
