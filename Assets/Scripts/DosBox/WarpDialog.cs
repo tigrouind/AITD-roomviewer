@@ -289,10 +289,10 @@ public class WarpDialog : MonoBehaviour
 	{
 		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 
-		long offset = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
-		byte[] position = new byte[6];
-		position.Write(angle, 0);
-		processReader.Write(position, offset + 40, position.Length);
+		int address = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
+		byte[] buffer = new byte[6];
+		buffer.Write(angle, 0);
+		processReader.Write(buffer, address + 40, buffer.Length);
 
 		actor.Angles = angle;
 	}
@@ -302,18 +302,18 @@ public class WarpDialog : MonoBehaviour
 		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 
 		//get object offset
-		long offset = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
+		int address = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
 
 		//update to memory
 		//bounds
 		byte[] buffer = new byte[12];
 		buffer.Write(lowerBound, upperBound, 0);
-		processReader.Write(buffer, offset + 8, 12);
+		processReader.Write(buffer, address + 8, 12);
 
 		//local+world
 		buffer.Write(localPosition, 0);
 		buffer.Write(worldPosition, 6);
-		processReader.Write(buffer, offset + 28, 12);
+		processReader.Write(buffer, address + 28, 12);
 
 		actor.LocalPosition = localPosition;
 		actor.WorldPosition = worldPosition;

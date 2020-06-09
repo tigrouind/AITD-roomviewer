@@ -532,6 +532,7 @@ public class RoomLoader : MonoBehaviour
 		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && isAITD1 && dosBox.IsCDROMVersion;
 		dosBox.SpeedRunMode = speedRunMode;
 
+		dosBox.RefreshMemory();
 		dosBox.CalculateFPS();
 		dosBox.UpdateAllActors();
 		dosBox.UpdateBoxInfo();

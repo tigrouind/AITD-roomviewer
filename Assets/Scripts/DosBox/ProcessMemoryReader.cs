@@ -41,6 +41,8 @@ public class ProcessMemoryReader
 
 	private IntPtr processHandle;
 
+	public long BaseAddress;
+
 	public ProcessMemoryReader(int processId)
 	{
 		this.processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, processId);
@@ -51,22 +53,22 @@ public class ProcessMemoryReader
 		Close();
 	}
 
-	public long Read(byte[] buffer, long offset, int count)
+	public int Read(byte[] buffer, int offset, int count)
 	{
 		IntPtr bytesRead;
-		if (ReadProcessMemory(processHandle, new IntPtr(offset), buffer, count, out bytesRead))
+		if (ReadProcessMemory(processHandle, new IntPtr(BaseAddress + offset), buffer, count, out bytesRead))
 		{
-			return (long)bytesRead;
+			return (int)bytesRead;
 		}
 		return 0;
 	}
 
-	public long Write(byte[] buffer, long offset, int count)
+	public int Write(byte[] buffer, int offset, int count)
 	{
 		IntPtr bytesWritten;
-		if (WriteProcessMemory(processHandle, new IntPtr(offset), buffer, count, out bytesWritten))
+		if (WriteProcessMemory(processHandle, new IntPtr(BaseAddress + offset), buffer, count, out bytesWritten))
 		{
-			return (long)bytesWritten;
+			return (int)bytesWritten;
 		}
 		return 0;
 	}
@@ -87,6 +89,7 @@ public class ProcessMemoryReader
 		long min_address = 0;
 		long max_address = 0x7FFFFFFF;
 		byte[] memory = new byte[4096];
+		IntPtr bytesRead;
 
 		//scan process memory regions
 		while (min_address < max_address
@@ -96,7 +99,7 @@ public class ProcessMemoryReader
 			//skip regions smaller than 16M (default DOSBOX memory size)
 			if (mem_info.Protect == PAGE_READWRITE && mem_info.State == MEM_COMMIT && (mem_info.Type & MEM_PRIVATE) == MEM_PRIVATE
 				&& (int)mem_info.RegionSize >= 1024 * 1024 * 16
-				&& Read(memory, (long)mem_info.BaseAddress, memory.Length) > 0
+				&& ReadProcessMemory(processHandle, mem_info.BaseAddress, memory, memory.Length, out bytesRead)
 				&& Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CON ")) != -1)
 			{
 				return (long)mem_info.BaseAddress + 32; //skip Windows 32-bytes memory allocation header

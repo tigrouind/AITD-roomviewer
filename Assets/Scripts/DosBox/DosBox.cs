@@ -23,9 +23,7 @@ public class DosBox : MonoBehaviour
 	public Box Player;
 	public bool IsCDROMVersion;
 
-	private long actorsMemoryAddress;
-	private long objectMemoryAddress;
-	private long memoryRegion;
+	private int actorsAddress;
 	private int entryPoint;
 
 	//initial player position
@@ -101,249 +99,245 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	public void RefreshMemory()
+	{
+		if (ProcessReader != null && ProcessReader.Read(memory, 0, memory.Length) == 0)
+		{
+			//unlink DOSBOX
+			GetComponent<RoomLoader>().LinkToDosBox();
+		}
+	}
+
 	public void UpdateAllActors()
 	{
 		Player = null;
 		if (ProcessReader != null)
 		{
-			if (ProcessReader.Read(memory, actorsMemoryAddress, 16384) > 0)
+			//read actors info
+			for (int i = 0 ; i < Boxes.Length ; i++) //up to 50 actors max
 			{
-				//read actors info
-				for (int i = 0 ; i < Boxes.Length ; i++) //up to 50 actors max
+				int k = actorsAddress + i * actorStructSize[dosBoxPattern];
+				int id = memory.ReadShort(k + 0);
+
+				if (id != -1)
 				{
-					int k = i * actorStructSize[dosBoxPattern];
-					int id = memory.ReadShort(k + 0);
+					Box box = GetActor(i);
+					box.ID = id;
+					box.Body = memory.ReadShort(k + 2);
+					box.Flags = memory.ReadShort(k + 4);
+					box.ColFlags = memory.ReadShort(k + 6);
 
-					if (id != -1)
+					memory.ReadBoundingBox(k + 8, out box.BoundingLower, out box.BoundingUpper);
+
+					FixBoundingWrap(ref box.BoundingLower.x, ref box.BoundingUpper.x);
+					FixBoundingWrap(ref box.BoundingLower.z, ref box.BoundingUpper.z);
+
+					memory.ReadBoundingBox(k + 20, out box.Box2DLower, out box.Box2DUpper);
+
+					box.LocalPosition = memory.ReadVector(k + 28);
+					box.WorldPosition = memory.ReadVector(k + 34);
+					box.Angles = memory.ReadVector(k + 40);
+
+					box.Floor = memory.ReadShort(k + 46);
+					box.Room = memory.ReadShort(k + 48);
+					box.LifeMode = memory. ReadShort(k + 50);
+					box.Life = memory.ReadShort(k + 52);
+					box.Chrono = memory.ReadUnsignedInt(k + 54);
+					box.RoomChrono = memory.ReadUnsignedInt(k + 58);
+					box.Anim = memory.ReadShort(k + 62);
+					box.AnimType = memory.ReadShort(k + 64);
+					box.NextAnim = memory.ReadShort(k + 66);
+					box.Keyframe = memory.ReadShort(k + 74);
+					box.TotalFrames = memory.ReadShort(k + 76);
+					box.EndFrame = memory.ReadShort(k + 78);
+					box.EndAnim = memory.ReadShort(k + 80);
+
+					int trackModeOffset = trackModeOffsets[dosBoxPattern];
+					box.TrackMode = memory.ReadShort(k + trackModeOffset);
+					box.TrackNumber = memory.ReadShort(k + 84);
+					box.PositionInTrack = memory.ReadShort(k + 88);
+
+					if(dosBoxPattern == 0) //AITD1 only
 					{
-						Box box = GetActor(i);
-						box.ID = id;
-						box.Body = memory.ReadShort(k + 2);
-						box.Flags = memory.ReadShort(k + 4);
-						box.ColFlags = memory.ReadShort(k + 6);
-
-						memory.ReadBoundingBox(k + 8, out box.BoundingLower, out box.BoundingUpper);
-
-						FixBoundingWrap(ref box.BoundingLower.x, ref box.BoundingUpper.x);
-						FixBoundingWrap(ref box.BoundingLower.z, ref box.BoundingUpper.z);
-
-						memory.ReadBoundingBox(k + 20, out box.Box2DLower, out box.Box2DUpper);
-
-						box.LocalPosition = memory.ReadVector(k + 28);
-						box.WorldPosition = memory.ReadVector(k + 34);
-						box.Angles = memory.ReadVector(k + 40);
-
-						box.Floor = memory.ReadShort(k + 46);
-						box.Room = memory.ReadShort(k + 48);
-						box.LifeMode = memory. ReadShort(k + 50);
-						box.Life = memory.ReadShort(k + 52);
-						box.Chrono = memory.ReadUnsignedInt(k + 54);
-						box.RoomChrono = memory.ReadUnsignedInt(k + 58);
-						box.Anim = memory.ReadShort(k + 62);
-						box.AnimType = memory.ReadShort(k + 64);
-						box.NextAnim = memory.ReadShort(k + 66);
-						box.Keyframe = memory.ReadShort(k + 74);
-						box.TotalFrames = memory.ReadShort(k + 76);
-						box.EndFrame = memory.ReadShort(k + 78);
-						box.EndAnim = memory.ReadShort(k + 80);
-
-						int trackModeOffset = trackModeOffsets[dosBoxPattern];
-						box.TrackMode = memory.ReadShort(k + trackModeOffset);
-						box.TrackNumber = memory.ReadShort(k + 84);
-						box.PositionInTrack = memory.ReadShort(k + 88);
-
-						if(dosBoxPattern == 0) //AITD1 only
-						{
-							box.Mod = memory.ReadVector(k + 90);
-						}
-						else
-						{
-							box.Mod = Vector3.zero;
-						}
-
-						box.OldAngle = memory.ReadShort(k + 106);
-						box.NewAngle = memory.ReadShort(k + 108);
-						box.RotateTime = memory.ReadShort(k + 110);
-						box.Speed = memory.ReadShort(k + 116);
-
-						box.Col = memory.ReadVector(k + 126);
-						box.ColBy = memory.ReadShort(k + 132);
-						box.HardTrigger = memory.ReadShort(k + 134);
-						box.HardCol = memory.ReadShort(k + 136);
-						box.Hit = memory.ReadShort(k + 138);
-						box.HitBy = memory.ReadShort(k + 140);
-						box.ActionType = memory.ReadShort(k + 142);
-						box.HotBoxSize = memory.ReadShort(k + 148);
-						box.HitForce = memory.ReadShort(k + 150);
-						box.HotPosition = memory.ReadVector(k + 154);
+						box.Mod = memory.ReadVector(k + 90);
 					}
 					else
 					{
-						RemoveActor(i);
+						box.Mod = Vector3.zero;
 					}
+
+					box.OldAngle = memory.ReadShort(k + 106);
+					box.NewAngle = memory.ReadShort(k + 108);
+					box.RotateTime = memory.ReadShort(k + 110);
+					box.Speed = memory.ReadShort(k + 116);
+
+					box.Col = memory.ReadVector(k + 126);
+					box.ColBy = memory.ReadShort(k + 132);
+					box.HardTrigger = memory.ReadShort(k + 134);
+					box.HardCol = memory.ReadShort(k + 136);
+					box.Hit = memory.ReadShort(k + 138);
+					box.HitBy = memory.ReadShort(k + 140);
+					box.ActionType = memory.ReadShort(k + 142);
+					box.HotBoxSize = memory.ReadShort(k + 148);
+					box.HitForce = memory.ReadShort(k + 150);
+					box.HotPosition = memory.ReadVector(k + 154);
 				}
-
-				//find player + switch floor if necessary
-				foreach (Box box in Boxes)
+				else
 				{
-					if (box != null)
+					RemoveActor(i);
+				}
+			}
+
+			//find player + switch floor if necessary
+			foreach (Box box in Boxes)
+			{
+				if (box != null)
+				{
+					//player
+					if (box.TrackMode == 1 || box.ID == lastValidPlayerIndex)
 					{
-						//player
-						if (box.TrackMode == 1 || box.ID == lastValidPlayerIndex)
+						//update player index
+						lastValidPlayerIndex = box.ID;
+
+						//automatically switch room and floor (has to be done before setting other actors positions)
+						if (linkfloor != box.Floor || linkroom != box.Room)
 						{
-							//update player index
-							lastValidPlayerIndex = box.ID;
+							linkfloor = box.Floor;
+							linkroom = box.Room;
 
-							//automatically switch room and floor (has to be done before setting other actors positions)
-							if (linkfloor != box.Floor || linkroom != box.Room)
-							{
-								linkfloor = box.Floor;
-								linkroom = box.Room;
-
-								GetComponent<RoomLoader>().RefreshRooms(linkfloor, linkroom);
-							}
+							GetComponent<RoomLoader>().RefreshRooms(linkfloor, linkroom);
 						}
 					}
 				}
+			}
 
-				//update all boxes
-				foreach (Box box in Boxes)
+			//update all boxes
+			foreach (Box box in Boxes)
+			{
+				if (box != null)
 				{
-					if (box != null)
+					Transform roomObject = GetComponent<RoomLoader>().GetRoom(box.Floor, box.Room);
+					if (roomObject != null)
 					{
-						Transform roomObject = GetComponent<RoomLoader>().GetRoom(box.Floor, box.Room);
-						if (roomObject != null)
+						//local to global position
+						Vector3 boxPosition = box.BoundingPos / 1000.0f;
+						boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z) + roomObject.localPosition;
+
+						if (box.transform.position != boxPosition)
 						{
-							//local to global position
-							Vector3 boxPosition = box.BoundingPos / 1000.0f;
-							boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z) + roomObject.localPosition;
+							Vector3 offset = 1000.0f * (box.transform.position - boxPosition);
+							float distance = new Vector3(Mathf.Round(offset.x), 0.0f, Mathf.Round(offset.z)).magnitude;
+							box.LastOffset = Mathf.RoundToInt(distance);
+							box.LastDistance += distance;
+							box.transform.position = boxPosition;
+						}
 
-							if (box.transform.position != boxPosition)
+						//make actors appears slightly bigger than they are to be not covered by colliders
+						Vector3 delta = Vector3.one;
+						box.transform.localScale = (box.BoundingSize + delta) / 1000.0f;
+
+						//make sure very small actors are visible
+						box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.1f);
+
+						bool isAITD1 = dosBoxPattern == 0;
+						if (isAITD1)
+						{
+							UpdateHotPointBox(box, roomObject.localPosition);
+						}
+
+						if (ShowAITD1Vars)
+						{
+							if(box.PreviousAnim != box.Anim || box.PreviousKeyFrame != box.Keyframe || box.EndFrame == 1 || box.EndAnim == 1)
 							{
-								Vector3 offset = 1000.0f * (box.transform.position - boxPosition);
-								float distance = new Vector3(Mathf.Round(offset.x), 0.0f, Mathf.Round(offset.z)).magnitude;
-								box.LastOffset = Mathf.RoundToInt(distance);
-								box.LastDistance += distance;
-								box.transform.position = boxPosition;
+								box.PreviousAnim = box.Anim;
+								box.PreviousKeyFrame = box.Keyframe;
+								box.lastKeyFrameChange.Reset();
 							}
 
-							//make actors appears slightly bigger than they are to be not covered by colliders
-							Vector3 delta = Vector3.one;
-							box.transform.localScale = (box.BoundingSize + delta) / 1000.0f;
-
-							//make sure very small actors are visible
-							box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.1f);
-
-							bool isAITD1 = dosBoxPattern == 0;
-							if (isAITD1)
+							if (saveTimerFlag)
 							{
-								UpdateHotPointBox(box, roomObject.localPosition);
-							}
-
-							if (ShowAITD1Vars)
-							{
-								if(box.PreviousAnim != box.Anim || box.PreviousKeyFrame != box.Keyframe || box.EndFrame == 1 || box.EndAnim == 1)
-								{
-									box.PreviousAnim = box.Anim;
-									box.PreviousKeyFrame = box.Keyframe;
-									box.lastKeyFrameChange.Reset();
-								}
-
-								if (saveTimerFlag)
-								{
-									box.lastKeyFrameChange.Stop();
-								}
-								else
-								{
-									box.lastKeyFrameChange.Start();
-								}
-							}
-
-							//player
-							bool isPlayer = box.ID == lastValidPlayerIndex;
-							if (isPlayer)
-							{
-								//check if player has moved
-								if (box.transform.position != lastPlayerPosition)
-								{
-									//center camera to player position
-									GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
-									lastPlayerPosition = box.transform.position;
-								}
-
-								//follow player
-								Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
-
-								//face camera
-								float angle = box.Angles.y * 360.0f / 1024.0f;
-								Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
-								Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
-
-								float minBoxScale = Mathf.Min(box.transform.localScale.x, box.transform.localScale.z);
-								Arrow.transform.localScale = new Vector3(
-									minBoxScale * 0.9f,
-									minBoxScale * 0.9f,
-									1.0f);
-
-								//player is white
-								box.Color = new Color32(255, 255, 255, 255);
-								Arrow.AlwaysOnTop = Camera.main.orthographic;
-								Player = box;
+								box.lastKeyFrameChange.Stop();
 							}
 							else
 							{
-								if (box.Slot == 0)
-								{
-									box.Color = new Color32(255, 255, 255, 255);
-								}
-								else
-								{
-									//other actors are green
-									box.Color = new Color32(0, 128, 0, 255);
-								}
+								box.lastKeyFrameChange.Start();
 							}
+						}
 
-							if (isAITD1)
+						//player
+						bool isPlayer = box.ID == lastValidPlayerIndex;
+						if (isPlayer)
+						{
+							//check if player has moved
+							if (box.transform.position != lastPlayerPosition)
 							{
-								UpdateWorldPosBox(box, roomObject.localPosition, isPlayer);
+								//center camera to player position
+								GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
+								lastPlayerPosition = box.transform.position;
 							}
 
-							box.AlwaysOnTop = Camera.main.orthographic;
+							//follow player
+							Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
+
+							//face camera
+							float angle = box.Angles.y * 360.0f / 1024.0f;
+							Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
+							Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
+
+							float minBoxScale = Mathf.Min(box.transform.localScale.x, box.transform.localScale.z);
+							Arrow.transform.localScale = new Vector3(
+								minBoxScale * 0.9f,
+								minBoxScale * 0.9f,
+								1.0f);
+
+							//player is white
+							box.Color = new Color32(255, 255, 255, 255);
+							Arrow.AlwaysOnTop = Camera.main.orthographic;
+							Player = box;
 						}
 						else
 						{
-							RemoveActor(box.Slot);
+							if (box.Slot == 0)
+							{
+								box.Color = new Color32(255, 255, 255, 255);
+							}
+							else
+							{
+								//other actors are green
+								box.Color = new Color32(0, 128, 0, 255);
+							}
 						}
+
+						if (isAITD1)
+						{
+							UpdateWorldPosBox(box, roomObject.localPosition, isPlayer);
+						}
+
+						box.AlwaysOnTop = Camera.main.orthographic;
+					}
+					else
+					{
+						RemoveActor(box.Slot);
 					}
 				}
-
-				if (ShowAITD1Vars)
-				{
-					//internal timer
-					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x19D12, 4);
-					InternalTimer1 = memory.ReadUnsignedInt(0);
-
-					//internal timer 2
-					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x242E0, 2);
-					internalTimer2 = memory.ReadUnsignedShort(0);
-
-					//inventory
-					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x19B6E, 2);
-					allowInventory = memory.ReadShort(0) == 1;
-
-					//inhand
-					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x24054, 2);
-					inHand = memory.ReadShort(0);
-
-					//set by AITD when long running code is started (eg: loading ressource)
-					ProcessReader.Read(memory, memoryRegion + entryPoint + 0x1B0FC, 1);
-					saveTimerFlag = memory[0] == 1;
-				}
 			}
-			else
+
+			if (ShowAITD1Vars)
 			{
-				//unlink DOSBOX
-				GetComponent<RoomLoader>().LinkToDosBox();
+				//internal timer
+				InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x19D12);
+
+				//internal timer 2
+				internalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x242E0);
+
+				//inventory
+				allowInventory = memory.ReadShort(entryPoint + 0x19B6E) == 1;
+
+				//inhand
+				inHand = memory.ReadShort(entryPoint + 0x24054);
+
+				//set by AITD when long running code is started (eg: loading ressource)
+				saveTimerFlag = memory.ReadByte(entryPoint + 0x1B0FC) == 1;
 			}
 		}
 
@@ -477,15 +471,17 @@ public class DosBox : MonoBehaviour
 			{
 				//internal timer 1
 				InternalTimer1 -= 60 * 5; //back 5 frames
-				memory.Write(InternalTimer1, 0);
-				ProcessReader.Write(memory, memoryRegion + entryPoint + 0x19D12, 4);
+				byte[] buffer = new byte[4];
+				buffer.Write(InternalTimer1, 0);
+				ProcessReader.Write(buffer, entryPoint + 0x19D12, buffer.Length);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha2))
 			{
 				//internal timer 2
 				internalTimer2 -= 60 * 5; //back 5 frames
-				memory.Write(internalTimer2, 0);
-				ProcessReader.Write(memory, memoryRegion + entryPoint + 0x242E0, 2);
+				byte[] buffer = new byte[2];
+				buffer.Write(internalTimer2, 0);
+				ProcessReader.Write(buffer, entryPoint + 0x242E0, buffer.Length);
 			}
 		}
 
@@ -496,12 +492,10 @@ public class DosBox : MonoBehaviour
 		if (ProcessReader != null && ShowAITD1Vars)
 		{
 			//fps
-			ProcessReader.Read(memory, memoryRegion + entryPoint + 0x19D18, 2);
-			int fps = memory.ReadShort(0);
+			int fps = memory.ReadShort(entryPoint + 0x19D18);
 
 			//frames counter (reset to zero when every second by AITD)
-			ProcessReader.Read(memory, memoryRegion + entryPoint + 0x2117C, 2);
-			int frames = memory.ReadShort(0);
+			int frames = memory.ReadShort(entryPoint + 0x2117C);
 
 			//check how much frames elapsed since last time
 			int diff;
@@ -589,14 +583,14 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	bool GetDosBoxMemoryRegion(out ProcessMemoryReader reader, out long memoryRegion)
+	bool TryGetMemoryReader(out ProcessMemoryReader reader)
 	{
 		int processId = SearchDosBoxProcess();
 		if (processId != -1)
 		{
 			reader = new ProcessMemoryReader(processId);
-			memoryRegion = reader.SearchFor16MRegion();
-			if (memoryRegion != -1)
+			reader.BaseAddress = reader.SearchFor16MRegion();
+			if (reader.BaseAddress != -1)
 			{
 				return true;
 			}
@@ -605,11 +599,10 @@ public class DosBox : MonoBehaviour
 		}
 
 		reader = null;
-		memoryRegion = -1;
 		return false;
 	}
 
-	bool GetExeEntryPoint(out int entryPoint)
+	bool TryGetExeEntryPoint(out int entryPoint)
 	{
 		int psp = memory.ReadUnsignedShort(0x0B30) * 16;
 		if (psp > 0)
@@ -632,45 +625,38 @@ public class DosBox : MonoBehaviour
 	{
 		int patternIndex = detectedGame - 1;
 
-		if (!GetDosBoxMemoryRegion(out ProcessReader, out memoryRegion))
+		if (!TryGetMemoryReader(out ProcessReader))
 		{
 			return false;
 		}
 
-		ProcessReader.Read(memory, memoryRegion, memory.Length);
+		ProcessReader.Read(memory, 0, memory.Length);
 
-		if (!GetExeEntryPoint(out entryPoint))
+		if (!TryGetExeEntryPoint(out entryPoint))
 		{
 			ProcessReader.Close();
 			ProcessReader = null;
 			return false;
 		}
 
-		objectMemoryAddress = -1;
 		if (detectedGame == 1) //AITD1 only
 		{
 			//check version
 			IsCDROMVersion = Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CD Not Found")) != -1;
-			if (IsCDROMVersion)
+			if (!IsCDROMVersion)
 			{
-				//CDROM
-				int objectAddressPointer = memory.ReadFarPointer(entryPoint + 0x2400E);
-				if (objectAddressPointer > 0)
+				if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("USA.PAK")) != -1)
 				{
-					objectMemoryAddress = memoryRegion + objectAddressPointer;
+					patternIndex = 5; //demo
 				}
-			}
-			else if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("USA.PAK")) != -1)
-			{
-				patternIndex = 5; //demo
-			}
-			else
-			{
-				patternIndex = 4; //floppy
+				else
+				{
+					patternIndex = 4; //floppy
+				}
 			}
 		}
 
-		actorsMemoryAddress = memoryRegion + entryPoint + actorArrayAddress[patternIndex];
+		actorsAddress = entryPoint + actorArrayAddress[patternIndex];
 
 		//force reload
 		linkfloor = floor;
@@ -700,9 +686,9 @@ public class DosBox : MonoBehaviour
 		linkroom = room;
 	}
 
-	public long GetActorMemoryAddress(int index)
+	public int GetActorMemoryAddress(int index)
 	{
-		return actorsMemoryAddress + index * actorStructSize[dosBoxPattern];
+		return actorsAddress + index * actorStructSize[dosBoxPattern];
 	}
 
 	public Vector3 GetMousePosition(int room, int floor)
@@ -801,13 +787,13 @@ public class DosBox : MonoBehaviour
 
 	void ExchangeActorSlots(int slotFrom, int slotTo)
 	{
-		if (ProcessReader != null && objectMemoryAddress != -1)
+		if (ProcessReader != null && IsCDROMVersion)
 		{
 			if (slotFrom != slotTo)
 			{
 				int actorSize = actorStructSize[dosBoxPattern];
-				long offsetFrom = GetActorMemoryAddress(slotFrom);
-				long offsetTo = GetActorMemoryAddress(slotTo);
+				int offsetFrom = GetActorMemoryAddress(slotFrom);
+				int offsetTo = GetActorMemoryAddress(slotTo);
 
 				byte[] memoryFrom = new byte[actorSize];
 				byte[] memoryTo = new byte[actorSize];
@@ -837,9 +823,12 @@ public class DosBox : MonoBehaviour
 	{
 		if (objectID != -1)
 		{
-			long address = objectMemoryAddress + objectID * 52;
-			memory.Write((short)ownerID, 0);
-			ProcessReader.Write(memory, address, 2);
+			int objectAddress = memory.ReadFarPointer(entryPoint + 0x2400E);
+			int address = objectAddress + objectID * 52;
+
+			byte[] buffer = new byte[2];
+			buffer.Write((short)ownerID, 0);
+			ProcessReader.Write(buffer, address, buffer.Length);
 		}
 	}
 
