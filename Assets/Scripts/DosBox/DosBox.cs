@@ -189,6 +189,7 @@ public class DosBox : MonoBehaviour
 			}
 
 			//find player + switch floor if necessary
+			bool foundPlayer = false;
 			foreach (Box box in Boxes)
 			{
 				if (box != null)
@@ -198,14 +199,27 @@ public class DosBox : MonoBehaviour
 					{
 						//update player index
 						lastValidPlayerIndex = box.ID;
+						foundPlayer = true;
 
 						//automatically switch room and floor (has to be done before setting other actors positions)
-						if (linkfloor != box.Floor || linkroom != box.Room)
-						{
-							linkfloor = box.Floor;
-							linkroom = box.Room;
+						SwitchRoom(box.Floor, box.Room);
+					}
+				}
+			}
 
-							GetComponent<RoomLoader>().RefreshRooms(linkfloor, linkroom);
+			if (!foundPlayer && IsCDROMVersion)
+			{
+				int currentCameraTarget = memory.ReadShort(entryPoint + 0x19B6C);
+				foreach (Box box in Boxes)
+				{
+					if (box != null && box.Slot == currentCameraTarget)
+					{
+						SwitchRoom(box.Floor, box.Room);
+
+						if (box.transform.position != lastPlayerPosition)
+						{
+							GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
+							lastPlayerPosition = box.transform.position;
 						}
 					}
 				}
@@ -346,6 +360,17 @@ public class DosBox : MonoBehaviour
 			&& Player != null
 			&& Player.gameObject.activeSelf
 			&& Player.transform.localScale.magnitude > 0.01f);
+	}
+
+	void SwitchRoom(int floor, int room)
+	{
+		if (linkfloor != floor || linkroom != room)
+		{
+			linkfloor = floor;
+			linkroom = room;
+
+			GetComponent<RoomLoader>().RefreshRooms(linkfloor, linkroom);
+		}
 	}
 
 	void UpdateHotPointBox(Box box, Vector3 roomPosition)
@@ -654,6 +679,10 @@ public class DosBox : MonoBehaviour
 					patternIndex = 4; //floppy
 				}
 			}
+		}
+		else
+		{
+			IsCDROMVersion = false;
 		}
 
 		actorsAddress = entryPoint + actorArrayAddress[patternIndex];
