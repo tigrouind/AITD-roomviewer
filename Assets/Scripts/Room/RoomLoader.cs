@@ -192,6 +192,12 @@ public class RoomLoader : MonoBehaviour
 			return;
 		}
 
+		LoadRooms(folder);
+		LoadCameras(folder);
+	}
+
+	void LoadRooms(string folder)
+	{
 		//load file
 		string filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000000");
 		byte[] allPointsA = File.ReadAllBytes(filePath);
@@ -201,9 +207,8 @@ public class RoomLoader : MonoBehaviour
 		int maxrooms = allPointsA.ReadInt(0) / 4;
 		for (int currentroom = 0; currentroom < maxrooms; currentroom++)
 		{
-			int i = currentroom * 4;
-			int roomheader = allPointsA.ReadInt(i + 0);
-			if (roomheader > allPointsA.Length || roomheader == 0)
+			int roomheader = allPointsA.ReadInt(currentroom * 4);
+			if (roomheader <= 0 || roomheader >= allPointsA.Length)
 			{
 				//all rooms parsed
 				break;
@@ -218,7 +223,7 @@ public class RoomLoader : MonoBehaviour
 			roomObject.transform.localPosition = new Vector3(roomPosition.x, roomPosition.y, -roomPosition.z) / 100.0f;
 
 			//colliders
-			i = roomheader + allPointsA.ReadShort(roomheader + 0);
+			int i = roomheader + allPointsA.ReadShort(roomheader + 0);
 			int totalpoint = allPointsA.ReadShort(i + 0);
 			i += 2;
 
@@ -312,58 +317,56 @@ public class RoomLoader : MonoBehaviour
 
 			camerasPerRoom.Add(cameraInRoom);
 		}
+	}
 
+	void LoadCameras(string folder)
+	{
 		//cameras
 		var cameraHelper = GetComponent<CameraHelper>();
-		filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000001");
+		string filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000001");
 		byte[] allPointsB = File.ReadAllBytes(filePath);
-		int roomIndex = 0;
-		List<Transform> rooms = transform.Cast<Transform>().Where(x => x.name != "DELETED").ToList();
-		foreach (Transform room in rooms)
-		{
-			foreach (int cameraID in camerasPerRoom[roomIndex])
-			{
-				int cameraHeader = allPointsB.ReadShort(cameraID * 4 + 0);
-				int numentries = allPointsB.ReadShort(cameraHeader + 0x12);
 
+		foreach (int cameraID in camerasPerRoom.SelectMany(x => x).Distinct())
+		{
+			int cameraHeader = allPointsB.ReadInt(cameraID * 4);
+			int numentries = allPointsB.ReadShort(cameraHeader + 0x12);
+			for (int k = 0; k < numentries; k++)
+			{
 				List<Vector2> points = new List<Vector2>();
 				List<int> indices = new List<int>();
 
-				for (int k = 0; k < numentries; k++)
+				int i = cameraHeader + 0x14 + k * (isAITD1 ? 12 : 16);
+				int cameraRoom = allPointsB.ReadShort(i + 0);
+
+				i = cameraHeader + allPointsB.ReadShort(i + 4);
+				int totalAreas = allPointsB.ReadShort(i + 0);
+				i += 2;
+
+				for (int g = 0; g < totalAreas; g++)
 				{
-					int i = cameraHeader + 0x14 + k * (isAITD1 ? 12 : 16);
-					int cameraRoom = allPointsB.ReadShort(i + 0);
+					int totalPoints = allPointsB.ReadShort(i + 0);
+					i += 2;
 
-					if (cameraRoom == roomIndex)
+					List<Vector2> pts = new List<Vector2>();
+					for (int u = 0; u < totalPoints; u++)
 					{
-						i = cameraHeader + allPointsB.ReadShort(i + 4);
-						int totalAreas = allPointsB.ReadShort(i + 0);
-						i += 2;
-
-						for (int g = 0; g < totalAreas; g++)
-						{
-							int totalPoints = allPointsB.ReadShort(i + 0);
-							i += 2;
-
-							List<Vector2> pts = new List<Vector2>();
-							for (int u = 0; u < totalPoints; u++)
-							{
-								short px = allPointsB.ReadShort(i + 0);
-								short pz = allPointsB.ReadShort(i + 2);
-								pts.Add(new Vector2(px, pz) / 100.0f);
-								i += 4;
-							}
-
-							Triangulator tr = new Triangulator(pts);
-							int[] idc = tr.Triangulate();
-							indices.AddRange(idc.Select(x => x + points.Count).ToArray());
-							points.AddRange(pts);
-						}
+						short px = allPointsB.ReadShort(i + 0);
+						short pz = allPointsB.ReadShort(i + 2);
+						pts.Add(new Vector2(px, pz) / 100.0f);
+						i += 4;
 					}
+
+					Triangulator tr = new Triangulator(pts);
+					int[] idc = tr.Triangulate();
+					indices.AddRange(idc.Select(x => x + points.Count).ToArray());
+					points.AddRange(pts);
 				}
 
 				if (points.Count > 0)
 				{
+					var room = transform.Cast<Transform>().FirstOrDefault(x => x.name == "ROOM" + cameraRoom);
+					if(room == null) continue;
+
 					int colorRGB = cameraColors[cameraID % cameraColors.Length];
 
 					Box area = Instantiate(BoxPrefab);
@@ -399,8 +402,6 @@ public class RoomLoader : MonoBehaviour
 					camera.gameObject.SetActive(false);
 				}
 			}
-
-			roomIndex++;
 		}
 	}
 
