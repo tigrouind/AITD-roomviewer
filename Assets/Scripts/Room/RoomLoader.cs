@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using System.Globalization;
 
 public class RoomLoader : MonoBehaviour
 {
@@ -192,215 +193,249 @@ public class RoomLoader : MonoBehaviour
 			return;
 		}
 
-		LoadRooms(folder);
-		LoadCameras(folder);
+		//load cameras and rooms
+		camerasPerRoom = new List<List<int>>();
+		name = "FLOOR" + floor;
+
+		if (detectedGame == 5)
+		{
+			LoadRoomsMulti(folder);
+		}
+		else
+		{
+			LoadRoomsSingle(folder);
+		}
 	}
 
-	void LoadRooms(string folder)
+	void LoadRoomsSingle(string folder)
 	{
-		//load file
 		string filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000000");
-		byte[] allPointsA = File.ReadAllBytes(filePath);
-		camerasPerRoom = new List<List<int>>();
+		byte[] buffer = File.ReadAllBytes(filePath);
 
-		name = "FLOOR" + floor;
-		int maxrooms = allPointsA.ReadInt(0) / 4;
+		int maxrooms = buffer.ReadInt(0) / 4;
 		for (int currentroom = 0; currentroom < maxrooms; currentroom++)
 		{
-			int roomheader = allPointsA.ReadInt(currentroom * 4);
-			if (roomheader <= 0 || roomheader >= allPointsA.Length)
+			int roomheader = buffer.ReadInt(currentroom * 4);
+			if (roomheader <= 0 || roomheader >= buffer.Length)
 			{
 				//all rooms parsed
 				break;
 			}
 
-			//room
-			GameObject roomObject = new GameObject();
-			roomObject.name = "ROOM" + currentroom;
-			roomObject.transform.parent = transform;
-
-			Vector3 roomPosition = allPointsA.ReadVector(roomheader + 4);
-			roomObject.transform.localPosition = new Vector3(roomPosition.x, roomPosition.y, -roomPosition.z) / 100.0f;
-
-			//colliders
-			int i = roomheader + allPointsA.ReadShort(roomheader + 0);
-			int totalpoint = allPointsA.ReadShort(i + 0);
-			i += 2;
-
-			for (int count = 0; count < totalpoint; count++)
-			{
-				Box box = Instantiate(BoxPrefab);
-				box.name = "Collider";
-				box.Room = currentroom;
-				box.transform.parent = roomObject.transform;
-
-				Vector3 lower, upper;
-				allPointsA.ReadBoundingBox(i + 0, out lower, out upper);
-
-				Vector3 position = lower + upper;
-				box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
-				box.transform.localScale = (upper - lower) / 1000.0f;
-
-				box.ID = allPointsA.ReadShort(i + 12);
-				box.Flags = allPointsA.ReadShort(i + 14);
-
-				box.Color = new Color32(143, 143, 143, 255);
-				if ((box.Flags & 2) == 2)
-				{
-					//underground floor
-					box.Color = new Color32(100, 100, 100, 255);
-				}
-				if ((box.Flags & 4) == 4)
-				{
-					//room link
-					box.Color = new Color32(0, 100, 128, 255);
-				}
-				if ((box.Flags & 8) == 8)
-				{
-					//interactive box
-					box.Color = new Color32(0, 0, 128, 255);
-				}
-
-				i += 16;
-			}
-
-			//triggers
-			i = roomheader + allPointsA.ReadShort(roomheader + 2);
-			totalpoint = allPointsA.ReadShort(i + 0);
-			i += 2;
-
-			for (int count = 0; count < totalpoint; count++)
-			{
-				Box box = Instantiate(BoxPrefab);
-				box.name = "Trigger";
-				box.Room = currentroom;
-				box.transform.parent = roomObject.transform;
-
-				Vector3 lower, upper;
-				allPointsA.ReadBoundingBox(i + 0, out lower, out upper);
-
-				Vector3 position = lower + upper;
-				box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
-				box.transform.localScale = (upper - lower) / 1000.0f;
-
-				box.ID = allPointsA.ReadShort(i + 12);
-				box.Flags = allPointsA.ReadShort(i + 14);
-
-				if (box.Flags == 9) //custom trigger
-				{
-					box.Color = new Color32(255, 128, 0, 50);
-				}
-				else if (box.Flags == 10) //exit
-				{
-					box.Color = new Color32(255, 255, 50, 100);
-				}
-				else if (box.Flags == 0) //room switch
-				{
-					box.Color = new Color32(255, 0, 0, 45);
-				}
-				else
-				{
-					box.Color = new Color32(255, 128, 128, 50);
-				}
-
-				i += 16;
-			}
-
-			//cameras
-			int cameraCount = allPointsA.ReadShort(roomheader + 10);
-			List<int> cameraInRoom = new List<int>();
-			for (int cameraIndex = 0; cameraIndex < cameraCount; cameraIndex++)
-			{
-				int cameraID = allPointsA.ReadShort(roomheader + cameraIndex * 2 + 12);	 //camera
-				cameraInRoom.Add(cameraID);
-			}
-
-			camerasPerRoom.Add(cameraInRoom);
+			LoadRoom(buffer, roomheader, currentroom);
 		}
-	}
 
-	void LoadCameras(string folder)
-	{
-		//cameras
-		var cameraHelper = GetComponent<CameraHelper>();
-		string filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000001");
-		byte[] allPointsB = File.ReadAllBytes(filePath);
+		filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000001");
+		buffer = File.ReadAllBytes(filePath);
 
 		foreach (int cameraID in camerasPerRoom.SelectMany(x => x).Distinct())
 		{
-			int cameraHeader = allPointsB.ReadInt(cameraID * 4);
-			int numentries = allPointsB.ReadShort(cameraHeader + 0x12);
-			for (int k = 0; k < numentries; k++)
+			int cameraHeader = buffer.ReadInt(cameraID * 4);
+			LoadCamera(buffer, cameraHeader, cameraID);
+		}
+	}
+
+	void LoadRoomsMulti(string folder)
+	{
+		foreach (var filePath in Directory.GetFiles(folder).Where(x => new FileInfo(x).Length > 0))
+		{
+			int room = int.Parse(Path.GetFileNameWithoutExtension(filePath), NumberStyles.HexNumber);
+			byte[] buffer = File.ReadAllBytes(filePath);
+			LoadRoom(buffer, 0, room);
+		}
+
+		folder = string.Format("GAMEDATA\\CAMSAL{0:D2}", floor);
+		if (Directory.Exists(folder))
+		{
+			foreach (var filePath in Directory.GetFiles(folder).Where(x => new FileInfo(x).Length > 0))
 			{
-				List<Vector2> points = new List<Vector2>();
-				List<int> indices = new List<int>();
+				int camera = int.Parse(Path.GetFileNameWithoutExtension(filePath), NumberStyles.HexNumber);
+				byte[] buffer = File.ReadAllBytes(filePath);
+				LoadCamera(buffer, 0, camera);
+			}
+		}
+	}
 
-				int i = cameraHeader + 0x14 + k * (isAITD1 ? 12 : 16);
-				int cameraRoom = allPointsB.ReadShort(i + 0);
+	void LoadRoom(byte[] allPointsA, int roomheader, int currentroom)
+	{
+		//room
+		GameObject roomObject = new GameObject();
+		roomObject.name = "ROOM" + currentroom;
+		roomObject.transform.parent = transform;
 
-				i = cameraHeader + allPointsB.ReadShort(i + 4);
-				int totalAreas = allPointsB.ReadShort(i + 0);
+		Vector3 roomPosition = allPointsA.ReadVector(roomheader + 4);
+		roomObject.transform.localPosition = new Vector3(roomPosition.x, roomPosition.y, -roomPosition.z) / 100.0f;
+
+		//colliders
+		int i = roomheader + allPointsA.ReadShort(roomheader + 0);
+		int totalpoint = allPointsA.ReadShort(i + 0);
+		i += 2;
+
+		for (int count = 0; count < totalpoint; count++)
+		{
+			Box box = Instantiate(BoxPrefab);
+			box.name = "Collider";
+			box.Room = currentroom;
+			box.transform.parent = roomObject.transform;
+
+			Vector3 lower, upper;
+			allPointsA.ReadBoundingBox(i + 0, out lower, out upper);
+
+			Vector3 position = lower + upper;
+			box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
+			box.transform.localScale = (upper - lower) / 1000.0f;
+
+			box.ID = allPointsA.ReadShort(i + 12);
+			box.Flags = allPointsA.ReadShort(i + 14);
+
+			box.Color = new Color32(143, 143, 143, 255);
+			if ((box.Flags & 2) == 2)
+			{
+				//underground floor
+				box.Color = new Color32(100, 100, 100, 255);
+			}
+			if ((box.Flags & 4) == 4)
+			{
+				//room link
+				box.Color = new Color32(0, 100, 128, 255);
+			}
+			if ((box.Flags & 8) == 8)
+			{
+				//interactive box
+				box.Color = new Color32(0, 0, 128, 255);
+			}
+
+			i += 16;
+		}
+
+		//triggers
+		i = roomheader + allPointsA.ReadShort(roomheader + 2);
+		totalpoint = allPointsA.ReadShort(i + 0);
+		i += 2;
+
+		for (int count = 0; count < totalpoint; count++)
+		{
+			Box box = Instantiate(BoxPrefab);
+			box.name = "Trigger";
+			box.Room = currentroom;
+			box.transform.parent = roomObject.transform;
+
+			Vector3 lower, upper;
+			allPointsA.ReadBoundingBox(i + 0, out lower, out upper);
+
+			Vector3 position = lower + upper;
+			box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
+			box.transform.localScale = (upper - lower) / 1000.0f;
+
+			box.ID = allPointsA.ReadShort(i + 12);
+			box.Flags = allPointsA.ReadShort(i + 14);
+
+			if (box.Flags == 9) //custom trigger
+			{
+				box.Color = new Color32(255, 128, 0, 50);
+			}
+			else if (box.Flags == 10) //exit
+			{
+				box.Color = new Color32(255, 255, 50, 100);
+			}
+			else if (box.Flags == 0) //room switch
+			{
+				box.Color = new Color32(255, 0, 0, 45);
+			}
+			else
+			{
+				box.Color = new Color32(255, 128, 128, 50);
+			}
+
+			i += 16;
+		}
+
+		//cameras
+		int cameraCount = allPointsA.ReadShort(roomheader + 10);
+		List<int> cameraInRoom = new List<int>();
+		for (int cameraIndex = 0; cameraIndex < cameraCount; cameraIndex++)
+		{
+			int cameraID = allPointsA.ReadShort(roomheader + cameraIndex * 2 + 12);	 //camera
+			cameraInRoom.Add(cameraID);
+		}
+
+		camerasPerRoom.Add(cameraInRoom);
+	}
+
+	void LoadCamera(byte[] allPointsB, int cameraHeader, int cameraID)
+	{
+		int numentries = allPointsB.ReadShort(cameraHeader + 0x12);
+		for (int k = 0; k < numentries; k++)
+		{
+			List<Vector2> points = new List<Vector2>();
+			List<int> indices = new List<int>();
+
+			int i = cameraHeader + 0x14 + k * (isAITD1 ? 12 : (detectedGame == 5 ? 22 : 16));
+			int cameraRoom = allPointsB.ReadShort(i + 0);
+
+			i = cameraHeader + allPointsB.ReadShort(i + 4);
+			int totalAreas = allPointsB.ReadShort(i + 0);
+			i += 2;
+
+			for (int g = 0; g < totalAreas; g++)
+			{
+				int totalPoints = allPointsB.ReadShort(i + 0);
 				i += 2;
 
-				for (int g = 0; g < totalAreas; g++)
+				List<Vector2> pts = new List<Vector2>();
+				for (int u = 0; u < totalPoints; u++)
 				{
-					int totalPoints = allPointsB.ReadShort(i + 0);
-					i += 2;
-
-					List<Vector2> pts = new List<Vector2>();
-					for (int u = 0; u < totalPoints; u++)
-					{
-						short px = allPointsB.ReadShort(i + 0);
-						short pz = allPointsB.ReadShort(i + 2);
-						pts.Add(new Vector2(px, pz) / 100.0f);
-						i += 4;
-					}
-
-					Triangulator tr = new Triangulator(pts);
-					int[] idc = tr.Triangulate();
-					indices.AddRange(idc.Select(x => x + points.Count).ToArray());
-					points.AddRange(pts);
+					short px = allPointsB.ReadShort(i + 0);
+					short pz = allPointsB.ReadShort(i + 2);
+					pts.Add(new Vector2(px, pz) / 100.0f);
+					i += 4;
 				}
 
-				if (points.Count > 0)
-				{
-					var room = transform.Cast<Transform>().FirstOrDefault(x => x.name == "ROOM" + cameraRoom);
-					if(room == null) continue;
+				Triangulator tr = new Triangulator(pts);
+				int[] idc = tr.Triangulate();
+				indices.AddRange(idc.Select(x => x + points.Count).ToArray());
+				points.AddRange(pts);
+			}
 
-					int colorRGB = cameraColors[cameraID % cameraColors.Length];
+			if (points.Count > 0)
+			{
+				var room = transform.Cast<Transform>().FirstOrDefault(x => x.name == "ROOM" + cameraRoom);
+				if(room == null) continue;
 
-					Box area = Instantiate(BoxPrefab);
-					area.name = "Camera";
-					area.transform.parent = room;
-					area.transform.localPosition = Vector3.zero;
-					area.Color = new Color32((byte)((colorRGB >> 16) & 0xFF), (byte)((colorRGB >> 8) & 0xFF), (byte)(colorRGB & 0xFF), 100);
-					area.ID = cameraID;
-					area.DosBox = GetComponent<DosBox>();
-					MeshFilter filter = area.GetComponent<MeshFilter>();
+				int colorRGB = cameraColors[cameraID % cameraColors.Length];
 
-					// Use the triangulator to get indices for creating triangles
-					filter.sharedMesh = GetMeshFromPoints(points, indices);
-					Destroy(area.gameObject.GetComponent<BoxCollider>());
-					area.gameObject.AddComponent<MeshCollider>();
+				Box area = Instantiate(BoxPrefab);
+				area.name = "Camera";
+				area.transform.parent = room;
+				area.transform.localPosition = Vector3.zero;
+				area.Color = new Color32((byte)((colorRGB >> 16) & 0xFF), (byte)((colorRGB >> 8) & 0xFF), (byte)(colorRGB & 0xFF), 100);
+				area.ID = cameraID;
+				area.DosBox = GetComponent<DosBox>();
+				MeshFilter filter = area.GetComponent<MeshFilter>();
 
-					//setup camera
-					Vector3 cameraRotation = allPointsB.ReadVector(cameraHeader + 0);
-					Vector3 cameraPosition = allPointsB.ReadVector(cameraHeader + 6);
-					Vector3 cameraFocal = allPointsB.ReadVector(cameraHeader + 12);
+				// Use the triangulator to get indices for creating triangles
+				filter.sharedMesh = GetMeshFromPoints(points, indices);
+				Destroy(area.gameObject.GetComponent<BoxCollider>());
+				area.gameObject.AddComponent<MeshCollider>();
 
-					Box camera = Instantiate(BoxPrefab);
-					camera.name = "CameraFrustum";
-					camera.transform.parent = room;
-					camera.Color = new Color32(255, 128, 0, 255);
-					camera.HighLight = true;
-					cameraHelper.SetupTransform(camera, cameraPosition, cameraRotation, cameraFocal);
-					area.Camera = camera;
+				//setup camera
+				Vector3 cameraRotation = allPointsB.ReadVector(cameraHeader + 0);
+				Vector3 cameraPosition = allPointsB.ReadVector(cameraHeader + 6);
+				Vector3 cameraFocal = allPointsB.ReadVector(cameraHeader + 12);
 
-					filter = camera.GetComponent<MeshFilter>();
-					filter.sharedMesh = cameraHelper.CreateMesh(cameraFocal);
-					Destroy(camera.gameObject.GetComponent<BoxCollider>());
-					camera.gameObject.SetActive(false);
-				}
+				CameraHelper cameraHelper = GetComponent<CameraHelper>();
+				Box camera = Instantiate(BoxPrefab);
+				camera.name = "CameraFrustum";
+				camera.transform.parent = room;
+				camera.Color = new Color32(255, 128, 0, 255);
+				camera.HighLight = true;
+				cameraHelper.SetupTransform(camera, cameraPosition, cameraRotation, cameraFocal);
+				area.Camera = camera;
+
+				filter = camera.GetComponent<MeshFilter>();
+				filter.sharedMesh = cameraHelper.CreateMesh(cameraFocal);
+				Destroy(camera.gameObject.GetComponent<BoxCollider>());
+				camera.gameObject.SetActive(false);
 			}
 		}
 	}
@@ -418,7 +453,9 @@ public class RoomLoader : MonoBehaviour
 	int DetectGame()
 	{
 		//detect game based on number of floors
-		if (floors.Count >= 15)
+		if (Directory.Exists("GAMEDATA\\ETAGE00") && Directory.GetFiles("GAMEDATA\\ETAGE00").Count() > 2)
+			return 5; //TIME GATE
+		else if (floors.Count >= 15)
 			return 2;
 		else if (floors.Count >= 14)
 			return 3;
@@ -726,6 +763,11 @@ public class RoomLoader : MonoBehaviour
 
 	public void LinkToDosBox()
 	{
+		if (detectedGame == 5)
+		{
+			return; //not supported
+		}
+
 		if (!dosBoxEnabled)
 		{
 			dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);
