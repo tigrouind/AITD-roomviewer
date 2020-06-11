@@ -256,19 +256,19 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	void LoadRoom(byte[] allPointsA, int roomheader, int currentroom)
+	void LoadRoom(byte[] buffer, int roomheader, int currentroom)
 	{
 		//room
 		GameObject roomObject = new GameObject();
 		roomObject.name = "ROOM" + currentroom;
 		roomObject.transform.parent = transform;
 
-		Vector3 roomPosition = allPointsA.ReadVector(roomheader + 4);
+		Vector3 roomPosition = buffer.ReadVector(roomheader + 4);
 		roomObject.transform.localPosition = new Vector3(roomPosition.x, roomPosition.y, -roomPosition.z) / 100.0f;
 
 		//colliders
-		int i = roomheader + allPointsA.ReadShort(roomheader + 0);
-		int totalpoint = allPointsA.ReadShort(i + 0);
+		int i = roomheader + buffer.ReadShort(roomheader + 0);
+		int totalpoint = buffer.ReadShort(i + 0);
 		i += 2;
 
 		for (int count = 0; count < totalpoint; count++)
@@ -279,14 +279,14 @@ public class RoomLoader : MonoBehaviour
 			box.transform.parent = roomObject.transform;
 
 			Vector3 lower, upper;
-			allPointsA.ReadBoundingBox(i + 0, out lower, out upper);
+			buffer.ReadBoundingBox(i + 0, out lower, out upper);
 
 			Vector3 position = lower + upper;
 			box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
 			box.transform.localScale = (upper - lower) / 1000.0f;
 
-			box.ID = allPointsA.ReadShort(i + 12);
-			box.Flags = allPointsA.ReadShort(i + 14);
+			box.ID = buffer.ReadShort(i + 12);
+			box.Flags = buffer.ReadShort(i + 14);
 
 			box.Color = new Color32(143, 143, 143, 255);
 			if ((box.Flags & 2) == 2)
@@ -309,8 +309,8 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//triggers
-		i = roomheader + allPointsA.ReadShort(roomheader + 2);
-		totalpoint = allPointsA.ReadShort(i + 0);
+		i = roomheader + buffer.ReadShort(roomheader + 2);
+		totalpoint = buffer.ReadShort(i + 0);
 		i += 2;
 
 		for (int count = 0; count < totalpoint; count++)
@@ -321,14 +321,14 @@ public class RoomLoader : MonoBehaviour
 			box.transform.parent = roomObject.transform;
 
 			Vector3 lower, upper;
-			allPointsA.ReadBoundingBox(i + 0, out lower, out upper);
+			buffer.ReadBoundingBox(i + 0, out lower, out upper);
 
 			Vector3 position = lower + upper;
 			box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
 			box.transform.localScale = (upper - lower) / 1000.0f;
 
-			box.ID = allPointsA.ReadShort(i + 12);
-			box.Flags = allPointsA.ReadShort(i + 14);
+			box.ID = buffer.ReadShort(i + 12);
+			box.Flags = buffer.ReadShort(i + 14);
 
 			if (box.Flags == 9) //custom trigger
 			{
@@ -351,42 +351,42 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//cameras
-		int cameraCount = allPointsA.ReadShort(roomheader + 10);
+		int cameraCount = buffer.ReadShort(roomheader + 10);
 		List<int> cameraInRoom = new List<int>();
 		for (int cameraIndex = 0; cameraIndex < cameraCount; cameraIndex++)
 		{
-			int cameraID = allPointsA.ReadShort(roomheader + cameraIndex * 2 + 12);	 //camera
+			int cameraID = buffer.ReadShort(roomheader + cameraIndex * 2 + 12);	 //camera
 			cameraInRoom.Add(cameraID);
 		}
 
 		camerasPerRoom.Add(cameraInRoom);
 	}
 
-	void LoadCamera(byte[] allPointsB, int cameraHeader, int cameraID)
+	void LoadCamera(byte[] buffer, int cameraHeader, int cameraID)
 	{
-		int numentries = allPointsB.ReadShort(cameraHeader + 0x12);
+		int numentries = buffer.ReadShort(cameraHeader + 0x12);
 		for (int k = 0; k < numentries; k++)
 		{
 			List<Vector2> points = new List<Vector2>();
 			List<int> indices = new List<int>();
 
 			int i = cameraHeader + 0x14 + k * (isAITD1 ? 12 : (detectedGame == 5 ? 22 : 16));
-			int cameraRoom = allPointsB.ReadShort(i + 0);
+			int cameraRoom = buffer.ReadShort(i + 0);
 
-			i = cameraHeader + allPointsB.ReadShort(i + 4);
-			int totalAreas = allPointsB.ReadShort(i + 0);
+			i = cameraHeader + buffer.ReadShort(i + 4);
+			int totalAreas = buffer.ReadShort(i + 0);
 			i += 2;
 
 			for (int g = 0; g < totalAreas; g++)
 			{
-				int totalPoints = allPointsB.ReadShort(i + 0);
+				int totalPoints = buffer.ReadShort(i + 0);
 				i += 2;
 
 				List<Vector2> pts = new List<Vector2>();
 				for (int u = 0; u < totalPoints; u++)
 				{
-					short px = allPointsB.ReadShort(i + 0);
-					short pz = allPointsB.ReadShort(i + 2);
+					short px = buffer.ReadShort(i + 0);
+					short pz = buffer.ReadShort(i + 2);
 					pts.Add(new Vector2(px, pz) / 100.0f);
 					i += 4;
 				}
@@ -419,9 +419,9 @@ public class RoomLoader : MonoBehaviour
 				area.gameObject.AddComponent<MeshCollider>();
 
 				//setup camera
-				Vector3 cameraRotation = allPointsB.ReadVector(cameraHeader + 0);
-				Vector3 cameraPosition = allPointsB.ReadVector(cameraHeader + 6);
-				Vector3 cameraFocal = allPointsB.ReadVector(cameraHeader + 12);
+				Vector3 cameraRotation = buffer.ReadVector(cameraHeader + 0);
+				Vector3 cameraPosition = buffer.ReadVector(cameraHeader + 6);
+				Vector3 cameraFocal = buffer.ReadVector(cameraHeader + 12);
 
 				CameraHelper cameraHelper = GetComponent<CameraHelper>();
 				Box camera = Instantiate(BoxPrefab);
