@@ -57,8 +57,8 @@ public class RoomLoader : MonoBehaviour
 	private static readonly String EtageDirName = "ETAGE";
 	private static readonly String CamSalDirName = "CAMSAL";
 	private static readonly String FolderSeparator = Application.platform == RuntimePlatform.WindowsPlayer ? "\\" : "/";
-	private readonly String EtagePath = GameDataDirName + FolderSeparator + EtageDirName;
-	private readonly String CamSalPath = GameDataDirName + FolderSeparator + CamSalDirName;
+	private static readonly String EtagePath = GameDataDirName + FolderSeparator + EtageDirName;
+	private static readonly String CamSalPath = GameDataDirName + FolderSeparator + CamSalDirName;
 
 	void Start()
 	{
