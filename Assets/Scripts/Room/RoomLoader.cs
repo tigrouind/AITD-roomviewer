@@ -763,11 +763,6 @@ public class RoomLoader : MonoBehaviour
 
 	public void LinkToDosBox()
 	{
-		if (detectedGame == 5)
-		{
-			return; //not supported
-		}
-
 		if (!dosBoxEnabled)
 		{
 			dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);

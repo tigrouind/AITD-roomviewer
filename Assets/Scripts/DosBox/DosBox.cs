@@ -35,13 +35,14 @@ public class DosBox : MonoBehaviour
 		0x38180, //AITD3
 		0x39EC4, //JACK
 		0x20542, //AITD1 floppy
-		0x2050A  //AITD1 demo
+		0x2050A, //AITD1 demo
+		0x00000  //TIMEGATE
 	};
 
 	//offset to apply to get beginning of actors array
-	private int[] actorStructSize = new [] { 160, 180, 182, 180 };
+	private int[] actorStructSize = new [] { 160, 180, 182, 180, 202 };
 	//size of one actor
-	private int[] trackModeOffsets = new [] { 82, 90, 90, 90 };
+	private int[] trackModeOffsets = new [] { 82, 90, 90, 90, 90 };
 
 	private Vector3 lastPlayerPosition;
 	private int lastValidPlayerIndex = -1;
@@ -657,7 +658,12 @@ public class DosBox : MonoBehaviour
 
 		ProcessReader.Read(memory, 0, memory.Length);
 
-		if (!TryGetExeEntryPoint(out entryPoint))
+		if (detectedGame == 5)
+		{
+			ProcessReader.BaseAddress += 0x3B9000;
+			patternIndex = 6; //TIMEGATE
+		}
+		else if(!TryGetExeEntryPoint(out entryPoint))
 		{
 			ProcessReader.Close();
 			ProcessReader = null;
