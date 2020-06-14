@@ -1,12 +1,17 @@
 # AITD room viewer
 
-This is a room viewer (and 3D model viewer) for Alone in the Dark (1992).
+This is a room viewer (and 3D model viewer) for Alone in the Dark series.
 It has been created mostly for speedrunning.
 
-AITD2, AITD3 and Jack in the Dark are also supported.
+The following games are supported :
+- Alone in the Dark 1 (floppy or CD-ROM)
+- Alone in the Dark 2
+- Alone in the Dark 3
+- Jack in the Dark
+- Time Gate: Knight's Chase
 
 ## Instructions
-1. Make sure you have the original version of the game installed somewhere on your computer (eg: from GOG)
+1. You need to have the original version of the game installed somewhere on your computer (eg: from GOG)
 2. Extract AITD room viewer archive in a folder (eg : on your desktop)
 3. Create a new folder named "GAMEDATA" in it.
 4. Download [QuickBMS](http://aluigi.altervista.org/quickbms.htm) and [alonedark.bms](http://aluigi.altervista.org/bms/alonedark.bms) script ([alternative link](https://github.com/tigrouind/AITD-roomviewer/releases/download/1.1.14/alonedark.bms)).
@@ -14,6 +19,7 @@ AITD2, AITD3 and Jack in the Dark are also supported.
    - Select "alonedark.bms" script
    - Select all files named ETAGE00.PAK, ETAGE01.PAK, ETAGE02.PAK, ... from game folder (eg: "C:\GOG Games\Alone in the Dark\"). Hold control key to select multiple files.
    - As output folder, choose the "GAMEDATA" folder you created previously.
+   - For Time Gate, CAMSALxx.PAK archives should also be extracted.
 
 ## Commands
 
@@ -66,6 +72,8 @@ When the game is linked to DOSBox, you can swap two actors slot positions by hig
 
 Repeat room viewer installation steps with QuickBMS but select files LISTBODY.PAK and LISTBOD2.PAK.
 If you want to be able to view animations, unpack files LISTANIM.PAK and LISTANI2.PAK.
+
+For Time Gate, TEXTURES.PAK archive should also be extracted.
 
 ## Commands
 

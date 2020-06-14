@@ -1070,11 +1070,10 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 4b31818a291beb543a3744b792568af2, type: 3}
   - {fileID: 2800000, guid: a19c1244574785e4d8fc0bf3a447fef7, type: 3}
   - {fileID: 2800000, guid: 1e1c312be29f96341a8342f78134f93c, type: 3}
+  - {fileID: 2800000, guid: 9ae83d855cf19474e98c93d13c4ec083, type: 3}
   LeftText: {fileID: 692489841}
   SphereMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
   CubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  boundingLower: {x: 0, y: 0, z: 0}
-  boundingUpper: {x: 0, y: 0, z: 0}
   Panel: {fileID: 1196216666}
   ModelInput: {fileID: 708951445}
   AnimationInput: {fileID: 1537273363}
@@ -1114,6 +1113,8 @@ SkinnedMeshRenderer:
   - {fileID: 2100000, guid: 4de699cee54d0ee42b5e907fb1796d15, type: 2}
   - {fileID: 2100000, guid: 5b9939975d3f8ee46828eef8c5b5a5e1, type: 2}
   - {fileID: 2100000, guid: 269640d2656b137449fb73d8becc1606, type: 2}
+  - {fileID: 2100000, guid: 56153434bea80e64d932a0edf1b92448, type: 2}
+  - {fileID: 2100000, guid: 56153434bea80e64d932a0edf1b92448, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -27,11 +27,6 @@ public static class Utils
 		}
 	}
 
-	public static byte ReadByte(this byte[] data, int offset)
-	{
-		return data[offset];
-	}
-
 	public static Vector3 ReadVector(this byte[] data, int offset)
 	{
 		unchecked

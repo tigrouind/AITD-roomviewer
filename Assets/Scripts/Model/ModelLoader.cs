@@ -22,6 +22,8 @@ public class ModelLoader : MonoBehaviour
 	private string[] animFolders = new string[] { "GAMEDATA\\LISTANIM", "GAMEDATA\\LISTANI2" };
 	private List<KeyValuePair<int, string>> modelFiles = new List<KeyValuePair<int, string>>();
 	private List<KeyValuePair<int, string>> animFiles = new List<KeyValuePair<int, string>>();
+	private List<KeyValuePair<int, string>> textureFiles = new List<KeyValuePair<int, string>>();
+
 	private List<Frame> animFrames;
 	private List<Transform> bones;
 	private List<Vector3> initialBonesPosition;
@@ -187,18 +189,39 @@ public class ModelLoader : MonoBehaviour
 		float noisesize = 0.8f / bounds.size.magnitude;
 
 		//primitives
-		count = allbytes.ReadShort(i + 0);
+		count = allbytes.ReadUnsignedShort(i + 0);
 		i += 2;
 
 		//load palette
 		Color32[] paletteColors = PaletteTexture[paletteIndex].GetPixels32();
+
+		//load texture
+		int texAHeight = 1;
+		int texBHeight = 1;
+		int uvStart = 0;
+		if (DetectGame() == 5)
+		{
+			paletteColors[0] = new Color32(0, 0, 0, 0); //transparent
+
+			var offset = allbytes[0xE];
+			var texA = LoadTexture(allbytes.ReadUnsignedShort(offset + 12), paletteColors);
+			var texB = LoadTexture(allbytes.ReadUnsignedShort(offset + 14), paletteColors);
+
+			uvStart = allbytes.ReadShort(offset + 6);
+			texAHeight = texA.height;
+			texBHeight = texB.height;
+
+			var materials = GetComponent<SkinnedMeshRenderer>().materials;
+			materials[5].mainTexture = texA;
+			materials[6].mainTexture = texB;
+		}
 
 		List<BoneWeight> boneWeights = new List<BoneWeight>();
 		allVertices = new List<Vector3>();
 		uv = new List<Vector2>();
 		uvDepth = new List<Vector2>();
 		List<Color32> colors = new List<Color32>();
-		List<int>[] indices = new List<int>[5];
+		List<int>[] indices = new List<int>[7];
 
 		for (int n = 0 ; n < indices.Length ; n++)
 		{
@@ -386,6 +409,61 @@ public class ModelLoader : MonoBehaviour
 						break;
 					}
 
+				//triangle
+				case 8:  //texture
+				case 9:  //normals
+				case 10: //normals + texture
+					{
+						float textureHeight = 1.0f;
+						int uvIndex = 0, indicesIndex = 0;
+						Color color = Color.white;
+
+						if (primitiveType == 8 || primitiveType == 10)
+						{
+							uvIndex = uvStart + (allbytes.ReadUnsignedShort(i + 1) / 16) * 3;
+							bool texModel = (allbytes[i + 1] & 0xF) == 0;
+							textureHeight = (float)(texModel ? texAHeight : texBHeight);
+							indicesIndex = texModel ? 5 : 6;
+						}
+						else
+						{
+							int colorIndex = allbytes[i + 2];
+							color = paletteColors[colorIndex];
+						}
+
+						i += 3;
+
+						for(int k = 0 ; k < 3 ; k++)
+						{
+							int pointIndex = allbytes.ReadShort(i + 0) / 6;
+							i += 2;
+
+							uvDepth.Add(Vector2.zero);
+							indices[indicesIndex].Add(allVertices.Count);
+							colors.Add(color);
+							allVertices.Add(vertices[pointIndex]);
+							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
+
+							if(primitiveType == 8 || primitiveType == 10)
+							{
+								uv.Add(new Vector2(
+									allbytes.ReadShort(uvIndex + 0) / 256.0f,
+									allbytes.ReadShort(uvIndex + 2) / textureHeight));
+								uvIndex += 4;
+							}
+							else
+							{
+								uv.Add(Vector2.zero);
+							}
+						}
+
+						if (primitiveType == 9 || primitiveType == 10)
+						{
+							i +=6; //normals
+						}
+					}
+					break;
+
 				case 4:
 				case 5: //should be ignored
 					break;
@@ -403,12 +481,14 @@ public class ModelLoader : MonoBehaviour
 
 		//separate transparent/opaque triangles
 
-		msh.subMeshCount = 5;
+		msh.subMeshCount = 7;
 		msh.SetTriangles(indices[0], 0);
 		msh.SetTriangles(indices[1], 1);
 		msh.SetTriangles(indices[2], 2);
 		msh.SetTriangles(indices[3], 3);
 		msh.SetTriangles(indices[4], 4);
+		msh.SetTriangles(indices[5], 5);
+		msh.SetTriangles(indices[6], 6);
 		msh.SetUVs(0, uv);
 		msh.SetUVs(1, uvDepth);
 		msh.RecalculateNormals();
@@ -484,6 +564,41 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		return color;
+	}
+
+	Texture LoadTexture(int textureIndex, Color32[] paletteColors)
+	{
+		int index = textureFiles.FindIndex(x => x.Key == textureIndex);
+		if (index != -1)
+		{
+			string filename = textureFiles[index].Value;
+			var tex256 = File.ReadAllBytes(filename);
+			var texSize = (int)new FileInfo(filename).Length;
+			var textureData = new byte[texSize * 4];
+			Texture2D tex = new Texture2D(256, texSize / 256, TextureFormat.ARGB32, false);
+
+			int dest = 0;
+			for(int j = 0 ; j < tex256.Length ; j++)
+			{
+				Color32 color = paletteColors[tex256[j]];
+				textureData[dest++] = color.a;
+				textureData[dest++] = color.r;
+				textureData[dest++] = color.g;
+				textureData[dest++] = color.b;
+			}
+
+			tex.LoadRawTextureData(textureData);
+			tex.Apply();
+
+			return tex;
+		}
+		else
+		{
+			Texture2D tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+			tex.LoadRawTextureData(new byte[] { 255, 255, 0, 255 }); //single 1x1 pink
+			tex.Apply();
+			return tex;
+		}
 	}
 
 	void LoadAnim()
@@ -665,6 +780,7 @@ public class ModelLoader : MonoBehaviour
 
 		//load first model
 		modelIndex = 0;
+		LoadTextures(@"GAMEDATA\\TEXTURES");
 		LoadModels(modelFolders[modelFolderIndex]);
 		LoadAnims(animFolders[modelFolderIndex]);
 		ToggleAnimationMenuItems(false);
@@ -675,12 +791,14 @@ public class ModelLoader : MonoBehaviour
 		//detect game based on number of models
 		if (modelFiles.Count > 700)
 			return 3;
-		else if (modelFiles.Count > 500)
+		else if (modelFiles.Count > 550)
 			return 2;
+		else if (modelFiles.Count > 500)
+			return 5; //TIME GATE
 		else if (modelFiles.Count > 200)
 			return 1;
 		else
-			return 4;
+			return 4; //JITD
 	}
 
 	void SetPalette()
@@ -726,6 +844,17 @@ public class ModelLoader : MonoBehaviour
 			{
 				LoadAnim();
 			}
+		}
+	}
+
+	void LoadTextures(string foldername)
+	{
+		if (Directory.Exists(foldername))
+		{
+			textureFiles = Directory.GetFiles(foldername)
+				.Select(x => new KeyValuePair<int, string>(int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber), x))
+				.OrderBy(x => x.Key)
+				.ToList();
 		}
 	}
 
@@ -891,6 +1020,7 @@ public class ModelLoader : MonoBehaviour
 	void UpdateGradientsUVs()
 	{
 		Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+		if (mesh == null) return;
 
 		if (EnableAnimation.BoolValue)
 		{

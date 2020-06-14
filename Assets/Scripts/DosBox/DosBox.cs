@@ -351,7 +351,7 @@ public class DosBox : MonoBehaviour
 				inHand = memory.ReadShort(entryPoint + 0x24054);
 
 				//set by AITD when long running code is started (eg: loading ressource)
-				saveTimerFlag = memory.ReadByte(entryPoint + 0x1B0FC) == 1;
+				saveTimerFlag = memory[entryPoint + 0x1B0FC] == 1;
 			}
 		}
 
