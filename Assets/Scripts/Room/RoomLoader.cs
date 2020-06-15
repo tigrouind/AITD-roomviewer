@@ -1,12 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
 using System.Linq;
 using System.IO;
-using System.Text;
 using System.Collections.Generic;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using System.Globalization;
 
@@ -53,21 +50,15 @@ public class RoomLoader : MonoBehaviour
 	public ToggleButton CameraMode;
 	public GameObject Border;
 
-	private static readonly String GameDataDirName = "GAMEDATA";
-	private static readonly String EtageDirName = "ETAGE";
-	private static readonly String CamSalDirName = "CAMSAL";
-	private static readonly String FolderSeparator = Application.platform == RuntimePlatform.WindowsPlayer ? "\\" : "/";
-	private static readonly String EtagePath = GameDataDirName + FolderSeparator + EtageDirName;
-	private static readonly String CamSalPath = GameDataDirName + FolderSeparator + CamSalDirName;
 
 	void Start()
 	{
-		Directory.CreateDirectory(GameDataDirName);
+		Directory.CreateDirectory(Config.BaseDirectory);
 
 		//check existing ETAGEXX folders
-		floors = Directory.GetDirectories(GameDataDirName)
+		floors = Directory.GetDirectories(Config.BaseDirectory)
 			.Select(x => Path.GetFileName(x))
-			.Where(x => x.StartsWith(EtageDirName, StringComparison.InvariantCultureIgnoreCase))
+			.Where(x => x.StartsWith("ETAGE", StringComparison.InvariantCultureIgnoreCase))
 			.Select(x => int.Parse(x.Substring(5, 2)))
 			.ToList();
 		floor = floors.FirstOrDefault();
@@ -193,7 +184,7 @@ public class RoomLoader : MonoBehaviour
 	void LoadFloor(int floor)
 	{
 		//check folder
-		string folder = string.Format(EtagePath + "{0:D2}", floor);
+		string folder = Config.GetPath("ETAGE{0:D2}", floor);
 		if (!Directory.Exists(folder))
 		{
 			LeftText.text = string.Format("Cannot find folder {0}", folder);
@@ -251,7 +242,7 @@ public class RoomLoader : MonoBehaviour
 			LoadRoom(buffer, 0, room);
 		}
 
-		folder = string.Format(CamSalPath + "{0:D2}", floor);
+		folder = Config.GetPath("CAMSAL{0:D2}", floor);
 		if (Directory.Exists(folder))
 		{
 			foreach (var filePath in Directory.GetFiles(folder).Where(x => new FileInfo(x).Length > 0))
@@ -460,13 +451,13 @@ public class RoomLoader : MonoBehaviour
 	int DetectGame()
 	{
 		//detect game based on number of floors
-		if (Directory.Exists(EtagePath + "00") && Directory.GetFiles(EtagePath + "00").Count() > 2)
+		if (floors.Contains(0) && Directory.GetFiles(Config.GetPath("ETAGE00")).Count() > 2)
 			return 5; //TIME GATE
 		else if (floors.Count >= 15)
 			return 2;
 		else if (floors.Count >= 14)
 			return 3;
-		else if (floors.Count == 1 && Directory.Exists(EtagePath + "16"))
+		else if (floors.Count == 1 && floors.Contains(16))
 			return 4; //JITD
 		else
 			return 1;

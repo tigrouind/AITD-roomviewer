@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -18,8 +18,8 @@ public class ModelLoader : MonoBehaviour
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private VarParser varParser = new VarParser();
 
-	private string[] modelFolders = new string[] { "GAMEDATA\\LISTBODY", "GAMEDATA\\LISTBOD2" };
-	private string[] animFolders = new string[] { "GAMEDATA\\LISTANIM", "GAMEDATA\\LISTANI2" };
+	private string[] modelFolders = new string[] { Config.GetPath("LISTBODY"), Config.GetPath("LISTBOD2") };
+	private string[] animFolders = new string[] { Config.GetPath("LISTANIM"), Config.GetPath("LISTANI2") };
 	private List<KeyValuePair<int, string>> modelFiles = new List<KeyValuePair<int, string>>();
 	private List<KeyValuePair<int, string>> animFiles = new List<KeyValuePair<int, string>>();
 	private List<KeyValuePair<int, string>> textureFiles = new List<KeyValuePair<int, string>>();
@@ -767,7 +767,7 @@ public class ModelLoader : MonoBehaviour
 		CheckCommandLine();
 
 		//parse vars.txt file
-		string varPath = @"GAMEDATA\vars.txt";
+		string varPath = Config.GetPath("vars.txt");
 		if (File.Exists(varPath))
 		{
 			varParser.Parse(varPath, "BODYS", "ANIMS");
@@ -780,7 +780,7 @@ public class ModelLoader : MonoBehaviour
 
 		//load first model
 		modelIndex = 0;
-		LoadTextures(@"GAMEDATA\\TEXTURES");
+		LoadTextures(Config.GetPath("TEXTURES"));
 		LoadModels(modelFolders[modelFolderIndex]);
 		LoadAnims(animFolders[modelFolderIndex]);
 		ToggleAnimationMenuItems(false);
