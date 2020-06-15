@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -69,7 +69,7 @@ public class ModelLoader : MonoBehaviour
 		int fileIndex = modelFiles[modelIndex].Key;
 		string varName = varParser.GetText("BODYS", fileIndex);
 		string folderName = modelFolders[modelFolderIndex];
-		leftTextBody = folderName.Substring(folderName.Length - 4) + " " + fileIndex + "/" + modelFiles[modelFiles.Count - 1].Key + " <color=#00c864>" + varName + "</color>";
+		leftTextBody = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", folderName.Substring(folderName.Length - 4), fileIndex, modelFiles[modelFiles.Count - 1].Key, varName);
 		RefreshLeftText();
 
 		//camera
@@ -199,7 +199,7 @@ public class ModelLoader : MonoBehaviour
 		int texAHeight = 1;
 		int texBHeight = 1;
 		int uvStart = 0;
-		if (DetectGame() == 5)
+		if (paletteIndex == 4) //TIMEGATE
 		{
 			paletteColors[0] = new Color32(0, 0, 0, 0); //transparent
 
@@ -606,7 +606,7 @@ public class ModelLoader : MonoBehaviour
 		int fileIndex = animFiles[animIndex].Key;
 		string varName = varParser.GetText("ANIMS", fileIndex);
 		string folderName = animFolders[modelFolderIndex];
-		leftTextAnim = folderName.Substring(folderName.Length - 4) + " " + fileIndex + "/" + animFiles[animFiles.Count - 1].Key + " <color=#00c864>" + varName + "</color>";
+		leftTextAnim = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", folderName.Substring(folderName.Length - 4), fileIndex, animFiles[animFiles.Count - 1].Key , varName);
 
 		int i = 0;
 		string filename = animFiles[animIndex].Value;
