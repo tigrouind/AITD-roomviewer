@@ -761,6 +761,12 @@ public class RoomLoader : MonoBehaviour
 
 	public void LinkToDosBox()
 	{
+		if ((Application.platform != RuntimePlatform.WindowsEditor &&
+			 Application.platform != RuntimePlatform.WindowsPlayer))
+		{
+			return;
+		}
+
 		if (!dosBoxEnabled)
 		{
 			dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);
