@@ -59,8 +59,7 @@ public class ModelLoader : MonoBehaviour
 	public InputField ModelInput;
 	public InputField AnimationInput;
 	public ToggleButton AutoRotate;
-	public ToggleButton GradientMaterial;
-	public ToggleButton NoiseMaterial;
+	public ToggleButton DetailsLevel;
 	public ToggleButton EnableAnimation;
 	public ToggleButton ShowAdditionalInfo;
 
@@ -292,7 +291,7 @@ public class ModelLoader : MonoBehaviour
 						gradientPolygonType.Add(polyType);
 						gradientPolygonList.Add(polyVertices);
 
-						if (polyType == 1 && NoiseMaterial.BoolValue)
+						if (polyType == 1 && DetailsLevel.BoolValue)
 						{
 							Vector3 forward, left;
 							ComputeUV(polyVertices, out forward, out left);
@@ -362,7 +361,7 @@ public class ModelLoader : MonoBehaviour
 						float scale = size / 500.0f;
 						float uvScale = noisesize * size / 200.0f;
 
-						if ((polyType == 3 || polyType == 4 || polyType == 5 || polyType == 6) && GradientMaterial.BoolValue)
+						if ((polyType == 3 || polyType == 4 || polyType == 5 || polyType == 6) && DetailsLevel.BoolValue)
 						{
 							gradientPolygonType.Add(polyType);
 							gradientPolygonList.Add(Enumerable.Range(allVertices.Count, SphereMesh.vertices.Length).ToList());
@@ -516,7 +515,7 @@ public class ModelLoader : MonoBehaviour
 				return 0;
 
 			case 1: //noise
-				if (NoiseMaterial.BoolValue)
+				if (DetailsLevel.BoolValue)
 					return 2;
 				else
 					return 0;
@@ -526,14 +525,14 @@ public class ModelLoader : MonoBehaviour
 
 			case 3: //gradient
 			case 6:
-				if (GradientMaterial.BoolValue)
+				if (DetailsLevel.BoolValue)
 					return 3;
 				else
 					return 0;
 
 			case 4:
 			case 5:
-				if (GradientMaterial.BoolValue)
+				if (DetailsLevel.BoolValue)
 					return 4;
 				else
 					return 0;
@@ -544,7 +543,7 @@ public class ModelLoader : MonoBehaviour
 	{
 		Color32 color = paletteColors[colorIndex];
 
-		if (polyType == 1 && NoiseMaterial.BoolValue)
+		if (polyType == 1 && DetailsLevel.BoolValue)
 		{
 			//noise
 			color.r = (byte)((colorIndex % 16) * 16);
@@ -555,7 +554,7 @@ public class ModelLoader : MonoBehaviour
 			//transparency
 			color.a = 128;
 		}
-		else if ((polyType == 3 || polyType == 6 || polyType == 4 || polyType == 5) && GradientMaterial.BoolValue)
+		else if ((polyType == 3 || polyType == 6 || polyType == 4 || polyType == 5) && DetailsLevel.BoolValue)
 		{
 			//horizontal or vertical gradient
 			color.r = (byte)((polyType == 5) ? 127 : 255);
@@ -576,6 +575,7 @@ public class ModelLoader : MonoBehaviour
 			var texSize = (int)new FileInfo(filename).Length;
 			var textureData = new byte[texSize * 4];
 			Texture2D tex = new Texture2D(256, texSize / 256, TextureFormat.ARGB32, false);
+			tex.filterMode = DetailsLevel.BoolValue ? FilterMode.Bilinear : FilterMode.Point;
 			FixBlackBorders(tex256);
 
 			int dest = 0;
@@ -1350,13 +1350,8 @@ public class ModelLoader : MonoBehaviour
 				RefreshLeftText();
 				break;
 
-			case KeyCode.G:
-				GradientMaterial.BoolValue = !GradientMaterial.BoolValue;
-				LoadBody(false);
-				break;
-
-			case KeyCode.N:
-				NoiseMaterial.BoolValue = !NoiseMaterial.BoolValue;
+			case KeyCode.D:
+				DetailsLevel.BoolValue = !DetailsLevel.BoolValue;
 				LoadBody(false);
 				break;
 
