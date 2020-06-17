@@ -36,7 +36,7 @@ public class DosBox : MonoBehaviour
 		0x39EC4, //JACK
 		0x20542, //AITD1 floppy
 		0x2050A, //AITD1 demo
-		0x00000  //TIMEGATE
+		0x2ADD0  //TIMEGATE
 	};
 
 	//offset to apply to get beginning of actors array
@@ -649,27 +649,54 @@ public class DosBox : MonoBehaviour
 
 	public bool LinkToDosBOX(int floor, int room, int detectedGame)
 	{
-		int patternIndex = detectedGame - 1;
-
 		if (!TryGetMemoryReader(out ProcessReader))
 		{
 			return false;
 		}
 
-		ProcessReader.Read(memory, 0, memory.Length);
-
-		if (detectedGame == 5)
-		{
-			ProcessReader.BaseAddress += 0x3B9000;
-			patternIndex = 6; //TIMEGATE
-		}
-		else if(!TryGetExeEntryPoint(out entryPoint))
+		if (!FindActorsAddress(detectedGame))
 		{
 			ProcessReader.Close();
 			ProcessReader = null;
 			return false;
 		}
 
+		//force reload
+		linkfloor = floor;
+		linkroom = room;
+
+		dosBoxPattern = detectedGame - 1;
+
+		return true;
+	}
+
+	public void UnlinkDosBox()
+	{
+		if (ProcessReader != null)
+		{
+			ProcessReader.Close();
+			ProcessReader = null;
+		}
+
+		BoxInfo.Clear(true);
+		lastValidPlayerIndex = -1;
+	}
+
+	public bool FindActorsAddress(int detectedGame)
+	{
+		if (detectedGame == 5) //TIMEGATE
+		{
+			return FindActorsAddressTimeGate();
+		}
+
+		ProcessReader.Read(memory, 0, memory.Length);
+
+		if (!TryGetExeEntryPoint(out entryPoint))
+		{
+			return false;
+		}
+
+		int patternIndex = detectedGame - 1;
 		if (detectedGame == 1) //AITD1 only
 		{
 			//check version
@@ -692,26 +719,26 @@ public class DosBox : MonoBehaviour
 		}
 
 		actorsAddress = entryPoint + actorArrayAddress[patternIndex];
-
-		//force reload
-		linkfloor = floor;
-		linkroom = room;
-
-		dosBoxPattern = detectedGame - 1;
-
 		return true;
 	}
 
-	public void UnlinkDosBox()
+	public bool FindActorsAddressTimeGate()
 	{
-		if (ProcessReader != null)
+		int dataSegment = ProcessReader.SearchForBytePattern(Encoding.ASCII.GetBytes("HARD_DEC"), 0x100000, 0x200000); //start at 1MB, size = 2MB
+		if (dataSegment != -1)
 		{
-			ProcessReader.Close();
-			ProcessReader = null;
+			dataSegment -= 28;
+			ProcessReader.Read(memory, dataSegment + actorArrayAddress[6], 4);
+			var result = memory.ReadUnsignedInt(0);
+			if (result != 0)
+			{
+				actorsAddress = 0;
+				ProcessReader.BaseAddress += result;
+				return true;
+			}
 		}
 
-		BoxInfo.Clear(true);
-		lastValidPlayerIndex = -1;
+		return false;
 	}
 
 	public void ResetCamera(int floor, int room)
