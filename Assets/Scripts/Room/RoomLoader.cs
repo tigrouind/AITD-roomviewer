@@ -183,18 +183,11 @@ public class RoomLoader : MonoBehaviour
 
 	void LoadFloor(int floor)
 	{
-		//check folder
-		string folder = Config.GetPath("ETAGE{0:D2}", floor);
-		if (!Directory.Exists(folder))
-		{
-			LeftText.text = string.Format("Cannot find folder {0}", folder);
-			return;
-		}
-
 		//load cameras and rooms
 		camerasPerRoom = new List<List<int>>();
 		name = "FLOOR" + floor;
 
+		string folder = Config.GetPath("ETAGE{0:D2}", floor);
 		if (detectedGame == 5)
 		{
 			LoadRoomsMulti(folder);

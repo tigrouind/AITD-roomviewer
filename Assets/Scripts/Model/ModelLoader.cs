@@ -850,10 +850,6 @@ public class ModelLoader : MonoBehaviour
 			SetPalette();
 			LoadBody();
 		}
-		else
-		{
-			LeftText.text = string.Format("Cannot find folder {0}", foldername);
-		}
 	}
 
 	void LoadAnims(string foldername)
@@ -959,7 +955,11 @@ public class ModelLoader : MonoBehaviour
 				menuEnabled = !menuEnabled;
 				if (menuEnabled)
 				{
-					ModelInput.text = modelFiles[modelIndex].Key.ToString();
+					if(modelFiles.Count > 0)
+					{
+						ModelInput.text = modelFiles[modelIndex].Key.ToString();
+					}
+
 					if (animFiles.Count > 0)
 					{
 						AnimationInput.text = animFiles[animIndex].Key.ToString();
@@ -1231,7 +1231,10 @@ public class ModelLoader : MonoBehaviour
 			LoadBody();
 		}
 
-		ModelInput.text = modelFiles[modelIndex].Key.ToString();
+		if (modelFiles.Count > 0)
+		{
+			ModelInput.text = modelFiles[modelIndex].Key.ToString();
+		}
 	}
 
 	public void AnimationIndexInputChanged()
@@ -1243,7 +1246,10 @@ public class ModelLoader : MonoBehaviour
 			LoadAnim();
 		}
 
-		AnimationInput.text = animFiles[animIndex].Key.ToString();
+		if (animFiles.Count > 0)
+		{
+			AnimationInput.text = animFiles[animIndex].Key.ToString();
+		}
 	}
 
 	void CheckCommandLine()
