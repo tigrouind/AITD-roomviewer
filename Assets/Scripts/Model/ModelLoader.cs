@@ -576,6 +576,7 @@ public class ModelLoader : MonoBehaviour
 			var texSize = (int)new FileInfo(filename).Length;
 			var textureData = new byte[texSize * 4];
 			Texture2D tex = new Texture2D(256, texSize / 256, TextureFormat.ARGB32, false);
+			FixBlackBorders(tex256);
 
 			int dest = 0;
 			for(int j = 0 ; j < tex256.Length ; j++)
@@ -599,6 +600,30 @@ public class ModelLoader : MonoBehaviour
 			tex.Apply();
 			return tex;
 		}
+	}
+
+	void FixBlackBorders(byte[] tex256)
+	{
+		int width = 256;
+		int height = tex256.Length / 256;
+
+		byte[] newText256 = tex256.ToArray();
+		for (int j = 1 ; j < height - 1 ; j++)
+		{
+			for (int i = 1 ; i < width - 1 ; i++)
+			{
+				int n = i + j * 256;
+				if (tex256[n] == 0)
+				{
+					if (tex256[n + 1] != 0) newText256[n] = tex256[n + 1];
+					else if (tex256[n - 1] != 0) newText256[n] = tex256[n - 1];
+					else if (tex256[n + 256] != 0) newText256[n] = tex256[n + 256];
+					else if (tex256[n - 256] != 0) newText256[n] = tex256[n - 256];
+				}
+			}
+		}
+
+		Array.Copy(newText256, tex256, tex256.Length);
 	}
 
 	void LoadAnim()
