@@ -89,26 +89,26 @@ public class ModelLoader : MonoBehaviour
 
 		//load data
 		string filename = modelFiles[modelIndex].Value;
-		byte[] allbytes = File.ReadAllBytes(filename);
+		byte[] buffer = File.ReadAllBytes(filename);
 		int i = 0;
 
 		//header
-		modelFlags = allbytes.ReadShort(i + 0);
+		modelFlags = buffer.ReadShort(i + 0);
 
 		//bounding box
-		allbytes.ReadBoundingBox(i + 2, out boundingLower, out boundingUpper);
+		buffer.ReadBoundingBox(i + 2, out boundingLower, out boundingUpper);
 
 		i += 0xE;
-		i += allbytes.ReadShort(i + 0) + 2;
+		i += buffer.ReadShort(i + 0) + 2;
 
 		//vertexes
-		int count = allbytes.ReadShort(i + 0);
+		int count = buffer.ReadShort(i + 0);
 		i += 2;
 
 		List<Vector3> vertices = new List<Vector3>();
 		for (int j = 0; j < count; j++)
 		{
-			Vector3 position = new Vector3(allbytes.ReadShort(i + 0), -allbytes.ReadShort(i + 2), allbytes.ReadShort(i + 4));
+			Vector3 position = new Vector3(buffer.ReadShort(i + 0), -buffer.ReadShort(i + 2), buffer.ReadShort(i + 4));
 			vertices.Add(position / 1000.0f);
 			i += 6;
 		}
@@ -121,7 +121,7 @@ public class ModelLoader : MonoBehaviour
 		if ((modelFlags & 2) == 2) //check if model has bones
 		{
 			//bones
-			count = allbytes.ReadShort(i + 0);
+			count = buffer.ReadShort(i + 0);
 			i += 2;
 			i += count * 2;
 
@@ -130,11 +130,11 @@ public class ModelLoader : MonoBehaviour
 			bonesPerIndex.Add(255, transform);
 			for (int n = 0; n < count; n++)
 			{
-				int startindex = allbytes.ReadShort(i + 0) / 6;
-				int numpoints = allbytes.ReadShort(i + 2);
-				int vertexindex = allbytes.ReadShort(i + 4) / 6;
-				int parentindex = allbytes[i + 6];
-				int boneindex = allbytes[i + 7];
+				int startindex = buffer.ReadShort(i + 0) / 6;
+				int numpoints = buffer.ReadShort(i + 2);
+				int vertexindex = buffer.ReadShort(i + 4) / 6;
+				int parentindex = buffer[i + 6];
+				int boneindex = buffer[i + 7];
 
 				//create bone
 				Transform bone = new GameObject("BONE").transform;
@@ -188,7 +188,7 @@ public class ModelLoader : MonoBehaviour
 		float noisesize = 0.8f / bounds.size.magnitude;
 
 		//primitives
-		count = allbytes.ReadUnsignedShort(i + 0);
+		count = buffer.ReadUnsignedShort(i + 0);
 		i += 2;
 
 		//load palette
@@ -202,11 +202,11 @@ public class ModelLoader : MonoBehaviour
 		{
 			paletteColors[0] = new Color32(0, 0, 0, 0); //transparent
 
-			var offset = allbytes[0xE];
-			var texA = LoadTexture(allbytes.ReadUnsignedShort(offset + 12), paletteColors);
-			var texB = LoadTexture(allbytes.ReadUnsignedShort(offset + 14), paletteColors);
+			var offset = buffer[0xE];
+			var texA = LoadTexture(buffer.ReadUnsignedShort(offset + 12), paletteColors);
+			var texB = LoadTexture(buffer.ReadUnsignedShort(offset + 14), paletteColors);
 
-			uvStart = allbytes.ReadShort(offset + 6);
+			uvStart = buffer.ReadShort(offset + 6);
 			texAHeight = texA.height;
 			texBHeight = texB.height;
 
@@ -232,7 +232,7 @@ public class ModelLoader : MonoBehaviour
 
 		for (int n = 0; n < count; n++)
 		{
-			int primitiveType = allbytes[i + 0];
+			int primitiveType = buffer[i + 0];
 			i++;
 
 			switch (primitiveType)
@@ -241,12 +241,12 @@ public class ModelLoader : MonoBehaviour
 				case 0:
 					{
 						i++;
-						int colorIndex = allbytes[i + 0];
+						int colorIndex = buffer[i + 0];
 						i += 2;
 
 						Color32 color = paletteColors[colorIndex];
-						int pointIndexA = allbytes.ReadShort(i + 0) / 6;
-						int pointIndexB = allbytes.ReadShort(i + 2) / 6;
+						int pointIndexA = buffer.ReadShort(i + 0) / 6;
+						int pointIndexB = buffer.ReadShort(i + 2) / 6;
 						Vector3 directionVector = vertices[pointIndexA] - vertices[pointIndexB];
 						Vector3 middle = (vertices[pointIndexA] + vertices[pointIndexB]) / 2.0f;
 						Quaternion rotation = Quaternion.LookRotation(directionVector);
@@ -266,9 +266,9 @@ public class ModelLoader : MonoBehaviour
 				//polygon
 				case 1:
 					{
-						int numPoints = allbytes[i + 0];
-						int polyType = allbytes[i + 1];
-						int colorIndex = allbytes[i + 2];
+						int numPoints = buffer[i + 0];
+						int polyType = buffer[i + 1];
+						int colorIndex = buffer[i + 2];
 						i += 3;
 
 						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
@@ -279,7 +279,7 @@ public class ModelLoader : MonoBehaviour
 						int verticesCount = allVertices.Count;
 						for (int m = 0; m < numPoints; m++)
 						{
-							int pointIndex = allbytes.ReadShort(i + 0) / 6;
+							int pointIndex = buffer.ReadShort(i + 0) / 6;
 							i += 2;
 
 							colors.Add(color);
@@ -344,17 +344,17 @@ public class ModelLoader : MonoBehaviour
 				//sphere
 				case 3:
 					{
-						int polyType = allbytes[i];
+						int polyType = buffer[i];
 						i++;
-						int colorIndex = allbytes[i];
+						int colorIndex = buffer[i];
 						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
 						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
 
 						i += 2;
 
-						int size = allbytes.ReadShort(i + 0);
+						int size = buffer.ReadShort(i + 0);
 						i += 2;
-						int pointSphereIndex = allbytes.ReadShort(i + 0) / 6;
+						int pointSphereIndex = buffer.ReadShort(i + 0) / 6;
 						i += 2;
 
 						Vector3 position = vertices[pointSphereIndex];
@@ -381,9 +381,9 @@ public class ModelLoader : MonoBehaviour
 				case 7: //NxN square, size depends projected z-value
 					{
 						i++;
-						int colorIndex = allbytes[i];
+						int colorIndex = buffer[i];
 						i += 2;
-						int cubeIndex = allbytes.ReadShort(i + 0) / 6;
+						int cubeIndex = buffer.ReadShort(i + 0) / 6;
 						i += 2;
 
 						Color32 color = paletteColors[colorIndex];
@@ -419,14 +419,14 @@ public class ModelLoader : MonoBehaviour
 
 						if (primitiveType == 8 || primitiveType == 10)
 						{
-							uvIndex = uvStart + (allbytes.ReadUnsignedShort(i + 1) / 16) * 3;
-							bool texModel = (allbytes[i + 1] & 0xF) == 0;
+							uvIndex = uvStart + (buffer.ReadUnsignedShort(i + 1) / 16) * 3;
+							bool texModel = (buffer[i + 1] & 0xF) == 0;
 							textureHeight = (float)(texModel ? texAHeight : texBHeight);
 							indicesIndex = texModel ? 5 : 6;
 						}
 						else
 						{
-							int colorIndex = allbytes[i + 2];
+							int colorIndex = buffer[i + 2];
 							color = paletteColors[colorIndex];
 						}
 
@@ -434,7 +434,7 @@ public class ModelLoader : MonoBehaviour
 
 						for(int k = 0 ; k < 3 ; k++)
 						{
-							int pointIndex = allbytes.ReadShort(i + 0) / 6;
+							int pointIndex = buffer.ReadShort(i + 0) / 6;
 							i += 2;
 
 							uvDepth.Add(Vector2.zero);
@@ -446,8 +446,8 @@ public class ModelLoader : MonoBehaviour
 							if(primitiveType == 8 || primitiveType == 10)
 							{
 								uv.Add(new Vector2(
-									allbytes.ReadShort(uvIndex + 0) / 256.0f,
-									allbytes.ReadShort(uvIndex + 2) / textureHeight));
+									buffer.ReadShort(uvIndex + 0) / 256.0f,
+									buffer.ReadShort(uvIndex + 2) / textureHeight));
 								uvIndex += 4;
 							}
 							else
@@ -635,26 +635,26 @@ public class ModelLoader : MonoBehaviour
 
 		int i = 0;
 		string filename = animFiles[animIndex].Value;
-		byte[] allbytes = File.ReadAllBytes(filename);
-		int frameCount = allbytes.ReadShort(i + 0);
-		int boneCount = allbytes.ReadShort(i + 2);
+		byte[] buffer = File.ReadAllBytes(filename);
+		int frameCount = buffer.ReadShort(i + 0);
+		int boneCount = buffer.ReadShort(i + 2);
 		i += 4;
 
-		var isAITD2 = ((boneCount * 16 + 8) * frameCount + 4) == allbytes.Length;
+		var isAITD2 = ((boneCount * 16 + 8) * frameCount + 4) == buffer.Length;
 		animFrames = new List<Frame>();
 		for(int frame = 0 ; frame < frameCount ; frame++)
 		{
 			Frame f = new Frame();
-			f.Time = allbytes.ReadShort(i + 0);
-			f.Offset = allbytes.ReadVector(i + 2);
+			f.Time = buffer.ReadShort(i + 0);
+			f.Offset = buffer.ReadVector(i + 2);
 
 			f.Bones = new List<Bone>();
 			i += 8;
 			for(int bone = 0 ; bone < boneCount ; bone++)
 			{
 				Bone b = new Bone();
-				b.Type = allbytes.ReadShort(i + 0);
-				Vector3 boneTransform = allbytes.ReadVector(i + 2);
+				b.Type = buffer.ReadShort(i + 0);
+				Vector3 boneTransform = buffer.ReadVector(i + 2);
 
 				switch(b.Type)
 				{
@@ -677,7 +677,7 @@ public class ModelLoader : MonoBehaviour
 				i += 8;
 				if (isAITD2)
 				{
-					boneTransform = allbytes.ReadVector(i + 0);
+					boneTransform = buffer.ReadVector(i + 0);
 					b.Rotate = new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f);
 					i += 8;
 				}
