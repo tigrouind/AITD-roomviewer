@@ -478,8 +478,7 @@ public class ModelLoader : MonoBehaviour
 		msh.vertices = allVertices.ToArray();
 		msh.colors32 = colors.ToArray();
 
-		//separate transparent/opaque triangles
-
+		//separate triangles depending their material
 		msh.subMeshCount = 7;
 		msh.SetTriangles(indices[0], 0);
 		msh.SetTriangles(indices[1], 1);
@@ -508,6 +507,11 @@ public class ModelLoader : MonoBehaviour
 
 	int GetTriangleListIndex(int polyType)
 	{
+		if (!DetailsLevel.BoolValue)
+		{
+			return 0;
+		}
+
 		switch (polyType)
 		{
 			default:
@@ -515,27 +519,18 @@ public class ModelLoader : MonoBehaviour
 				return 0;
 
 			case 1: //noise
-				if (DetailsLevel.BoolValue)
-					return 2;
-				else
-					return 0;
+				return 2;
 
 			case 2: //transparent
 				return 1;
 
 			case 3: //gradient
 			case 6:
-				if (DetailsLevel.BoolValue)
-					return 3;
-				else
-					return 0;
+				return 3;
 
-			case 4:
+			case 4: //gradient2
 			case 5:
-				if (DetailsLevel.BoolValue)
-					return 4;
-				else
-					return 0;
+				return 4;
 		}
 	}
 

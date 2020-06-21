@@ -33,7 +33,7 @@
 			{
 				vertOutput o;
 				o.pos = mul(UNITY_MATRIX_MVP, input.pos);
-				o.pos.z = o.pos.z - input.uv1.x * 0.00001;
+				o.pos.z = o.pos.z - input.uv1.x * 0.00001; //fix z-fighting
 				o.screenPos = ComputeScreenPos(o.pos);
 				o.uv = input.uv0;
 				o.color = input.color;

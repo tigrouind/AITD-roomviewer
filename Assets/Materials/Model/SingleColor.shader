@@ -23,7 +23,7 @@
 			{
 				vertOutput o;
 				o.pos = mul(UNITY_MATRIX_MVP, input.pos);
-				o.pos.z = o.pos.z - input.uv.x * 0.00001;
+				o.pos.z = o.pos.z - input.uv.x * 0.00001; //fix z-fighting
 				o.color = input.color;
 				return o;
 			}
