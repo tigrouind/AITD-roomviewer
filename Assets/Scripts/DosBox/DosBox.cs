@@ -724,10 +724,12 @@ public class DosBox : MonoBehaviour
 
 	public bool FindActorsAddressTimeGate()
 	{
-		int dataSegment = ProcessReader.SearchForBytePattern(Encoding.ASCII.GetBytes("HARD_DEC"), 0x100000, 0x200000); //start at 1MB, size = 2MB
+		//scan range: 0x110000 (extended memory) - 0x300000 (3MB)
+		byte[] pattern = Encoding.ASCII.GetBytes("HARD_DEC");
+		int dataSegment = ProcessReader.SearchForBytePattern(0x110000, 0x1F0000, buffer => Utils.IndexOf(buffer, pattern, 28, 16));
+
 		if (dataSegment != -1)
 		{
-			dataSegment -= 28;
 			ProcessReader.Read(memory, dataSegment + actorArrayAddress[6], 4);
 			var result = memory.ReadUnsignedInt(0);
 			if (result != 0)

@@ -112,7 +112,7 @@ public class ProcessMemoryReader
 		return -1;
 	}
 
-	public int SearchForBytePattern(byte[] pattern, int offset, int bytesToRead)
+	public int SearchForBytePattern(int offset, int bytesToRead, Func<byte[], int> searchFunction)
 	{
 		byte[] buffer = new byte[81920];
 
@@ -121,7 +121,7 @@ public class ProcessMemoryReader
 		while (bytesToRead > 0 && ReadProcessMemory(processHandle, new IntPtr(readPosition), buffer, Math.Min(buffer.Length, bytesToRead), out bytesRead))
 		{
 			//search bytes pattern
-			int index = Utils.IndexOf(buffer, pattern);
+			int index = searchFunction(buffer);
 			if (index != -1)
 			{
 				return (int)(readPosition + index - BaseAddress);

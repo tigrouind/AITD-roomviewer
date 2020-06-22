@@ -121,11 +121,16 @@ public static class Utils
 
 	public static int IndexOf(byte[] buffer, byte[] pattern)
 	{
-		for (int index = 0; index < buffer.Length - pattern.Length + 1; index++)
+		return IndexOf(buffer, pattern, 0, 1);
+	}
+
+	public static int IndexOf(byte[] buffer, byte[] pattern, int offset, int stride)
+	{
+		for (int index = offset; index < buffer.Length - pattern.Length + 1; index += stride)
 		{
 			if (IsMatch(buffer, pattern, index))
 			{
-				return index;
+				return index - offset;
 			}
 		}
 
