@@ -49,7 +49,6 @@ public class ModelLoader : MonoBehaviour
 
 	private Vector3 mousePosition;
 	//mouse drag
-	private bool autoRotate;
 	private bool displayMenuAfterDrag;
 	private bool menuEnabled;
 	private string leftTextBody;
@@ -74,7 +73,6 @@ public class ModelLoader : MonoBehaviour
 		//camera
 		if (resetcamera)
 		{
-			autoRotate = true;
 			cameraPosition = Vector2.zero;
 		}
 
@@ -905,7 +903,7 @@ public class ModelLoader : MonoBehaviour
 			if (Input.GetMouseButtonDown(0))
 			{
 				mousePosition = Input.mousePosition;
-				autoRotate = false;
+				AutoRotate.BoolValue = false;
 			}
 
 			//dragging (rotate)
@@ -921,7 +919,7 @@ public class ModelLoader : MonoBehaviour
 			if (Input.GetMouseButtonDown(1))
 			{
 				mousePosition = Input.mousePosition;
-				autoRotate = false;
+				AutoRotate.BoolValue = false;
 				displayMenuAfterDrag = true;
 			}
 
@@ -988,7 +986,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//rotate model
-		if (autoRotate && AutoRotate.BoolValue)
+		if (AutoRotate.BoolValue && AutoRotate.BoolValue)
 		{
 			cameraRotation.x = Time.time * 100.0f;
 			cameraRotation.y = 20.0f;
@@ -1352,10 +1350,6 @@ public class ModelLoader : MonoBehaviour
 
 			case KeyCode.R:
 				AutoRotate.BoolValue = !AutoRotate.BoolValue;
-				if (AutoRotate.BoolValue)
-				{
-					autoRotate = true;
-				}
 				break;
 
 			case KeyCode.Escape:
