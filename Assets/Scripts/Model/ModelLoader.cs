@@ -761,6 +761,16 @@ public class ModelLoader : MonoBehaviour
 				boneTransform.localRotation = rotation;
 			}
 		}
+
+		if (ShowAdditionalInfo.BoolValue && bones.Count > 0 && animFrames.Count > 0)
+		{
+			var scale = new Vector3(1.0f, -1.0f, 1.0f) / 1000.0f;
+			Vector3 a = animFrames.Take(frame % animFrames.Count).Aggregate(Vector3.zero, (x, y) => x + Vector3.Scale(y.Offset, scale));
+			Vector3 b = animFrames.Take((frame % animFrames.Count) + 1).Aggregate(Vector3.zero, (x, y) => x + Vector3.Scale(y.Offset, scale));
+
+			bones[0].transform.position += transform.rotation *
+				Vector3.Lerp(a, b, framePosition);
+		}
 	}
 
 	void ComputeUV(List<int> polyVertices, out Vector3 forward, out Vector3 left)
