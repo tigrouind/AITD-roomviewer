@@ -28,6 +28,8 @@ public class ModelLoader : MonoBehaviour
 	private List<Transform> bones;
 	private List<Vector3> initialBonesPosition;
 	private int modelFlags;
+	private int previousFrame;
+	private Vector3 frameDistance;
 
 	private int paletteIndex;
 	public Texture2D[] PaletteTexture;
@@ -705,6 +707,11 @@ public class ModelLoader : MonoBehaviour
 		Frame currentFrame = animFrames[frame % animFrames.Count];
 		Frame nextFrame = animFrames[(frame + 1) % animFrames.Count];
 		float framePosition = (nextFrame.Time == 0.0f) ? 0.0f : (time - (totaltime - nextFrame.Time)) / nextFrame.Time;
+		if(frame != previousFrame)
+		{
+			previousFrame = frame;
+			frameDistance += animFrames[frame % animFrames.Count].Offset;
+		}
 
 		for (int i = 0 ; i < bones.Count; i++)
 		{
@@ -762,14 +769,11 @@ public class ModelLoader : MonoBehaviour
 			}
 		}
 
-		if (ShowAdditionalInfo.BoolValue && bones.Count > 0 && animFrames.Count > 0)
+		if (ShowAdditionalInfo.BoolValue && bones.Count > 0)
 		{
 			var scale = new Vector3(1.0f, -1.0f, 1.0f) / 1000.0f;
-			Vector3 a = animFrames.Take(frame % animFrames.Count).Aggregate(Vector3.zero, (x, y) => x + Vector3.Scale(y.Offset, scale));
-			Vector3 b = animFrames.Take((frame % animFrames.Count) + 1).Aggregate(Vector3.zero, (x, y) => x + Vector3.Scale(y.Offset, scale));
-
 			bones[0].transform.position += transform.rotation *
-				Vector3.Lerp(a, b, framePosition);
+				Vector3.Scale(nextFrame.Offset * framePosition + frameDistance, scale);
 		}
 	}
 
@@ -1201,6 +1205,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		LeftText.text = stringBuilder.ToString();
+		frameDistance = Vector3.zero;
 	}
 
 	public void ToggleAnimationMenuItems(bool enabled)
