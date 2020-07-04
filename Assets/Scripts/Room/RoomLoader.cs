@@ -56,7 +56,7 @@ public class RoomLoader : MonoBehaviour
 		Directory.CreateDirectory(Config.BaseDirectory);
 
 		//check existing ETAGEXX folders
-		floors = Directory.GetDirectories(Config.BaseDirectory)
+		floors = Directory.GetFiles(Config.BaseDirectory)
 			.Select(x => Path.GetFileName(x))
 			.Where(x => x.StartsWith("ETAGE", StringComparison.InvariantCultureIgnoreCase))
 			.Select(x => int.Parse(x.Substring(5, 2)))
@@ -187,21 +187,20 @@ public class RoomLoader : MonoBehaviour
 		camerasPerRoom = new List<List<int>>();
 		name = "FLOOR" + floor;
 
-		string folder = Config.GetPath("ETAGE{0:D2}", floor);
+		string filePath = Config.GetPath("ETAGE{0:D2}.PAK", floor);
 		if (detectedGame == 5)
 		{
-			LoadRoomsMulti(folder);
+			LoadRoomsMulti(filePath);
 		}
 		else
 		{
-			LoadRoomsSingle(folder);
+			LoadRoomsSingle(filePath);
 		}
 	}
 
-	void LoadRoomsSingle(string folder)
+	void LoadRoomsSingle(string filePath)
 	{
-		string filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000000");
-		byte[] buffer = File.ReadAllBytes(filePath);
+		var buffer = UnPAK.ReadFile(filePath, 0);
 
 		int maxrooms = buffer.ReadInt(0) / 4;
 		for (int currentroom = 0; currentroom < maxrooms; currentroom++)
@@ -216,9 +215,7 @@ public class RoomLoader : MonoBehaviour
 			LoadRoom(buffer, roomheader, currentroom);
 		}
 
-		filePath = Directory.GetFiles(folder).FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == "00000001");
-		buffer = File.ReadAllBytes(filePath);
-
+		buffer = UnPAK.ReadFile(filePath, 1);
 		foreach (int cameraID in camerasPerRoom.SelectMany(x => x).Distinct())
 		{
 			int cameraHeader = buffer.ReadInt(cameraID * 4);
@@ -226,23 +223,23 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	void LoadRoomsMulti(string folder)
+	void LoadRoomsMulti(string filePath)
 	{
-		foreach (var filePath in Directory.GetFiles(folder).Where(x => new FileInfo(x).Length > 0))
+		int roomCount = UnPAK.GetFileCount(filePath);
+		for(int i = 0 ; i < roomCount ; i++)
 		{
-			int room = int.Parse(Path.GetFileNameWithoutExtension(filePath), NumberStyles.HexNumber);
-			byte[] buffer = File.ReadAllBytes(filePath);
-			LoadRoom(buffer, 0, room);
+			byte[] buffer = UnPAK.ReadFile(filePath, i);
+			LoadRoom(buffer, 0, i);
 		}
 
-		folder = Config.GetPath("CAMSAL{0:D2}", floor);
-		if (Directory.Exists(folder))
+		filePath = Config.GetPath("CAMSAL{0:D2}.PAK", floor);
+		if (File.Exists(filePath))
 		{
-			foreach (var filePath in Directory.GetFiles(folder).Where(x => new FileInfo(x).Length > 0))
+			int cameraCount = UnPAK.GetFileCount(filePath);
+			for(int i = 0 ; i < cameraCount ; i++)
 			{
-				int camera = int.Parse(Path.GetFileNameWithoutExtension(filePath), NumberStyles.HexNumber);
-				byte[] buffer = File.ReadAllBytes(filePath);
-				LoadCamera(buffer, 0, camera);
+				byte[] buffer = UnPAK.ReadFile(filePath, i);
+				LoadCamera(buffer, 0, i);
 			}
 		}
 	}
@@ -444,7 +441,8 @@ public class RoomLoader : MonoBehaviour
 	int DetectGame()
 	{
 		//detect game based on number of floors
-		if (floors.Contains(0) && Directory.GetFiles(Config.GetPath("ETAGE00")).Count() > 2)
+		string firstFloorFilePath = Config.GetPath("ETAGE00.PAK");
+		if (File.Exists(firstFloorFilePath) && UnPAK.GetFileCount(firstFloorFilePath) > 2)
 			return 5; //TIME GATE
 		else if (floors.Count >= 15)
 			return 2;

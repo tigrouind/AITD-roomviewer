@@ -634,7 +634,7 @@ public class DosBox : MonoBehaviour
 		if (psp > 0)
 		{
 			int exeSize = memory.ReadUnsignedShort(psp - 16 + 3) * 16;
-			if (exeSize > 100 * 1024 && exeSize < 200 * 1024) //is AITD exe loaded yet?
+			if (exeSize > 100 * 1024 && exeSize < 250 * 1024) //is AITD exe loaded yet?
 			{
 				entryPoint = psp + 0x100;
 				return true;

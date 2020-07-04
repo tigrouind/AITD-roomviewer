@@ -18,11 +18,13 @@ public class ModelLoader : MonoBehaviour
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private VarParser varParser = new VarParser();
 
-	private string[] modelFolders = new string[] { Config.GetPath("LISTBODY"), Config.GetPath("LISTBOD2") };
-	private string[] animFolders = new string[] { Config.GetPath("LISTANIM"), Config.GetPath("LISTANI2") };
-	private List<KeyValuePair<int, string>> modelFiles = new List<KeyValuePair<int, string>>();
-	private List<KeyValuePair<int, string>> animFiles = new List<KeyValuePair<int, string>>();
-	private List<KeyValuePair<int, string>> textureFiles = new List<KeyValuePair<int, string>>();
+	private string[] modelFolders = new string[] { Config.GetPath("LISTBODY.PAK"), Config.GetPath("LISTBOD2.PAK") };
+	private string[] animFolders = new string[] { Config.GetPath("LISTANIM.PAK"), Config.GetPath("LISTANI2.PAK") };
+	private string textureFolder = Config.GetPath("TEXTURES.PAK");
+
+	private int modelCount;
+	private int animCount;
+	private int textureCount;
 
 	private List<Frame> animFrames;
 	private List<Transform> bones;
@@ -66,10 +68,9 @@ public class ModelLoader : MonoBehaviour
 
 	void LoadBody(bool resetcamera = true)
 	{
-		int fileIndex = modelFiles[modelIndex].Key;
-		string varName = varParser.GetText("BODYS", fileIndex);
-		string folderName = modelFolders[modelFolderIndex];
-		leftTextBody = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", folderName.Substring(folderName.Length - 4), fileIndex, modelFiles[modelFiles.Count - 1].Key, varName);
+		string varName = varParser.GetText("BODYS", modelIndex);
+		string filePath = modelFolders[modelFolderIndex];
+		leftTextBody = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", Path.GetFileNameWithoutExtension(filePath), modelIndex, modelCount - 1, varName);
 		RefreshLeftText();
 
 		//camera
@@ -88,8 +89,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//load data
-		string filename = modelFiles[modelIndex].Value;
-		byte[] buffer = File.ReadAllBytes(filename);
+		byte[] buffer = UnPAK.ReadFile(filePath, modelIndex);
 		int i = 0;
 
 		//header
@@ -562,12 +562,10 @@ public class ModelLoader : MonoBehaviour
 
 	Texture LoadTexture(int textureIndex, Color32[] paletteColors)
 	{
-		int index = textureFiles.FindIndex(x => x.Key == textureIndex);
-		if (index != -1)
+		if (textureIndex >= 0 && textureIndex < textureCount)
 		{
-			string filename = textureFiles[index].Value;
-			var tex256 = File.ReadAllBytes(filename);
-			var texSize = (int)new FileInfo(filename).Length;
+			var tex256 = UnPAK.ReadFile(textureFolder, textureIndex);
+			var texSize = tex256.Length;
 			var textureData = new byte[texSize * 4];
 			Texture2D tex = new Texture2D(256, texSize / 256, TextureFormat.ARGB32, false);
 			tex.filterMode = DetailsLevel.BoolValue ? FilterMode.Bilinear : FilterMode.Point;
@@ -623,14 +621,13 @@ public class ModelLoader : MonoBehaviour
 
 	void LoadAnim()
 	{
-		int fileIndex = animFiles[animIndex].Key;
-		string varName = varParser.GetText("ANIMS", fileIndex);
-		string folderName = animFolders[modelFolderIndex];
-		leftTextAnim = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", folderName.Substring(folderName.Length - 4), fileIndex, animFiles[animFiles.Count - 1].Key , varName);
+		string varName = varParser.GetText("ANIMS", animIndex);
+		string filePath = animFolders[modelFolderIndex];
+		leftTextAnim = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", Path.GetFileNameWithoutExtension(filePath), animIndex, animCount - 1, varName);
 
 		int i = 0;
-		string filename = animFiles[animIndex].Value;
-		byte[] buffer = File.ReadAllBytes(filename);
+		var buffer = UnPAK.ReadFile(filePath, animIndex);
+
 		int frameCount = buffer.ReadShort(i + 0);
 		int boneCount = buffer.ReadShort(i + 2);
 		i += 4;
@@ -812,7 +809,7 @@ public class ModelLoader : MonoBehaviour
 
 		//load first model
 		modelIndex = 0;
-		LoadTextures(Config.GetPath("TEXTURES"));
+		LoadTextures(textureFolder);
 		LoadModels(modelFolders[modelFolderIndex]);
 		LoadAnims(animFolders[modelFolderIndex]);
 		ToggleAnimationMenuItems(false);
@@ -821,13 +818,13 @@ public class ModelLoader : MonoBehaviour
 	int DetectGame()
 	{
 		//detect game based on number of models
-		if (modelFiles.Count > 700)
+		if (modelCount > 700)
 			return 3;
-		else if (modelFiles.Count > 550)
+		else if (modelCount > 550)
 			return 2;
-		else if (modelFiles.Count > 500)
+		else if (modelCount > 500)
 			return 5; //TIME GATE
-		else if (modelFiles.Count > 200)
+		else if (modelCount > 200)
 			return 1;
 		else
 			return 4; //JITD
@@ -845,44 +842,35 @@ public class ModelLoader : MonoBehaviour
 			.SetTexture("_Palette", PaletteTexture[paletteIndex]);
 	}
 
-	void LoadModels(string foldername)
+	void LoadModels(string filePath)
 	{
-		if (Directory.Exists(foldername))
+		if (File.Exists(filePath))
 		{
-			modelFiles = Directory.GetFiles(foldername)
-				.Select(x => new KeyValuePair<int, string>(int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber), x))
-				.OrderBy(x => x.Key)
-				.ToList();
+			modelCount = UnPAK.GetFileCount(filePath);
 
 			SetPalette();
 			LoadBody();
 		}
 	}
 
-	void LoadAnims(string foldername)
+	void LoadAnims(string filePath)
 	{
-		if (Directory.Exists(foldername))
+		if (File.Exists(filePath))
 		{
-			animFiles = Directory.GetFiles(foldername)
-				.Select(x => new KeyValuePair<int, string>(int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber), x))
-				.OrderBy(x => x.Key)
-				.ToList();
+			animCount = UnPAK.GetFileCount(filePath);
 
-			if(EnableAnimation.BoolValue)
+			if (EnableAnimation.BoolValue)
 			{
 				LoadAnim();
 			}
 		}
 	}
 
-	void LoadTextures(string foldername)
+	void LoadTextures(string filePath)
 	{
-		if (Directory.Exists(foldername))
+		if (File.Exists(filePath))
 		{
-			textureFiles = Directory.GetFiles(foldername)
-				.Select(x => new KeyValuePair<int, string>(int.Parse(Path.GetFileNameWithoutExtension(x), NumberStyles.HexNumber), x))
-				.OrderBy(x => x.Key)
-				.ToList();
+			textureCount = UnPAK.GetFileCount(filePath);
 		}
 	}
 
@@ -962,14 +950,14 @@ public class ModelLoader : MonoBehaviour
 				menuEnabled = !menuEnabled;
 				if (menuEnabled)
 				{
-					if(modelFiles.Count > 0)
+					if(modelCount > 0)
 					{
-						ModelInput.text = modelFiles[modelIndex].Key.ToString();
+						ModelInput.text = modelIndex.ToString();
 					}
 
-					if (animFiles.Count > 0)
+					if (animCount > 0)
 					{
-						AnimationInput.text = animFiles[animIndex].Key.ToString();
+						AnimationInput.text = animIndex.ToString();
 					}
 				}
 			}
@@ -983,19 +971,19 @@ public class ModelLoader : MonoBehaviour
 
 		Panel.gameObject.SetActive(menuEnabled);
 
-		modelIndex = Math.Min(Math.Max(modelIndex, 0), modelFiles.Count - 1);
-		animIndex = Math.Min(Math.Max(animIndex, 0), animFiles.Count - 1);
+		modelIndex = Math.Min(Math.Max(modelIndex, 0), modelCount - 1);
+		animIndex = Math.Min(Math.Max(animIndex, 0), animCount - 1);
 
 		//load new model if needed
-		if (modelFiles.Count > 0 && oldModelIndex != modelIndex)
+		if (modelCount > 0 && oldModelIndex != modelIndex)
 		{
-			ModelInput.text = modelFiles[modelIndex].Key.ToString();
+			ModelInput.text = modelIndex.ToString();
 			LoadBody();
 		}
 
-		if (animFiles.Count > 0 && oldAnimIndex != animIndex)
+		if (animCount > 0 && oldAnimIndex != animIndex)
 		{
-			AnimationInput.text = animFiles[animIndex].Key.ToString();
+			AnimationInput.text = animIndex.ToString();
 			LoadAnim();
 		}
 
@@ -1232,31 +1220,33 @@ public class ModelLoader : MonoBehaviour
 
 	public void ModelIndexInputChanged()
 	{
-		int fileName, fileIndex;
-		if (int.TryParse(ModelInput.text, out fileName) && TryFindFileIndex(modelFiles, fileName, out fileIndex) && fileIndex != modelIndex)
+		if (modelCount > 0)
 		{
-			modelIndex = fileIndex;
-			LoadBody();
-		}
+			int newModelIndex;
+			if (int.TryParse(ModelInput.text, out newModelIndex) && newModelIndex != modelIndex)
+			{
+				modelIndex = newModelIndex;
+				modelIndex = Math.Min(Math.Max(modelIndex, 0), modelCount - 1);
+				LoadBody();
+			}
 
-		if (modelFiles.Count > 0)
-		{
-			ModelInput.text = modelFiles[modelIndex].Key.ToString();
+			ModelInput.text = modelIndex.ToString();
 		}
 	}
 
 	public void AnimationIndexInputChanged()
 	{
-		int fileName, fileIndex;
-		if (int.TryParse(AnimationInput.text, out fileName) && TryFindFileIndex(animFiles, fileName, out fileIndex) && fileIndex != animIndex)
+		if (animCount > 0)
 		{
-			animIndex = fileIndex;
-			LoadAnim();
-		}
+			int newAnimIndex;
+			if (int.TryParse(AnimationInput.text, out newAnimIndex) && newAnimIndex != animIndex)
+			{
+				animIndex = newAnimIndex;
+				animIndex = Math.Min(Math.Max(animIndex, 0), animCount - 1);
+				LoadAnim();
+			}
 
-		if (animFiles.Count > 0)
-		{
-			AnimationInput.text = animFiles[animIndex].Key.ToString();
+			AnimationInput.text = animCount.ToString();
 		}
 	}
 
@@ -1337,7 +1327,7 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.A:
-				if (animFiles.Count > 0)
+				if (animCount > 0)
 				{
 					EnableAnimation.BoolValue = !EnableAnimation.BoolValue;
 					ToggleAnimationMenuItems(EnableAnimation.BoolValue);
