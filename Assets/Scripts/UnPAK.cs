@@ -3,72 +3,95 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 
-public static class UnPAK
+public class UnPAK : IDisposable
 {
 	[DllImport("UnPAK")]
 	static extern void PAK_explode(byte[] srcBuffer, byte[] dstBuffer, uint compressedSize, uint uncompressedSize, ushort flags);
 
-	public static byte[] ReadFile(string fileName, int index)
+	readonly FileStream stream;
+	readonly BinaryReader reader;
+	int? entryCount;
+
+	public UnPAK(string filename)
 	{
-		using(var stream = new FileStream(fileName, FileMode.Open))
-		using(var reader = new BinaryReader(stream))
+		stream = new FileStream(filename, FileMode.Open);
+		reader = new BinaryReader(stream);
+	}
+
+	public byte[] GetEntry(int index)
+	{
+		stream.Position = (index + 1) * 4;
+		stream.Position = reader.ReadUInt32() + 4;
+
+		var compressedSize = reader.ReadUInt32();
+		var uncompressedSize = reader.ReadUInt32();
+		var flag = reader.ReadByte();
+		var info5 = reader.ReadByte();
+		var offset = reader.ReadUInt16();
+		stream.Position += offset;
+
+		var dest = new byte[uncompressedSize];
+
+		switch (flag)
 		{
-			stream.Position = 4 + index * 4;
-			stream.Position = 4 + reader.ReadUInt32();
-
-			var compressedSize = reader.ReadUInt32();
-			var uncompressedSize = reader.ReadUInt32();
-			var flag = reader.ReadByte();
-			var info5 = reader.ReadByte();
-			int offset = reader.ReadUInt16();
-			stream.Position += offset;
-
-			var dest = new byte[uncompressedSize];
-
-			switch (flag)
+			case 0:
 			{
-				case 0:
-				{
-					stream.Read(dest, 0, (int)compressedSize);
-					break;
-				}
-
-				case 1:
-				{
-					var source = new byte[compressedSize];
-					stream.Read(source, 0, (int)compressedSize);
-					PAK_explode(source, dest, compressedSize, uncompressedSize, info5);
-					break;
-				}
-
-				case 4:
-				{
-					using (var deflateStream = new DeflateStream(stream, CompressionMode.Decompress))
-					{
-						deflateStream.Read(dest, 0, (int)uncompressedSize);
-					}
-					break;
-				}
-
-				default:
-					throw new NotSupportedException();
+				stream.Read(dest, 0, (int)compressedSize);
+				break;
 			}
 
-			return dest;
+			case 1:
+			{
+				var source = new byte[compressedSize];
+				stream.Read(source, 0, (int)compressedSize);
+				PAK_explode(source, dest, compressedSize, uncompressedSize, info5);
+				break;
+			}
+
+			case 4:
+			{
+				using (var deflateStream = new DeflateStream(stream, CompressionMode.Decompress, true))
+				{
+					deflateStream.Read(dest, 0, (int)uncompressedSize);
+				}
+				break;
+			}
+
+			default:
+				throw new NotSupportedException();
+		}
+
+		return dest;
+	}
+
+	public int EntryCount
+	{
+		get
+		{
+			if(!entryCount.HasValue)
+			{
+				entryCount = GetEntryCount();
+			}
+
+			return entryCount.Value;
 		}
 	}
 
-	public static int GetFileCount(string fileName)
+	int GetEntryCount()
 	{
-		using(var stream = new FileStream(fileName, FileMode.Open))
-		using(var reader = new BinaryReader(stream))
-		{
-			stream.Position = 4;
-			int offset = reader.ReadInt32();
-			int fileCount = (offset - 4) / 4;
-			stream.Position = offset - 4;
-			if(reader.ReadInt32() == 0) fileCount--; //TIMEGATE
-			return fileCount;
-		}
+		stream.Position = 4;
+		int offset = reader.ReadInt32();
+		int count = offset / 4 - 1;
+
+		stream.Position = offset - 4;
+		if(reader.ReadInt32() == 0) count--; //TIMEGATE
+
+		return count;
+	}
+
+	public void Dispose()
+	{
+		reader.Close();
+		stream.Close();
 	}
 }

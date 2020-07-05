@@ -200,46 +200,52 @@ public class RoomLoader : MonoBehaviour
 
 	void LoadRoomsSingle(string filePath)
 	{
-		var buffer = UnPAK.ReadFile(filePath, 0);
-
-		int maxrooms = buffer.ReadInt(0) / 4;
-		for (int currentroom = 0; currentroom < maxrooms; currentroom++)
+		using (var pak = new UnPAK(filePath))
 		{
-			int roomheader = buffer.ReadInt(currentroom * 4);
-			if (roomheader <= 0 || roomheader >= buffer.Length)
+			var buffer = pak.GetEntry(0);
+			int maxrooms = buffer.ReadInt(0) / 4;
+			for (int currentroom = 0; currentroom < maxrooms; currentroom++)
 			{
-				//all rooms parsed
-				break;
+				int roomheader = buffer.ReadInt(currentroom * 4);
+				if (roomheader <= 0 || roomheader >= buffer.Length)
+				{
+					//all rooms parsed
+					break;
+				}
+
+				LoadRoom(buffer, roomheader, currentroom);
 			}
 
-			LoadRoom(buffer, roomheader, currentroom);
-		}
-
-		buffer = UnPAK.ReadFile(filePath, 1);
-		foreach (int cameraID in camerasPerRoom.SelectMany(x => x).Distinct())
-		{
-			int cameraHeader = buffer.ReadInt(cameraID * 4);
-			LoadCamera(buffer, cameraHeader, cameraID);
+			buffer = pak.GetEntry(1);
+			foreach (int cameraID in camerasPerRoom.SelectMany(x => x).Distinct())
+			{
+				int cameraHeader = buffer.ReadInt(cameraID * 4);
+				LoadCamera(buffer, cameraHeader, cameraID);
+			}
 		}
 	}
 
 	void LoadRoomsMulti(string filePath)
 	{
-		int roomCount = UnPAK.GetFileCount(filePath);
-		for(int i = 0 ; i < roomCount ; i++)
+		using (var pak = new UnPAK(filePath))
 		{
-			byte[] buffer = UnPAK.ReadFile(filePath, i);
-			LoadRoom(buffer, 0, i);
+			for(int i = 0 ; i < pak.EntryCount ; i++)
+			{
+				byte[] buffer = pak.GetEntry(i);
+				LoadRoom(buffer, 0, i);
+			}
 		}
 
 		filePath = Config.GetPath("CAMSAL{0:D2}.PAK", floor);
 		if (File.Exists(filePath))
 		{
-			int cameraCount = UnPAK.GetFileCount(filePath);
-			for(int i = 0 ; i < cameraCount ; i++)
+			using (var pak = new UnPAK(filePath))
 			{
-				byte[] buffer = UnPAK.ReadFile(filePath, i);
-				LoadCamera(buffer, 0, i);
+				for(int i = 0 ; i < pak.EntryCount ; i++)
+				{
+					byte[] buffer = pak.GetEntry(i);
+					LoadCamera(buffer, 0, i);
+				}
 			}
 		}
 	}
@@ -441,8 +447,7 @@ public class RoomLoader : MonoBehaviour
 	int DetectGame()
 	{
 		//detect game based on number of floors
-		string firstFloorFilePath = Config.GetPath("ETAGE00.PAK");
-		if (File.Exists(firstFloorFilePath) && UnPAK.GetFileCount(firstFloorFilePath) > 2)
+		if (GetEntriesCount("ETAGE00.PAK") > 2)
 			return 5; //TIME GATE
 		else if (floors.Count >= 15)
 			return 2;
@@ -452,6 +457,20 @@ public class RoomLoader : MonoBehaviour
 			return 4; //JITD
 		else
 			return 1;
+	}
+
+	int GetEntriesCount(string filePath)
+	{
+		string firstFloorFilePath = Config.GetPath(filePath);
+		if (File.Exists(firstFloorFilePath))
+		{
+			using (var pak = new UnPAK(firstFloorFilePath))
+			{
+				return pak.EntryCount;
+			}
+		}
+
+		return 0;
 	}
 
 	bool IsPointVisible(Vector3 point)

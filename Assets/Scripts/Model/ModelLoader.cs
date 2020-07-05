@@ -89,7 +89,11 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//load data
-		byte[] buffer = UnPAK.ReadFile(filePath, modelIndex);
+		byte[] buffer;
+		using (var pak = new UnPAK(filePath))
+		{
+			buffer = pak.GetEntry(modelIndex);
+		}
 		int i = 0;
 
 		//header
@@ -203,8 +207,20 @@ public class ModelLoader : MonoBehaviour
 			paletteColors[0] = new Color32(0, 0, 0, 0); //transparent
 
 			var offset = buffer[0xE];
-			var texA = LoadTexture(buffer.ReadUnsignedShort(offset + 12), paletteColors);
-			var texB = LoadTexture(buffer.ReadUnsignedShort(offset + 14), paletteColors);
+			Texture2D texA, texB;
+			if(File.Exists(textureFolder))
+			{
+				using (var pak = new UnPAK(textureFolder))
+				{
+					texA = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 12), paletteColors);
+					texB = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 14), paletteColors);
+				}
+			}
+			else
+			{
+				texA = EmptyTexture();
+				texB = EmptyTexture();
+			}
 
 			uvStart = buffer.ReadShort(offset + 6);
 			texAHeight = texA.height;
@@ -560,11 +576,11 @@ public class ModelLoader : MonoBehaviour
 		return color;
 	}
 
-	Texture LoadTexture(int textureIndex, Color32[] paletteColors)
+	Texture2D LoadTexture(UnPAK pak, int textureIndex, Color32[] paletteColors)
 	{
 		if (textureIndex >= 0 && textureIndex < textureCount)
 		{
-			var tex256 = UnPAK.ReadFile(textureFolder, textureIndex);
+			var tex256 = pak.GetEntry(textureIndex);
 			var texSize = tex256.Length;
 			var textureData = new byte[texSize * 4];
 			Texture2D tex = new Texture2D(256, texSize / 256, TextureFormat.ARGB32, false);
@@ -586,13 +602,16 @@ public class ModelLoader : MonoBehaviour
 
 			return tex;
 		}
-		else
-		{
-			Texture2D tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-			tex.LoadRawTextureData(new byte[] { 255, 255, 0, 255 }); //single 1x1 pink
-			tex.Apply();
-			return tex;
-		}
+
+		return EmptyTexture();
+	}
+
+	Texture2D EmptyTexture()
+	{
+		Texture2D tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+		tex.LoadRawTextureData(new byte[] { 255, 255, 0, 255 }); //single 1x1 pink
+		tex.Apply();
+		return tex;
 	}
 
 	void FixBlackBorders(byte[] tex256)
@@ -626,7 +645,11 @@ public class ModelLoader : MonoBehaviour
 		leftTextAnim = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", Path.GetFileNameWithoutExtension(filePath), animIndex, animCount - 1, varName);
 
 		int i = 0;
-		var buffer = UnPAK.ReadFile(filePath, animIndex);
+		byte[] buffer;
+		using (var pak = new UnPAK(filePath))
+		{
+			buffer = pak.GetEntry(animIndex);
+		}
 
 		int frameCount = buffer.ReadShort(i + 0);
 		int boneCount = buffer.ReadShort(i + 2);
@@ -846,7 +869,10 @@ public class ModelLoader : MonoBehaviour
 	{
 		if (File.Exists(filePath))
 		{
-			modelCount = UnPAK.GetFileCount(filePath);
+			using (var pak = new UnPAK(filePath))
+			{
+				modelCount = pak.EntryCount;
+			}
 
 			SetPalette();
 			LoadBody();
@@ -857,7 +883,10 @@ public class ModelLoader : MonoBehaviour
 	{
 		if (File.Exists(filePath))
 		{
-			animCount = UnPAK.GetFileCount(filePath);
+			using (var pak = new UnPAK(filePath))
+			{
+				animCount = pak.EntryCount;
+			}
 
 			if (EnableAnimation.BoolValue)
 			{
@@ -870,7 +899,10 @@ public class ModelLoader : MonoBehaviour
 	{
 		if (File.Exists(filePath))
 		{
-			textureCount = UnPAK.GetFileCount(filePath);
+			using (var pak = new UnPAK(filePath))
+			{
+				textureCount = pak.EntryCount;
+			}
 		}
 	}
 
