@@ -204,31 +204,7 @@ public class ModelLoader : MonoBehaviour
 		int uvStart = 0;
 		if (paletteIndex == 4) //TIMEGATE
 		{
-			paletteColors[0] = new Color32(0, 0, 0, 0); //transparent
-
-			var offset = buffer[0xE];
-			Texture2D texA, texB;
-			if(File.Exists(textureFolder))
-			{
-				using (var pak = new UnPAK(textureFolder))
-				{
-					texA = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 12), paletteColors);
-					texB = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 14), paletteColors);
-				}
-			}
-			else
-			{
-				texA = EmptyTexture();
-				texB = EmptyTexture();
-			}
-
-			uvStart = buffer.ReadShort(offset + 6);
-			texAHeight = texA.height;
-			texBHeight = texB.height;
-
-			var materials = GetComponent<SkinnedMeshRenderer>().materials;
-			materials[5].mainTexture = texA;
-			materials[6].mainTexture = texB;
+			LoadTextures(buffer, paletteColors, out uvStart, out texAHeight, out texBHeight);
 		}
 
 		List<BoneWeight> boneWeights = new List<BoneWeight>();
@@ -576,6 +552,35 @@ public class ModelLoader : MonoBehaviour
 		return color;
 	}
 
+	void LoadTextures(byte[] buffer, Color32[] paletteColors, out int uvStart, out int texAHeight, out int texBHeight)
+	{
+		var offset = buffer[0xE];
+		Texture2D texA, texB;
+		if(File.Exists(textureFolder))
+		{
+			paletteColors[0] = Color.clear;
+
+			using (var pak = new UnPAK(textureFolder))
+			{
+				texA = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 12), paletteColors);
+				texB = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 14), paletteColors);
+			}
+		}
+		else
+		{
+			texA = EmptyTexture();
+			texB = EmptyTexture();
+		}
+
+		uvStart = buffer.ReadShort(offset + 6);
+		texAHeight = texA.height;
+		texBHeight = texB.height;
+
+		var materials = GetComponent<SkinnedMeshRenderer>().materials;
+		materials[5].mainTexture = texA;
+		materials[6].mainTexture = texB;
+	}
+
 	Texture2D LoadTexture(UnPAK pak, int textureIndex, Color32[] paletteColors)
 	{
 		if (textureIndex >= 0 && textureIndex < textureCount)
@@ -605,7 +610,7 @@ public class ModelLoader : MonoBehaviour
 	Texture2D EmptyTexture()
 	{
 		Texture2D tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-		tex.LoadRawTextureData(new byte[] { 255, 255, 0, 255 }); //single 1x1 pink
+		tex.SetPixel(1, 1, Color.magenta);
 		tex.Apply();
 		return tex;
 	}
