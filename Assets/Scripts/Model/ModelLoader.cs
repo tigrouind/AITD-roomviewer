@@ -581,27 +581,23 @@ public class ModelLoader : MonoBehaviour
 		if (textureIndex >= 0 && textureIndex < textureCount)
 		{
 			var tex256 = pak.GetEntry(textureIndex);
-			var texSize = tex256.Length;
-			var textureData = new byte[texSize * 4];
-			Texture2D tex = new Texture2D(256, texSize / 256, TextureFormat.ARGB32, false);
-			tex.filterMode = DetailsLevel.BoolValue ? FilterMode.Bilinear : FilterMode.Point;
 			FixBlackBorders(tex256);
 
-			int dest = 0;
-			for(int j = 0 ; j < tex256.Length ; j++)
+			var texSize = tex256.Length;
+			Color32[] textureData = new Color32[texSize];
+			for (int i = 0 ; i < tex256.Length ; i++)
 			{
-				Color32 color = paletteColors[tex256[j]];
-				textureData[dest++] = color.a;
-				textureData[dest++] = color.r;
-				textureData[dest++] = color.g;
-				textureData[dest++] = color.b;
+				textureData[i] = paletteColors[tex256[i]];
 			}
 
-			tex.LoadRawTextureData(textureData);
+			Texture2D tex = new Texture2D(256, texSize / 256, TextureFormat.ARGB32, false);
+			tex.filterMode = DetailsLevel.BoolValue ? FilterMode.Bilinear : FilterMode.Point;
+			tex.SetPixels32(textureData);
 			tex.Apply();
 
 			return tex;
 		}
+
 
 		return EmptyTexture();
 	}
@@ -619,23 +615,23 @@ public class ModelLoader : MonoBehaviour
 		int width = 256;
 		int height = tex256.Length / 256;
 
-		byte[] newText256 = tex256.ToArray();
+		byte[] result = tex256.ToArray();
 		for (int j = 1 ; j < height - 1 ; j++)
 		{
 			for (int i = 1 ; i < width - 1 ; i++)
 			{
 				int n = i + j * 256;
-				if (tex256[n] == 0)
+				if (tex256[n] == 0) //black/transparent
 				{
-					if (tex256[n + 1] != 0) newText256[n] = tex256[n + 1];
-					else if (tex256[n - 1] != 0) newText256[n] = tex256[n - 1];
-					else if (tex256[n + 256] != 0) newText256[n] = tex256[n + 256];
-					else if (tex256[n - 256] != 0) newText256[n] = tex256[n - 256];
+					if (tex256[n + 1] != 0) result[n] = tex256[n + 1];
+					else if (tex256[n - 1] != 0) result[n] = tex256[n - 1];
+					else if (tex256[n + 256] != 0) result[n] = tex256[n + 256];
+					else if (tex256[n - 256] != 0) result[n] = tex256[n - 256];
 				}
 			}
 		}
 
-		Array.Copy(newText256, tex256, tex256.Length);
+		Array.Copy(result, tex256, tex256.Length);
 	}
 
 	void LoadAnim()
