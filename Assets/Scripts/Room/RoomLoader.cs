@@ -278,6 +278,7 @@ public class RoomLoader : MonoBehaviour
 			Vector3 position = lower + upper;
 			box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
 			box.transform.localScale = (upper - lower) / 1000.0f;
+			box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.01f);
 
 			box.ID = buffer.ReadShort(i + 12);
 			box.Flags = buffer.ReadShort(i + 14);
