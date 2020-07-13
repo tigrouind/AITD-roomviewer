@@ -1236,21 +1236,6 @@ public class ModelLoader : MonoBehaviour
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 
-	bool TryFindFileIndex(List<KeyValuePair<int, string>> source, int fileName, out int index)
-	{
-		for (int i = source.Count - 1 ; i >= 0 ; i--)
-		{
-			if(source[i].Key <= fileName)
-			{
-				index = i;
-				return true;
-			}
-		}
-
-		index = source.FindIndex(x => x.Key > fileName);
-		return index != -1;
-	}
-
 	public void ModelIndexInputChanged()
 	{
 		if (modelCount > 0)
@@ -1279,7 +1264,7 @@ public class ModelLoader : MonoBehaviour
 				LoadAnim();
 			}
 
-			AnimationInput.text = animCount.ToString();
+			AnimationInput.text = animIndex.ToString();
 		}
 	}
 
