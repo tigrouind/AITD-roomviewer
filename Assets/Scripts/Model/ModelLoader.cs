@@ -826,7 +826,7 @@ public class ModelLoader : MonoBehaviour
 			varParser.Parse(varPath, "BODYS", "ANIMS");
 		}
 
-		if(!Directory.Exists(modelFolders[1]))
+		if(!File.Exists(modelFolders[1]))
 		{
 			Array.Resize(ref modelFolders, 1);
 		}
