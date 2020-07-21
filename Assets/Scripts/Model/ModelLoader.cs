@@ -843,13 +843,13 @@ public class ModelLoader : MonoBehaviour
 	{
 		//detect game based on number of models
 		if (modelCount > 700)
-			return 3;
+			return 3; //AITD3
 		else if (modelCount > 550)
-			return 2;
+			return 2; //AITD2
 		else if (modelCount > 500)
 			return 5; //TIME GATE
-		else if (modelCount > 200)
-			return 1;
+		else if (modelCount > 200 || modelCount < 30)
+			return 1; //AITD1 or DEMO
 		else
 			return 4; //JITD
 	}
