@@ -266,16 +266,16 @@ public class DosBox : MonoBehaviour
 							{
 								box.PreviousAnim = box.Anim;
 								box.PreviousKeyFrame = box.Keyframe;
-								box.lastKeyFrameChange.Reset();
+								box.LastKeyFrameChange.Reset();
 							}
 
 							if (saveTimerFlag)
 							{
-								box.lastKeyFrameChange.Stop();
+								box.LastKeyFrameChange.Stop();
 							}
 							else
 							{
-								box.lastKeyFrameChange.Start();
+								box.LastKeyFrameChange.Start();
 							}
 						}
 

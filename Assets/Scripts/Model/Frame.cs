@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-class Frame
+public class Frame
 {
 	public float Time;
 	public Vector3 Offset;

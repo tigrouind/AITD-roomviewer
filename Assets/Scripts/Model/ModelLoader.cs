@@ -823,7 +823,7 @@ public class ModelLoader : MonoBehaviour
 		string varPath = Config.GetPath("vars.txt");
 		if (File.Exists(varPath))
 		{
-			varParser.Parse(varPath, "BODYS", "ANIMS");
+			varParser.Load(varPath, "BODYS", "ANIMS");
 		}
 
 		if(!File.Exists(modelFolders[1]))

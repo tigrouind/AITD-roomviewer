@@ -1,6 +1,6 @@
 using UnityEngine;
 
-class Bone
+public class Bone
 {
 	public int Type;
 	public Vector3 Position;

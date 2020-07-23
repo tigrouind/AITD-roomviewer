@@ -86,4 +86,38 @@ public class CameraHelper : MonoBehaviour
 		indices.AddRange(CubeMesh.triangles.Select(x => x + vertices.Count));
 		vertices.AddRange(CubeMesh.vertices.Select(x => rotation * Vector3.Scale(x, scale) + middle));
 	}
+
+	public static Mesh SetupBorder()
+	{
+		var triangles = new int[]
+		{
+			0, 1, 5, 0, 5, 4,
+			6, 3, 2, 6, 7, 3,
+			0, 4, 2, 4, 6, 2,
+			1, 3, 7, 5, 1, 7
+		};
+
+		const float outerSize = 32.768f;
+		const float innerSize = outerSize + 0.3f;
+
+		var vertices = new Vector3[]
+		{
+			new Vector3(-innerSize, 0f,  innerSize),
+			new Vector3( innerSize, 0f,  innerSize),
+			new Vector3(-innerSize, 0f, -innerSize),
+			new Vector3( innerSize, 0f, -innerSize),
+
+			new Vector3(-outerSize, 0f,  outerSize),
+			new Vector3( outerSize, 0f,  outerSize),
+			new Vector3(-outerSize, 0f, -outerSize),
+			new Vector3( outerSize, 0f, -outerSize)
+		};
+
+		Mesh mesh = new Mesh();
+		mesh.vertices = vertices;
+		mesh.triangles = triangles;
+
+		mesh.RecalculateBounds();
+		return mesh;
+	}
 }

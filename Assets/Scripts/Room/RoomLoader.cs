@@ -5,7 +5,6 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System.Globalization;
 
 public class RoomLoader : MonoBehaviour
 {
@@ -50,7 +49,6 @@ public class RoomLoader : MonoBehaviour
 	public ToggleButton CameraMode;
 	public GameObject Border;
 
-
 	void Start()
 	{
 		Directory.CreateDirectory(Config.BaseDirectory);
@@ -72,43 +70,9 @@ public class RoomLoader : MonoBehaviour
 		}
 		ToggleMenuDOSBoxOptions(false);
 
-		SetupBorder();
+		Border.GetComponent<MeshFilter>().mesh = CameraHelper.SetupBorder();
 		linkToDosBoxTimer.Start();
 		LinkToDosBox();
-	}
-
-	void SetupBorder()
-	{
-		var triangles = new int[]
-		{
-			0, 1, 5, 0, 5, 4,
-			6, 3, 2, 6, 7, 3,
-			0, 4, 2, 4, 6, 2,
-			1, 3, 7, 5, 1, 7
-		};
-
-		const float outerSize = 32.768f;
-		const float innerSize = outerSize + 0.3f;
-
-		var vertices = new Vector3[]
-		{
-			new Vector3(-innerSize, 0f,  innerSize),
-			new Vector3( innerSize, 0f,  innerSize),
-			new Vector3(-innerSize, 0f, -innerSize),
-			new Vector3( innerSize, 0f, -innerSize),
-
-			new Vector3(-outerSize, 0f,  outerSize),
-			new Vector3( outerSize, 0f,  outerSize),
-			new Vector3(-outerSize, 0f, -outerSize),
-			new Vector3( outerSize, 0f, -outerSize)
-		};
-
-		Mesh mesh = new Mesh();
-		mesh.vertices = vertices;
-		mesh.triangles = triangles;
-
-		mesh.RecalculateBounds();
-		Border.GetComponent<MeshFilter>().mesh = mesh;
 	}
 
 	void RefreshRooms()

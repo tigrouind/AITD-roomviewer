@@ -41,7 +41,7 @@ public class Box : MonoBehaviour
 	public int PositionInTrack;
 	public int Slot;
 	public int HitForce;
-	public Timer lastKeyFrameChange = new Timer();
+	public Timer LastKeyFrameChange = new Timer();
 	public Vector3 Mod;
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
@@ -327,7 +327,7 @@ public class Box : MonoBehaviour
 				if (Keyframe != -1)
 				{
 					info.Append("KEYFRAME", "{0}/{1}; {2} {3}", Keyframe, TotalFrames - 1, EndFrame, EndAnim);
-					info.Append("FRAME", Mathf.FloorToInt(lastKeyFrameChange.Elapsed * 60.0f));
+					info.Append("FRAME", Mathf.FloorToInt(LastKeyFrameChange.Elapsed * 60.0f));
 				}
 
 				info.Append("SPEED", Speed);

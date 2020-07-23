@@ -1,6 +1,6 @@
 using System.IO;
 
-public class Config
+public static class Config
 {
 	public static readonly string BaseDirectory = "GAMEDATA";
 
