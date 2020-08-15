@@ -514,6 +514,7 @@ public class RoomLoader : MonoBehaviour
 				if(speedRunMode)
 				{
 					warpDialog.WarpActorBox = null; //reset to player
+					warpDialog.WarpActorBoxId = -1;
 				}
 			}
 			else if (dosBoxEnabled && highLightedBox != null && highLightedBox.name == "Actor")

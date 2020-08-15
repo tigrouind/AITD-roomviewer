@@ -10,6 +10,7 @@ public class WarpDialog : MonoBehaviour
 	public GameObject Actors;
 	public bool WarpMenuEnabled;
 	public Box WarpActorBox;
+	public int WarpActorBoxId = -1;
 	public InputField PositionX, PositionY, PositionZ;
 	public InputField LocalPosX, LocalPosY, LocalPosZ;
 	public InputField worldPosX, worldPosY, worldPosZ;
@@ -33,6 +34,19 @@ public class WarpDialog : MonoBehaviour
 			&& !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
 		{
 			WarpMenuEnabled = false;
+		}
+
+		if (WarpActorBox == null && WarpActorBoxId != -1)
+		{
+			//if actor is no more available (eg : after loading savegame) search for it
+			foreach (Box box in GetComponent<DosBox>().Boxes)
+			{
+				if (box != null && box.ID == WarpActorBoxId)
+				{
+					WarpActorBox = box;
+					break;
+				}
+			}
 		}
 
 		Panel.gameObject.SetActive(WarpMenuEnabled);
@@ -118,6 +132,8 @@ public class WarpDialog : MonoBehaviour
 		if (actor == null)
 		{
 			actor = GetComponent<DosBox>().Player;
+			WarpActorBox = actor;
+			WarpActorBoxId = actor.ID;
 		}
 
 		if (actor != null)
@@ -133,6 +149,7 @@ public class WarpDialog : MonoBehaviour
 		UpdateAngleInputField(actor);
 		UpdatePositionInputFields(actor);
 		WarpActorBox = actor;
+		WarpActorBoxId = actor.ID;
 	}
 
 	public void SetPositionClick()
