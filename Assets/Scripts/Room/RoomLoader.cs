@@ -31,7 +31,7 @@ public class RoomLoader : MonoBehaviour
 	public BoxInfo BoxInfo;
 	private Box highLightedBox;
 	private Box selectedBox;
-	private int selectedBoxId;
+	private int selectedBoxId = -1;
 
 	private bool dosBoxEnabled;
 	private bool isAITD1;
@@ -658,12 +658,13 @@ public class RoomLoader : MonoBehaviour
 				else
 				{
 					selectedBox = null;
+					selectedBoxId = -1;
 					defaultBoxSelectionTimer.Restart();
 				}
 			}
 		}
 
-		if (selectedBox == null)
+		if (selectedBox == null && selectedBoxId != -1)
 		{
 			//if actor is no more available (eg : after room switch) search for it
 			foreach (Box box in GetComponent<DosBox>().Boxes)
@@ -674,15 +675,15 @@ public class RoomLoader : MonoBehaviour
 					break;
 				}
 			}
+		}
 
-			if(speedRunMode && defaultBoxSelectionTimer.Elapsed > 1.0f)
+		if (selectedBox == null && speedRunMode && defaultBoxSelectionTimer.Elapsed > 1.0f)
+		{
+			//select player by default
+			selectedBox = GetComponent<DosBox>().Player;
+			if (selectedBox != null)
 			{
-				//select player by default
-				selectedBox = GetComponent<DosBox>().Player;
-				if (selectedBox != null)
-				{
-					selectedBoxId = selectedBox.ID;
-				}
+				selectedBoxId = selectedBox.ID;
 			}
 		}
 
@@ -730,11 +731,6 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	public Box GetSelectedBox()
-	{
-		return selectedBox;
-	}
-
 	public void LinkToDosBox()
 	{
 		if ((Application.platform != RuntimePlatform.WindowsEditor &&
@@ -773,6 +769,7 @@ public class RoomLoader : MonoBehaviour
 			}
 
 			selectedBox = null;
+			selectedBoxId = -1;
 			GetComponent<WarpDialog>().WarpMenuEnabled = false; //hide warp
 		}
 
