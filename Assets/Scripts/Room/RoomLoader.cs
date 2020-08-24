@@ -717,8 +717,11 @@ public class RoomLoader : MonoBehaviour
 	{
 		if (floor == newfloor && newroom >= 0 && newroom < transform.childCount)
 		{
-			return transform.Cast<Transform>()
-				.FirstOrDefault(x => x.name == "ROOM" + newroom);
+			var room = GameObject.Find("ROOM" + newroom);
+			if (room != null)
+			{
+				return room.transform;
+			}
 		}
 		return null;
 	}
