@@ -55,8 +55,6 @@ public class ModelLoader : MonoBehaviour
 	//mouse drag
 	private bool displayMenuAfterDrag;
 	private bool menuEnabled;
-	private string leftTextBody;
-	private string leftTextAnim;
 
 	public RectTransform Panel;
 	public InputField ModelInput;
@@ -68,9 +66,7 @@ public class ModelLoader : MonoBehaviour
 
 	void LoadBody(bool resetcamera = true)
 	{
-		string varName = varParser.GetText("BODYS", modelIndex);
 		string filePath = modelFolders[modelFolderIndex];
-		leftTextBody = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", Path.GetFileNameWithoutExtension(filePath), modelIndex, modelCount - 1, varName);
 
 		//camera
 		if (resetcamera)
@@ -642,9 +638,7 @@ public class ModelLoader : MonoBehaviour
 
 	void LoadAnim()
 	{
-		string varName = varParser.GetText("ANIMS", animIndex);
 		string filePath = animFolders[modelFolderIndex];
-		leftTextAnim = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", Path.GetFileNameWithoutExtension(filePath), animIndex, animCount - 1, varName);
 
 		int i = 0;
 		byte[] buffer;
@@ -1200,11 +1194,19 @@ public class ModelLoader : MonoBehaviour
 	void RefreshLeftText()
 	{
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.Append(leftTextBody);
+
+		stringBuilder.AppendFormat("{0} {1}/{2} <color=#00c864>{3}</color>",
+			Path.GetFileNameWithoutExtension(modelFolders[modelFolderIndex]),
+			modelIndex, modelCount - 1,
+			varParser.GetText("BODYS", modelIndex));
 
 		if(EnableAnimation.BoolValue)
 		{
-			stringBuilder.Append("\r\n" + leftTextAnim);
+			stringBuilder.Append("\r\n");
+			stringBuilder.AppendFormat("{0} {1}/{2} <color=#00c864>{3}</color>",
+				Path.GetFileNameWithoutExtension(animFolders[modelFolderIndex]),
+				animIndex, animCount - 1,
+				varParser.GetText("ANIMS", animIndex));
 		}
 
 		if(ShowAdditionalInfo.BoolValue)
