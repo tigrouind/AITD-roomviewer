@@ -71,7 +71,6 @@ public class ModelLoader : MonoBehaviour
 		string varName = varParser.GetText("BODYS", modelIndex);
 		string filePath = modelFolders[modelFolderIndex];
 		leftTextBody = string.Format("{0} {1}/{2} <color=#00c864>{3}</color>", Path.GetFileNameWithoutExtension(filePath), modelIndex, modelCount - 1, varName);
-		RefreshLeftText();
 
 		//camera
 		if (resetcamera)
@@ -495,6 +494,8 @@ public class ModelLoader : MonoBehaviour
 
 		filter.localBounds = msh.bounds;
 		filter.sharedMesh = msh;
+
+		RefreshLeftText();
 	}
 
 	int GetTriangleListIndex(int polyType)
