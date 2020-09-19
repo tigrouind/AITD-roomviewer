@@ -63,6 +63,7 @@ public class ModelLoader : MonoBehaviour
 	public ToggleButton DetailsLevel;
 	public ToggleButton EnableAnimation;
 	public ToggleButton ShowAdditionalInfo;
+	public GameObject BoundingBox;
 
 	void LoadBody(bool resetcamera = true)
 	{
@@ -96,6 +97,9 @@ public class ModelLoader : MonoBehaviour
 
 		//bounding box
 		buffer.ReadBoundingBox(i + 2, out boundingLower, out boundingUpper);
+		BoundingBox.transform.localScale = (boundingUpper - boundingLower) / 1000.0f;
+		var pos = (boundingUpper + boundingLower) / 2000.0f;
+		BoundingBox.transform.localPosition = new Vector3(pos.x, -pos.y, pos.z);
 
 		i += 0xE;
 		i += buffer.ReadShort(i + 0) + 2;
@@ -1029,12 +1033,12 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//update model
-		transform.position = Vector3.zero;
-		transform.rotation = Quaternion.identity;
+		transform.parent.position = Vector3.zero;
+		transform.parent.rotation = Quaternion.identity;
 		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);
 
-		transform.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
-		transform.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
+		transform.parent.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
+		transform.parent.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
 			* Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
 
 		//set camera
@@ -1352,6 +1356,7 @@ public class ModelLoader : MonoBehaviour
 				{
 					EnableAnimation.BoolValue = !EnableAnimation.BoolValue;
 					ToggleAnimationMenuItems(EnableAnimation.BoolValue);
+					BoundingBox.gameObject.SetActive(!EnableAnimation.BoolValue && ShowAdditionalInfo.BoolValue);
 					if (EnableAnimation.BoolValue)
 					{
 						LoadAnim();
@@ -1366,6 +1371,7 @@ public class ModelLoader : MonoBehaviour
 
 			case KeyCode.E:
 				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+				BoundingBox.gameObject.SetActive(!EnableAnimation.BoolValue && ShowAdditionalInfo.BoolValue);
 				RefreshLeftText();
 				break;
 
