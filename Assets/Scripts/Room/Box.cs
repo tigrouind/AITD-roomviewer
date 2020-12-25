@@ -27,8 +27,6 @@ public class Box : MonoBehaviour
 	public int AnimType;
 	public int ActionType;
 	public int Keyframe;
-	public int PreviousAnim;
-	public int PreviousKeyFrame;
 	public int EndFrame;
 	public int EndAnim;
 	public int TotalFrames;
@@ -41,7 +39,8 @@ public class Box : MonoBehaviour
 	public int PositionInTrack;
 	public int Slot;
 	public int HitForce;
-	public Timer LastKeyFrameChange = new Timer();
+	public int KeyFrameTime;
+	public int KeyFrameLength;
 	public Vector3 Mod;
 	public Vector3 LocalPosition;
 	public Vector3 WorldPosition;
@@ -322,12 +321,12 @@ public class Box : MonoBehaviour
 					info.Append("BODY", Body);
 			}
 
-			if (DosBox.ShowAITD1Vars && Anim != -1)
+			if (DosBox.ShowAITD1Vars && Anim != -1 && (Flags & 1) == 1)
 			{
 				if (Keyframe != -1)
 				{
 					info.Append("KEYFRAME", "{0}/{1}; {2} {3}", Keyframe, TotalFrames - 1, EndFrame, EndAnim);
-					info.Append("FRAME", Mathf.FloorToInt(LastKeyFrameChange.Elapsed * 60.0f));
+					info.Append("FRAME", "{0}/{1}", Math.Min(Math.Max(DosBox.InternalTimer2 - KeyFrameTime, 0), KeyFrameLength), KeyFrameLength);
 				}
 
 				info.Append("SPEED", Speed);

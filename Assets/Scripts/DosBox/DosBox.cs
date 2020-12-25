@@ -15,6 +15,7 @@ public class DosBox : MonoBehaviour
 	public Box BoxPrefab;
 	public Box[] Boxes;
 	public uint InternalTimer1;
+	public int InternalTimer2;
 	public bool ShowAdditionalInfo;
 	public bool ShowAITD1Vars;
 	public bool SpeedRunMode;
@@ -25,6 +26,8 @@ public class DosBox : MonoBehaviour
 
 	private int actorsAddress;
 	private int entryPoint;
+	private Dictionary<int, int> bodyIdToMemoryAddress = new Dictionary<int, int>();
+	private Dictionary<int, int> animIdToMemoryAddress = new Dictionary<int, int>();
 
 	//initial player position
 	private int dosBoxPattern;
@@ -63,7 +66,6 @@ public class DosBox : MonoBehaviour
 	private int inHand;
 	private bool allowInventory;
 	private bool saveTimerFlag;
-	private ushort internalTimer2;
 	private int targetSlot;
 
 	Box GetActor(int index)
@@ -158,7 +160,17 @@ public class DosBox : MonoBehaviour
 					box.TrackNumber = memory.ReadShort(k + 84);
 					box.PositionInTrack = memory.ReadShort(k + 88);
 
-					if(dosBoxPattern == 0) //AITD1 only
+					int bodyAddress, animAddress;
+					if (bodyIdToMemoryAddress.TryGetValue(box.Body, out bodyAddress) &&
+					    animIdToMemoryAddress.TryGetValue(box.Anim, out animAddress))
+					{
+						int bonesInAnim = memory.ReadShort(animAddress + 2);
+						int keyframeAddress = animAddress + box.Keyframe * (bonesInAnim * 8 + 8);
+						box.KeyFrameTime = memory.ReadUnsignedShort(bodyAddress + 20);
+						box.KeyFrameLength = memory.ReadShort(keyframeAddress + 4);
+					}
+
+					if (dosBoxPattern == 0) //AITD1 only
 					{
 						box.Mod = memory.ReadVector(k + 90);
 					}
@@ -258,25 +270,6 @@ public class DosBox : MonoBehaviour
 							UpdateHotPointBox(box, roomObject.localPosition);
 						}
 
-						if (ShowAITD1Vars)
-						{
-							if(box.PreviousAnim != box.Anim || box.PreviousKeyFrame != box.Keyframe || box.EndFrame == 1 || box.EndAnim == 1)
-							{
-								box.PreviousAnim = box.Anim;
-								box.PreviousKeyFrame = box.Keyframe;
-								box.LastKeyFrameChange.Reset();
-							}
-
-							if (saveTimerFlag)
-							{
-								box.LastKeyFrameChange.Stop();
-							}
-							else
-							{
-								box.LastKeyFrameChange.Start();
-							}
-						}
-
 						//camera target
 						if(box.ID == cameraTargetID)
 						{
@@ -341,12 +334,6 @@ public class DosBox : MonoBehaviour
 
 			if (ShowAITD1Vars)
 			{
-				//internal timer
-				InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x19D12);
-
-				//internal timer 2
-				internalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x242E0);
-
 				//inventory
 				allowInventory = memory.ReadShort(entryPoint + 0x19B6E) == 1;
 
@@ -355,6 +342,15 @@ public class DosBox : MonoBehaviour
 
 				//set by AITD when long running code is started (eg: loading ressource)
 				saveTimerFlag = memory[entryPoint + 0x1B0FC] == 1;
+
+				if (!saveTimerFlag)
+				{
+					//internal timer
+					InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x19D12);
+
+					//internal timer 2
+					InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x242E0);
+				}
 			}
 		}
 
@@ -373,6 +369,25 @@ public class DosBox : MonoBehaviour
 			linkroom = room;
 
 			GetComponent<RoomLoader>().RefreshRooms(linkfloor, linkroom);
+		}
+	}
+
+	void RefreshCacheEntries(Dictionary<int, int> entries, int address)
+	{
+		entries.Clear();
+		int cacheAddress = memory.ReadFarPointer(entryPoint + address);
+		if (cacheAddress > 0)
+		{
+			int numEntries = Math.Min((int)memory.ReadUnsignedShort(cacheAddress + 16), 100);
+			int baseAddress = memory.ReadFarPointer(cacheAddress + 18);
+
+			for (int i = 0 ; i < numEntries ; i++)
+			{
+				int addr = cacheAddress + 22 + i * 10;
+				int id = memory.ReadUnsignedShort(addr);
+				int offset = memory.ReadUnsignedShort(addr + 2);
+				entries[id] = baseAddress + offset;
+			}
 		}
 	}
 
@@ -458,7 +473,7 @@ public class DosBox : MonoBehaviour
 				TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
 
 				BoxInfo.Append("Timer 1", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer1 / 60), InternalTimer1 % 60);
-				BoxInfo.Append("Timer 2", "{0}.{1:D2}", TimeSpan.FromSeconds(internalTimer2 / 60), internalTimer2 % 60);
+				BoxInfo.Append("Timer 2", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer2 / 60), InternalTimer2 % 60);
 				BoxInfo.Append("FPS/Frame/Delay", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.FloorToInt(lastDelay * 1000));
 				BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			}
@@ -506,13 +521,21 @@ public class DosBox : MonoBehaviour
 			if (Input.GetKeyDown(KeyCode.Alpha2))
 			{
 				//internal timer 2
-				internalTimer2 -= 60 * 5; //back 5 frames
+				InternalTimer2 -= 60 * 5; //back 5 frames
 				byte[] buffer = new byte[2];
-				buffer.Write(internalTimer2, 0);
+				buffer.Write((ushort)InternalTimer2, 0);
 				ProcessReader.Write(buffer, entryPoint + 0x242E0, buffer.Length);
 			}
 		}
+	}
 
+	public void RefreshCacheEntries()
+	{
+		if (ShowAITD1Vars)
+		{
+			RefreshCacheEntries(animIdToMemoryAddress, 0x218D3);
+			RefreshCacheEntries(bodyIdToMemoryAddress, 0x218D7);
+		}
 	}
 
 	public void CalculateFPS()
@@ -522,15 +545,19 @@ public class DosBox : MonoBehaviour
 			//fps
 			int fps = memory.ReadShort(entryPoint + 0x19D18);
 
-			//frames counter (reset to zero when every second by AITD)
+			//frames counter (reset to zero every second by AITD)
 			int frames = memory.ReadShort(entryPoint + 0x2117C);
 
 			//check how much frames elapsed since last time
 			int diff;
 			if (frames >= oldFramesCount)
+			{
 				diff = frames - oldFramesCount; //eg: 20 - 15
+			}
 			else
+			{
 				diff = fps - oldFramesCount + frames; //special case: eg: 60 - 58 + 3
+			}
 			oldFramesCount = frames;
 			frameCounter += diff;
 

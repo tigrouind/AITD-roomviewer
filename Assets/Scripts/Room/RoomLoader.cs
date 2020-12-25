@@ -546,6 +546,7 @@ public class RoomLoader : MonoBehaviour
 		dosBox.SpeedRunMode = speedRunMode;
 
 		dosBox.RefreshMemory();
+		dosBox.RefreshCacheEntries();
 		dosBox.CalculateFPS();
 		dosBox.UpdateAllActors();
 		dosBox.UpdateBoxInfo();
