@@ -14,6 +14,7 @@ public class RoomLoader : MonoBehaviour
 	private Vector3 mousePosition;
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
+	private List<Transform> rooms = new List<Transform>();
 	private List<List<int>> camerasPerRoom;
 	private BoxComparer boxComparer = new BoxComparer();
 	private float defaultCameraZoom = 10.0f;
@@ -96,14 +97,11 @@ public class RoomLoader : MonoBehaviour
 
 	void CenterCamera(int room)
 	{
-		if (transform.childCount > 0)
+		Transform roomTransform = GetRoom(floor, room);
+		if (roomTransform != null)
 		{
-			Transform roomTransform = transform.Find("ROOM" + room);
-			if (roomTransform != null)
-			{
-				Vector3 roomPosition = roomTransform.localPosition;
-				Camera.main.transform.position = new Vector3(roomPosition.x, Camera.main.transform.position.y, roomPosition.z);
-			}
+			Vector3 roomPosition = roomTransform.localPosition;
+			Camera.main.transform.position = new Vector3(roomPosition.x, Camera.main.transform.position.y, roomPosition.z);
 		}
 	}
 
@@ -115,7 +113,7 @@ public class RoomLoader : MonoBehaviour
 		bool showtiggers = ShowTriggers.BoolValue;
 
 		int roomIndex = 0;
-		foreach (Transform roomTransform in transform.Cast<Transform>().Where(x => x.name != "DELETED"))
+		foreach (Transform roomTransform in rooms)
 		{
 			bool currentRoom = room == roomIndex;
 			if (currentRoom)
@@ -149,6 +147,7 @@ public class RoomLoader : MonoBehaviour
 	{
 		//load cameras and rooms
 		camerasPerRoom = new List<List<int>>();
+		rooms = new List<Transform>();
 		name = "FLOOR" + floor;
 
 		string filePath = Config.GetPath("ETAGE{0:D2}.PAK", floor);
@@ -220,6 +219,7 @@ public class RoomLoader : MonoBehaviour
 		GameObject roomObject = new GameObject();
 		roomObject.name = "ROOM" + currentroom;
 		roomObject.transform.parent = transform;
+		rooms.Add(roomObject.transform);
 
 		Vector3 roomPosition = buffer.ReadVector(roomheader + 4);
 		roomObject.transform.localPosition = new Vector3(roomPosition.x, roomPosition.y, -roomPosition.z) / 100.0f;
@@ -358,7 +358,7 @@ public class RoomLoader : MonoBehaviour
 
 			if (points.Count > 0)
 			{
-				var room = transform.Cast<Transform>().FirstOrDefault(x => x.name == "ROOM" + cameraRoom);
+				var room = GetRoom(floor, cameraRoom);
 				if(room == null) continue;
 
 				int colorRGB = cameraColors[cameraID % cameraColors.Length];
@@ -401,10 +401,8 @@ public class RoomLoader : MonoBehaviour
 
 	void RemoveAll()
 	{
-		name = "DELETED";
 		foreach (Transform t in transform)
 		{
-			t.name = "DELETED"; //bug fix
 			Destroy(t.gameObject);
 		}
 	}
@@ -713,15 +711,11 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	public Transform GetRoom(int newfloor, int newroom)
+	public Transform GetRoom(int newFloor, int newRoom)
 	{
-		if (floor == newfloor && newroom >= 0 && newroom < transform.childCount)
+		if (floor == newFloor && newRoom >= 0 && newRoom < rooms.Count)
 		{
-			var room = GameObject.Find("ROOM" + newroom);
-			if (room != null)
-			{
-				return room.transform;
-			}
+			return rooms[newRoom];
 		}
 		return null;
 	}
@@ -924,8 +918,7 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.RightArrow:
-				int roomsCount = transform.Cast<Transform>().Where(x => x.name != "DELETED").Count();
-				if (room < roomsCount - 1)
+				if (room < rooms.Count - 1)
 				{
 					room++;
 					RefreshRooms();

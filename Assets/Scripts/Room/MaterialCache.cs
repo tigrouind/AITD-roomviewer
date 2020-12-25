@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class MaterialCache : MonoBehaviour
 {
-	private static Dictionary<KeyValuePair<Color32, bool>, Material> materialsCache = new Dictionary<KeyValuePair<Color32, bool>, Material>();
+	private static Dictionary<long, Material> materialsCache = new Dictionary<long, Material>();
 	public Material TransparentMaterial;
 	public Material OpaqueMaterial;
 	public Material AlwaysOnTopMaterial;
@@ -12,7 +12,7 @@ public class MaterialCache : MonoBehaviour
 	public Material GetMaterialFromCache(Color32 color, bool alwaysOnTop)
 	{
 		Material material;
-		var key = new KeyValuePair<Color32, bool>(color, alwaysOnTop);
+		var key = (alwaysOnTop ? 0L : 1L) << 32 | (long)color.r << 24 | (long)color.g << 16 | (long)color.b << 8 | color.a;
 		if (!materialsCache.TryGetValue(key, out material))
 		{
 			if (alwaysOnTop)

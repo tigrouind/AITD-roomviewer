@@ -53,7 +53,7 @@ public class WarpDialog : MonoBehaviour
 
 		if (GetComponent<DosBox>().ProcessReader != null)
 		{
-			if (!Panel.GetComponentsInChildren<InputField>().Any(x => x.isFocused) && WarpActorBox != null)
+			if (WarpActorBox != null && !Panel.GetComponentsInChildren<InputField>().Any(x => x.isFocused))
 			{
 				MoveOrRotateActor(WarpActorBox);
 			}
