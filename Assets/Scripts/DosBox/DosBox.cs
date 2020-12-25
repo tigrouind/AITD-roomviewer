@@ -189,40 +189,38 @@ public class DosBox : MonoBehaviour
 				}
 			}
 
-			//find player + switch floor if necessary
-			bool foundPlayer = false;
-			foreach (Box box in Boxes)
-			{
-				if (box != null)
-				{
-					//player
-					if (box.TrackMode == 1 || box.ID == lastValidPlayerIndex)
-					{
-						//update player index
-						lastValidPlayerIndex = box.ID;
-						foundPlayer = true;
-
-						//automatically switch room and floor (has to be done before setting other actors positions)
-						SwitchRoom(box.Floor, box.Room);
-					}
-				}
-			}
-
-			if (!foundPlayer && IsCDROMVersion)
+			//search current camera target
+			int cameraTargetID = -1;
+			if (IsCDROMVersion)
 			{
 				int currentCameraTarget = memory.ReadShort(entryPoint + 0x19B6C);
 				foreach (Box box in Boxes)
 				{
 					if (box != null && box.Slot == currentCameraTarget)
 					{
-						SwitchRoom(box.Floor, box.Room);
-
-						if (box.transform.position != lastPlayerPosition)
-						{
-							GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
-							lastPlayerPosition = box.transform.position;
-						}
+						cameraTargetID = box.ID;
+						break;
 					}
+				}
+			}
+
+			//search player
+			foreach (Box box in Boxes)
+			{
+				if (box != null && (box.TrackMode == 1 || box.ID == lastValidPlayerIndex))
+				{
+					//update player index
+					lastValidPlayerIndex = cameraTargetID = box.ID;
+					break;
+				}
+			}
+
+			//automatically switch room and floor (has to be done before setting other actors positions)
+			foreach (Box box in Boxes)
+			{
+				if (box != null && box.ID == cameraTargetID)
+				{
+					SwitchRoom(box.Floor, box.Room);
 				}
 			}
 
@@ -279,9 +277,8 @@ public class DosBox : MonoBehaviour
 							}
 						}
 
-						//player
-						bool isPlayer = box.ID == lastValidPlayerIndex;
-						if (isPlayer)
+						//camera target
+						if(box.ID == cameraTargetID)
 						{
 							//check if player has moved
 							if (box.transform.position.x != lastPlayerPosition.x || box.transform.position.z != lastPlayerPosition.z)
@@ -290,8 +287,13 @@ public class DosBox : MonoBehaviour
 								GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
 								lastPlayerPosition = box.transform.position;
 							}
+						}
 
-							//follow player
+						//player
+						bool isPlayer = box.ID == lastValidPlayerIndex;
+						if (isPlayer)
+						{
+							//arrow follow player
 							Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
 
 							//face camera
