@@ -5,6 +5,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Text.RegularExpressions;
 
 public class RoomLoader : MonoBehaviour
 {
@@ -54,12 +55,14 @@ public class RoomLoader : MonoBehaviour
 	{
 		Directory.CreateDirectory(Config.BaseDirectory);
 
-		//check existing ETAGEXX folders
+		//check existing ETAGEXX files
+		Regex match = new Regex(@"ETAGE(\d\d)\.PAK", RegexOptions.IgnoreCase);
 		floors = Directory.GetFiles(Config.BaseDirectory)
-			.Select(x => Path.GetFileName(x))
-			.Where(x => x.StartsWith("ETAGE", StringComparison.InvariantCultureIgnoreCase))
-			.Select(x => int.Parse(x.Substring(5, 2)))
+			.Select(x => match.Match(Path.GetFileName(x)))
+			.Where(x => x.Success)
+			.Select(x => int.Parse(x.Groups[1].Value))
 			.ToList();
+
 		floor = floors.FirstOrDefault();
 		detectedGame = DetectGame();
 		isAITD1 = detectedGame == 1;
