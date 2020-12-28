@@ -9,14 +9,14 @@ using System.Text.RegularExpressions;
 
 public class RoomLoader : MonoBehaviour
 {
-	private int floor = 0;
-	private int room = 0;
+	private int floor;
+	private int room;
 	private int[] cameraColors = new [] { 0xFF8080, 0x789CF0, 0xB0DE6F, 0xCC66C0, 0x5DBAAB, 0xF2BA79, 0x8E71E3, 0x6ED169, 0xBF6080, 0x7CCAF7 };
 	private Vector3 mousePosition;
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
 	private List<Transform> rooms = new List<Transform>();
-	private List<List<int>> camerasPerRoom;
+	private List<List<int>> camerasPerRoom = new List<List<int>>();
 	private BoxComparer boxComparer = new BoxComparer();
 	private float defaultCameraZoom = 10.0f;
 	private Timer defaultBoxSelectionTimer = new Timer();
@@ -133,7 +133,9 @@ public class RoomLoader : MonoBehaviour
 
 				if (box.name == "Camera")
 				{
-					box.gameObject.SetActive(ShowAreas.Value == 3 || (ShowAreas.Value == 1 && currentRoom) || (ShowAreas.Value == 2 && camerasPerRoom[room].Contains(box.ID)));
+					box.gameObject.SetActive(ShowAreas.Value == 3
+						|| (ShowAreas.Value == 1 && currentRoom)
+						|| (ShowAreas.Value == 2 && room >= 0 && room < camerasPerRoom.Count && camerasPerRoom[room].Contains(box.ID)));
 				}
 
 				if (box.name == "Collider")
@@ -839,7 +841,7 @@ public class RoomLoader : MonoBehaviour
 				}
 				else if (CameraFollow.Value == 2) //player
 				{
-					//make sure camear snap back
+					//make sure camera snap back
 					GetComponent<DosBox>().ResetCamera(floor, room);
 				}
 				break;

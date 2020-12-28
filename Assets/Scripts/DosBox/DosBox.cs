@@ -49,8 +49,8 @@ public class DosBox : MonoBehaviour
 
 	private Vector3 lastPlayerPosition;
 	private int lastValidPlayerIndex = -1;
-	private int linkfloor = 0;
-	private int linkroom = 0;
+	private int linkfloor;
+	private int linkroom;
 	private byte[] memory = new byte[640 * 1024];
 
 	//fps
@@ -334,10 +334,7 @@ public class DosBox : MonoBehaviour
 
 			if (ShowAITD1Vars)
 			{
-				//inventory
 				allowInventory = memory.ReadShort(entryPoint + 0x19B6E) == 1;
-
-				//inhand
 				inHand = memory.ReadShort(entryPoint + 0x24054);
 
 				//set by AITD when long running code is started (eg: loading ressource)
@@ -345,10 +342,7 @@ public class DosBox : MonoBehaviour
 
 				if (!saveTimerFlag)
 				{
-					//internal timer
 					InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x19D12);
-
-					//internal timer 2
 					InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x242E0);
 				}
 			}
@@ -424,9 +418,9 @@ public class DosBox : MonoBehaviour
 	void UpdateWorldPosBox(Box box, Vector3 roomPosition, bool isPlayer)
 	{
 		Box worldPos = box.BoxWorldPos;
-
+		Vector3 boundingPos = box.WorldPosition + box.Mod;
 		//worldpos unsync
-		if (isPlayer && ((box.WorldPosition.x + box.Mod.x) != box.BoundingPos.x || (box.WorldPosition.z + box.Mod.z) != box.BoundingPos.z))
+		if (isPlayer && (boundingPos.x != box.BoundingPos.x || boundingPos.z != box.BoundingPos.z))
 		{
 			if (worldPos == null)
 			{

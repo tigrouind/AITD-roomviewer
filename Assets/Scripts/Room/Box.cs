@@ -243,7 +243,7 @@ public class Box : MonoBehaviour
 			info.Append("FLAGS", "0x{0:X4}", Flags);
 		}
 
-		if (name == "Camera" && DosBox != null && DosBox.ShowAdditionalInfo)
+		if (name == "Camera" && DosBox.ShowAdditionalInfo)
 		{
 			Vector3 position = Camera.transform.localPosition * 1000.0f;
 			Vector3 rotation = Camera.transform.rotation.eulerAngles;
