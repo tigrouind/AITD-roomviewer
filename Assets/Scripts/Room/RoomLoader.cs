@@ -11,6 +11,7 @@ public class RoomLoader : MonoBehaviour
 {
 	private int floor;
 	private int room;
+	private int currentCamera = -1;
 	private int[] cameraColors = new [] { 0xFF8080, 0x789CF0, 0xB0DE6F, 0xCC66C0, 0x5DBAAB, 0xF2BA79, 0x8E71E3, 0x6ED169, 0xBF6080, 0x7CCAF7 };
 	private Vector3 mousePosition;
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
@@ -24,7 +25,7 @@ public class RoomLoader : MonoBehaviour
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
 	private bool dragging;
-	private Box currentCamera;
+	private Box currentCameraBox;
 
 	public Text LeftText;
 	public BoxInfo BottomText;
@@ -116,6 +117,11 @@ public class RoomLoader : MonoBehaviour
 		bool showtiggers = ShowTriggers.BoolValue;
 
 		int roomIndex = 0;
+		var dosBox = GetComponent<DosBox>();
+		int currentCameraID = dosBox.CurrentCameraFloor == floor &&
+			dosBox.CurrentCameraRoom >= 0 && dosBox.CurrentCameraRoom < camerasPerRoom.Count &&
+			currentCamera >= 0 && currentCamera < camerasPerRoom[dosBox.CurrentCameraRoom].Count ? camerasPerRoom[dosBox.CurrentCameraRoom][currentCamera] : -1;
+
 		foreach (Transform roomTransform in rooms)
 		{
 			bool currentRoom = room == roomIndex;
@@ -133,9 +139,10 @@ public class RoomLoader : MonoBehaviour
 
 				if (box.name == "Camera")
 				{
-					box.gameObject.SetActive(ShowAreas.Value == 3
-						|| (ShowAreas.Value == 1 && currentRoom)
-						|| (ShowAreas.Value == 2 && room >= 0 && room < camerasPerRoom.Count && camerasPerRoom[room].Contains(box.ID)));
+					box.gameObject.SetActive(ShowAreas.Value == 4
+						|| (ShowAreas.Value == 2 && currentRoom)
+						|| (ShowAreas.Value == 3 && room >= 0 && room < camerasPerRoom.Count && camerasPerRoom[room].Contains(box.ID))
+						|| (ShowAreas.Value == 1 && currentCameraID == box.ID));
 				}
 
 				if (box.name == "Collider")
@@ -556,6 +563,12 @@ public class RoomLoader : MonoBehaviour
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
 
+		if (dosBox.CurrentCamera != currentCamera)
+		{
+			currentCamera = dosBox.CurrentCamera;
+			SetRoomObjectsVisibility(room);
+		}
+
 		//process keys
 		if (!GetComponent<WarpDialog>().WarpMenuEnabled)
 		{
@@ -747,6 +760,12 @@ public class RoomLoader : MonoBehaviour
 			dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);
 			if (dosBoxEnabled)
 			{
+				//none => current camera
+				if (GetComponent<DosBox>().IsCDROMVersion && ShowAreas.Value == 0)
+				{
+					ShowAreas.Value = 1;
+				}
+
 				//set follow mode to player
 				CameraFollow.Value = 2;
 				GetComponent<DosBox>().ResetCamera(floor, room);
@@ -769,6 +788,12 @@ public class RoomLoader : MonoBehaviour
 			if (CameraFollow.Value == 2)
 			{
 				CameraFollow.Value = 1;
+			}
+
+			//current camera => no
+			if (ShowAreas.Value == 1)
+			{
+				ShowAreas.Value = 0;
 			}
 
 			selectedBox = null;
@@ -852,7 +877,11 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.C:
-				ShowAreas.Value = (ShowAreas.Value + 1) % 4;
+				ShowAreas.Value = (ShowAreas.Value + 1) % 5;
+				if (!(dosBoxEnabled && GetComponent<DosBox>().IsCDROMVersion) && ShowAreas.Value == 1)
+				{
+					ShowAreas.Value++; //skip value
+				}
 				SetRoomObjectsVisibility(room);
 				break;
 
@@ -944,7 +973,6 @@ public class RoomLoader : MonoBehaviour
 			defaultCameraZoom = 10.0f / Mathf.Pow(0.9f, 5.0f);
 			ProcessKey(KeyCode.Mouse2); //reset camera zoom
 			ProcessKey(KeyCode.D); //camera perspective
-			ProcessKey(KeyCode.C); //camera areas for current room
 			ProcessKey(KeyCode.E); //extra info
 		}
 	}
@@ -970,16 +998,16 @@ public class RoomLoader : MonoBehaviour
 
 	void RefreshSelectedCamera()
 	{
-		if(highLightedBox != currentCamera)
+		if(highLightedBox != currentCameraBox)
 		{
-			SetCameraVisibility(currentCamera, false);
+			SetCameraVisibility(currentCameraBox, false);
 			SetCameraVisibility(highLightedBox, true);
-			currentCamera = highLightedBox;
+			currentCameraBox = highLightedBox;
 		}
 		else
 		{
 			SetCameraVisibility(highLightedBox, false);
-			currentCamera = null;
+			currentCameraBox = null;
 		}
 	}
 

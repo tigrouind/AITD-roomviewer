@@ -1176,7 +1176,7 @@ Prefab:
     - target: {fileID: 114846519685537734, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
       propertyPath: Items.Array.size
-      value: 4
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 224457636725803840, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
@@ -1276,12 +1276,12 @@ Prefab:
     - target: {fileID: 114846519685537734, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
       propertyPath: Items.Array.data[1]
-      value: Current room
+      value: Current camera
       objectReference: {fileID: 0}
     - target: {fileID: 114846519685537734, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
       propertyPath: Items.Array.data[2]
-      value: Current room / Adjacent
+      value: Current room
       objectReference: {fileID: 0}
     - target: {fileID: 114633407962285906, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
@@ -1306,6 +1306,11 @@ Prefab:
     - target: {fileID: 114846519685537734, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
         type: 2}
       propertyPath: Items.Array.data[3]
+      value: Current room / Adjacent
+      objectReference: {fileID: 0}
+    - target: {fileID: 114846519685537734, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
+        type: 2}
+      propertyPath: Items.Array.data[4]
       value: All
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -6339,9 +6344,13 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   InternalTimer1: 0
+  InternalTimer2: 0
   ShowAdditionalInfo: 0
   ShowAITD1Vars: 0
   SpeedRunMode: 0
+  CurrentCamera: -1
+  CurrentCameraRoom: 0
+  CurrentCameraFloor: 0
   Player: {fileID: 0}
   IsCDROMVersion: 0
 --- !u!114 &2046595784
@@ -6358,6 +6367,7 @@ MonoBehaviour:
   Actors: {fileID: 1100510531}
   WarpMenuEnabled: 0
   WarpActorBox: {fileID: 0}
+  WarpActorBoxId: -1
   PositionX: {fileID: 362964645}
   PositionY: {fileID: 1175176948}
   PositionZ: {fileID: 390349829}

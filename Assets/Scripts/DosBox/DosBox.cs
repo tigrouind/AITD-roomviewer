@@ -19,6 +19,9 @@ public class DosBox : MonoBehaviour
 	public bool ShowAdditionalInfo;
 	public bool ShowAITD1Vars;
 	public bool SpeedRunMode;
+	public int CurrentCamera = -1;
+	public int CurrentCameraRoom;
+	public int CurrentCameraFloor;
 
 	public ProcessMemoryReader ProcessReader;
 	public Box Player;
@@ -332,6 +335,13 @@ public class DosBox : MonoBehaviour
 				}
 			}
 
+			if (IsCDROMVersion)
+			{
+				CurrentCamera = memory.ReadShort(entryPoint + 0x24056);
+				CurrentCameraFloor = memory.ReadShort(entryPoint + 0x24058);
+				CurrentCameraRoom = memory.ReadShort(entryPoint + 0x2405A);
+			}
+
 			if (ShowAITD1Vars)
 			{
 				allowInventory = memory.ReadShort(entryPoint + 0x19B6E) == 1;
@@ -417,31 +427,38 @@ public class DosBox : MonoBehaviour
 
 	void UpdateWorldPosBox(Box box, Vector3 roomPosition, bool isPlayer)
 	{
-		Box worldPos = box.BoxWorldPos;
-		Vector3 boundingPos = box.WorldPosition + box.Mod;
-		//worldpos unsync
-		if (isPlayer && (boundingPos.x != box.BoundingPos.x || boundingPos.z != box.BoundingPos.z))
+		var currentRoom = GetComponent<RoomLoader>().GetRoom(CurrentCameraFloor, CurrentCameraRoom);
+		if (currentRoom != null)
 		{
-			if (worldPos == null)
-			{
-				worldPos = Instantiate(BoxPrefab);
-				worldPos.name = "WorldPos";
-				worldPos.Color = new Color32(255, 0, 0, 128);
-				Destroy(worldPos.gameObject.GetComponent<BoxCollider>());
-				box.BoxWorldPos = worldPos;
-			}
+			Box worldPos = box.BoxWorldPos;
+			Vector3 boundingPos = box.WorldPosition + box.Mod + (currentRoom.localPosition - roomPosition) * 1000.0f;
 
-			Vector3 finalPos = (box.WorldPosition + box.Mod) / 1000.0f;
-			float height = -box.BoundingPos.y / 1000.0f;
-			finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z) + roomPosition;
-			worldPos.transform.position = finalPos;
-			worldPos.transform.localScale = box.transform.localScale;
-			worldPos.AlwaysOnTop = Camera.main.orthographic;
-		}
-		else if (worldPos != null)
-		{
-			Destroy(worldPos.gameObject);
-			box.BoxWorldPos = null;
+			//worldpos unsync
+			if (isPlayer &&
+				  (Mathf.RoundToInt(boundingPos.x) != Mathf.RoundToInt(box.BoundingPos.x) ||
+				   Mathf.RoundToInt(boundingPos.z) != Mathf.RoundToInt(box.BoundingPos.z)))
+			{
+				if (worldPos == null)
+				{
+					worldPos = Instantiate(BoxPrefab);
+					worldPos.name = "WorldPos";
+					worldPos.Color = new Color32(255, 0, 0, 128);
+					Destroy(worldPos.gameObject.GetComponent<BoxCollider>());
+					box.BoxWorldPos = worldPos;
+				}
+
+				Vector3 finalPos = (box.WorldPosition + box.Mod) / 1000.0f;
+				float height = -box.BoundingPos.y / 1000.0f;
+				finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z) + currentRoom.localPosition;
+				worldPos.transform.position = finalPos;
+				worldPos.transform.localScale = box.transform.localScale;
+				worldPos.AlwaysOnTop = Camera.main.orthographic;
+			}
+			else if (worldPos != null)
+			{
+				Destroy(worldPos.gameObject);
+				box.BoxWorldPos = null;
+			}
 		}
 	}
 
@@ -702,6 +719,7 @@ public class DosBox : MonoBehaviour
 		}
 
 		BoxInfo.Clear(true);
+		CurrentCamera = -1;
 		lastValidPlayerIndex = -1;
 	}
 
