@@ -42,7 +42,7 @@ public class DosBox : MonoBehaviour
 		0x39EC4, //JACK
 		0x20542, //AITD1 floppy
 		0x2050A, //AITD1 demo
-		0x2ADD0  //TIMEGATE
+		0x2ADD0  //TIMEGATE (pointer)
 	};
 
 	//offset to apply to get beginning of actors array
@@ -204,7 +204,7 @@ public class DosBox : MonoBehaviour
 				}
 			}
 
-			//search current camera target
+			//search current camera target (fallback if player not found)
 			int cameraTargetID = -1;
 			if (IsCDROMVersion)
 			{
@@ -572,6 +572,27 @@ public class DosBox : MonoBehaviour
 			oldFramesCount = frames;
 			frameCounter += diff;
 
+			float time = Time.time;
+			if (diff > 0)
+			{
+				previousFramesCount.Enqueue(diff);
+				previousFrameTime.Enqueue(time);
+			}
+
+			//remove any frame info older than one second
+			while (previousFrameTime.Count > 0 &&
+				previousFrameTime.Peek() < (time - 1.0f))
+			{
+				previousFramesCount.Dequeue();
+				previousFrameTime.Dequeue();
+			}
+		}
+	}
+
+	public void CheckDelay()
+	{
+		if(ShowAITD1Vars)
+		{
 			if(delayCounter.Elapsed >= 0.1f) //100ms
 			{
 				lastDelay = delayCounter.Elapsed;
@@ -587,21 +608,6 @@ public class DosBox : MonoBehaviour
 			{
 				delayCounter.Start();
 				totalDelay.Start();
-			}
-
-			float time = Time.time;
-			if (diff > 0)
-			{
-				previousFramesCount.Enqueue(diff);
-				previousFrameTime.Enqueue(time);
-			}
-
-			//remove any frame info older than one second
-			while (previousFrameTime.Count > 0 &&
-				previousFrameTime.Peek() < (time - 1.0f))
-			{
-				previousFramesCount.Dequeue();
-				previousFrameTime.Dequeue();
 			}
 		}
 	}
@@ -621,7 +627,9 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	int SearchDosBoxProcess()
+	#region SearchDOSBox
+
+	int SearchDOSBoxProcess()
 	{
 		int? processId = Process.GetProcesses()
 				.Where(x => GetProcessName(x).StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase))
@@ -651,7 +659,7 @@ public class DosBox : MonoBehaviour
 
 	bool TryGetMemoryReader(out ProcessMemoryReader reader)
 	{
-		int processId = SearchDosBoxProcess();
+		int processId = SearchDOSBoxProcess();
 		if (processId != -1)
 		{
 			reader = new ProcessMemoryReader(processId);
@@ -684,6 +692,8 @@ public class DosBox : MonoBehaviour
 		entryPoint = -1;
 		return false;
 	}
+
+	#endregion
 
 	#region Room loader
 

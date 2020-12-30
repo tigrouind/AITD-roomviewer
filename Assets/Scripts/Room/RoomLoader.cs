@@ -557,6 +557,7 @@ public class RoomLoader : MonoBehaviour
 		dosBox.RefreshMemory();
 		dosBox.RefreshCacheEntries();
 		dosBox.CalculateFPS();
+		dosBox.CheckDelay();
 		dosBox.UpdateAllActors();
 		dosBox.UpdateBoxInfo();
 		if(isAITD1) dosBox.UpdateTargetSlot(highLightedBox);

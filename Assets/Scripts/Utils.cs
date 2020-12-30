@@ -3,6 +3,8 @@ using UnityEngine;
 
 public static class Utils
 {
+	#region Read
+
 	public static uint ReadUnsignedInt(this byte[] data, int offset)
 	{
 		unchecked
@@ -73,6 +75,10 @@ public static class Utils
 		upper.y = data.ReadShort(offset + 6);
 	}
 
+	#endregion
+
+	#region Write
+
 	public static void Write(this byte[] data, Vector3 value, int offset)
 	{
 		data.Write((short)value.x, offset + 0);
@@ -119,6 +125,10 @@ public static class Utils
 		}
 	}
 
+	#endregion
+
+	#region Search
+
 	public static int IndexOf(byte[] buffer, byte[] pattern)
 	{
 		return IndexOf(buffer, pattern, 0, 1);
@@ -149,4 +159,6 @@ public static class Utils
 
 		return true;
 	}
+
+	#endregion
 }
