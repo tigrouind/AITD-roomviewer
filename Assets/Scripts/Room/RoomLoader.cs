@@ -51,6 +51,7 @@ public class RoomLoader : MonoBehaviour
 	public ToggleButton CameraFollow;
 	public ToggleButton CameraMode;
 	public GameObject Border;
+	public GameObject CameraFrustum;
 
 	void Start()
 	{
@@ -390,29 +391,16 @@ public class RoomLoader : MonoBehaviour
 				area.gameObject.AddComponent<MeshCollider>();
 
 				//setup camera
-				Vector3 cameraRotation = buffer.ReadVector(cameraHeader + 0);
-				Vector3 cameraPosition = buffer.ReadVector(cameraHeader + 6);
-				Vector3 cameraFocal = buffer.ReadVector(cameraHeader + 12);
-
-				CameraHelper cameraHelper = GetComponent<CameraHelper>();
-				Box camera = Instantiate(BoxPrefab);
-				camera.name = "CameraFrustum";
-				camera.transform.parent = room;
-				camera.Color = new Color32(255, 128, 0, 255);
-				camera.HighLight = true;
-				cameraHelper.SetupTransform(camera, cameraPosition, cameraRotation, cameraFocal);
-				area.Camera = camera;
-
-				filter = camera.GetComponent<MeshFilter>();
-				filter.sharedMesh = cameraHelper.CreateMesh(cameraFocal);
-				Destroy(camera.gameObject.GetComponent<BoxCollider>());
-				camera.gameObject.SetActive(false);
+				area.CameraRotation = buffer.ReadVector(cameraHeader + 0);
+				area.CameraPosition = buffer.ReadVector(cameraHeader + 6);
+				area.CameraFocal = buffer.ReadVector(cameraHeader + 12);
 			}
 		}
 	}
 
 	void RemoveAll()
 	{
+		CreateCameraFrustum(null);
 		foreach (Transform t in transform)
 		{
 			Destroy(t.gameObject);
@@ -1001,22 +989,31 @@ public class RoomLoader : MonoBehaviour
 	{
 		if(highLightedBox != currentCameraBox)
 		{
-			SetCameraVisibility(currentCameraBox, false);
-			SetCameraVisibility(highLightedBox, true);
+			CreateCameraFrustum(highLightedBox);
 			currentCameraBox = highLightedBox;
 		}
 		else
 		{
-			SetCameraVisibility(highLightedBox, false);
+			CreateCameraFrustum(null);
 			currentCameraBox = null;
 		}
 	}
 
-	void SetCameraVisibility(Box box, bool visible)
+	void CreateCameraFrustum(Box camera)
 	{
-		if(box != null)
+		if (camera != null)
 		{
-			box.Camera.gameObject.SetActive(visible);
+			CameraFrustum.GetComponent<MeshRenderer>().material.color = new Color32(255, 203, 75, 255);
+			CameraHelper cameraHelper = GetComponent<CameraHelper>();
+			cameraHelper.SetupTransform(CameraFrustum, camera.CameraPosition, camera.CameraRotation, camera.CameraFocal);
+
+			var filter = CameraFrustum.GetComponent<MeshFilter>();
+			filter.sharedMesh = cameraHelper.CreateMesh(camera.CameraFocal);
+			CameraFrustum.gameObject.SetActive(true);
+		}
+		else
+		{
+			CameraFrustum.gameObject.SetActive(false);
 		}
 	}
 }

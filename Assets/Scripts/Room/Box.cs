@@ -58,7 +58,6 @@ public class Box : MonoBehaviour
 	public int OldAngle;
 	public int NewAngle;
 	public int RotateTime;
-	public Box Camera;
 	public int HitBy;
 	public int Hit;
 	public int ColBy;
@@ -66,6 +65,9 @@ public class Box : MonoBehaviour
 	public int HardCol;
 	public int HardTrigger;
 	public DosBox DosBox;
+	public Vector3 CameraPosition;
+	public Vector3 CameraRotation;
+	public Vector3 CameraFocal;
 
 	public Vector3 BoundingPos
 	{
@@ -245,9 +247,9 @@ public class Box : MonoBehaviour
 
 		if (name == "Camera" && DosBox.ShowAdditionalInfo)
 		{
-			Vector3 position = Camera.transform.localPosition * 1000.0f;
-			Vector3 rotation = Camera.transform.rotation.eulerAngles;
-			info.Append("POSITION", "{0:F0} {1:F0} {2:F0}", position.x, -position.y, position.z);
+			Vector3 position = CameraPosition * 10.0f;
+			Vector3 rotation = CameraRotation * (360.0f / 1024.0f);
+			info.Append("POSITION", "{0:F0} {1:F0} {2:F0}", position.x, -position.y, -position.z);
 			info.Append("ANGLE", "{0:N1} {1:N1} {2:N1}",
 				rotation.x > 180.0f ? (rotation.x - 360.0f) : rotation.x,
 				(-rotation.y + 540.0f) % 360.0f,

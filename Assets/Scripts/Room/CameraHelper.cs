@@ -26,14 +26,14 @@ public class CameraHelper : MonoBehaviour
 		new Vector3( 500.0f, 2.0f, 0.0f)
 	};
 
-	public void SetupTransform(Box box, Vector3 cameraPosition, Vector3 cameraRotation, Vector3 cameraFocal)
+	public void SetupTransform(GameObject gameObject, Vector3 cameraPosition, Vector3 cameraRotation, Vector3 cameraFocal)
 	{
 		Vector3 rot = cameraRotation / 1024.0f * 360.0f;
 		var qrot = Quaternion.Euler(rot.x, rot.y, rot.z);
 
-		box.transform.position = new Vector3(cameraPosition.x, cameraPosition.y, -cameraPosition.z) / 100.0f
+		gameObject.transform.position = new Vector3(cameraPosition.x, cameraPosition.y, -cameraPosition.z) / 100.0f
 			- qrot * new Vector3(0.0f, 0.0f, cameraFocal.x) / 1000.0f;
-		box.transform.localRotation = qrot;
+		gameObject.transform.localRotation = qrot;
 	}
 
 	public Mesh CreateMesh(Vector3 cameraFocal)
