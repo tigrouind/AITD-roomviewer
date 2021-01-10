@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -10,7 +9,7 @@ public class CameraHelper : MonoBehaviour
 	private readonly List<Vector3> vertices = new List<Vector3>();
 	private readonly List<int> indices = new List<int>();
 
-	private static readonly Vector3[] quadA = new Vector3[]
+	private readonly Vector3[] quad = new Vector3[]
 	{
 		new Vector3( 1.0f, 1.0f, 1.0f),
 		new Vector3( 1.0f,-1.0f, 1.0f),
@@ -18,52 +17,40 @@ public class CameraHelper : MonoBehaviour
 		new Vector3(-1.0f, 1.0f, 1.0f)
 	};
 
-	private static readonly Vector3[] quadB = new Vector3[]
+	private readonly int[] lines =
 	{
-		new Vector3(-500.0f, 2.0f, 0.0f),
-		new Vector3(-500.0f,-2.0f, 0.0f),
-		new Vector3( 500.0f,-2.0f, 0.0f),
-		new Vector3( 500.0f, 2.0f, 0.0f)
+		0, 1, 1, 2, 2, 3, 3, 0, //far
+		4, 5, 5, 6, 6, 7, 7, 4, //near
+		4, 0, 5, 1, 6, 2, 7, 3, //edges between far and near
+		9, 10, 11, 8
 	};
 
-	public void SetupTransform(GameObject gameObject, Vector3 cameraPosition, Vector3 cameraRotation, Vector3 cameraFocal)
+	public void SetupTransform(Transform transform, Vector3 cameraPosition, Vector3 cameraRotation, Vector3 cameraFocal)
 	{
 		Vector3 rot = cameraRotation / 1024.0f * 360.0f;
 		var qrot = Quaternion.Euler(rot.x, rot.y, rot.z);
 
-		gameObject.transform.position = new Vector3(cameraPosition.x, cameraPosition.y, -cameraPosition.z) / 100.0f
+		transform.position = new Vector3(cameraPosition.x, cameraPosition.y, -cameraPosition.z) / 100.0f
 			- qrot * new Vector3(0.0f, 0.0f, cameraFocal.x) / 1000.0f;
-		gameObject.transform.localRotation = qrot;
+		transform.rotation = qrot;
 	}
 
 	public Mesh CreateMesh(Vector3 cameraFocal)
 	{
 		var pos = new Vector3(160.0f / cameraFocal.y, 100.0f / cameraFocal.z, 1.0f);
 
-		var pts1 = quadA.Select(x => Vector3.Scale(x, pos) * 4.0f).ToArray();
-		var pts2 = quadA.Select(x => Vector3.Scale(x, pos) * 0.4f).ToArray();
-		var pts3 = quadB;
+		var pts = quad.Select(x => Vector3.Scale(x, pos) * 4.0f)
+		  .Concat(quad.Select(x => Vector3.Scale(x, pos) * 0.4f))
+		  .Concat(quad.Select(x => Vector3.Scale(x, new Vector3(-500.0f, 2.0f, 0.0f))))
+		  .ToArray();
 
 		vertices.Clear();
 		indices.Clear();
 
-		AddLine(pts2[0], pts1[0]);
-		AddLine(pts2[1], pts1[1]);
-		AddLine(pts2[2], pts1[2]);
-		AddLine(pts2[3], pts1[3]);
-
-		AddLine(pts1[0], pts1[1]);
-		AddLine(pts1[1], pts1[2]);
-		AddLine(pts1[2], pts1[3]);
-		AddLine(pts1[3], pts1[0]);
-
-		AddLine(pts2[0], pts2[1]);
-		AddLine(pts2[1], pts2[2]);
-		AddLine(pts2[2], pts2[3]);
-		AddLine(pts2[3], pts2[0]);
-
-		AddLine(pts3[1], pts3[2]);
-		AddLine(pts3[3], pts3[0]);
+		for (int i = 0; i < lines.Length; i += 2)
+		{
+			AddLine(pts[lines[i]], pts[lines[i + 1]]);
+		}
 
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices.ToArray();
@@ -87,7 +74,7 @@ public class CameraHelper : MonoBehaviour
 		vertices.AddRange(CubeMesh.vertices.Select(x => rotation * Vector3.Scale(x, scale) + middle));
 	}
 
-	public static Mesh SetupBorder()
+	public Mesh SetupBorder()
 	{
 		var triangles = new int[]
 		{
@@ -117,6 +104,7 @@ public class CameraHelper : MonoBehaviour
 		mesh.vertices = vertices;
 		mesh.triangles = triangles;
 
+		mesh.RecalculateNormals();
 		mesh.RecalculateBounds();
 		return mesh;
 	}

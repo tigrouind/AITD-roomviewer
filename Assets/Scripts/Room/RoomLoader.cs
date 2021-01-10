@@ -76,7 +76,7 @@ public class RoomLoader : MonoBehaviour
 		}
 		ToggleMenuDOSBoxOptions(false);
 
-		Border.GetComponent<MeshFilter>().mesh = CameraHelper.SetupBorder();
+		Border.GetComponent<MeshFilter>().mesh = GetComponent<CameraHelper>().SetupBorder();
 		linkToDosBoxTimer.Start();
 		LinkToDosBox();
 	}
@@ -400,7 +400,7 @@ public class RoomLoader : MonoBehaviour
 
 	void RemoveAll()
 	{
-		CreateCameraFrustum(null);
+		CameraFrustum.SetActive(false);
 		foreach (Transform t in transform)
 		{
 			Destroy(t.gameObject);
@@ -989,31 +989,24 @@ public class RoomLoader : MonoBehaviour
 	{
 		if(highLightedBox != currentCameraBox)
 		{
-			CreateCameraFrustum(highLightedBox);
+			SetupCameraFrustum(highLightedBox);
+			CameraFrustum.SetActive(true);
 			currentCameraBox = highLightedBox;
 		}
 		else
 		{
-			CreateCameraFrustum(null);
+			CameraFrustum.SetActive(false);
 			currentCameraBox = null;
 		}
 	}
 
-	void CreateCameraFrustum(Box camera)
+	void SetupCameraFrustum(Box box)
 	{
-		if (camera != null)
-		{
-			CameraFrustum.GetComponent<MeshRenderer>().material.color = new Color32(255, 203, 75, 255);
-			CameraHelper cameraHelper = GetComponent<CameraHelper>();
-			cameraHelper.SetupTransform(CameraFrustum, camera.CameraPosition, camera.CameraRotation, camera.CameraFocal);
+		CameraFrustum.GetComponent<MeshRenderer>().material.color = new Color32(255, 203, 75, 255);
+		CameraHelper cameraHelper = GetComponent<CameraHelper>();
+		cameraHelper.SetupTransform(CameraFrustum.transform, box.CameraPosition, box.CameraRotation, box.CameraFocal);
 
-			var filter = CameraFrustum.GetComponent<MeshFilter>();
-			filter.sharedMesh = cameraHelper.CreateMesh(camera.CameraFocal);
-			CameraFrustum.gameObject.SetActive(true);
-		}
-		else
-		{
-			CameraFrustum.gameObject.SetActive(false);
-		}
+		var filter = CameraFrustum.GetComponent<MeshFilter>();
+		filter.sharedMesh = cameraHelper.CreateMesh(box.CameraFocal);
 	}
 }
