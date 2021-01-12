@@ -792,8 +792,10 @@ public class ModelLoader : MonoBehaviour
 		if (ShowAdditionalInfo.BoolValue && bones.Count > 0)
 		{
 			var scale = new Vector3(1.0f, -1.0f, 1.0f) / 1000.0f;
-			bones[0].transform.position += transform.rotation *
+			var offset = transform.rotation *
 				Vector3.Scale(nextFrame.Offset * framePosition + frameDistance, scale);
+			bones[0].transform.position += offset;
+			BoundingBox.transform.position = offset;
 		}
 	}
 
@@ -1355,7 +1357,6 @@ public class ModelLoader : MonoBehaviour
 				{
 					EnableAnimation.BoolValue = !EnableAnimation.BoolValue;
 					ToggleAnimationMenuItems(EnableAnimation.BoolValue);
-					BoundingBox.gameObject.SetActive(!EnableAnimation.BoolValue && ShowAdditionalInfo.BoolValue);
 					if (EnableAnimation.BoolValue)
 					{
 						LoadAnim();
@@ -1370,7 +1371,7 @@ public class ModelLoader : MonoBehaviour
 
 			case KeyCode.E:
 				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
-				BoundingBox.gameObject.SetActive(!EnableAnimation.BoolValue && ShowAdditionalInfo.BoolValue);
+				BoundingBox.gameObject.SetActive(ShowAdditionalInfo.BoolValue);
 				RefreshLeftText();
 				break;
 
