@@ -19,29 +19,35 @@ public class CameraHelper : MonoBehaviour
 
 	private readonly int[] lines =
 	{
-		0, 1, 1, 2, 2, 3, 3, 0, //far
-		4, 5, 5, 6, 6, 7, 7, 4, //near
-		4, 0, 5, 1, 6, 2, 7, 3, //edges between far and near
-		9, 10, 11, 8
+		0, 1, 1, 2, 2, 3, 3, 0,         //far plane
+		4, 5, 5, 6, 6, 7, 7, 4,         //near plane
+		4, 0, 5, 1, 6, 2, 7, 3,         //edges between near and far
+		9, 10, 11, 8,                   //parallel lines
+		12, 13, 13, 14, 14, 15, 15, 12  //2D border
 	};
 
-	public void SetupTransform(Transform transform, Vector3 cameraPosition, Vector3 cameraRotation, Vector3 cameraFocal)
+	public void SetupTransform(Transform transform, Vector3 cameraPosition)
 	{
-		Vector3 rot = cameraRotation / 1024.0f * 360.0f;
-		var qrot = Quaternion.Euler(rot.x, rot.y, rot.z);
-
-		transform.position = new Vector3(cameraPosition.x, cameraPosition.y, -cameraPosition.z) / 100.0f
-			- qrot * new Vector3(0.0f, 0.0f, cameraFocal.x) / 1000.0f;
-		transform.rotation = qrot;
+		var pos = new Vector3(cameraPosition.x, cameraPosition.y, -cameraPosition.z) / 100.0f;
+		transform.position = pos;
 	}
 
-	public Mesh CreateMesh(Vector3 cameraFocal)
+	public Mesh CreateMesh(Vector3 cameraRotation, Vector3 cameraFocal)
 	{
-		var pos = new Vector3(160.0f / cameraFocal.y, 100.0f / cameraFocal.z, 1.0f);
+		var rot = cameraRotation / 1024.0f * 360.0f;
+		var qrot = Quaternion.Euler(rot.x, rot.y, rot.z);
+		var offset = qrot * new Vector3(0.0f, 0.0f, cameraFocal.x) / 1000.0f;
 
-		var pts = quad.Select(x => Vector3.Scale(x, pos) * 4.0f)
-		  .Concat(quad.Select(x => Vector3.Scale(x, pos) * 0.4f))
+		Matrix4x4 matrixA = Matrix4x4.TRS(-offset, qrot, Vector3.one);
+		Matrix4x4 matrixB = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90.0f, 0.0f, 0.0f), new Vector3(32.767f, 32.767f, 0.0f));
+
+		var foc = new Vector3(160.0f / cameraFocal.y, 100.0f / cameraFocal.z, 1.0f);
+
+		var pts = quad.Select(x => Vector3.Scale(x, foc) * 32.767f)
+		  .Concat(quad.Select(x => Vector3.Scale(x, foc) * 0.4f))
 		  .Concat(quad.Select(x => Vector3.Scale(x, new Vector3(-500.0f, 2.0f, 0.0f))))
+		  .Select(x => matrixA.MultiplyPoint3x4(x))
+		  .Concat(quad.Select(x => matrixB.MultiplyPoint3x4(x)))
 		  .ToArray();
 
 		vertices.Clear();

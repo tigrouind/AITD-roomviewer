@@ -1004,9 +1004,9 @@ public class RoomLoader : MonoBehaviour
 	{
 		CameraFrustum.GetComponent<MeshRenderer>().material.color = new Color32(255, 203, 75, 255);
 		CameraHelper cameraHelper = GetComponent<CameraHelper>();
-		cameraHelper.SetupTransform(CameraFrustum.transform, box.CameraPosition, box.CameraRotation, box.CameraFocal);
+		cameraHelper.SetupTransform(CameraFrustum.transform, box.CameraPosition);
 
 		var filter = CameraFrustum.GetComponent<MeshFilter>();
-		filter.sharedMesh = cameraHelper.CreateMesh(box.CameraFocal);
+		filter.sharedMesh = cameraHelper.CreateMesh(box.CameraRotation, box.CameraFocal);
 	}
 }
