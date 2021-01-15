@@ -6,7 +6,7 @@ public class CameraHelper : MonoBehaviour
 {
 	public Mesh CubeMesh;
 
-	private readonly Vector3[] quad = new Vector3[]
+	readonly Vector3[] quad = new Vector3[]
 	{
 		new Vector3( 1.0f, 1.0f, 1.0f),
 		new Vector3( 1.0f, 1.0f,-1.0f),
@@ -14,13 +14,12 @@ public class CameraHelper : MonoBehaviour
 		new Vector3(-1.0f, 1.0f, 1.0f)
 	};
 
-	private readonly int[] lines =
+	readonly int[] lines =
 	{
-		0, 1, 1, 2, 2, 3, 3, 0,         //far plane
-		4, 5, 5, 6, 6, 7, 7, 4,         //near plane
-		4, 0, 5, 1, 6, 2, 7, 3,         //edges between near and far
-		9, 10, 11, 8,                   //parallel lines behind
-		12, 13, 13, 14, 14, 15, 15, 12  //2D border
+		0, 1, 1, 2, 2, 3, 3, 0, //far plane
+		4, 5, 5, 6, 6, 7, 7, 4, //near plane
+		4, 0, 5, 1, 6, 2, 7, 3, //edges between near and far
+		9, 10, 11, 8            //parallel lines behind
 	};
 
 	public void SetupTransform(Transform transform, Vector3 cameraPosition)
@@ -41,20 +40,27 @@ public class CameraHelper : MonoBehaviour
 		  .Select(x => Vector3.Scale(x, focal))
 		  .Concat(quad.Select(x => Vector3.Scale(x, new Vector3(-500.0f, 0.0f, 2.0f))))
 		  .Select(x => matrix.MultiplyPoint3x4(x))
-		  .Concat(quad.Select(x => Vector3.Scale(x, new Vector3(32.768f, 0.0f, 32.768f))))
 		  .ToArray();
 
 		var vertices = new List<Vector3>();
-		var indices = new List<int>();
+		var triangles = new List<int>();
 
 		for (int i = 0; i < lines.Length; i += 2)
 		{
-			AddLine(pts[lines[i]], pts[lines[i + 1]], indices, vertices);
+			AddLine(pts[lines[i]], pts[lines[i + 1]], triangles, vertices);
 		}
+
+		//2d border
+		int[] borderTriangles;
+		Vector3[] borderVertices;
+		GetBorder(out borderTriangles, out borderVertices, 0.075f);
+
+		triangles.AddRange(borderTriangles.Select(x => x + vertices.Count));
+		vertices.AddRange(borderVertices);
 
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices.ToArray();
-		mesh.triangles = indices.ToArray();
+		mesh.triangles = triangles.ToArray();
 
 		mesh.RecalculateNormals();
 		mesh.RecalculateBounds();
@@ -62,7 +68,7 @@ public class CameraHelper : MonoBehaviour
 		return mesh;
 	}
 
-	private void AddLine(Vector3 a, Vector3 b, List<int> indices, List<Vector3> vertices)
+	void AddLine(Vector3 a, Vector3 b, List<int> indices, List<Vector3> vertices)
 	{
 		const float linesize = 0.04f;
 		Vector3 directionVector = a - b;
@@ -77,20 +83,9 @@ public class CameraHelper : MonoBehaviour
 
 	public Mesh SetupBorder()
 	{
-		var triangles = new int[]
-		{
-			0, 1, 5, 0, 5, 4,
-			3, 6, 2, 7, 6, 3,
-			0, 4, 7, 7, 3, 0,
-			6, 5, 1, 6, 1, 2
-		};
-
-		const float outerSize = 32.768f;
-		const float innerSize = outerSize + 0.3f;
-
-		var vertices = quad.Select(x => Vector3.Scale(x, new Vector3(innerSize, 0.0f, innerSize)))
-			.Concat(quad.Select(x => Vector3.Scale(x, new Vector3(outerSize, 0.0f, outerSize))))
-			.ToArray();
+		int[] triangles;
+		Vector3[] vertices;
+		GetBorder(out triangles, out vertices, 0.3f);
 
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices;
@@ -99,5 +94,23 @@ public class CameraHelper : MonoBehaviour
 		mesh.RecalculateNormals();
 		mesh.RecalculateBounds();
 		return mesh;
+	}
+
+	void GetBorder(out int[] triangles, out Vector3[] vertices, float borderSize)
+	{
+		triangles = new int[]
+		{
+			0, 1, 5, 0, 5, 4,
+			3, 6, 2, 7, 6, 3,
+			0, 4, 7, 7, 3, 0,
+			6, 5, 1, 6, 1, 2
+		};
+
+		const float outerSize = 32.768f;
+		float innerSize = outerSize + borderSize;
+
+		vertices = quad.Select(x => Vector3.Scale(x, new Vector3(innerSize, 0.0f, innerSize)))
+			.Concat(quad.Select(x => Vector3.Scale(x, new Vector3(outerSize, 0.0f, outerSize))))
+			.ToArray();
 	}
 }
