@@ -357,8 +357,8 @@ public class RoomLoader : MonoBehaviour
 				List<Vector2> pts = new List<Vector2>();
 				for (int u = 0; u < totalPoints; u++)
 				{
-					short px = buffer.ReadShort(i + 0);
-					short pz = buffer.ReadShort(i + 2);
+					int px = buffer.ReadShort(i + 0);
+					int pz = buffer.ReadShort(i + 2);
 					pts.Add(new Vector2(px, pz) / 100.0f);
 					i += 4;
 				}
