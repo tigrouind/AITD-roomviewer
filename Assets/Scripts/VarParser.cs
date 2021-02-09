@@ -28,14 +28,21 @@ public class VarParser
 		var allLines = ReadLines(filePath);
 
 		Dictionary<int, string> currentSection = null;
-		Regex regex = new Regex("^(?<from>[0-9]+)(-(?<to>[0-9]+))? (?<text>.*)");
+		Regex regex = new Regex(@"^(?<from>[0-9]+)(-(?<to>[0-9]+))?\s+(?<text>.*)$");
 
 		foreach (string line in allLines)
 		{
 			//check if new section
 			if (line.Length > 0 && line[0] >= 'A' && line[0] <= 'Z')
 			{
-				currentSection = CreateNewSection(line, sectionsToParse);
+				if (sectionsToParse.Length == 0 || Array.IndexOf(sectionsToParse, line) >= 0)
+				{
+					currentSection = CreateNewSection(line);
+				}
+				else
+				{
+					currentSection = null;
+				}
 			}
 			else if (currentSection != null)
 			{
@@ -53,19 +60,10 @@ public class VarParser
 		}
 	}
 
-	Dictionary<int, string> CreateNewSection(string name, string[] sectionsToParse)
+	Dictionary<int, string> CreateNewSection(string name)
 	{
-		Dictionary<int, string> section;
-		if (sectionsToParse.Length == 0 || Array.IndexOf(sectionsToParse, name) >= 0)
-		{
-			section = new Dictionary<int, string>();
-			sections.Add(name.Trim(), section);
-		}
-		else
-		{
-			section = null;
-		}
-
+		Dictionary<int, string> section = new Dictionary<int, string>();
+		sections.Add(name.Trim(), section);
 		return section;
 	}
 
