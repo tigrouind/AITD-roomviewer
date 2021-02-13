@@ -244,12 +244,12 @@ public class DosBox : MonoBehaviour
 			{
 				if (box != null)
 				{
-					Transform roomObject = GetComponent<RoomLoader>().GetRoom(box.Floor, box.Room);
-					if (roomObject != null)
+					Vector3Int roomPosition;
+					if (GetComponent<RoomLoader>().TryGetRoomPosition(box.Floor, box.Room, out roomPosition))
 					{
 						//local to global position
-						Vector3 boxPosition = (Vector3)box.BoundingPos / 1000.0f;
-						boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z) + roomObject.localPosition;
+						Vector3 boxPosition = (Vector3)(box.BoundingPos + roomPosition) / 1000.0f;
+						boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z);
 
 						if (box.transform.position != boxPosition)
 						{
@@ -270,7 +270,7 @@ public class DosBox : MonoBehaviour
 						bool isAITD1 = dosBoxPattern == 0;
 						if (isAITD1)
 						{
-							UpdateHotPointBox(box, roomObject.localPosition);
+							UpdateHotPointBox(box, roomPosition);
 						}
 
 						//camera target
@@ -323,7 +323,7 @@ public class DosBox : MonoBehaviour
 
 						if (isAITD1)
 						{
-							UpdateWorldPosBox(box, roomObject.localPosition, isPlayer);
+							UpdateWorldPosBox(box, roomPosition, isPlayer);
 						}
 
 						box.AlwaysOnTop = Camera.main.orthographic;
@@ -395,7 +395,7 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	void UpdateHotPointBox(Box box, Vector3 roomPosition)
+	void UpdateHotPointBox(Box box, Vector3Int roomPosition)
 	{
 		//hot point
 		Box hotPoint = box.BoxHotPoint;
@@ -411,8 +411,8 @@ public class DosBox : MonoBehaviour
 				box.BoxHotPoint = hotPoint;
 			}
 
-			Vector3 finalPos = (Vector3)(box.HotPosition + box.LocalPosition + box.Mod) / 1000.0f;
-			finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z) + roomPosition;
+			Vector3 finalPos = (Vector3)(box.HotPosition + box.LocalPosition + box.Mod + roomPosition) / 1000.0f;
+			finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z);
 			hotPoint.transform.position = finalPos;
 
 			hotPoint.transform.localScale = Vector3.one * (box.HotBoxSize / 500.0f);
@@ -425,13 +425,13 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	void UpdateWorldPosBox(Box box, Vector3 roomPosition, bool isPlayer)
+	void UpdateWorldPosBox(Box box, Vector3Int roomPosition, bool isPlayer)
 	{
-		var currentRoom = GetComponent<RoomLoader>().GetRoom(CurrentCameraFloor, CurrentCameraRoom);
-		if (currentRoom != null)
+		Vector3Int currentRoomPos;
+		if (GetComponent<RoomLoader>().TryGetRoomPosition(CurrentCameraFloor, CurrentCameraRoom, out currentRoomPos))
 		{
 			Box worldPos = box.BoxWorldPos;
-			Vector3Int boundingPos = box.WorldPosition + box.Mod + Vector3Int.FloorToInt((currentRoom.localPosition - roomPosition) * 1000.0f);
+			Vector3Int boundingPos = box.WorldPosition + box.Mod + currentRoomPos - roomPosition;
 
 			//worldpos unsync
 			if (isPlayer &&
@@ -447,9 +447,9 @@ public class DosBox : MonoBehaviour
 					box.BoxWorldPos = worldPos;
 				}
 
-				Vector3 finalPos = (Vector3)(box.WorldPosition + box.Mod) / 1000.0f;
+				Vector3 finalPos = (Vector3)(box.WorldPosition + box.Mod + currentRoomPos) / 1000.0f;
 				float height = -box.BoundingPos.y / 1000.0f;
-				finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z) + currentRoom.localPosition;
+				finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z);
 				worldPos.transform.position = finalPos;
 				worldPos.transform.localScale = box.transform.localScale;
 				worldPos.AlwaysOnTop = Camera.main.orthographic;
@@ -809,13 +809,13 @@ public class DosBox : MonoBehaviour
 	public Vector3Int GetMousePosition(int room, int floor)
 	{
 		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
-		Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
-		Transform roomObject = GetComponent<RoomLoader>().GetRoom(floor, room);
-		if (roomObject != null)
+		Vector3Int mousePosition = Vector3Int.FloorToInt(Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight) * 1000.0f);
+		Vector3Int roomPosition;
+		if (GetComponent<RoomLoader>().TryGetRoomPosition(floor, room, out roomPosition))
 		{
-			mousePosition -= roomObject.position;
+			mousePosition -= roomPosition;
 		}
-		return Vector3Int.FloorToInt(mousePosition * 1000.0f);
+		return mousePosition;
 	}
 
 	#endregion

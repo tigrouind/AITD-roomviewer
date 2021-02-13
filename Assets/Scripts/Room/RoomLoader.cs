@@ -17,6 +17,7 @@ public class RoomLoader : MonoBehaviour
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
 	private List<Transform> rooms = new List<Transform>();
+	private List<Vector3Int> roomsPosition = new List<Vector3Int>();
 	private List<List<int>> camerasPerRoom = new List<List<int>>();
 	private BoxComparer boxComparer = new BoxComparer();
 	private float defaultCameraZoom = 10.0f;
@@ -161,6 +162,7 @@ public class RoomLoader : MonoBehaviour
 		//load cameras and rooms
 		camerasPerRoom = new List<List<int>>();
 		rooms = new List<Transform>();
+		roomsPosition = new List<Vector3Int>();
 		name = "FLOOR" + floor;
 
 		string filePath = Config.GetPath("ETAGE{0:D2}.PAK", floor);
@@ -235,7 +237,9 @@ public class RoomLoader : MonoBehaviour
 		rooms.Add(roomObject.transform);
 
 		Vector3Int roomPosition = buffer.ReadVector(roomheader + 4);
-		roomObject.transform.localPosition = new Vector3(roomPosition.x, roomPosition.y, -roomPosition.z) / 100.0f;
+		roomPosition = new Vector3Int(roomPosition.x, -roomPosition.y, -roomPosition.z) * 10;
+		roomObject.transform.localPosition = new Vector3(roomPosition.x, -roomPosition.y, roomPosition.z) / 1000.0f;
+		roomsPosition.Add(roomPosition);
 
 		//colliders
 		int i = roomheader + buffer.ReadShort(roomheader + 0);
@@ -719,13 +723,26 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	public Transform GetRoom(int newFloor, int newRoom)
+	private Transform GetRoom(int newFloor, int newRoom)
 	{
 		if (floor == newFloor && newRoom >= 0 && newRoom < rooms.Count)
 		{
 			return rooms[newRoom];
 		}
+
 		return null;
+	}
+
+	public bool TryGetRoomPosition(int newFloor, int newRoom, out Vector3Int position)
+	{
+		if (floor == newFloor && newRoom >= 0 && newRoom < rooms.Count)
+		{
+			position = roomsPosition[newRoom];
+			return true;
+		}
+
+		position = default(Vector3Int);
+		return false;
 	}
 
 	public void CenterCamera(Vector2 position)
