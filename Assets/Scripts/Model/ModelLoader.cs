@@ -676,7 +676,7 @@ public class ModelLoader : MonoBehaviour
 					case 0: //rotate
 						if(!isAITD2)
 						{
-							b.Rotate = new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f);
+							b.Rotate = GetRotation(new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f));
 						}
 						break;
 
@@ -693,7 +693,7 @@ public class ModelLoader : MonoBehaviour
 				if (isAITD2)
 				{
 					boneTransform = buffer.ReadVector(i + 0);
-					b.Rotate = new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f);
+					b.Rotate = GetRotation(new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f));
 					i += 8;
 				}
 
@@ -704,6 +704,13 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		RefreshLeftText();
+	}
+
+	Quaternion GetRotation(Vector3 angles)
+	{
+		return Quaternion.AngleAxis(angles.z, Vector3.forward) *
+				Quaternion.AngleAxis(angles.x, Vector3.right) *
+				Quaternion.AngleAxis(angles.y, Vector3.up);
 	}
 
 	void AnimateModel()
@@ -748,31 +755,17 @@ public class ModelLoader : MonoBehaviour
 				//interpolate
 				if (nextBone.Type == 0 || (modelFlags & 8) == 8) //rotation
 				{
-					rotation = Quaternion.Slerp(
-							Quaternion.AngleAxis(currentBone.Rotate.z, Vector3.forward) *
-							Quaternion.AngleAxis(currentBone.Rotate.x, Vector3.right) *
-							Quaternion.AngleAxis(currentBone.Rotate.y, Vector3.up),
-							Quaternion.AngleAxis(nextBone.Rotate.z, Vector3.forward) *
-							Quaternion.AngleAxis(nextBone.Rotate.x, Vector3.right) *
-							Quaternion.AngleAxis(nextBone.Rotate.y, Vector3.up),
-							framePosition);
+					rotation = Quaternion.Slerp(currentBone.Rotate, nextBone.Rotate, framePosition);
 				}
 
 				if (nextBone.Type == 1) //position
 				{
-					position = initialBonesPosition[i] +
-						Vector3.Lerp(
-							new Vector3(currentBone.Position.x, currentBone.Position.y, currentBone.Position.z),
-							new Vector3(nextBone.Position.x, nextBone.Position.y, nextBone.Position.z),
-							framePosition);
+					position = initialBonesPosition[i] + Vector3.Lerp(currentBone.Position, nextBone.Position, framePosition);
 				}
 
 				if (nextBone.Type == 2) //scaling
 				{
-					scale = Vector3.Lerp(
-							new Vector3(currentBone.Scale.x, currentBone.Scale.y, currentBone.Scale.z),
-							new Vector3(nextBone.Scale.x, nextBone.Scale.y, nextBone.Scale.z),
-							framePosition);
+					scale = Vector3.Lerp(currentBone.Scale, nextBone.Scale, framePosition);
 				}
 			}
 
