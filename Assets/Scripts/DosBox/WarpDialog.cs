@@ -138,7 +138,7 @@ public class WarpDialog : MonoBehaviour
 
 		if (actor != null)
 		{
-			Vector3Int offset = GetComponent<DosBox>().GetMousePosition(actor.Room, actor.Floor) - (actor.LocalPosition + actor.Mod);
+			Vector3Int offset = GetComponent<RoomLoader>().GetMousePosition(actor.Room, actor.Floor) - (actor.LocalPosition + actor.Mod);
 			offset = new Vector3Int(offset.x, 0, offset.z);
 			MoveActor(actor, offset);
 		}

@@ -489,7 +489,7 @@ public class DosBox : MonoBehaviour
 				BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			}
 
-			Vector3Int mousePosition = GetMousePosition(linkroom, linkfloor);
+			Vector3Int mousePosition = GetComponent<RoomLoader>().GetMousePosition(linkroom, linkfloor);
 			BoxInfo.Append("Cursor position", "{0} {1}", Math.Min(Math.Max(mousePosition.x, -32768), 32767), Math.Min(Math.Max(mousePosition.z, -32768), 32767));
 			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
 
@@ -804,18 +804,6 @@ public class DosBox : MonoBehaviour
 	public int GetActorMemoryAddress(int index)
 	{
 		return actorsAddress + index * actorStructSize[dosBoxPattern];
-	}
-
-	public Vector3Int GetMousePosition(int room, int floor)
-	{
-		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
-		Vector3Int mousePosition = Vector3Int.FloorToInt(Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight) * 1000.0f);
-		Vector3Int roomPosition;
-		if (GetComponent<RoomLoader>().TryGetRoomPosition(floor, room, out roomPosition))
-		{
-			mousePosition -= roomPosition;
-		}
-		return mousePosition;
 	}
 
 	#endregion

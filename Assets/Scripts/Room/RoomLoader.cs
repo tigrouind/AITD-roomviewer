@@ -813,6 +813,18 @@ public class RoomLoader : MonoBehaviour
 		ToggleMenuDOSBoxOptions(dosBoxEnabled);
 	}
 
+	public Vector3Int GetMousePosition(int room, int floor)
+	{
+		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
+		Vector3Int mousePosition = Vector3Int.FloorToInt(Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight) * 1000.0f);
+		Vector3Int roomPosition;
+		if (TryGetRoomPosition(floor, room, out roomPosition))
+		{
+			mousePosition -= roomPosition;
+		}
+		return mousePosition;
+	}
+
 	#endregion
 
 	#region GUI
@@ -989,7 +1001,7 @@ public class RoomLoader : MonoBehaviour
 		Vector3[] vertices = new Vector3[vertices2D.Count];
 		for (int i = 0; i < vertices.Length; i++)
 		{
-			vertices[i] = new Vector3(vertices2D[i].x, 0, vertices2D[i].y);
+			vertices[i] = new Vector3(vertices2D[i].x, 0.0f, vertices2D[i].y);
 		}
 
 		// Create the mesh
