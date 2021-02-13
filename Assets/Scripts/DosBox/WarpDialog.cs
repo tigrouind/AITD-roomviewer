@@ -83,32 +83,32 @@ public class WarpDialog : MonoBehaviour
 
 			if (Input.GetKey(KeyCode.Keypad3))
 			{
-				MoveActor(actor, new Vector3(0.0f, -1.0f, 0.0f));
+				MoveActor(actor, new Vector3Int(0, -1, 0));
 			}
 
 			if (Input.GetKey(KeyCode.Keypad1))
 			{
-				MoveActor(actor, new Vector3(0.0f, 1.0f, 0.0f));
+				MoveActor(actor, new Vector3Int(0, 1, 0));
 			}
 
 			if (Input.GetKey(KeyCode.Keypad4))
 			{
-				MoveActor(actor, new Vector3(-1.0f, 0.0f, 0.0f));
+				MoveActor(actor, new Vector3Int(-1, 0, 0));
 			}
 
 			if (Input.GetKey(KeyCode.Keypad6))
 			{
-				MoveActor(actor, new Vector3(1.0f, 0.0f, 0.0f));
+				MoveActor(actor, new Vector3Int(1, 0, 0));
 			}
 
 			if (Input.GetKey(KeyCode.Keypad2))
 			{
-				MoveActor(actor, new Vector3(0.0f, 0.0f, -1.0f));
+				MoveActor(actor, new Vector3Int(0, 0, -1));
 			}
 
 			if (Input.GetKey(KeyCode.Keypad8))
 			{
-				MoveActor(actor, new Vector3(0.0f, 0.0f, 1.0f));
+				MoveActor(actor, new Vector3Int(0, 0, 1));
 			}
 		}
 
@@ -138,8 +138,8 @@ public class WarpDialog : MonoBehaviour
 
 		if (actor != null)
 		{
-			Vector3 offset = GetComponent<DosBox>().GetMousePosition(actor.Room, actor.Floor) - (actor.LocalPosition + actor.Mod);
-			offset = new Vector3(Mathf.RoundToInt(offset.x), 0.0f, Mathf.RoundToInt(offset.z));
+			Vector3Int offset = GetComponent<DosBox>().GetMousePosition(actor.Room, actor.Floor) - (actor.LocalPosition + actor.Mod);
+			offset = new Vector3Int(offset.x, 0, offset.z);
 			MoveActor(actor, offset);
 		}
 	}
@@ -160,13 +160,13 @@ public class WarpDialog : MonoBehaviour
 	void SetPosition(Box actor)
 	{
 		//parse angle
-		Vector3 angleInt;
+		Vector3Int angleInt;
 		TryParseAngle(AngleX, AngleY, AngleZ, out angleInt, actor.Angles);
 		WriteActorAngle(actor, angleInt);
 		UpdateAngleInputField(actor);
 
 		//parse position
-		Vector3 lowerBound, upperBound, local, world;
+		Vector3Int lowerBound, upperBound, local, world;
 
 		if (!AdvancedMode.BoolValue)
 		{
@@ -174,21 +174,21 @@ public class WarpDialog : MonoBehaviour
 			local -= actor.Mod;
 
 			//apply offset to world/bound
-			Vector3 offset = local - actor.LocalPosition;
+			Vector3Int offset = local - actor.LocalPosition;
 			world = actor.WorldPosition + offset;
 			lowerBound = actor.BoundingLower + offset;
 			upperBound = actor.BoundingUpper + offset;
 		}
 		else
 		{
-			Vector3 boundingPos;
+			Vector3Int boundingPos;
 			TryParsePosition(BoundingPosX, BoundingPosY, BoundingPosZ, out boundingPos, actor.BoundingPos);
 			TryParsePosition(LocalPosX, LocalPosY, LocalPosZ, out local, actor.LocalPosition + actor.Mod);
 			TryParsePosition(worldPosX, worldPosY, worldPosZ, out world, actor.WorldPosition + actor.Mod);
 			local -= actor.Mod;
 			world -= actor.Mod;
 
-			Vector3 offset = boundingPos - actor.BoundingPos;
+			Vector3Int offset = boundingPos - actor.BoundingPos;
 			lowerBound = actor.BoundingLower + offset;
 			upperBound = actor.BoundingUpper + offset;
 		}
@@ -218,18 +218,18 @@ public class WarpDialog : MonoBehaviour
 		int angle = (int)actor.Angles.y + offset;
 		angle = (angle + 1024) % 1024;
 
-		WriteActorAngle(actor, new Vector3(actor.Angles.x, angle, actor.Angles.z));
+		WriteActorAngle(actor, new Vector3Int(actor.Angles.x, angle, actor.Angles.z));
 		UpdateAngleInputField(actor);
 		timer.Restart();
 	}
 
 	//input keys or warp
-	void MoveActor(Box actor, Vector3 offset)
+	void MoveActor(Box actor, Vector3Int offset)
 	{
-		Vector3 local = actor.LocalPosition + offset;
-		Vector3 world = actor.WorldPosition + offset;
-		Vector3 boundLow = actor.BoundingLower + offset;
-		Vector3 boundUpper = actor.BoundingUpper + offset;
+		Vector3Int local = actor.LocalPosition + offset;
+		Vector3Int world = actor.WorldPosition + offset;
+		Vector3Int boundLow = actor.BoundingLower + offset;
+		Vector3Int boundUpper = actor.BoundingUpper + offset;
 
 		WriteActorPosition(actor, boundLow, boundUpper, local, world);
 		UpdatePositionInputFields(actor);
@@ -256,14 +256,14 @@ public class WarpDialog : MonoBehaviour
 		AngleZ.text = (actor.Angles.z * 360.0f / 1024.0f).ToString("N1");
 	}
 
-	void TryParseAngle(InputField angleX, InputField angleY, InputField angleZ, out Vector3 intValue, Vector3 defaultValue)
+	void TryParseAngle(InputField angleX, InputField angleY, InputField angleZ, out Vector3Int intValue, Vector3Int defaultValue)
 	{
 		int x, y, z;
 		TryParseAngle(angleX, out x, (int)defaultValue.x);
 		TryParseAngle(angleY, out y, (int)defaultValue.y);
 		TryParseAngle(angleZ, out z, (int)defaultValue.z);
 
-		intValue = new Vector3(x, y, z);
+		intValue = new Vector3Int(x, y, z);
 	}
 
 	void TryParseAngle(InputField inputField, out int intValue, int defaultValue)
@@ -280,14 +280,14 @@ public class WarpDialog : MonoBehaviour
 		}
 	}
 
-	void TryParsePosition(InputField posX, InputField posY, InputField posZ, out Vector3 intValue, Vector3 defaultValue)
+	void TryParsePosition(InputField posX, InputField posY, InputField posZ, out Vector3Int intValue, Vector3Int defaultValue)
 	{
 		int x, y, z;
 		TryParsePosition(posX, out x, (int)defaultValue.x);
 		TryParsePosition(posY, out y, (int)defaultValue.y);
 		TryParsePosition(posZ, out z, (int)defaultValue.z);
 
-		intValue = new Vector3(x, y, z);
+		intValue = new Vector3Int(x, y, z);
 	}
 
 	void TryParsePosition(InputField inputField, out int intValue, int defaultValue)
@@ -302,7 +302,7 @@ public class WarpDialog : MonoBehaviour
 		}
 	}
 
-	void WriteActorAngle(Box actor, Vector3 angle)
+	void WriteActorAngle(Box actor, Vector3Int angle)
 	{
 		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 
@@ -314,7 +314,7 @@ public class WarpDialog : MonoBehaviour
 		actor.Angles = angle;
 	}
 
-	void WriteActorPosition(Box actor, Vector3 lowerBound, Vector3 upperBound, Vector3 localPosition, Vector3 worldPosition)
+	void WriteActorPosition(Box actor, Vector3Int lowerBound, Vector3Int upperBound, Vector3Int localPosition, Vector3Int worldPosition)
 	{
 		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
 

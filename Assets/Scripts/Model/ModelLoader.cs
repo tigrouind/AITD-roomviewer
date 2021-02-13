@@ -31,7 +31,7 @@ public class ModelLoader : MonoBehaviour
 	private List<Vector3> initialBonesPosition;
 	private int modelFlags;
 	private int previousFrame;
-	private Vector3 frameDistance;
+	private Vector3Int frameDistance;
 
 	private int paletteIndex;
 	public Texture2D[] PaletteTexture;
@@ -44,8 +44,8 @@ public class ModelLoader : MonoBehaviour
 	private List<Vector3> allVertices;
 	private List<Vector2> uv;
 	private List<Vector2> uvDepth;
-	private Vector3 boundingLower;
-	private Vector3 boundingUpper;
+	private Vector3Int boundingLower;
+	private Vector3Int boundingUpper;
 
 	private Vector2 cameraRotation;
 	private Vector2 cameraPosition;
@@ -97,8 +97,8 @@ public class ModelLoader : MonoBehaviour
 
 		//bounding box
 		buffer.ReadBoundingBox(i + 2, out boundingLower, out boundingUpper);
-		BoundingBox.transform.localScale = (boundingUpper - boundingLower) / 1000.0f;
-		var pos = (boundingUpper + boundingLower) / 2000.0f;
+		BoundingBox.transform.localScale = (Vector3)(boundingUpper - boundingLower) / 1000.0f;
+		Vector3Int pos = (boundingUpper + boundingLower) / 2000;
 		BoundingBox.transform.localPosition = new Vector3(pos.x, -pos.y, pos.z);
 
 		i += 0xE;
@@ -669,7 +669,7 @@ public class ModelLoader : MonoBehaviour
 			{
 				Bone b = new Bone();
 				b.Type = buffer.ReadShort(i + 0);
-				Vector3 boneTransform = buffer.ReadVector(i + 2);
+				Vector3Int boneTransform = buffer.ReadVector(i + 2);
 
 				switch(b.Type)
 				{
@@ -793,7 +793,7 @@ public class ModelLoader : MonoBehaviour
 		{
 			var scale = new Vector3(1.0f, -1.0f, 1.0f) / 1000.0f;
 			var offset = transform.rotation *
-				Vector3.Scale(nextFrame.Offset * framePosition + frameDistance, scale);
+				Vector3.Scale((Vector3)nextFrame.Offset * framePosition + frameDistance, scale);
 			bones[0].transform.position += offset;
 			BoundingBox.transform.position = offset;
 		}
@@ -1235,7 +1235,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		LeftText.text = stringBuilder.ToString();
-		frameDistance = Vector3.zero;
+		frameDistance = Vector3Int.zero;
 	}
 
 	public void ToggleAnimationMenuItems(bool enabled)

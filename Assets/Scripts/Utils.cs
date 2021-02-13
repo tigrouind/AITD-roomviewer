@@ -29,11 +29,11 @@ public static class Utils
 		}
 	}
 
-	public static Vector3 ReadVector(this byte[] data, int offset)
+	public static Vector3Int ReadVector(this byte[] data, int offset)
 	{
 		unchecked
 		{
-			Vector3 value = new Vector3();
+			Vector3Int value = new Vector3Int();
 			value.x = ReadShort(data, offset + 0);
 			value.y = ReadShort(data, offset + 2);
 			value.z = ReadShort(data, offset + 4);
@@ -57,7 +57,7 @@ public static class Utils
 		}
 	}
 
-	public static void ReadBoundingBox(this byte[] data, int offset, out Vector3 lower, out Vector3 upper)
+	public static void ReadBoundingBox(this byte[] data, int offset, out Vector3Int lower, out Vector3Int upper)
 	{
 		lower.x = data.ReadShort(offset + 0);
 		upper.x = data.ReadShort(offset + 2);
@@ -67,7 +67,7 @@ public static class Utils
 		upper.z = data.ReadShort(offset + 10);
 	}
 
-	public static void ReadBoundingBox(this byte[] data, int offset, out Vector2 lower, out Vector2 upper)
+	public static void ReadBoundingBox(this byte[] data, int offset, out Vector2Int lower, out Vector2Int upper)
 	{
 		lower.x = data.ReadShort(offset + 0);
 		lower.y = data.ReadShort(offset + 4);
@@ -79,14 +79,14 @@ public static class Utils
 
 	#region Write
 
-	public static void Write(this byte[] data, Vector3 value, int offset)
+	public static void Write(this byte[] data, Vector3Int value, int offset)
 	{
 		data.Write((short)value.x, offset + 0);
 		data.Write((short)value.y, offset + 2);
 		data.Write((short)value.z, offset + 4);
 	}
 
-	public static void Write(this byte[] data, Vector3 lower, Vector3 upper, int offset)
+	public static void Write(this byte[] data, Vector3Int lower, Vector3Int upper, int offset)
 	{
 		data.Write((short)lower.x, offset + 0);
 		data.Write((short)upper.x, offset + 2);

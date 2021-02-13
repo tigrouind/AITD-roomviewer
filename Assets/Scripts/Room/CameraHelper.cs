@@ -22,14 +22,14 @@ public class CameraHelper : MonoBehaviour
 		9, 10, 11, 8            //parallel lines behind
 	};
 
-	public void SetupTransform(Transform transform, Vector3 cameraPosition)
+	public void SetupTransform(Transform transform, Vector3Int cameraPosition)
 	{
 		transform.position = new Vector3(cameraPosition.x, cameraPosition.y, -cameraPosition.z) / 100.0f;
 	}
 
-	public Mesh CreateMesh(Vector3 cameraRotation, Vector3 cameraFocal)
+	public Mesh CreateMesh(Vector3Int cameraRotation, Vector3Int cameraFocal)
 	{
-		var qrot = Quaternion.Euler(cameraRotation / 1024.0f * 360.0f);
+		var qrot = Quaternion.Euler((Vector3)cameraRotation / 1024.0f * 360.0f);
 		var offset = qrot * new Vector3(0.0f, 0.0f, cameraFocal.x) / 1000.0f;
 		var focal = new Vector3(160.0f / cameraFocal.y, 1.0f, 100.0f / cameraFocal.z);
 

@@ -41,18 +41,18 @@ public class Box : MonoBehaviour
 	public int HitForce;
 	public int KeyFrameTime;
 	public int KeyFrameLength;
-	public Vector3 Mod;
-	public Vector3 LocalPosition;
-	public Vector3 WorldPosition;
-	public Vector3 BoundingLower;
-	public Vector3 BoundingUpper;
-	public Vector2 Box2DLower;
-	public Vector2 Box2DUpper;
-	public Vector3 Angles;
+	public Vector3Int Mod;
+	public Vector3Int LocalPosition;
+	public Vector3Int WorldPosition;
+	public Vector3Int BoundingLower;
+	public Vector3Int BoundingUpper;
+	public Vector2Int Box2DLower;
+	public Vector2Int Box2DUpper;
+	public Vector3Int Angles;
 	public int LastOffset;
 	public float LastDistance;
 	public int HotBoxSize;
-	public Vector3 HotPosition;
+	public Vector3Int HotPosition;
 	public Box BoxHotPoint;
 	public Box BoxWorldPos;
 	public int OldAngle;
@@ -61,34 +61,34 @@ public class Box : MonoBehaviour
 	public int HitBy;
 	public int Hit;
 	public int ColBy;
-	public Vector3 Col;
+	public Vector3Int Col;
 	public int HardCol;
 	public int HardTrigger;
 	public DosBox DosBox;
-	public Vector3 CameraPosition;
-	public Vector3 CameraRotation;
-	public Vector3 CameraFocal;
+	public Vector3Int CameraPosition;
+	public Vector3Int CameraRotation;
+	public Vector3Int CameraFocal;
 
-	public Vector3 BoundingPos
+	public Vector3Int BoundingPos
 	{
 		get
 		{
-			return new Vector3(
-				(int)((BoundingUpper.x + BoundingLower.x)) / 2,
-				(int)((BoundingUpper.y + BoundingLower.y)) / 2,
-				(int)((BoundingUpper.z + BoundingLower.z)) / 2
+			return new Vector3Int(
+				(BoundingUpper.x + BoundingLower.x) / 2,
+				(BoundingUpper.y + BoundingLower.y) / 2,
+				(BoundingUpper.z + BoundingLower.z) / 2
 			);
 		}
 	}
 
-	public Vector3 BoundingSize
+	public Vector3Int BoundingSize
 	{
 		get
 		{
-			return new Vector3(
-				(BoundingUpper.x - BoundingLower.x),
-				(BoundingUpper.y - BoundingLower.y),
-				(BoundingUpper.z - BoundingLower.z)
+			return new Vector3Int(
+				BoundingUpper.x - BoundingLower.x,
+				BoundingUpper.y - BoundingLower.y,
+				BoundingUpper.z - BoundingLower.z
 			);
 		}
 	}
@@ -247,9 +247,9 @@ public class Box : MonoBehaviour
 
 		if (name == "Camera" && DosBox.ShowAdditionalInfo)
 		{
-			Vector3 position = CameraPosition * 10.0f;
-			Vector3 rotation = CameraRotation * (360.0f / 1024.0f);
-			info.Append("POSITION", "{0:F0} {1:F0} {2:F0}", position.x, -position.y, -position.z);
+			Vector3Int position = CameraPosition * 10;
+			Vector3 rotation = (Vector3)CameraRotation * (360.0f / 1024.0f);
+			info.Append("POSITION", "{0} {1} {2}", position.x, -position.y, -position.z);
 			info.Append("ANGLE", "{0:N1} {1:N1} {2:N1}",
 				rotation.x > 180.0f ? (rotation.x - 360.0f) : rotation.x,
 				(-rotation.y + 540.0f) % 360.0f,

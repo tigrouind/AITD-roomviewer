@@ -179,7 +179,7 @@ public class DosBox : MonoBehaviour
 					}
 					else
 					{
-						box.Mod = Vector3.zero;
+						box.Mod = Vector3Int.zero;
 					}
 
 					box.OldAngle = memory.ReadShort(k + 106);
@@ -248,7 +248,7 @@ public class DosBox : MonoBehaviour
 					if (roomObject != null)
 					{
 						//local to global position
-						Vector3 boxPosition = box.BoundingPos / 1000.0f;
+						Vector3 boxPosition = (Vector3)box.BoundingPos / 1000.0f;
 						boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z) + roomObject.localPosition;
 
 						if (box.transform.position != boxPosition)
@@ -411,7 +411,7 @@ public class DosBox : MonoBehaviour
 				box.BoxHotPoint = hotPoint;
 			}
 
-			Vector3 finalPos = (box.HotPosition + box.LocalPosition + box.Mod) / 1000.0f;
+			Vector3 finalPos = (Vector3)(box.HotPosition + box.LocalPosition + box.Mod) / 1000.0f;
 			finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z) + roomPosition;
 			hotPoint.transform.position = finalPos;
 
@@ -431,12 +431,12 @@ public class DosBox : MonoBehaviour
 		if (currentRoom != null)
 		{
 			Box worldPos = box.BoxWorldPos;
-			Vector3 boundingPos = box.WorldPosition + box.Mod + (currentRoom.localPosition - roomPosition) * 1000.0f;
+			Vector3Int boundingPos = box.WorldPosition + box.Mod + Vector3Int.FloorToInt((currentRoom.localPosition - roomPosition) * 1000.0f);
 
 			//worldpos unsync
 			if (isPlayer &&
-				  (Mathf.RoundToInt(boundingPos.x) != Mathf.RoundToInt(box.BoundingPos.x) ||
-				   Mathf.RoundToInt(boundingPos.z) != Mathf.RoundToInt(box.BoundingPos.z)))
+				  (boundingPos.x != box.BoundingPos.x ||
+				   boundingPos.z != box.BoundingPos.z))
 			{
 				if (worldPos == null)
 				{
@@ -447,7 +447,7 @@ public class DosBox : MonoBehaviour
 					box.BoxWorldPos = worldPos;
 				}
 
-				Vector3 finalPos = (box.WorldPosition + box.Mod) / 1000.0f;
+				Vector3 finalPos = (Vector3)(box.WorldPosition + box.Mod) / 1000.0f;
 				float height = -box.BoundingPos.y / 1000.0f;
 				finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z) + currentRoom.localPosition;
 				worldPos.transform.position = finalPos;
@@ -489,8 +489,8 @@ public class DosBox : MonoBehaviour
 				BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			}
 
-			Vector3 mousePosition = GetMousePosition(linkroom, linkfloor);
-			BoxInfo.Append("Cursor position", "{0} {1}", Mathf.Clamp((int)(mousePosition.x), -32768, 32767), Mathf.Clamp((int)(mousePosition.z), -32768, 32767));
+			Vector3Int mousePosition = GetMousePosition(linkroom, linkfloor);
+			BoxInfo.Append("Cursor position", "{0} {1}", Math.Min(Math.Max(mousePosition.x, -32768), 32767), Math.Min(Math.Max(mousePosition.z, -32768), 32767));
 			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
 
 			if (ShowAITD1Vars)
@@ -612,17 +612,17 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	void FixBoundingWrap(ref float a, ref float b)
+	void FixBoundingWrap(ref int a, ref int b)
 	{
 		if(a > b)
 		{
 			if(a < -b)
 			{
-				b += 65536.0f;
+				b += 65536;
 			}
 			else
 			{
-				a -= 65536.0f;
+				a -= 65536;
 			}
 		}
 	}
@@ -806,7 +806,7 @@ public class DosBox : MonoBehaviour
 		return actorsAddress + index * actorStructSize[dosBoxPattern];
 	}
 
-	public Vector3 GetMousePosition(int room, int floor)
+	public Vector3Int GetMousePosition(int room, int floor)
 	{
 		Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
 		Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
@@ -815,7 +815,7 @@ public class DosBox : MonoBehaviour
 		{
 			mousePosition -= roomObject.position;
 		}
-		return mousePosition * 1000.0f;
+		return Vector3Int.FloorToInt(mousePosition * 1000.0f);
 	}
 
 	#endregion

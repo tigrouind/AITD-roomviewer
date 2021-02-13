@@ -234,7 +234,7 @@ public class RoomLoader : MonoBehaviour
 		roomObject.transform.parent = transform;
 		rooms.Add(roomObject.transform);
 
-		Vector3 roomPosition = buffer.ReadVector(roomheader + 4);
+		Vector3Int roomPosition = buffer.ReadVector(roomheader + 4);
 		roomObject.transform.localPosition = new Vector3(roomPosition.x, roomPosition.y, -roomPosition.z) / 100.0f;
 
 		//colliders
@@ -249,12 +249,12 @@ public class RoomLoader : MonoBehaviour
 			box.Room = currentroom;
 			box.transform.parent = roomObject.transform;
 
-			Vector3 lower, upper;
+			Vector3Int lower, upper;
 			buffer.ReadBoundingBox(i + 0, out lower, out upper);
 
-			Vector3 position = lower + upper;
+			Vector3Int position = lower + upper;
 			box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
-			box.transform.localScale = (upper - lower) / 1000.0f;
+			box.transform.localScale = (Vector3)(upper - lower) / 1000.0f;
 			box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.01f);
 
 			box.ID = buffer.ReadShort(i + 12);
@@ -292,12 +292,12 @@ public class RoomLoader : MonoBehaviour
 			box.Room = currentroom;
 			box.transform.parent = roomObject.transform;
 
-			Vector3 lower, upper;
+			Vector3Int lower, upper;
 			buffer.ReadBoundingBox(i + 0, out lower, out upper);
 
-			Vector3 position = lower + upper;
+			Vector3Int position = lower + upper;
 			box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
-			box.transform.localScale = (upper - lower) / 1000.0f;
+			box.transform.localScale = (Vector3)(upper - lower) / 1000.0f;
 
 			box.ID = buffer.ReadShort(i + 12);
 			box.Flags = buffer.ReadShort(i + 14);

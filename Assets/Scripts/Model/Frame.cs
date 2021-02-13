@@ -4,7 +4,7 @@ using UnityEngine;
 public class Frame
 {
 	public float Time;
-	public Vector3 Offset;
+	public Vector3Int Offset;
 	public List<Bone> Bones;
 }
 
