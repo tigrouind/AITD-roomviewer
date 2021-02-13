@@ -146,7 +146,7 @@ public class DosBox : MonoBehaviour
 
 					box.Floor = memory.ReadShort(k + 46);
 					box.Room = memory.ReadShort(k + 48);
-					box.LifeMode = memory. ReadShort(k + 50);
+					box.LifeMode = memory.ReadShort(k + 50);
 					box.Life = memory.ReadShort(k + 52);
 					box.Chrono = memory.ReadUnsignedInt(k + 54);
 					box.RoomChrono = memory.ReadUnsignedInt(k + 58);

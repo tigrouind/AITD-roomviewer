@@ -1,9 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System;
-using System.Text;
 
 public class Box : MonoBehaviour
 {
@@ -345,7 +341,7 @@ public class Box : MonoBehaviour
 			if (DosBox.ShowAITD1Vars && ActionType >= 0 && ActionType <= 10)
 				info.Append("ACTIONTYPE", actionTypeInfo[ActionType]);
 			if (DosBox.ShowAITD1Vars)
-				info.Append("2DBOX", "{0} {1}; {2} {3}", Box2DLower.x, Box2DLower.y, Box2DUpper.x, Box2DUpper.y);
+				info.Append("2DBOX", "{0} {1}; {2} {3}", DashIfEmpty(Box2DLower.x), DashIfEmpty(Box2DLower.y), DashIfEmpty(Box2DUpper.x), DashIfEmpty(Box2DUpper.y));
 			if (DosBox.ShowAITD1Vars)
 				info.Append("HITFORCE", HitForce);
 			if (DosBox.ShowAITD1Vars)
