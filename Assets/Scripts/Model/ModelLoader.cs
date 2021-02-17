@@ -817,7 +817,7 @@ public class ModelLoader : MonoBehaviour
 		string varPath = Config.GetPath("vars.txt");
 		if (File.Exists(varPath))
 		{
-			varParser.Load(varPath, "BODYS", "ANIMS");
+			varParser.Load(varPath, VarEnum.BODYS, VarEnum.ANIMS);
 		}
 
 		if(!File.Exists(modelFolders[1]))
@@ -1197,7 +1197,7 @@ public class ModelLoader : MonoBehaviour
 		stringBuilder.AppendFormat("{0} {1}/{2} <color=#00c864>{3}</color>",
 			Path.GetFileNameWithoutExtension(modelFolders[modelFolderIndex]),
 			modelIndex, modelCount - 1,
-			varParser.GetText("BODYS", modelIndex));
+			varParser.GetText(VarEnum.BODYS, modelIndex));
 
 		if(EnableAnimation.BoolValue)
 		{
@@ -1205,7 +1205,7 @@ public class ModelLoader : MonoBehaviour
 			stringBuilder.AppendFormat("{0} {1}/{2} <color=#00c864>{3}</color>",
 				Path.GetFileNameWithoutExtension(animFolders[modelFolderIndex]),
 				animIndex, animCount - 1,
-				varParser.GetText("ANIMS", animIndex));
+				varParser.GetText(VarEnum.ANIMS, animIndex));
 		}
 
 		if(ShowAdditionalInfo.BoolValue)
