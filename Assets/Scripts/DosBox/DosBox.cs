@@ -355,6 +355,11 @@ public class DosBox : MonoBehaviour
 					InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x19D12);
 					InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x242E0);
 				}
+				else
+				{
+					InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x1B0F8);
+					InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x1B0F6);
+				}
 			}
 		}
 
