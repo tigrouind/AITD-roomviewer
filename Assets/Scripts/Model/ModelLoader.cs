@@ -98,7 +98,7 @@ public class ModelLoader : MonoBehaviour
 		//bounding box
 		buffer.ReadBoundingBox(i + 2, out boundingLower, out boundingUpper);
 		BoundingBox.transform.localScale = (Vector3)(boundingUpper - boundingLower) / 1000.0f;
-		Vector3Int pos = (boundingUpper + boundingLower) / 2000;
+		Vector3 pos = (Vector3)(boundingUpper + boundingLower) / 2000.0f;
 		BoundingBox.transform.localPosition = new Vector3(pos.x, -pos.y, pos.z);
 
 		i += 0xE;
