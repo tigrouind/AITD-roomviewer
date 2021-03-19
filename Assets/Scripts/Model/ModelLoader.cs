@@ -743,7 +743,7 @@ public class ModelLoader : MonoBehaviour
 		for (int i = 0 ; i < bones.Count; i++)
 		{
 			Transform boneTransform = bones[i].transform;
-			Vector3 position = initialBonesPosition[i];
+			Vector3 position = Vector3.zero;
 			Quaternion rotation = Quaternion.identity;
 			Vector3 scale = Vector3.one;
 
@@ -760,7 +760,7 @@ public class ModelLoader : MonoBehaviour
 
 				if (nextBone.Type == 1) //position
 				{
-					position = initialBonesPosition[i] + Vector3.Lerp(currentBone.Position, nextBone.Position, framePosition);
+					position = Vector3.Lerp(currentBone.Position, nextBone.Position, framePosition);
 				}
 
 				if (nextBone.Type == 2) //scaling
@@ -769,7 +769,7 @@ public class ModelLoader : MonoBehaviour
 				}
 			}
 
-			boneTransform.localPosition = position;
+			boneTransform.localPosition = initialBonesPosition[i] + position;
 			boneTransform.localScale = scale;
 
 			if ((modelFlags & 8) == 8)
@@ -1046,22 +1046,13 @@ public class ModelLoader : MonoBehaviour
 		}
 	}
 
-	Vector3 WorldToViewportPoint(Camera cam, Vector3 pos)
+	Vector3 WorldToViewportPoint(Matrix4x4 mat, Vector3 pos)
 	{
 		//same as Camera.WorldToViewportPoint() but handle points behind camera correctly (when temp.w < 0)
-		Matrix4x4 mat = cam.projectionMatrix * cam.worldToCameraMatrix;
 		Vector4 temp = mat * new Vector4(pos.x, pos.y, pos.z, 1.0f);
-
-		if (temp.w == 0.0f)
-		{
-			return Vector3.zero;
-		}
-		else
-		{
-			temp.x = (temp.x / Mathf.Abs(temp.w) + 1.0f) * 0.5f;
-			temp.y = (temp.y / Mathf.Abs(temp.w) + 1.0f) * 0.5f;
-			return new Vector3(temp.x, temp.y, temp.w);
-		}
+		temp.x = (temp.x / Mathf.Abs(temp.w) + 1.0f) * 0.5f;
+		temp.y = (temp.y / Mathf.Abs(temp.w) + 1.0f) * 0.5f;
+		return new Vector3(temp.x, temp.y, temp.w);
 	}
 
 	void UpdateGradientsUVs()
@@ -1085,29 +1076,25 @@ public class ModelLoader : MonoBehaviour
 		float gmaxZ = float.MinValue;
 		float gminZ = float.MaxValue;
 
+		Camera cam = Camera.main;
+		Matrix4x4 mat = cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix;
 		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
 		{
 			float maxX = float.MinValue;
 			float minX = float.MaxValue;
 			float maxY = float.MinValue;
-			float minY = float.MaxValue;
 			float maxZ = float.MinValue;
 
 			int polyType = gradientPolygonType[i];
 
 			foreach(int vertexIndex in gradientPolygonList[i])
 			{
-				Vector3 poly = allVertices[vertexIndex];
-				Vector3 point = WorldToViewportPoint(Camera.main, transform.TransformPoint(poly));
+				Vector3 pos = allVertices[vertexIndex];
+				Vector3 point = WorldToViewportPoint(mat, pos);
 
 				if (point.y > maxY)
 				{
 					maxY = point.y;
-				}
-
-				if (point.y < minY)
-				{
-					minY = point.y;
 				}
 
 				if (point.y > gmaxY)
@@ -1182,7 +1169,8 @@ public class ModelLoader : MonoBehaviour
 					uv[vertexIndex] = new Vector2(maxY, gmaxY - gminY);
 				}
 
-				uvDepth[vertexIndex] = new Vector2((uvDepth[vertexIndex].x - gminZ) / range, 0.0f);
+				float maxZ = uvDepth[vertexIndex].x;
+				uvDepth[vertexIndex] = new Vector2((maxZ - gminZ) / range, 0.0f);
 			}
 		}
 
