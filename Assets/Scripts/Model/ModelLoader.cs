@@ -380,14 +380,15 @@ public class ModelLoader : MonoBehaviour
 						Color32 color = paletteColors[colorIndex];
 						Vector3 position = vertices[cubeIndex];
 
-						float pointsize;
-						if (primitiveType == 2)
+						float pointsize = linesize;
+						switch(primitiveType)
 						{
-							pointsize = linesize;
-						}
-						else
-						{
-							pointsize = linesize * 2.5f;
+							case 6:
+								pointsize = linesize * 2.5f;
+								break;
+							case 7:
+								pointsize = linesize * 5.0f;
+								break;
 						}
 
 						uv.AddRange(CubeMesh.uv);
@@ -1040,10 +1041,7 @@ public class ModelLoader : MonoBehaviour
 		Camera.main.transform.position = Vector3.back * cameraZoom + new Vector3(cameraPosition.x, cameraPosition.y, 0.0f);
 		Camera.main.transform.rotation = Quaternion.AngleAxis(0.0f, Vector3.left);
 
-		if (gradientPolygonList != null)
-		{
-			UpdateGradientsUVs();
-		}
+		UpdateMesh();
 	}
 
 	Vector3 WorldToViewportPoint(Matrix4x4 mat, Vector3 pos)
@@ -1055,7 +1053,7 @@ public class ModelLoader : MonoBehaviour
 		return new Vector3(temp.x, temp.y, temp.w);
 	}
 
-	void UpdateGradientsUVs()
+	void UpdateMesh()
 	{
 		Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
 		if (mesh == null) return;
@@ -1071,13 +1069,22 @@ public class ModelLoader : MonoBehaviour
 			bakedMesh.GetVertices(allVertices);
 		}
 
+		Camera cam = Camera.main;
+		Matrix4x4 mat = cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix;
+
+		if (gradientPolygonList != null && gradientPolygonList.Count > 0)
+		{
+			UpdateGradients(mesh, mat);
+		}		
+	}
+
+	void UpdateGradients(Mesh mesh, Matrix4x4 mat)
+	{
 		float gmaxY = float.MinValue;
 		float gminY = float.MaxValue;
 		float gmaxZ = float.MinValue;
 		float gminZ = float.MaxValue;
-
-		Camera cam = Camera.main;
-		Matrix4x4 mat = cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix;
+		
 		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
 		{
 			float maxX = float.MinValue;
@@ -1091,48 +1098,18 @@ public class ModelLoader : MonoBehaviour
 			{
 				Vector3 pos = allVertices[vertexIndex];
 				Vector3 point = WorldToViewportPoint(mat, pos);
-
 				point.y = Mathf.Clamp01(point.y);
 
-				if (point.y > maxY)
-				{
-					maxY = point.y;
-				}
+				if (point.y > maxY) maxY = point.y;
+				if (point.y > gmaxY) gmaxY = point.y;
+				if (point.y < gminY) gminY = point.y;
 
-				if (point.y > gmaxY)
-				{
-					gmaxY = point.y;
-				}
+				if (point.x > maxX) maxX = point.x;
+				if (point.x < minX) minX = point.x;
 
-				if (point.y < gminY)
-				{
-					gminY = point.y;
-				}
-
-				if (point.x > maxX)
-				{
-					maxX = point.x;
-				}
-
-				if (point.x < minX)
-				{
-					minX = point.x;
-				}
-
-				if (point.z > maxZ)
-				{
-					maxZ = point.z;
-				}
-
-				if (point.z > gmaxZ)
-				{
-					gmaxZ = point.z;
-				}
-
-				if (point.z < gminZ)
-				{
-					gminZ = point.z;
-				}
+				if (point.z > maxZ) maxZ = point.z;
+				if (point.z > gmaxZ) gmaxZ = point.z;
+				if (point.z < gminZ) gminZ = point.z;
 			}
 
 			foreach (int vertexIndex in gradientPolygonList[i])
