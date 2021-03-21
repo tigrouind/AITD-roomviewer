@@ -1092,6 +1092,8 @@ public class ModelLoader : MonoBehaviour
 				Vector3 pos = allVertices[vertexIndex];
 				Vector3 point = WorldToViewportPoint(mat, pos);
 
+				point.y = Mathf.Clamp01(point.y);
+
 				if (point.y > maxY)
 				{
 					maxY = point.y;
