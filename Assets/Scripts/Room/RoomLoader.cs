@@ -25,6 +25,7 @@ public class RoomLoader : MonoBehaviour
 	private Timer linkToDosBoxTimer = new Timer();
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
+	private Box warpActor;
 	private bool dragging;
 	private Box currentCameraBox;
 
@@ -473,6 +474,7 @@ public class RoomLoader : MonoBehaviour
 			Camera.main.transform.position += mouseBeforeZoom - Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
 		}
 
+		bool mustWarpActor = false;
 		if (!menuEnabled && !GetComponent<WarpDialog>().WarpMenuEnabled)
 		{
 			//start drag
@@ -480,6 +482,11 @@ public class RoomLoader : MonoBehaviour
 			{
 				dragging = false;
 				mousePosition = startDragPosition = Input.mousePosition;
+
+				if(highLightedBox != null && highLightedBox.name == "Actor")
+				{
+					warpActor = highLightedBox;
+				}
 			}
 
 			//dragging
@@ -488,22 +495,36 @@ public class RoomLoader : MonoBehaviour
 				Vector3 newMousePosition = Input.mousePosition;
 				if (newMousePosition != this.mousePosition)
 				{
-					Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
-					Vector3 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraHeight)
-										 - Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
+					if (warpActor == null)
+					{
+						Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
+						Vector3 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraHeight)
+											- Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
 
-					Camera.main.transform.position += mouseDelta;
-					mousePosition = newMousePosition;
+						Camera.main.transform.position += mouseDelta;
+						mousePosition = newMousePosition;
+					}
+					else if (Input.GetMouseButtonDown(1))
+					{
+						mustWarpActor = true;
+					}
+					
 					if((startDragPosition - newMousePosition).magnitude > 4.0f)
 					{
 						dragging = true;
 					}
 				}
 			}
+
+			//end drag
+			if (Input.GetMouseButtonUp(0))
+			{
+				warpActor = null;
+			}
 		}
 
 		//menu
-		if (Input.GetMouseButtonDown(1))
+		if (Input.GetMouseButtonDown(1) && warpActor == null)
 		{
 			WarpDialog warpDialog = GetComponent<WarpDialog>();
 			if(menuEnabled)
@@ -560,6 +581,13 @@ public class RoomLoader : MonoBehaviour
 		{
 			currentCamera = dosBox.CurrentCamera;
 			SetRoomObjectsVisibility(room);
+		}
+
+		//must be done after DosBox update
+		if (mustWarpActor) 
+		{
+			mustWarpActor = false;
+			GetComponent<WarpDialog>().WarpActor(warpActor);
 		}
 
 		//process keys
