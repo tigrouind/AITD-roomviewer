@@ -918,9 +918,12 @@ public class RoomLoader : MonoBehaviour
 				break;
 
 			case KeyCode.Mouse2:
+				//reset position
+				Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
+				Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);				
+				Camera.main.transform.position = new Vector3(position.x, Camera.main.transform.position.y, position.z);
+
 				//reset zoom
-				Vector3 pos = Camera.main.transform.position;
-				Camera.main.transform.position = new Vector3(pos.x, defaultCameraZoom, pos.z);
 				float planeWidth = Mathf.Tan(Camera.main.fieldOfView * Mathf.Deg2Rad / 2.0f);
 				Camera.main.orthographicSize = defaultCameraZoom * planeWidth;
 				break;
