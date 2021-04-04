@@ -817,7 +817,7 @@ public class DosBox : MonoBehaviour
 
 	public void UpdateTargetSlot(Box highLightedBox)
 	{
-		if (highLightedBox != null && !GetComponent<WarpDialog>().WarpMenuEnabled)
+		if (highLightedBox != null && highLightedBox.name == "Actor" && !GetComponent<WarpDialog>().WarpMenuEnabled)
 		{
 			if (InputDigit(ref targetSlot))
 			{
