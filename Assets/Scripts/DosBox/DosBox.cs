@@ -22,6 +22,7 @@ public class DosBox : MonoBehaviour
 	public int CurrentCamera = -1;
 	public int CurrentCameraRoom;
 	public int CurrentCameraFloor;
+	public bool ExchangeEnabled;
 
 	public ProcessMemoryReader ProcessReader;
 	public Box Player;
@@ -817,40 +818,58 @@ public class DosBox : MonoBehaviour
 
 	public void UpdateTargetSlot(Box highLightedBox)
 	{
-		if (highLightedBox != null && highLightedBox.name == "Actor" && !GetComponent<WarpDialog>().WarpMenuEnabled)
+		if (highLightedBox != null && highLightedBox.name == "Actor" && !GetComponent<WarpDialog>().WarpMenuEnabled && !Input.GetKeyDown(KeyCode.Escape))
 		{
-			if (InputDigit(ref targetSlot))
+			if (Input.GetKeyDown(KeyCode.X))
 			{
-				UpdateTargetSlotText();
-			}
-
-			if (Input.GetKeyDown(KeyCode.Backspace))
-			{
-				targetSlot = targetSlot >= 10 ? targetSlot / 10 : -1;
-				UpdateTargetSlotText();
-			}
-
-			if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-			{
-				if (targetSlot >= 0 && targetSlot < 50)
+				ExchangeEnabled = !ExchangeEnabled;		
+				if(ExchangeEnabled)
 				{
-					ExchangeActorSlots(highLightedBox.Slot, targetSlot);
-				}
-
-				targetSlot = -1;
+					targetSlot = -1;
+				}			
 				UpdateTargetSlotText();
+			}
+
+			if (ExchangeEnabled)
+			{
+				if (InputDigit(ref targetSlot))
+				{
+					UpdateTargetSlotText();
+				}
+				else if (Input.GetKeyDown(KeyCode.Backspace))
+				{
+					targetSlot = targetSlot >= 10 ? targetSlot / 10 : -1;
+					UpdateTargetSlotText();
+				}							
+				else if(Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
+				{			
+					if (targetSlot >= 0 && targetSlot < 50 && highLightedBox != null)
+					{
+						ExchangeActorSlots(highLightedBox.Slot, targetSlot);
+					}
+
+					ExchangeEnabled = false;
+					UpdateTargetSlotText();
+				}
 			}
 		}
-		else if (targetSlot != -1)
+		else if (ExchangeEnabled) 
 		{
-			targetSlot = -1;
+			ExchangeEnabled = false;
 			UpdateTargetSlotText();
 		}
 	}
 
 	void UpdateTargetSlotText()
-	{
-		RightText.text = (targetSlot == -1) ? string.Empty : string.Format("Exchange with SLOT {0}", targetSlot);
+	{		
+		if (ExchangeEnabled)
+		{
+			RightText.text = targetSlot == -1 ? "Exchange with SLOT" : string.Format("Exchange with SLOT {0}", targetSlot);	
+		}	
+		else
+		{
+			RightText.text = string.Empty;
+		}	
 	}
 
 	bool InputDigit(ref int value)
