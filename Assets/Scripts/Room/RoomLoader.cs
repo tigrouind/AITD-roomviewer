@@ -125,6 +125,8 @@ public class RoomLoader : MonoBehaviour
 			dosBox.CurrentCameraRoom >= 0 && dosBox.CurrentCameraRoom < camerasPerRoom.Count &&
 			currentCamera >= 0 && currentCamera < camerasPerRoom[dosBox.CurrentCameraRoom].Count ? camerasPerRoom[dosBox.CurrentCameraRoom][currentCamera] : -1;
 
+		CameraFrustum.SetActive(ShowAreas.Value != 0 && currentCameraBox != null);
+
 		foreach (Transform roomTransform in rooms)
 		{
 			bool currentRoom = room == roomIndex;
@@ -1050,14 +1052,14 @@ public class RoomLoader : MonoBehaviour
 		if(highLightedBox != currentCameraBox)
 		{
 			SetupCameraFrustum(highLightedBox);
-			CameraFrustum.SetActive(true);
 			currentCameraBox = highLightedBox;
 		}
 		else
 		{
-			CameraFrustum.SetActive(false);
 			currentCameraBox = null;
 		}
+
+		SetRoomObjectsVisibility(room);
 	}
 
 	void SetupCameraFrustum(Box box)
