@@ -114,10 +114,11 @@ public class RoomLoader : MonoBehaviour
 
 	void SetRoomObjectsVisibility(int room)
 	{
-		bool showallrooms = ShowRooms.Value == 3 || ShowRooms.Value == 2;
-		bool showallroomstransparent = ShowRooms.Value == 2;
-		bool showcolliders = ShowRooms.Value != 0;
-		bool showtiggers = ShowTriggers.BoolValue;
+		bool showAllRooms = ShowRooms.Value == 3 || ShowRooms.Value == 2;
+		bool showAllRoomsTransparent = ShowRooms.Value == 2;
+		bool showColliders = ShowRooms.Value != 0;
+		bool showTriggers = ShowTriggers.BoolValue;
+		bool showAreas = ShowAreas.Value != 0;
 
 		int roomIndex = 0;
 		var dosBox = GetComponent<DosBox>();
@@ -125,7 +126,7 @@ public class RoomLoader : MonoBehaviour
 			dosBox.CurrentCameraRoom >= 0 && dosBox.CurrentCameraRoom < camerasPerRoom.Count &&
 			currentCamera >= 0 && currentCamera < camerasPerRoom[dosBox.CurrentCameraRoom].Count ? camerasPerRoom[dosBox.CurrentCameraRoom][currentCamera] : -1;
 
-		CameraFrustum.SetActive(ShowAreas.Value != 0 && currentCameraBox != null);
+		CameraFrustum.SetActive(showAreas && currentCameraBox != null);
 
 		foreach (Transform roomTransform in rooms)
 		{
@@ -139,7 +140,7 @@ public class RoomLoader : MonoBehaviour
 			{
 				if (box.name == "Trigger")
 				{
-					box.gameObject.SetActive(showtiggers && currentRoom);
+					box.gameObject.SetActive(showTriggers && currentRoom);
 				}
 
 				if (box.name == "Camera")
@@ -152,8 +153,8 @@ public class RoomLoader : MonoBehaviour
 
 				if (box.name == "Collider")
 				{
-					box.gameObject.SetActive(showcolliders && (showallrooms || currentRoom));
-					box.Alpha = (byte)((showallroomstransparent && !currentRoom) ? 40 : 255);
+					box.gameObject.SetActive(showColliders && (showAllRooms || currentRoom));
+					box.Alpha = (byte)((showAllRoomsTransparent && !currentRoom) ? 40 : 255);
 				}
 			}
 			roomIndex++;
