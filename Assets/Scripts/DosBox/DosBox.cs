@@ -838,6 +838,7 @@ public class DosBox : MonoBehaviour
 				}
 				else if (Input.GetKeyDown(KeyCode.Backspace))
 				{
+					if (targetSlot == -1) ExchangeEnabled = false;
 					targetSlot = targetSlot >= 10 ? targetSlot / 10 : -1;
 					UpdateTargetSlotText();
 				}							
@@ -900,7 +901,8 @@ public class DosBox : MonoBehaviour
 	{
 		for(int digit = 0 ; digit <= 9 ; digit++)
 		{
-			if (Input.GetKeyDown(KeyCode.Keypad0 + digit))
+			if (Input.GetKeyDown(KeyCode.Keypad0 + digit)
+			 || Input.GetKeyDown(KeyCode.Alpha0 + digit))
 			{
 				value = digit;
 				return true;
