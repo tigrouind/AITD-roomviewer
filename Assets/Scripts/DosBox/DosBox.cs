@@ -22,7 +22,6 @@ public class DosBox : MonoBehaviour
 	public int CurrentCamera = -1;
 	public int CurrentCameraRoom;
 	public int CurrentCameraFloor;
-	public bool ExchangeEnabled;
 
 	public ProcessMemoryReader ProcessReader;
 	public Box Player;
@@ -70,7 +69,6 @@ public class DosBox : MonoBehaviour
 	private int inHand;
 	private bool allowInventory;
 	private bool saveTimerFlag;
-	private int targetSlot;
 
 	Box GetActor(int index)
 	{
@@ -812,152 +810,15 @@ public class DosBox : MonoBehaviour
 		return actorsAddress + index * actorStructSize[dosBoxPattern];
 	}
 
-	#endregion
-
-	#region Exchange slots
-
-	public void UpdateTargetSlot(Box highLightedBox)
+	public int GetActorSize()
 	{
-		if (highLightedBox != null && highLightedBox.name == "Actor" && !GetComponent<WarpDialog>().WarpMenuEnabled && !Input.GetKeyDown(KeyCode.Escape))
-		{
-			if (Input.GetKeyDown(KeyCode.X))
-			{
-				ExchangeEnabled = !ExchangeEnabled;		
-				if(ExchangeEnabled)
-				{
-					targetSlot = -1;
-				}			
-				UpdateTargetSlotText();
-			}
-
-			if (ExchangeEnabled)
-			{
-				if (InputDigit(ref targetSlot))
-				{
-					UpdateTargetSlotText();
-				}
-				else if (Input.GetKeyDown(KeyCode.Backspace))
-				{
-					if (targetSlot == -1) ExchangeEnabled = false;
-					targetSlot = targetSlot >= 10 ? targetSlot / 10 : -1;
-					UpdateTargetSlotText();
-				}							
-				else if(Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
-				{			
-					if (targetSlot >= 0 && targetSlot < 50 && highLightedBox != null)
-					{
-						ExchangeActorSlots(highLightedBox.Slot, targetSlot);
-					}
-
-					ExchangeEnabled = false;
-					UpdateTargetSlotText();
-				}
-			}
-		}
-		else if (ExchangeEnabled) 
-		{
-			ExchangeEnabled = false;
-			UpdateTargetSlotText();
-		}
+		return actorStructSize[dosBoxPattern];
 	}
 
-	void UpdateTargetSlotText()
-	{		
-		if (ExchangeEnabled)
-		{
-			RightText.text = targetSlot == -1 ? "Exchange with SLOT" : string.Format("Exchange with SLOT {0}", targetSlot);	
-		}	
-		else
-		{
-			RightText.text = string.Empty;
-		}	
-	}
-
-	bool InputDigit(ref int value)
+	public int GetObjectMemoryAddress(int index)
 	{
-		int digit;
-		if (IsKeypadKeyDown(out digit))
-		{
-			if (value == -1)
-			{
-				value = digit;
-			}
-			else
-			{
-				int newValue = digit + value * 10;
-				if (newValue < 50)
-				{
-					value = newValue;
-				}
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-
-	bool IsKeypadKeyDown(out int value)
-	{
-		for(int digit = 0 ; digit <= 9 ; digit++)
-		{
-			if (Input.GetKeyDown(KeyCode.Keypad0 + digit)
-			 || Input.GetKeyDown(KeyCode.Alpha0 + digit))
-			{
-				value = digit;
-				return true;
-			}
-		}
-
-		value = -1;
-		return false;
-	}
-
-	void ExchangeActorSlots(int slotFrom, int slotTo)
-	{
-		if (ProcessReader != null && IsCDROMVersion)
-		{
-			if (slotFrom != slotTo)
-			{
-				int actorSize = actorStructSize[dosBoxPattern];
-				int offsetFrom = GetActorMemoryAddress(slotFrom);
-				int offsetTo = GetActorMemoryAddress(slotTo);
-
-				byte[] memoryFrom = new byte[actorSize];
-				byte[] memoryTo = new byte[actorSize];
-
-				//exchange slots
-				ProcessReader.Read(memoryFrom, offsetFrom, actorSize);
-				ProcessReader.Read(memoryTo, offsetTo, actorSize);
-
-				ProcessReader.Write(memoryTo, offsetFrom, actorSize);
-				ProcessReader.Write(memoryFrom, offsetTo, actorSize);
-
-				//update ownerID
-				int objectIdFrom = memoryFrom.ReadShort(0);
-				int objectIdTo = memoryTo.ReadShort(0);
-
-				UpdateObjectOwnerID(objectIdFrom, slotTo);
-				UpdateObjectOwnerID(objectIdTo, slotFrom);
-			}
-		}
-		else
-		{
-			RightText.text = "Actor swap is not available";
-		}
-	}
-
-	void UpdateObjectOwnerID(int objectID, int ownerID)
-	{
-		if (objectID != -1)
-		{
-			int objectAddress = memory.ReadFarPointer(entryPoint + 0x2400E);
-			int address = objectAddress + objectID * 52;
-
-			byte[] buffer = new byte[2];
-			buffer.Write((short)ownerID, 0);
-			ProcessReader.Write(buffer, address, buffer.Length);
-		}
+		int objectAddress = memory.ReadFarPointer(entryPoint + 0x2400E);
+		return objectAddress + index * 52;
 	}
 
 	#endregion

@@ -576,7 +576,7 @@ public class RoomLoader : MonoBehaviour
 		dosBox.CheckDelay();
 		dosBox.UpdateAllActors();
 		dosBox.UpdateBoxInfo();
-		if(isAITD1) dosBox.UpdateTargetSlot(highLightedBox);
+		if(isAITD1 && dosBox.IsCDROMVersion) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
 
