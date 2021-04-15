@@ -116,249 +116,247 @@ public class DosBox : MonoBehaviour
 	public void UpdateAllActors()
 	{
 		Player = null;
-		if (ProcessReader != null)
+
+		//read actors info
+		for (int i = 0 ; i < Boxes.Length ; i++) //up to 50 actors max
 		{
-			//read actors info
-			for (int i = 0 ; i < Boxes.Length ; i++) //up to 50 actors max
+			int k = actorsAddress + i * actorStructSize[dosBoxPattern];
+			int id = memory.ReadShort(k + 0);
+
+			if (id != -1)
 			{
-				int k = actorsAddress + i * actorStructSize[dosBoxPattern];
-				int id = memory.ReadShort(k + 0);
+				Box box = GetActor(i);
+				box.ID = id;
+				box.Body = memory.ReadShort(k + 2);
+				box.Flags = memory.ReadShort(k + 4);
+				box.ColFlags = memory.ReadShort(k + 6);
 
-				if (id != -1)
+				memory.ReadBoundingBox(k + 8, out box.BoundingLower, out box.BoundingUpper);
+
+				FixBoundingWrap(ref box.BoundingLower.x, ref box.BoundingUpper.x);
+				FixBoundingWrap(ref box.BoundingLower.z, ref box.BoundingUpper.z);
+
+				memory.ReadBoundingBox(k + 20, out box.Box2DLower, out box.Box2DUpper);
+
+				box.LocalPosition = memory.ReadVector(k + 28);
+				box.WorldPosition = memory.ReadVector(k + 34);
+				box.Angles = memory.ReadVector(k + 40);
+
+				box.Floor = memory.ReadShort(k + 46);
+				box.Room = memory.ReadShort(k + 48);
+				box.LifeMode = memory.ReadShort(k + 50);
+				box.Life = memory.ReadShort(k + 52);
+				box.Chrono = memory.ReadUnsignedInt(k + 54);
+				box.RoomChrono = memory.ReadUnsignedInt(k + 58);
+				box.Anim = memory.ReadShort(k + 62);
+				box.AnimType = memory.ReadShort(k + 64);
+				box.NextAnim = memory.ReadShort(k + 66);
+				box.Keyframe = memory.ReadShort(k + 74);
+				box.TotalFrames = memory.ReadShort(k + 76);
+				box.EndFrame = memory.ReadShort(k + 78);
+				box.EndAnim = memory.ReadShort(k + 80);
+
+				int trackModeOffset = trackModeOffsets[dosBoxPattern];
+				box.TrackMode = memory.ReadShort(k + trackModeOffset);
+				box.TrackNumber = memory.ReadShort(k + 84);
+				box.PositionInTrack = memory.ReadShort(k + 88);
+
+				int bodyAddress, animAddress;
+				if (bodyIdToMemoryAddress.TryGetValue(box.Body, out bodyAddress) &&
+					animIdToMemoryAddress.TryGetValue(box.Anim, out animAddress))
 				{
-					Box box = GetActor(i);
-					box.ID = id;
-					box.Body = memory.ReadShort(k + 2);
-					box.Flags = memory.ReadShort(k + 4);
-					box.ColFlags = memory.ReadShort(k + 6);
+					int bonesInAnim = memory.ReadShort(animAddress + 2);
+					int keyframeAddress = animAddress + box.Keyframe * (bonesInAnim * 8 + 8);
+					box.KeyFrameTime = memory.ReadUnsignedShort(bodyAddress + 20);
+					box.KeyFrameLength = memory.ReadShort(keyframeAddress + 4);
+				}
 
-					memory.ReadBoundingBox(k + 8, out box.BoundingLower, out box.BoundingUpper);
-
-					FixBoundingWrap(ref box.BoundingLower.x, ref box.BoundingUpper.x);
-					FixBoundingWrap(ref box.BoundingLower.z, ref box.BoundingUpper.z);
-
-					memory.ReadBoundingBox(k + 20, out box.Box2DLower, out box.Box2DUpper);
-
-					box.LocalPosition = memory.ReadVector(k + 28);
-					box.WorldPosition = memory.ReadVector(k + 34);
-					box.Angles = memory.ReadVector(k + 40);
-
-					box.Floor = memory.ReadShort(k + 46);
-					box.Room = memory.ReadShort(k + 48);
-					box.LifeMode = memory.ReadShort(k + 50);
-					box.Life = memory.ReadShort(k + 52);
-					box.Chrono = memory.ReadUnsignedInt(k + 54);
-					box.RoomChrono = memory.ReadUnsignedInt(k + 58);
-					box.Anim = memory.ReadShort(k + 62);
-					box.AnimType = memory.ReadShort(k + 64);
-					box.NextAnim = memory.ReadShort(k + 66);
-					box.Keyframe = memory.ReadShort(k + 74);
-					box.TotalFrames = memory.ReadShort(k + 76);
-					box.EndFrame = memory.ReadShort(k + 78);
-					box.EndAnim = memory.ReadShort(k + 80);
-
-					int trackModeOffset = trackModeOffsets[dosBoxPattern];
-					box.TrackMode = memory.ReadShort(k + trackModeOffset);
-					box.TrackNumber = memory.ReadShort(k + 84);
-					box.PositionInTrack = memory.ReadShort(k + 88);
-
-					int bodyAddress, animAddress;
-					if (bodyIdToMemoryAddress.TryGetValue(box.Body, out bodyAddress) &&
-					    animIdToMemoryAddress.TryGetValue(box.Anim, out animAddress))
-					{
-						int bonesInAnim = memory.ReadShort(animAddress + 2);
-						int keyframeAddress = animAddress + box.Keyframe * (bonesInAnim * 8 + 8);
-						box.KeyFrameTime = memory.ReadUnsignedShort(bodyAddress + 20);
-						box.KeyFrameLength = memory.ReadShort(keyframeAddress + 4);
-					}
-
-					if (dosBoxPattern == 0) //AITD1 only
-					{
-						box.Mod = memory.ReadVector(k + 90);
-					}
-					else
-					{
-						box.Mod = Vector3Int.zero;
-					}
-
-					box.OldAngle = memory.ReadShort(k + 106);
-					box.NewAngle = memory.ReadShort(k + 108);
-					box.RotateTime = memory.ReadShort(k + 110);
-					box.Speed = memory.ReadShort(k + 116);
-
-					box.Col = memory.ReadVector(k + 126);
-					box.ColBy = memory.ReadShort(k + 132);
-					box.HardTrigger = memory.ReadShort(k + 134);
-					box.HardCol = memory.ReadShort(k + 136);
-					box.Hit = memory.ReadShort(k + 138);
-					box.HitBy = memory.ReadShort(k + 140);
-					box.ActionType = memory.ReadShort(k + 142);
-					box.HotBoxSize = memory.ReadShort(k + 148);
-					box.HitForce = memory.ReadShort(k + 150);
-					box.HotPosition = memory.ReadVector(k + 154);
+				if (dosBoxPattern == 0) //AITD1 only
+				{
+					box.Mod = memory.ReadVector(k + 90);
 				}
 				else
 				{
-					RemoveActor(i);
+					box.Mod = Vector3Int.zero;
 				}
-			}
 
-			//search current camera target (fallback if player not found)
-			int cameraTargetID = -1;
-			if (IsCDROMVersion)
+				box.OldAngle = memory.ReadShort(k + 106);
+				box.NewAngle = memory.ReadShort(k + 108);
+				box.RotateTime = memory.ReadShort(k + 110);
+				box.Speed = memory.ReadShort(k + 116);
+
+				box.Col = memory.ReadVector(k + 126);
+				box.ColBy = memory.ReadShort(k + 132);
+				box.HardTrigger = memory.ReadShort(k + 134);
+				box.HardCol = memory.ReadShort(k + 136);
+				box.Hit = memory.ReadShort(k + 138);
+				box.HitBy = memory.ReadShort(k + 140);
+				box.ActionType = memory.ReadShort(k + 142);
+				box.HotBoxSize = memory.ReadShort(k + 148);
+				box.HitForce = memory.ReadShort(k + 150);
+				box.HotPosition = memory.ReadVector(k + 154);
+			}
+			else
 			{
-				int currentCameraTarget = memory.ReadShort(entryPoint + 0x19B6C);
-				foreach (Box box in Boxes)
-				{
-					if (box != null && box.Slot == currentCameraTarget)
-					{
-						cameraTargetID = box.ID;
-						break;
-					}
-				}
+				RemoveActor(i);
 			}
+		}
 
-			//search player
+		//search current camera target (fallback if player not found)
+		int cameraTargetID = -1;
+		if (IsCDROMVersion)
+		{
+			int currentCameraTarget = memory.ReadShort(entryPoint + 0x19B6C);
 			foreach (Box box in Boxes)
 			{
-				if (box != null && (box.TrackMode == 1 || box.ID == lastValidPlayerIndex))
+				if (box != null && box.Slot == currentCameraTarget)
 				{
-					//update player index
-					lastValidPlayerIndex = cameraTargetID = box.ID;
+					cameraTargetID = box.ID;
 					break;
 				}
 			}
+		}
 
-			//automatically switch room and floor (has to be done before setting other actors positions)
-			foreach (Box box in Boxes)
+		//search player
+		foreach (Box box in Boxes)
+		{
+			if (box != null && (box.TrackMode == 1 || box.ID == lastValidPlayerIndex))
 			{
-				if (box != null && box.ID == cameraTargetID)
-				{
-					SwitchRoom(box.Floor, box.Room);
-				}
+				//update player index
+				lastValidPlayerIndex = cameraTargetID = box.ID;
+				break;
 			}
+		}
 
-			//update all boxes
-			foreach (Box box in Boxes)
+		//automatically switch room and floor (has to be done before setting other actors positions)
+		foreach (Box box in Boxes)
+		{
+			if (box != null && box.ID == cameraTargetID)
 			{
-				if (box != null)
+				SwitchRoom(box.Floor, box.Room);
+			}
+		}
+
+		//update all boxes
+		foreach (Box box in Boxes)
+		{
+			if (box != null)
+			{
+				Vector3Int roomPosition;
+				if (GetComponent<RoomLoader>().TryGetRoomPosition(box.Floor, box.Room, out roomPosition))
 				{
-					Vector3Int roomPosition;
-					if (GetComponent<RoomLoader>().TryGetRoomPosition(box.Floor, box.Room, out roomPosition))
+					//local to global position
+					Vector3 boxPosition = (Vector3)(box.BoundingPos + roomPosition) / 1000.0f;
+					boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z);
+
+					if (box.transform.position != boxPosition)
 					{
-						//local to global position
-						Vector3 boxPosition = (Vector3)(box.BoundingPos + roomPosition) / 1000.0f;
-						boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z);
+						Vector3 offset = 1000.0f * (box.transform.position - boxPosition);
+						float distance = new Vector3(Mathf.Round(offset.x), 0.0f, Mathf.Round(offset.z)).magnitude;
+						box.LastOffset = Mathf.RoundToInt(distance);
+						box.LastDistance += distance;
+						box.transform.position = boxPosition;
+					}
 
-						if (box.transform.position != boxPosition)
+					//make actors appears slightly bigger than they are to be not covered by colliders
+					Vector3 delta = Vector3.one;
+					box.transform.localScale = (box.BoundingSize + delta) / 1000.0f;
+
+					//make sure very small actors are visible
+					box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.1f);
+
+					bool isAITD1 = dosBoxPattern == 0;
+					if (isAITD1)
+					{
+						UpdateHotPointBox(box, roomPosition);
+					}
+
+					//camera target
+					if(box.ID == cameraTargetID)
+					{
+						//check if player has moved
+						if (box.transform.position.x != lastPlayerPosition.x || box.transform.position.z != lastPlayerPosition.z)
 						{
-							Vector3 offset = 1000.0f * (box.transform.position - boxPosition);
-							float distance = new Vector3(Mathf.Round(offset.x), 0.0f, Mathf.Round(offset.z)).magnitude;
-							box.LastOffset = Mathf.RoundToInt(distance);
-							box.LastDistance += distance;
-							box.transform.position = boxPosition;
+							//center camera to player position
+							GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
+							lastPlayerPosition = box.transform.position;
 						}
+					}
 
-						//make actors appears slightly bigger than they are to be not covered by colliders
-						Vector3 delta = Vector3.one;
-						box.transform.localScale = (box.BoundingSize + delta) / 1000.0f;
+					//player
+					bool isPlayer = box.ID == lastValidPlayerIndex;
+					if (isPlayer)
+					{
+						//arrow follow player
+						Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
 
-						//make sure very small actors are visible
-						box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.1f);
+						//face camera
+						float angle = box.Angles.y * 360.0f / 1024.0f;
+						Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
+						Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
 
-						bool isAITD1 = dosBoxPattern == 0;
-						if (isAITD1)
-						{
-							UpdateHotPointBox(box, roomPosition);
-						}
+						float minBoxScale = Mathf.Min(box.transform.localScale.x, box.transform.localScale.z);
+						Arrow.transform.localScale = new Vector3(
+							minBoxScale * 0.9f,
+							minBoxScale * 0.9f,
+							1.0f);
 
-						//camera target
-						if(box.ID == cameraTargetID)
-						{
-							//check if player has moved
-							if (box.transform.position.x != lastPlayerPosition.x || box.transform.position.z != lastPlayerPosition.z)
-							{
-								//center camera to player position
-								GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
-								lastPlayerPosition = box.transform.position;
-							}
-						}
-
-						//player
-						bool isPlayer = box.ID == lastValidPlayerIndex;
-						if (isPlayer)
-						{
-							//arrow follow player
-							Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
-
-							//face camera
-							float angle = box.Angles.y * 360.0f / 1024.0f;
-							Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
-							Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
-
-							float minBoxScale = Mathf.Min(box.transform.localScale.x, box.transform.localScale.z);
-							Arrow.transform.localScale = new Vector3(
-								minBoxScale * 0.9f,
-								minBoxScale * 0.9f,
-								1.0f);
-
-							//player is white
-							box.Color = new Color32(255, 255, 255, 255);
-							Arrow.AlwaysOnTop = Camera.main.orthographic;
-							Player = box;
-						}
-						else
-						{
-							if (box.Slot == 0)
-							{
-								box.Color = new Color32(255, 255, 255, 255);
-							}
-							else
-							{
-								//other actors are green
-								box.Color = new Color32(0, 128, 0, 255);
-							}
-						}
-
-						if (isAITD1)
-						{
-							UpdateWorldPosBox(box, roomPosition, isPlayer);
-						}
-
-						box.AlwaysOnTop = Camera.main.orthographic;
+						//player is white
+						box.Color = new Color32(255, 255, 255, 255);
+						Arrow.AlwaysOnTop = Camera.main.orthographic;
+						Player = box;
 					}
 					else
 					{
-						RemoveActor(box.Slot);
+						if (box.Slot == 0)
+						{
+							box.Color = new Color32(255, 255, 255, 255);
+						}
+						else
+						{
+							//other actors are green
+							box.Color = new Color32(0, 128, 0, 255);
+						}
 					}
-				}
-			}
 
-			if (IsCDROMVersion)
-			{
-				CurrentCamera = memory.ReadShort(entryPoint + 0x24056);
-				CurrentCameraFloor = memory.ReadShort(entryPoint + 0x24058);
-				CurrentCameraRoom = memory.ReadShort(entryPoint + 0x2405A);
-			}
+					if (isAITD1)
+					{
+						UpdateWorldPosBox(box, roomPosition, isPlayer);
+					}
 
-			if (ShowAITD1Vars)
-			{
-				allowInventory = memory.ReadShort(entryPoint + 0x19B6E) == 1;
-				inHand = memory.ReadShort(entryPoint + 0x24054);
-
-				//set by AITD when long running code is started (eg: loading ressource)
-				saveTimerFlag = memory[entryPoint + 0x1B0FC] == 1;
-
-				if (!saveTimerFlag)
-				{
-					InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x19D12);
-					InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x242E0);
+					box.AlwaysOnTop = Camera.main.orthographic;
 				}
 				else
 				{
-					InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x1B0F8);
-					InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x1B0F6);
+					RemoveActor(box.Slot);
 				}
+			}
+		}
+
+		if (IsCDROMVersion)
+		{
+			CurrentCamera = memory.ReadShort(entryPoint + 0x24056);
+			CurrentCameraFloor = memory.ReadShort(entryPoint + 0x24058);
+			CurrentCameraRoom = memory.ReadShort(entryPoint + 0x2405A);
+		}
+
+		if (ShowAITD1Vars)
+		{
+			allowInventory = memory.ReadShort(entryPoint + 0x19B6E) == 1;
+			inHand = memory.ReadShort(entryPoint + 0x24054);
+
+			//set by AITD when long running code is started (eg: loading ressource)
+			saveTimerFlag = memory[entryPoint + 0x1B0FC] == 1;
+
+			if (!saveTimerFlag)
+			{
+				InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x19D12);
+				InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x242E0);
+			}
+			else
+			{
+				InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x1B0F8);
+				InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x1B0F6);
 			}
 		}
 
@@ -555,7 +553,7 @@ public class DosBox : MonoBehaviour
 
 	public void CalculateFPS()
 	{
-		if (ProcessReader != null && ShowAITD1Vars)
+		if (ShowAITD1Vars)
 		{
 			//fps
 			int fps = memory.ReadShort(entryPoint + 0x19D18);
