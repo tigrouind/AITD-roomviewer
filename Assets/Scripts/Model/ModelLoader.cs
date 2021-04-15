@@ -634,6 +634,10 @@ public class ModelLoader : MonoBehaviour
 					else if (tex256[n - 1] != 0) result[n] = tex256[n - 1];
 					else if (tex256[n + 256] != 0) result[n] = tex256[n + 256];
 					else if (tex256[n - 256] != 0) result[n] = tex256[n - 256];
+					else if (tex256[n + 256 + 1] != 0) result[n] = tex256[n + 256 + 1];
+					else if (tex256[n + 256 - 1] != 0) result[n] = tex256[n + 256 - 1];
+					else if (tex256[n - 256 + 1] != 0) result[n] = tex256[n - 256 + 1];
+					else if (tex256[n - 256 - 1] != 0) result[n] = tex256[n - 256 - 1];
 				}
 			}
 		}
