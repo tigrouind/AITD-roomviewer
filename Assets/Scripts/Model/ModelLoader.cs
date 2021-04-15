@@ -64,6 +64,7 @@ public class ModelLoader : MonoBehaviour
 	public ToggleButton EnableAnimation;
 	public ToggleButton ShowAdditionalInfo;
 	public GameObject BoundingBox;
+	public GameObject Grid;
 
 	void LoadBody(bool resetcamera = true)
 	{
@@ -1343,6 +1344,7 @@ public class ModelLoader : MonoBehaviour
 
 			case KeyCode.E:
 				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+				Grid.SetActive(ShowAdditionalInfo.BoolValue);
 				BoundingBox.gameObject.SetActive(ShowAdditionalInfo.BoolValue);
 				RefreshLeftText();
 				break;
