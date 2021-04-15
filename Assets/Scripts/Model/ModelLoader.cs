@@ -80,8 +80,12 @@ public class ModelLoader : MonoBehaviour
 		filter.sharedMesh = null;
 
 		//delete all bones
-		foreach (Transform child in transform) {
-			GameObject.Destroy(child.gameObject);
+		foreach (Transform child in transform) 
+		{
+			if(child.gameObject != BoundingBox)
+			{
+				GameObject.Destroy(child.gameObject);
+			}			
 		}
 
 		//load data
@@ -792,8 +796,12 @@ public class ModelLoader : MonoBehaviour
 			var scale = new Vector3(1.0f, -1.0f, 1.0f) / 1000.0f;
 			var offset = transform.rotation *
 				Vector3.Scale((Vector3)nextFrame.Offset * framePosition + frameDistance, scale);
-			bones[0].transform.position += offset;
-			BoundingBox.transform.position = offset;
+
+			transform.localPosition = Quaternion.Inverse(transform.rotation) * offset;
+		}
+		else
+		{
+			transform.localPosition = Vector3.zero;
 		}
 	}
 
