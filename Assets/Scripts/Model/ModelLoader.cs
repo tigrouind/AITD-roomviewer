@@ -723,7 +723,7 @@ public class ModelLoader : MonoBehaviour
 				Quaternion.AngleAxis(angles.y, Vector3.up);
 	}
 
-	void AnimateModel()
+	Vector3 AnimateModel()
 	{
 		float totaltime = animFrames.Sum(x => x.Time);
 		float time = (Time.time * 50.0f) % totaltime;
@@ -798,11 +798,11 @@ public class ModelLoader : MonoBehaviour
 			var offset = transform.rotation *
 				Vector3.Scale((Vector3)nextFrame.Offset * framePosition + frameDistance, scale);
 
-			transform.localPosition = Quaternion.Inverse(transform.rotation) * offset;
+			return Quaternion.Inverse(transform.rotation) * offset;
 		}
 		else
 		{
-			transform.localPosition = Vector3.zero;
+			return Vector3.zero;
 		}
 	}
 
@@ -1036,17 +1036,19 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//animate
+		Vector3 offset = Vector3.zero;
 		if(animFrames != null && (modelFlags & 2) == 2 && animFrames.Count > 0)
 		{
-			AnimateModel();
+			offset = AnimateModel();
 		}
 
-		//update model
-		transform.parent.position = Vector3.zero;
+		//rotate model around center
 		transform.parent.rotation = Quaternion.identity;
+		transform.position = Vector3.zero;						
 		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);
+		transform.localPosition = -center + offset;
+		Grid.transform.localPosition = -center;
 
-		transform.parent.position = -(Quaternion.AngleAxis(cameraRotation.y, Vector3.left) * center);
 		transform.parent.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
 			* Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
 
