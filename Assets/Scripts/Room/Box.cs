@@ -10,6 +10,7 @@ public class Box : MonoBehaviour
 	private static string[] trackModeInfo = new string[] { "NONE", "MANUAL", "FOLLOW", "TRACK" };
 	private static string[] actionTypeInfo = new string[] { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
 	private static string[] lifeModeInfo = new string[] { "FLOOR", "ROOM", "CAMERA" };
+	private static string[] particleNames = { "BUBBLES", "BLOOD/DEBRIS", "", "FLASH", "SMOKE" };
 
 	public int ID;
 	public int Flags;
@@ -233,8 +234,16 @@ public class Box : MonoBehaviour
 	public void UpdateText(BoxInfo info)
 	{
 		info.Clear();
-		info.Append(name.ToUpperInvariant(), "#{0}", ID);
-
+		
+		if (name == "Actor" && DosBox.IsCDROMVersion && ID == -2 && (Anim == 0 || Anim == 1 || Anim == 3 || Anim == 4))
+		{			
+			info.Append(particleNames[Anim], "#{0}", Keyframe);
+		}
+		else
+		{
+			info.Append(name.ToUpperInvariant(), "#{0}", ID);
+		}
+		
 		if (name == "Collider" || name == "Trigger")
 		{
 			info.Append("FLAGS", "0x{0:X4}", Flags);
@@ -300,14 +309,18 @@ public class Box : MonoBehaviour
 
 			}
 
-			if (Body != -1)
+			if (Body != -1 && ID >= 0)
 			{
 				if(Anim != -1)
 				{
 					if(DosBox.ShowAITD1Vars && NextAnim != -1)
+					{
 						info.Append("BODY/ANIM", "{0}; {1}; {2}", Body, Anim, NextAnim);
+					}						
 					else
+					{
 						info.Append("BODY/ANIM", "{0}; {1}", Body, Anim);
+					}						
 
 					if (DosBox.ShowAITD1Vars && AnimType >= 0 && AnimType <= 2)
 					{
@@ -315,7 +328,9 @@ public class Box : MonoBehaviour
 					}
 				}
 				else
+				{
 					info.Append("BODY", Body);
+				}					
 			}
 
 			if (DosBox.ShowAITD1Vars && Anim != -1 && (Flags & 1) == 1)
