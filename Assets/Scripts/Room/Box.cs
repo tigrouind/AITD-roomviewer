@@ -233,8 +233,7 @@ public class Box : MonoBehaviour
 	public void UpdateText(BoxInfo info)
 	{
 		info.Clear();
-		info.Append("TYPE", name.ToUpperInvariant());
-		info.Append("ID", ID);
+		info.Append(name.ToUpperInvariant(), "#{0}", ID);
 
 		if (name == "Collider" || name == "Trigger")
 		{

@@ -3924,6 +3924,11 @@ Prefab:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 114846519685537734, guid: 1a766bd9cbdc78c48b00492edb3ff2c6,
+        type: 2}
+      propertyPath: selectedIndex
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 1a766bd9cbdc78c48b00492edb3ff2c6, type: 2}
   m_IsPrefabParent: 0
@@ -5746,7 +5751,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
+  orthographic: 1
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:
