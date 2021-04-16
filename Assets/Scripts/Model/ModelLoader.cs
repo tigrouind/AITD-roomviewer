@@ -18,8 +18,8 @@ public class ModelLoader : MonoBehaviour
 	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private VarParser varParser = new VarParser();
 
-	private string[] modelFolders = new string[] { Config.GetPath("LISTBODY.PAK"), Config.GetPath("LISTBOD2.PAK") };
-	private string[] animFolders = new string[] { Config.GetPath("LISTANIM.PAK"), Config.GetPath("LISTANI2.PAK") };
+	private string[] modelFolders = { Config.GetPath("LISTBODY.PAK"), Config.GetPath("LISTBOD2.PAK") };
+	private string[] animFolders = { Config.GetPath("LISTANIM.PAK"), Config.GetPath("LISTANI2.PAK") };
 	private string textureFolder = Config.GetPath("TEXTURES.PAK");
 
 	private int modelCount;

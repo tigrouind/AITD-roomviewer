@@ -6,10 +6,10 @@ public class Box : MonoBehaviour
 	private Color32 color;
 	private bool highlighted;
 	private bool alwaysOnTop;
-	private static string[] animTypeInfo = new string[] { "ONCE", "REPEAT", "UNINTERRUPT" };
-	private static string[] trackModeInfo = new string[] { "NONE", "MANUAL", "FOLLOW", "TRACK" };
-	private static string[] actionTypeInfo = new string[] { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
-	private static string[] lifeModeInfo = new string[] { "FLOOR", "ROOM", "CAMERA" };
+	private static string[] animTypeInfo = { "ONCE", "REPEAT", "UNINTERRUPT" };
+	private static string[] trackModeInfo = { "NONE", "MANUAL", "FOLLOW", "TRACK" };
+	private static string[] actionTypeInfo = { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
+	private static string[] lifeModeInfo = { "FLOOR", "ROOM", "CAMERA" };
 	private static string[] particleNames = { "BUBBLES", "BLOOD/DEBRIS", "", "FLASH", "SMOKE" };
 
 	public int ID;
