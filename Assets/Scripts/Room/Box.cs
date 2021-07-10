@@ -10,7 +10,7 @@ public class Box : MonoBehaviour
 	private static string[] trackModeInfo = new string[] { "NONE", "MANUAL", "FOLLOW", "TRACK" };
 	private static string[] actionTypeInfo = new string[] { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
 	private static string[] lifeModeInfo = new string[] { "FLOOR", "ROOM", "CAMERA" };
-	private static string[] particleNames = { "BUBBLES", "BLOOD/GUN", "", "", "SMOKE" };
+	private static string[] particleNames = { "BUBBLES", "BLOOD/GUN", "", "FLASH", "SMOKE" };
 
 	public int ID;
 	public int Flags;
@@ -235,7 +235,7 @@ public class Box : MonoBehaviour
 	{
 		info.Clear();
 		
-		if (name == "Actor" && DosBox.IsCDROMVersion && ID == -2 && (Anim == 0 || Anim == 1 || Anim == 4))
+		if (name == "Actor" && DosBox.IsCDROMVersion && ID == -2 && (Anim == 0 || Anim == 1 || Anim == 3 || Anim == 4))
 		{			
 			info.Append(particleNames[Anim], "#{0}", Keyframe);
 		}
