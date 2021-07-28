@@ -896,7 +896,7 @@ public class RoomLoader : MonoBehaviour
 				if (Camera.main.orthographic)
 				{
 					Camera.main.orthographicSize = Camera.main.transform.position.y * planeSize;
-					Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, 20.0f, Camera.main.transform.position.z);
+					Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, 40.0f, Camera.main.transform.position.z);
 				}
 				else
 				{
