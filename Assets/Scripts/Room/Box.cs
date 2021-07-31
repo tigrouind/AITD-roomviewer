@@ -258,6 +258,7 @@ public class Box : MonoBehaviour
 				rotation.x > 180.0f ? (rotation.x - 360.0f) : rotation.x,
 				(-rotation.y + 540.0f) % 360.0f,
 				rotation.z > 180.0f ? (rotation.z - 360.0f) : rotation.z);
+			info.Append("FOCAL", "{0} {1} {2}", CameraFocal.y, CameraFocal.z, CameraFocal.x);
 		}
 
 		if (name == "Actor")
