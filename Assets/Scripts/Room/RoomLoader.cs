@@ -26,7 +26,8 @@ public class RoomLoader : MonoBehaviour
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
 	private Box warpActor;
-	private bool dragging;
+	private bool refreshSelectedBoxAllowed = true;
+	private bool highLightedBoxAllowed = true;
 	private Box currentCameraBox;
 
 	public Text LeftText;
@@ -483,7 +484,7 @@ public class RoomLoader : MonoBehaviour
 			//start drag
 			if (Input.GetMouseButtonDown(0))
 			{
-				dragging = false;
+				refreshSelectedBoxAllowed = true;
 				mousePosition = startDragPosition = Input.mousePosition;
 
 				if(highLightedBox != null && highLightedBox.name == "Actor")
@@ -500,6 +501,7 @@ public class RoomLoader : MonoBehaviour
 				{
 					if (warpActor == null)
 					{
+						//move camera
 						Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
 						Vector3 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraHeight)
 											- Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
@@ -507,14 +509,19 @@ public class RoomLoader : MonoBehaviour
 						Camera.main.transform.position += mouseDelta;
 						mousePosition = newMousePosition;
 					}
-					else if (Input.GetMouseButtonDown(1))
+					else  
 					{
-						mustWarpActor = true;
-					}
-					
-					if((startDragPosition - newMousePosition).magnitude > 4.0f)
-					{
-						dragging = true;
+						//warp actor
+						if (Input.GetMouseButtonDown(1))
+						{
+							mustWarpActor = true;
+						}
+
+						if((startDragPosition - newMousePosition).magnitude > 4.0f)
+						{
+							refreshSelectedBoxAllowed = false;
+							highLightedBoxAllowed = false;
+						}
 					}
 				}
 			}
@@ -522,6 +529,7 @@ public class RoomLoader : MonoBehaviour
 			//end drag
 			if (Input.GetMouseButtonUp(0))
 			{
+				highLightedBoxAllowed = true;
 				warpActor = null;
 			}
 		}
@@ -626,7 +634,7 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		if (hitInfos != null && hitInfos.Length > 0
-			&& !menuEnabled && !GetComponent<WarpDialog>().WarpMenuEnabled)
+			&& !menuEnabled && !GetComponent<WarpDialog>().WarpMenuEnabled && highLightedBoxAllowed)
 		{
 			//sort colliders by priority
 			boxComparer.Room = room;
@@ -681,7 +689,7 @@ public class RoomLoader : MonoBehaviour
 	private void RefreshSelectedBox()
 	{
 		//toggle selected box
-		if (Input.GetMouseButtonUp(0) && highLightedBox != null && !dragging
+		if (Input.GetMouseButtonUp(0) && highLightedBox != null && refreshSelectedBoxAllowed
 			&& !(GetComponent<WarpDialog>().WarpMenuEnabled	 //make sure it not possible to change actor when there is a click inside warp menu
 				&& RectTransformUtility.RectangleContainsScreenPoint(GetComponent<WarpDialog>().Panel, Input.mousePosition)))
 		{
