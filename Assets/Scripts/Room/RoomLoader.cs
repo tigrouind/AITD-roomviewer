@@ -689,7 +689,7 @@ public class RoomLoader : MonoBehaviour
 			{
 				RefreshSelectedCamera();
 			}
-			else
+			else if (highLightedBox.name == "Actor")
 			{
 				if (selectedBox != highLightedBox)
 				{
