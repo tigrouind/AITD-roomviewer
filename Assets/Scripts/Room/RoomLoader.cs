@@ -508,6 +508,11 @@ public class RoomLoader : MonoBehaviour
 
 						Camera.main.transform.position += mouseDelta;
 						mousePosition = newMousePosition;
+
+						if((startDragPosition - newMousePosition).magnitude > 4.0f)
+						{
+							refreshSelectedBoxAllowed = false;
+						}
 					}
 					else  
 					{
