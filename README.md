@@ -55,7 +55,7 @@ Common issue: if AITD has been started with administrator rights, room viewer wi
 To fix this, run room viewer with administrator rights (or run AITD without administrator rights).
 
 ## Warp actor
-When the game is linked to DOSBox, it is possible to change the position of an actor by selecting it, then pressing CTRL-W. The actor will be warped to mouse position. It is also possible to manually edit positions of an actor by right clicking on it or by pressing numpad keys :
+When the game is linked to DOSBox, it is possible to change the position of an actor using drag and drop. Hold left mouse button while mouse is on an actor. Move cursor (keeping left button pressed) and right click to warp (you can do this multiple times). Then, release left button. It is also possible to manually edit position of an actor by right clicking on it or by pressing numpad keys :
 - 4, 6, 2, 8 : move actor left / right / down / up
 - 7, 9 : rotate actor left / right
 - If you hold 0 while pressing the numpad keys above, position is updated at a higher rate.
