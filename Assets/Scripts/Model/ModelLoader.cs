@@ -34,7 +34,7 @@ public class ModelLoader : MonoBehaviour
 	private Vector3Int frameDistance;
 
 	private int paletteIndex;
-	public Texture2D[] PaletteTexture;
+	private Texture2D paletteTexture;
 	public Text LeftText;
 	public Mesh SphereMesh;
 	public Mesh CubeMesh;
@@ -200,7 +200,7 @@ public class ModelLoader : MonoBehaviour
 		i += 2;
 
 		//load palette
-		Color32[] paletteColors = PaletteTexture[paletteIndex].GetPixels32();
+		Color32[] paletteColors = paletteTexture.GetPixels32();
 
 		//load texture
 		int texAHeight = 1;
@@ -864,14 +864,93 @@ public class ModelLoader : MonoBehaviour
 
 	void SetPalette()
 	{
-		paletteIndex = DetectGame() - 1;
-
 		GetComponent<SkinnedMeshRenderer>().materials[2] //noise
-			.SetTexture("_Palette", PaletteTexture[paletteIndex]);
+			.SetTexture("_Palette", paletteTexture);
 		GetComponent<SkinnedMeshRenderer>().materials[3] //gradient
-			.SetTexture("_Palette", PaletteTexture[paletteIndex]);
+			.SetTexture("_Palette", paletteTexture);
 		GetComponent<SkinnedMeshRenderer>().materials[4] //gradient2
-			.SetTexture("_Palette", PaletteTexture[paletteIndex]);
+			.SetTexture("_Palette", paletteTexture);
+	}
+
+	Texture2D GetPaletteTexture()
+	{		
+		switch (paletteIndex)
+		{
+			case 0: //AITD1
+				return GetPaletteTexture("ITD_RESS.PAK", 3);
+
+			case 1: //AITD2
+				return GetPaletteTexture("ITD_RESS.PAK", 59, true);
+
+			case 2: //AITD3
+				return GetPaletteTexture("ITD_RESS.PAK", 47, true);
+			
+			case 3: //JITD
+				return GetPaletteTexture("CAMERA16.PAK", 0, true, 64000);
+
+			case 4: //TIME GATE
+				return GetPaletteTexture("ITD_RESS.PAK", 43);
+		}	
+
+		throw new NotSupportedException();
+	}
+
+	Texture2D GetPaletteTexture(string filename, int entry, bool mapTo255 = false, int offset = 0)
+	{
+		Color32[] colors;
+		filename = Config.GetPath(filename);
+		if (File.Exists(filename))
+		{
+			colors = LoadPalette(filename, entry, mapTo255, offset);
+		}
+		else
+		{
+			colors = LoadDefaultPalette();
+		}
+		
+		var texture = new Texture2D(16, 16);
+		texture.SetPixels32(colors);
+		texture.wrapMode = TextureWrapMode.Clamp;
+		texture.Apply();
+		return texture;
+	}
+
+	Color32[] LoadPalette(string filename, int entry, bool mapTo255, int offset)
+	{
+		var colors = new Color32[256];
+		using (var pak = new UnPAK(filename))
+		{
+			var buffer = pak.GetEntry(entry);
+			for (int i = 0; i < 256; i++)
+			{					
+				byte r = buffer[i * 3 + 0 + offset];
+				byte g = buffer[i * 3 + 1 + offset];
+				byte b = buffer[i * 3 + 2 + offset];
+
+				if (mapTo255)
+				{
+					colors[i] = new Color32((byte)(r << 2 | r >> 4), (byte)(g << 2 | g >> 4), (byte)(b << 2 | b >> 4), 255);
+				}	
+				else
+				{
+					colors[i] = new Color32(r, g, b, 255);
+				}
+			}
+		}
+
+		return colors;
+	}
+
+	Color32[] LoadDefaultPalette()
+	{
+		var colors = new Color32[256];
+		for (int i = 0 ; i < 256 ; i++)
+		{
+			var color = (byte)i;
+			colors[i] = new Color32(color, color, color, 255);
+		}
+
+		return colors;
 	}
 
 	void LoadModels(string filePath)
@@ -883,7 +962,10 @@ public class ModelLoader : MonoBehaviour
 				modelCount = pak.EntryCount;
 			}
 
+			paletteIndex = DetectGame() - 1;
+			paletteTexture = GetPaletteTexture();
 			SetPalette();
+
 			LoadBody();
 		}
 	}

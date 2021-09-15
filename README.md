@@ -70,6 +70,7 @@ When the game is linked to DOSBox, you can swap two actors slot positions by hig
 Repeat room viewer installation steps. Copy the following files :
 - LISTBODY.PAK, LISTBOD2.PAK
 - LISTANIM.PAK, LISTANI2.PAK
+- ITD_RESS.PAK or CAMERA16.PAK (JITD only)
 - TEXTURES.PAK (Time Gate only)
 
 ## Commands
