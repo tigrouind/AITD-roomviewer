@@ -502,6 +502,10 @@ public class ModelLoader : MonoBehaviour
 		filter.sharedMesh = msh;
 
 		RefreshLeftText();
+		if (resetcamera)
+		{
+			frameDistance = Vector3Int.zero;
+		}
 	}
 
 	int GetTriangleListIndex(int polyType)
@@ -714,6 +718,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		RefreshLeftText();
+		frameDistance = Vector3Int.zero;
 	}
 
 	Quaternion GetRotation(Vector3 angles)
@@ -1289,7 +1294,6 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		LeftText.text = stringBuilder.ToString();
-		frameDistance = Vector3Int.zero;
 	}
 
 	public void ToggleAnimationMenuItems(bool enabled)
