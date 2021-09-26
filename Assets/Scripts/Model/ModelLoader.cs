@@ -795,10 +795,7 @@ public class ModelLoader : MonoBehaviour
 		if (ShowAdditionalInfo.BoolValue && bones.Count > 0)
 		{
 			var scale = new Vector3(1.0f, -1.0f, 1.0f) / 1000.0f;
-			var offset = transform.rotation *
-				Vector3.Scale((Vector3)nextFrame.Offset * framePosition + frameDistance, scale);
-
-			return Quaternion.Inverse(transform.rotation) * offset;
+			return Vector3.Scale((Vector3)nextFrame.Offset * framePosition + frameDistance, scale);
 		}
 		else
 		{
