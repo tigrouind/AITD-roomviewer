@@ -1125,8 +1125,8 @@ public class ModelLoader : MonoBehaviour
 		transform.parent.rotation = Quaternion.identity;
 		transform.position = Vector3.zero;						
 		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);
-		transform.localPosition = -center + offset;
-		Grid.transform.localPosition = -center;
+		transform.localPosition = -center;
+		Grid.transform.localPosition = -center - new Vector3(offset.x, offset.y, Mathf.Repeat(offset.z, 1.0f));
 
 		transform.parent.rotation = Quaternion.AngleAxis(cameraRotation.y, Vector3.left)
 			* Quaternion.AngleAxis(cameraRotation.x, Vector3.up);
