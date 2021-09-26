@@ -1376,9 +1376,12 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.Space:
-				modelFolderIndex = (modelFolderIndex + 1) % modelFolders.Length;
-				LoadModels(modelFolders[modelFolderIndex]);
-				LoadAnims(animFolders[modelFolderIndex]);
+				if (modelFolders.Length > 1)
+				{
+					modelFolderIndex = (modelFolderIndex + 1) % modelFolders.Length;
+					LoadModels(modelFolders[modelFolderIndex]);
+					LoadAnims(animFolders[modelFolderIndex]);
+				}				
 				break;
 
 			case KeyCode.UpArrow:
