@@ -8,7 +8,6 @@
 	SubShader
 	{
 		Tags { "Queue"="Transparent" "RenderType" = "Transparent" }
-		LOD 100
 
 		ZWrite Off
 		Cull Off
@@ -19,6 +18,7 @@
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
+			#include "UnityLightingCommon.cginc"
 			
 			#include "UnityCG.cginc"
 
@@ -48,7 +48,7 @@
 			
 			fixed4 frag (v2f i) : SV_Target
 			{
-				return tex2D(_MainTex, i.uv) * _Color;
+				return tex2D(_MainTex, i.uv) * _Color * _LightColor0;
 			}
 			ENDCG
 		}
