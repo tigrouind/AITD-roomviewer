@@ -47,7 +47,7 @@ public class ModelLoader : MonoBehaviour
 	private Vector3Int boundingLower;
 	private Vector3Int boundingUpper;
 
-	private Vector2 cameraRotation;
+	private Vector2 cameraRotation = new Vector2(0.0f, 20.0f);
 	private Vector2 cameraPosition;
 	private float cameraZoom = 2.0f;
 
@@ -1115,8 +1115,10 @@ public class ModelLoader : MonoBehaviour
 		//rotate model
 		if (AutoRotate.BoolValue && AutoRotate.BoolValue)
 		{
-			cameraRotation.x = Time.time * 100.0f;
-			cameraRotation.y = 20.0f;
+			float damp = 1.0f - Mathf.Pow(0.0001f, Time.deltaTime);
+			cameraRotation.x += Time.deltaTime * 100.0f;			
+			cameraRotation.y = Mathf.Lerp(cameraRotation.y, 20.0f, damp);
+			cameraPosition = Vector2.Lerp(cameraPosition, Vector2.zero, damp);
 		}
 
 		//animate
