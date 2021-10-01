@@ -919,24 +919,28 @@ public class ModelLoader : MonoBehaviour
 
 	Color32[] LoadPalette(string filename, int entry, bool mapTo255, int offset)
 	{
-		var colors = new Color32[256];
+		byte[] buffer;		
 		using (var pak = new UnPAK(filename))
 		{
-			var buffer = pak.GetEntry(entry);
-			for (int i = 0; i < 256; i++)
-			{					
-				byte r = buffer[i * 3 + 0 + offset];
-				byte g = buffer[i * 3 + 1 + offset];
-				byte b = buffer[i * 3 + 2 + offset];
+			buffer = pak.GetEntry(entry);
+		}
 
-				if (mapTo255)
-				{
-					colors[i] = new Color32((byte)(r << 2 | r >> 4), (byte)(g << 2 | g >> 4), (byte)(b << 2 | b >> 4), 255);
-				}	
-				else
-				{
-					colors[i] = new Color32(r, g, b, 255);
-				}
+		var dest = 0;
+		var colors = new Color32[256];
+		for (int i = 0; i < 256; i++)
+		{					
+			byte r = buffer[dest + 0 + offset];
+			byte g = buffer[dest + 1 + offset];
+			byte b = buffer[dest + 2 + offset];
+			dest += 3;
+
+			if (mapTo255)
+			{
+				colors[i] = new Color32((byte)(r << 2 | r >> 4), (byte)(g << 2 | g >> 4), (byte)(b << 2 | b >> 4), 255);
+			}	
+			else
+			{
+				colors[i] = new Color32(r, g, b, 255);
 			}
 		}
 
