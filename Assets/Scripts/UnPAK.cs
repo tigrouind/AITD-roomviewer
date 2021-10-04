@@ -20,15 +20,15 @@ public class UnPAK : IDisposable
 
 	public byte[] GetEntry(int index)
 	{
-		stream.Position = (index + 1) * 4;
-		stream.Position = reader.ReadUInt32() + 4;
+		stream.Seek((index + 1) * 4, SeekOrigin.Begin);
+		stream.Seek(reader.ReadUInt32() + 4, SeekOrigin.Begin);
 
 		var compressedSize = reader.ReadUInt32();
 		var uncompressedSize = reader.ReadUInt32();
 		var flag = reader.ReadByte();
 		var info5 = reader.ReadByte();
 		var offset = reader.ReadUInt16();
-		stream.Position += offset;
+		stream.Seek(offset, SeekOrigin.Current);
 
 		var dest = new byte[uncompressedSize];
 
@@ -79,11 +79,11 @@ public class UnPAK : IDisposable
 
 	int GetEntryCount()
 	{
-		stream.Position = 4;
+		stream.Seek(4, SeekOrigin.Begin);
 		int offset = reader.ReadInt32();
 		int count = offset / 4 - 1;
 
-		stream.Position = offset - 4;
+		stream.Seek(offset - 4, SeekOrigin.Begin);
 		if(reader.ReadInt32() == 0) count--; //TIMEGATE
 
 		return count;
