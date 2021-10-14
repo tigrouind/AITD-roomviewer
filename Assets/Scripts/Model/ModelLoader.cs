@@ -31,6 +31,7 @@ public class ModelLoader : MonoBehaviour
 	private List<Vector3> initialBonesPosition;
 	private int modelFlags;
 	private int previousFrame;
+	private float previousAnimCounter;
 	private Vector3Int frameDistance;
 
 	private int paletteIndex;
@@ -731,7 +732,9 @@ public class ModelLoader : MonoBehaviour
 	Vector3 AnimateModel()
 	{
 		float totaltime = animFrames.Sum(x => x.Time);
-		float time = (Time.time * 50.0f) % totaltime;
+		float scaledTime = Time.time * 50.0f;
+		float time = scaledTime % totaltime;
+		int animCounter = Mathf.FloorToInt(scaledTime / totaltime);
 
 		//find current frame
 		totaltime = 0.0f;
@@ -753,6 +756,12 @@ public class ModelLoader : MonoBehaviour
 		{
 			previousFrame = frame;
 			frameDistance += animFrames[frame % animFrames.Count].Offset;
+		}
+
+		if((animFrames.Count == 1 && animCounter != previousAnimCounter))
+		{
+			previousAnimCounter = animCounter;
+			frameDistance += animFrames[0].Offset;
 		}
 
 		for (int i = 0 ; i < bones.Count; i++)
