@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
@@ -87,6 +88,36 @@ public class UnPAK : IDisposable
 		if(reader.ReadInt32() == 0) count--; //TIMEGATE
 
 		return count;
+	}
+	
+	public List<uint> GetEntriesSize()
+	{
+		var header = ReadHeader();
+		var entries = new List<uint>();
+		foreach(var pos in header)
+		{
+			stream.Seek(pos + 4, SeekOrigin.Begin);
+			var uncompressedSize = reader.ReadUInt32();
+			entries.Add(uncompressedSize);
+		}
+
+		return entries;
+	}
+
+	List<uint> ReadHeader()
+	{
+		stream.Seek(4, SeekOrigin.Begin);
+		uint startOffset = reader.ReadUInt32();
+		uint offset = startOffset;
+
+		var entries = new List<uint>();
+		do
+		{			
+			entries.Add(offset + 4);
+		}
+		while(stream.Position < startOffset && (offset = reader.ReadUInt32()) != 0);
+
+		return entries;
 	}
 
 	public void Dispose()

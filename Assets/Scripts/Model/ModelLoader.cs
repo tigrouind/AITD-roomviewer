@@ -8,6 +8,7 @@ using System;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Text;
+using System.Text.RegularExpressions;
 
 public class ModelLoader : MonoBehaviour
 {
@@ -34,7 +35,6 @@ public class ModelLoader : MonoBehaviour
 	private float previousAnimCounter;
 	private Vector3Int frameDistance;
 
-	private int paletteIndex;
 	private Texture2D paletteTexture;
 	public Text LeftText;
 	public Mesh SphereMesh;
@@ -207,7 +207,7 @@ public class ModelLoader : MonoBehaviour
 		int texAHeight = 1;
 		int texBHeight = 1;
 		int uvStart = 0;
-		if (paletteIndex == 4) //TIMEGATE
+		if (File.Exists(textureFolder)) //TIMEGATE
 		{
 			LoadTextures(buffer, paletteColors, out uvStart, out texAHeight, out texBHeight);
 		}
@@ -568,20 +568,12 @@ public class ModelLoader : MonoBehaviour
 	{
 		var offset = buffer[0xE];
 		Texture2D texA, texB;
-		if(File.Exists(textureFolder))
-		{
-			paletteColors[0] = Color.clear;
+		paletteColors[0] = Color.clear;
 
-			using (var pak = new UnPAK(textureFolder))
-			{
-				texA = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 12), paletteColors);
-				texB = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 14), paletteColors);
-			}
-		}
-		else
+		using (var pak = new UnPAK(textureFolder))
 		{
-			texA = EmptyTexture();
-			texB = EmptyTexture();
+			texA = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 12), paletteColors);
+			texB = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 14), paletteColors);
 		}
 
 		uvStart = buffer.ReadShort(offset + 6);
@@ -858,21 +850,6 @@ public class ModelLoader : MonoBehaviour
 		ToggleAnimationMenuItems(false);
 	}
 
-	int DetectGame()
-	{
-		//detect game based on number of models
-		if (modelCount > 700)
-			return 3; //AITD3
-		else if (modelCount > 550)
-			return 2; //AITD2
-		else if (modelCount > 500)
-			return 5; //TIME GATE
-		else if (modelCount > 200 || modelCount < 30)
-			return 1; //AITD1 or DEMO
-		else
-			return 4; //JITD
-	}
-
 	void SetPalette()
 	{
 		GetComponent<SkinnedMeshRenderer>().materials[2] //noise
@@ -882,42 +859,10 @@ public class ModelLoader : MonoBehaviour
 		GetComponent<SkinnedMeshRenderer>().materials[4] //gradient2
 			.SetTexture("_Palette", paletteTexture);
 	}
-
+	
 	Texture2D GetPaletteTexture()
-	{		
-		switch (paletteIndex)
-		{
-			case 0: //AITD1
-				return GetPaletteTexture("ITD_RESS.PAK", 3);
-
-			case 1: //AITD2
-				return GetPaletteTexture("ITD_RESS.PAK", 59, true);
-
-			case 2: //AITD3
-				return GetPaletteTexture("ITD_RESS.PAK", 47, true);
-			
-			case 3: //JITD
-				return GetPaletteTexture("CAMERA16.PAK", 0, true, 64000);
-
-			case 4: //TIME GATE
-				return GetPaletteTexture("ITD_RESS.PAK", 43);
-		}	
-
-		throw new NotSupportedException();
-	}
-
-	Texture2D GetPaletteTexture(string filename, int entry, bool mapTo255 = false, int offset = 0)
 	{
-		Color32[] colors;
-		filename = Config.GetPath(filename);
-		if (File.Exists(filename))
-		{
-			colors = LoadPalette(filename, entry, mapTo255, offset);
-		}
-		else
-		{
-			colors = LoadDefaultPalette();
-		}
+		Color32[] colors = LoadPalette();
 		
 		var texture = new Texture2D(16, 16);
 		texture.SetPixels32(colors);
@@ -926,14 +871,48 @@ public class ModelLoader : MonoBehaviour
 		return texture;
 	}
 
-	Color32[] LoadPalette(string filename, int entry, bool mapTo255, int offset)
-	{
-		byte[] buffer;		
-		using (var pak = new UnPAK(filename))
+	Color32[] LoadPalette()
+	{	
+		string filePath = Config.GetPath("ITD_RESS.PAK");
+		if (File.Exists(filePath))
 		{
-			buffer = pak.GetEntry(entry);
+			using (var pak = new UnPAK(filePath))
+			{
+				var entries = pak.GetEntriesSize();
+				for (int i = entries.Count - 1 ; i >= 0 ; i--)
+				{
+					if (entries[i] == 768)
+					{
+						return LoadPalette(pak.GetEntry(i), 0);	
+					}
+				}
+			}
 		}
+		
+		Regex match = new Regex(@"CAMERA\d\d\.PAK", RegexOptions.IgnoreCase);
+		filePath = Directory.GetFiles(Config.BaseDirectory)
+			.Where(x => match.IsMatch(Path.GetFileName(x)))
+			.OrderByDescending(x => x)
+			.FirstOrDefault();
 
+		if (filePath != null)
+		{
+			using (var pak = new UnPAK(filePath))
+			{
+				var buffer = pak.GetEntry(0);
+				if (buffer.Length == 64768)
+				{
+					return LoadPalette(buffer, 64000);
+				}				
+			}
+		}
+		
+		return LoadDefaultPalette();
+	}
+
+	Color32[] LoadPalette(byte[] buffer, int offset)
+	{
+		bool mapTo255 = true;
 		var dest = 0;
 		var colors = new Color32[256];
 		for (int i = 0; i < 256; i++)
@@ -943,13 +922,20 @@ public class ModelLoader : MonoBehaviour
 			byte b = buffer[dest + 2 + offset];
 			dest += 3;
 
-			if (mapTo255)
+			if(r > 63 || g > 63 || b > 63)
 			{
-				colors[i] = new Color32((byte)(r << 2 | r >> 4), (byte)(g << 2 | g >> 4), (byte)(b << 2 | b >> 4), 255);
-			}	
-			else
+				mapTo255 = false;
+			}
+
+			colors[i] = new Color32(r, g, b, 255);
+		}
+
+		if (mapTo255)
+		{
+			for (int i = 0; i < 256; i++)
 			{
-				colors[i] = new Color32(r, g, b, 255);
+				Color32 c = colors[i];
+				colors[i] = new Color32((byte)(c.r << 2 | c.r >> 4), (byte)(c.g << 2 | c.g >> 4), (byte)(c.b << 2 | c.b >> 4), 255);
 			}
 		}
 
@@ -977,7 +963,6 @@ public class ModelLoader : MonoBehaviour
 				modelCount = pak.EntryCount;
 			}
 
-			paletteIndex = DetectGame() - 1;
 			paletteTexture = GetPaletteTexture();
 			SetPalette();
 
