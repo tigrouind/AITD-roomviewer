@@ -6,11 +6,11 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Gradient
-  m_Shader: {fileID: 4800000, guid: 0b73dfaf3a293894a81961462e26b014, type: 3}
+  m_Name: GradientH
+  m_Shader: {fileID: 4800000, guid: 427f7a56890cc01438542b48d31ea715, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2

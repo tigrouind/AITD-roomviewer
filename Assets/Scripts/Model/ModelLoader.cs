@@ -528,11 +528,11 @@ public class ModelLoader : MonoBehaviour
 			case 2: //transparent
 				return 1;
 
-			case 3: //gradient
+			case 3: //gradientH
 			case 6:
 				return 3;
 
-			case 4: //gradient2
+			case 4: //gradientV
 			case 5:
 				return 4;
 		}
@@ -556,9 +556,9 @@ public class ModelLoader : MonoBehaviour
 		else if ((polyType == 3 || polyType == 6 || polyType == 4 || polyType == 5) && DetailsLevel.BoolValue)
 		{
 			//horizontal or vertical gradient
-			color.r = (byte)((polyType == 5) ? 127 : 255);
-			color.b = (byte)((colorIndex / 16) * 16);
-			color.a = (byte)((colorIndex % 16) * 16);
+			color.r = (byte)((polyType == 5) ? 127 : 255); //vertical gradient x2
+			color.b = (byte)((colorIndex / 16) * 16); //vertical palette index
+			color.a = (byte)((colorIndex % 16) * 16); //horizontal palette index
 		}
 
 		return color;
@@ -852,11 +852,12 @@ public class ModelLoader : MonoBehaviour
 
 	void SetPalette()
 	{
-		GetComponent<SkinnedMeshRenderer>().materials[2] //noise
+		var skinnedMeshRenderer = GetComponent<SkinnedMeshRenderer>();
+		skinnedMeshRenderer.materials[2] //noise
 			.SetTexture("_Palette", paletteTexture);
-		GetComponent<SkinnedMeshRenderer>().materials[3] //gradient
+		skinnedMeshRenderer.materials[3] //gradientH
 			.SetTexture("_Palette", paletteTexture);
-		GetComponent<SkinnedMeshRenderer>().materials[4] //gradient2
+		skinnedMeshRenderer.materials[4] //gradientV
 			.SetTexture("_Palette", paletteTexture);
 	}
 	
