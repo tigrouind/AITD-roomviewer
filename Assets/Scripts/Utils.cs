@@ -129,12 +129,7 @@ public static class Utils
 
 	#region Search
 
-	public static int IndexOf(byte[] buffer, byte[] pattern)
-	{
-		return IndexOf(buffer, pattern, 0, 1);
-	}
-
-	public static int IndexOf(byte[] buffer, byte[] pattern, int offset, int stride)
+	public static int IndexOf(byte[] buffer, byte[] pattern, int offset = 0, int stride = 1)
 	{
 		for (int index = offset; index < buffer.Length - pattern.Length + 1; index += stride)
 		{

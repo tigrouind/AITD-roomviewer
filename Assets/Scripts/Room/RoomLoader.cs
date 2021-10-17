@@ -40,8 +40,7 @@ public class RoomLoader : MonoBehaviour
 	private int selectedBoxId = -1;
 
 	private bool dosBoxEnabled;
-	private bool isAITD1;
-	private int detectedGame;
+	private GameVersion gameVersion;
 	public GameObject Actors;
 
 	public RectTransform Panel;
@@ -69,8 +68,7 @@ public class RoomLoader : MonoBehaviour
 			.ToList();
 
 		floor = floors.FirstOrDefault();
-		detectedGame = DetectGame();
-		isAITD1 = detectedGame == 1;
+		gameVersion = DetectGame();
 
 		CheckCommandLine();
 		if (floors.Count > 0)
@@ -171,7 +169,7 @@ public class RoomLoader : MonoBehaviour
 		name = "FLOOR" + floor;
 
 		string filePath = Config.GetPath("ETAGE{0:D2}.PAK", floor);
-		if (detectedGame == 5)
+		if (gameVersion == GameVersion.TIMEGATE)
 		{
 			LoadRoomsMulti(filePath);
 		}
@@ -351,7 +349,11 @@ public class RoomLoader : MonoBehaviour
 			List<Vector2> points = new List<Vector2>();
 			List<int> indices = new List<int>();
 
-			int i = cameraHeader + 0x14 + k * (isAITD1 ? 12 : (detectedGame == 5 ? 22 : 16));
+			int structSize = 16;
+			if (gameVersion == GameVersion.AITD1) structSize = 12;
+			if (gameVersion == GameVersion.TIMEGATE) structSize = 22;
+
+			int i = cameraHeader + 0x14 + k * structSize;
 			int cameraRoom = buffer.ReadShort(i + 0);
 
 			i = cameraHeader + buffer.ReadShort(i + 4);
@@ -416,19 +418,19 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	int DetectGame()
+	GameVersion DetectGame()
 	{
 		//detect game based on number of floors
 		if (GetEntriesCount("ETAGE00.PAK") > 2)
-			return 5; //TIME GATE
-		else if (floors.Count >= 15)
-			return 2;
-		else if (floors.Count >= 14)
-			return 3;
+			return GameVersion.TIMEGATE; 
+		else if (floors.Count >= 15 || (floors.Count == 2 && floors.Contains(0) && floors.Contains(8)))
+			return GameVersion.AITD2;
+		else if (floors.Count >= 14 || (floors.Count == 2 && floors.Contains(0) && floors.Contains(2)))
+			return GameVersion.AITD3;
 		else if (floors.Count == 1 && floors.Contains(16))
-			return 4; //JITD
+			return GameVersion.JACK;
 		else
-			return 1;
+			return GameVersion.AITD1; 
 	}
 
 	int GetEntriesCount(string filePath)
@@ -580,7 +582,7 @@ public class RoomLoader : MonoBehaviour
 
 		DosBox dosBox = GetComponent<DosBox>();
 		dosBox.ShowAdditionalInfo = ShowAdditionalInfo.BoolValue && dosBoxEnabled;
-		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && isAITD1 && dosBox.IsCDROMVersion;
+		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && dosBox.IsCDROMVersion;
 		dosBox.SpeedRunMode = speedRunMode;
 
 		dosBox.RefreshMemory();
@@ -589,7 +591,7 @@ public class RoomLoader : MonoBehaviour
 		dosBox.CheckDelay();
 		dosBox.UpdateAllActors();
 		dosBox.UpdateBoxInfo();
-		if(isAITD1 && dosBox.IsCDROMVersion) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
+		if(dosBox.IsCDROMVersion) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
 
@@ -807,7 +809,7 @@ public class RoomLoader : MonoBehaviour
 
 		if (!dosBoxEnabled)
 		{
-			dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, detectedGame);
+			dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, gameVersion);
 			if (dosBoxEnabled)
 			{
 				//none => current camera

@@ -27,28 +27,25 @@ public class DosBox : MonoBehaviour
 	public Box Player;
 	public bool IsCDROMVersion;
 
-	private int actorsAddress;
 	private int entryPoint;
 	private Dictionary<int, int> bodyIdToMemoryAddress = new Dictionary<int, int>();
 	private Dictionary<int, int> animIdToMemoryAddress = new Dictionary<int, int>();
 
-	//initial player position
-	private int dosBoxPattern;
-	private int[] actorArrayAddress = new []
+	private GameConfig gameConfig;
+	private Dictionary<GameVersion, GameConfig> gameConfigs = new Dictionary<GameVersion, GameConfig>
 	{
-		0x220CE, //AITD1 cdrom (GOG)
-		0x300D0, //AITD2
-		0x38180, //AITD3
-		0x39EC4, //JACK
-		0x20542, //AITD1 floppy
-		0x2050A, //AITD1 demo
-		0x2ADD0  //TIMEGATE (pointer)
+		{ GameVersion.AITD1        , new GameConfig(0x220CE, 160, 82) },
+		{ GameVersion.AITD1_FLOPPY , new GameConfig(0x20542, 160, 82) },
+		{ GameVersion.AITD1_DEMO   , new GameConfig(0x2050A, 160, 82) },
+		{ GameVersion.AITD2        , new GameConfig(0x300D0, 180, 90) },
+		{ GameVersion.AITD2_FLOPPY , new GameConfig(0x2F850, 180, 90) },
+		{ GameVersion.AITD2_DEMO   , new GameConfig(0x38DC0, 176, 86) },
+		{ GameVersion.AITD3        , new GameConfig(0x38180, 182, 90) },
+		{ GameVersion.AITD3_DEMO   , new GameConfig(0x377A0, 182, 90) },
+		{ GameVersion.JACK         , new GameConfig(0x39EC4, 180, 90) },
+		{ GameVersion.TIMEGATE     , new GameConfig(0x2ADD0, 202, 90) },
+		{ GameVersion.TIMEGATE_DEMO, new GameConfig(0x45B98, 202, 90) },
 	};
-
-	//offset to apply to get beginning of actors array
-	private int[] actorStructSize = new [] { 160, 180, 182, 180, 202 };
-	//size of one actor
-	private int[] trackModeOffsets = new [] { 82, 90, 90, 90, 90 };
 
 	private Vector3 lastPlayerPosition;
 	private int lastValidPlayerIndex = -1;
@@ -120,7 +117,7 @@ public class DosBox : MonoBehaviour
 		//read actors info
 		for (int i = 0 ; i < Boxes.Length ; i++) //up to 50 actors max
 		{
-			int k = actorsAddress + i * actorStructSize[dosBoxPattern];
+			int k = gameConfig.ActorsAddress + i * gameConfig.ActorStructSize;
 			int id = memory.ReadShort(k + 0);
 
 			if (id != -1)
@@ -156,8 +153,7 @@ public class DosBox : MonoBehaviour
 				box.EndFrame = memory.ReadShort(k + 78);
 				box.EndAnim = memory.ReadShort(k + 80);
 
-				int trackModeOffset = trackModeOffsets[dosBoxPattern];
-				box.TrackMode = memory.ReadShort(k + trackModeOffset);
+				box.TrackMode = memory.ReadShort(k + gameConfig.TrackModeOffset);
 				box.TrackNumber = memory.ReadShort(k + 84);
 				box.PositionInTrack = memory.ReadShort(k + 88);
 
@@ -171,7 +167,7 @@ public class DosBox : MonoBehaviour
 					box.KeyFrameLength = memory.ReadShort(keyframeAddress + 4);
 				}
 
-				if (dosBoxPattern == 0) //AITD1 only
+				if (IsCDROMVersion)
 				{
 					box.Mod = memory.ReadVector(k + 90);
 				}
@@ -265,8 +261,7 @@ public class DosBox : MonoBehaviour
 					//make sure very small actors are visible
 					box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.1f);
 
-					bool isAITD1 = dosBoxPattern == 0;
-					if (isAITD1)
+					if (IsCDROMVersion)
 					{
 						UpdateHotPointBox(box, roomPosition);
 					}
@@ -319,7 +314,7 @@ public class DosBox : MonoBehaviour
 						}
 					}
 
-					if (isAITD1)
+					if (IsCDROMVersion)
 					{
 						UpdateWorldPosBox(box, roomPosition, isPlayer);
 					}
@@ -699,14 +694,14 @@ public class DosBox : MonoBehaviour
 
 	#region Room loader
 
-	public bool LinkToDosBOX(int floor, int room, int detectedGame)
+	public bool LinkToDosBOX(int floor, int room, GameVersion gameVersion)
 	{
 		if (!TryGetMemoryReader(out ProcessReader))
 		{
 			return false;
-		}
+		}	
 
-		if (!FindActorsAddress(detectedGame))
+		if (!FindActorsAddress(gameVersion))
 		{
 			ProcessReader.Close();
 			ProcessReader = null;
@@ -716,8 +711,6 @@ public class DosBox : MonoBehaviour
 		//force reload
 		linkfloor = floor;
 		linkroom = room;
-
-		dosBoxPattern = detectedGame - 1;
 
 		return true;
 	}
@@ -735,47 +728,72 @@ public class DosBox : MonoBehaviour
 		lastValidPlayerIndex = -1;
 	}
 
-	public bool FindActorsAddress(int detectedGame)
+	public bool FindActorsAddress(GameVersion gameVersion)
 	{
-		if (detectedGame == 5) //TIMEGATE
+		IsCDROMVersion = false;
+
+		if (gameVersion == GameVersion.TIMEGATE)
 		{
-			return FindActorsAddressTimeGate();
+			return FindActorsAddressTimeGate(gameVersion);
 		}
 
+		return FindActorsAddressAITD(gameVersion);
+	}
+
+	bool FindActorsAddressAITD(GameVersion gameVersion)
+	{
 		ProcessReader.Read(memory, 0, memory.Length);
 
 		if (!TryGetExeEntryPoint(out entryPoint))
 		{
 			return false;
 		}
-
-		int patternIndex = detectedGame - 1;
-		if (detectedGame == 1) //AITD1 only
+		
+		switch (gameVersion) 
 		{
-			//check version
-			IsCDROMVersion = Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CD Not Found")) != -1;
-			if (!IsCDROMVersion)
-			{
-				if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("USA.PAK")) != -1)
+			case GameVersion.AITD1:
+				IsCDROMVersion = Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CD Not Found")) != -1;
+				if (!IsCDROMVersion)
 				{
-					patternIndex = 5; //demo
+					if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("USA.PAK")) != -1)
+					{
+						gameVersion = GameVersion.AITD1_DEMO; 
+					}
+					else
+					{
+						gameVersion = GameVersion.AITD1_FLOPPY;
+					}
 				}
-				else
+				break;
+
+			case GameVersion.AITD2:
+				if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("Not a CD-ROM drive")) == -1)
 				{
-					patternIndex = 4; //floppy
+					if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("BATL.PAK")) == -1)
+					{
+						gameVersion = GameVersion.AITD2_DEMO;
+					}
+					else
+					{
+						gameVersion = GameVersion.AITD2_FLOPPY;
+					}
 				}
-			}
-		}
-		else
-		{
-			IsCDROMVersion = false;
+				break;
+
+			case GameVersion.AITD3:
+				if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("AN3.PAK")) == -1)
+				{
+					gameVersion = GameVersion.AITD3_DEMO;
+				}
+				break;
 		}
 
-		actorsAddress = entryPoint + actorArrayAddress[patternIndex];
+		gameConfig = gameConfigs[gameVersion];
+		gameConfig.ActorsAddress += entryPoint; 
 		return true;
 	}
 
-	public bool FindActorsAddressTimeGate()
+	bool FindActorsAddressTimeGate(GameVersion gameVersion)
 	{
 		//scan range: 0x110000 (extended memory) - 0x300000 (3MB)
 		byte[] pattern = Encoding.ASCII.GetBytes("HARD_DEC");
@@ -783,11 +801,18 @@ public class DosBox : MonoBehaviour
 
 		if (dataSegment != -1)
 		{
-			ProcessReader.Read(memory, dataSegment + actorArrayAddress[6], 4);
-			var result = memory.ReadUnsignedInt(0);
+			ProcessReader.Read(memory, dataSegment, memory.Length);
+			if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("Time Gate not found")) == -1)
+			{
+				gameVersion = GameVersion.TIMEGATE_DEMO;
+			}
+
+			gameConfig = gameConfigs[gameVersion];
+			ProcessReader.Read(memory, dataSegment + gameConfig.ActorsAddress, 4);
+			var result = memory.ReadUnsignedInt(0); //read pointer value
 			if (result != 0)
 			{
-				actorsAddress = 0;
+				gameConfig.ActorsAddress = 0; //only 640KB is fetched from memory
 				ProcessReader.BaseAddress += result;
 				return true;
 			}
@@ -805,12 +830,12 @@ public class DosBox : MonoBehaviour
 
 	public int GetActorMemoryAddress(int index)
 	{
-		return actorsAddress + index * actorStructSize[dosBoxPattern];
+		return gameConfig.ActorsAddress + index * gameConfig.ActorStructSize;
 	}
 
 	public int GetActorSize()
 	{
-		return actorStructSize[dosBoxPattern];
+		return gameConfig.ActorStructSize;
 	}
 
 	public int GetObjectMemoryAddress(int index)
