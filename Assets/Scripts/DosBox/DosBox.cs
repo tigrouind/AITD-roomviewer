@@ -690,56 +690,6 @@ public class DosBox : MonoBehaviour
 		return false;
 	}
 
-	#endregion
-
-	#region Room loader
-
-	public bool LinkToDosBOX(int floor, int room, GameVersion gameVersion)
-	{
-		if (!TryGetMemoryReader(out ProcessReader))
-		{
-			return false;
-		}	
-
-		if (!FindActorsAddress(gameVersion))
-		{
-			ProcessReader.Close();
-			ProcessReader = null;
-			return false;
-		}
-
-		//force reload
-		linkfloor = floor;
-		linkroom = room;
-
-		return true;
-	}
-
-	public void UnlinkDosBox()
-	{
-		if (ProcessReader != null)
-		{
-			ProcessReader.Close();
-			ProcessReader = null;
-		}
-
-		BoxInfo.Clear(true);
-		CurrentCamera = -1;
-		lastValidPlayerIndex = -1;
-	}
-
-	public bool FindActorsAddress(GameVersion gameVersion)
-	{
-		IsCDROMVersion = false;
-
-		if (gameVersion == GameVersion.TIMEGATE)
-		{
-			return FindActorsAddressTimeGate(gameVersion);
-		}
-
-		return FindActorsAddressAITD(gameVersion);
-	}
-
 	bool FindActorsAddressAITD(GameVersion gameVersion)
 	{
 		ProcessReader.Read(memory, 0, memory.Length);
@@ -819,6 +769,56 @@ public class DosBox : MonoBehaviour
 		}
 
 		return false;
+	}
+
+	#endregion
+
+	#region Room loader
+
+	public bool LinkToDosBOX(int floor, int room, GameVersion gameVersion)
+	{
+		if (!TryGetMemoryReader(out ProcessReader))
+		{
+			return false;
+		}	
+
+		if (!FindActorsAddress(gameVersion))
+		{
+			ProcessReader.Close();
+			ProcessReader = null;
+			return false;
+		}
+
+		//force reload
+		linkfloor = floor;
+		linkroom = room;
+
+		return true;
+	}
+
+	public void UnlinkDosBox()
+	{
+		if (ProcessReader != null)
+		{
+			ProcessReader.Close();
+			ProcessReader = null;
+		}
+
+		BoxInfo.Clear(true);
+		CurrentCamera = -1;
+		lastValidPlayerIndex = -1;
+	}
+
+	public bool FindActorsAddress(GameVersion gameVersion)
+	{
+		IsCDROMVersion = false;
+
+		if (gameVersion == GameVersion.TIMEGATE)
+		{
+			return FindActorsAddressTimeGate(gameVersion);
+		}
+
+		return FindActorsAddressAITD(gameVersion);
 	}
 
 	public void ResetCamera(int floor, int room)
