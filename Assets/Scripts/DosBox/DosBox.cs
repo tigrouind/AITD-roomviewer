@@ -506,7 +506,7 @@ public class DosBox : MonoBehaviour
 		{
 			totalDelay.Reset();
 		}
-		if (Input.GetKeyDown(KeyCode.W) && !(Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)))
+		if (Input.GetKeyDown(KeyCode.W))
 		{
 			foreach (Box box in Boxes)
 			{

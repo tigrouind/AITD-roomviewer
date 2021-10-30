@@ -22,10 +22,16 @@ The following games are supported :
 
 - Mouse wheel : zoom in / out
 - Left mouse button : drag map / highlight box
+- Middle mouse button : reset camera zoom and position
 - Right mouse button : show options menu
 - Up or down arrows : change floor
 - Left right arrows : change room
 - Esc : quit (only in fullscreen mode)
+
+- W : reset last distance for all actors
+- Q : reset total delay (AITD1 only)
+- Shift + Alpha1 : Timer 1 goes back 5 frames (AITD1 only)
+- Shift + Alpha2 : Timer 2 goes back 5 frames (AITD1 only)
 
 ## Shortcuts
 
@@ -70,7 +76,8 @@ When the game is linked to DOSBox, you can swap two actors slot positions by hig
 Repeat room viewer installation steps. Copy the following files :
 - LISTBODY.PAK, LISTBOD2.PAK
 - LISTANIM.PAK, LISTANI2.PAK
-- ITD_RESS.PAK or CAMERA16.PAK (JITD only)
+- ITD_RESS.PAK
+- CAMERA16.PAK (JITD only)
 - TEXTURES.PAK (Time Gate only)
 
 ## Commands
@@ -85,9 +92,8 @@ Repeat room viewer installation steps. Copy the following files :
 
 ## Shortcuts
 
-- N : noise material
-- G : gradient material
+- D : details high / low
 - R : camera auto rotate mode
-- E : show extra info
+- E : show extra information
 - A : enable animation
 - Tab : switch to room viewer
