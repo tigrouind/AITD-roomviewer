@@ -55,8 +55,7 @@ public class DosBox : MonoBehaviour
 
 	//fps
 	private int oldFramesCount;
-	private Queue<int> previousFramesCount = new Queue<int>();
-	private Queue<float> previousFrameTime = new Queue<float>();
+	private Queue<KeyValuePair<int, float>> previousFrames = new Queue<KeyValuePair<int, float>>();
 	private int frameCounter;
 
 	private float lastDelay;
@@ -477,7 +476,7 @@ public class DosBox : MonoBehaviour
 
 			if (ShowAITD1Vars)
 			{
-				int calculatedFps = previousFramesCount.Sum();
+				int calculatedFps = previousFrames.Sum(x => x.Key);
 				TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
 
 				BoxInfo.Append("Timer 1", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer1 / 60), InternalTimer1 % 60);
@@ -572,16 +571,14 @@ public class DosBox : MonoBehaviour
 			float time = Time.time;
 			if (diff > 0)
 			{
-				previousFramesCount.Enqueue(diff);
-				previousFrameTime.Enqueue(time);
+				previousFrames.Enqueue(new KeyValuePair<int, float>(diff, time));
 			}
 
 			//remove any frame info older than one second
-			while (previousFrameTime.Count > 0 &&
-				previousFrameTime.Peek() < (time - 1.0f))
+			while (previousFrames.Count > 0 && 
+				previousFrames.Peek().Value < (time - 1.0f))
 			{
-				previousFramesCount.Dequeue();
-				previousFrameTime.Dequeue();
+				previousFrames.Dequeue();
 			}
 		}
 	}
