@@ -130,7 +130,7 @@ public class Box : MonoBehaviour
 		}
 	}
 
-	public string RotateDir
+	string RotateDir
 	{
 		get
 		{
@@ -153,7 +153,7 @@ public class Box : MonoBehaviour
 		}
 	}
 
-	public string DashIfEmpty(int value)
+	string DashIfEmpty(int value)
 	{
 		if (value == -1)
 			return "▬";
@@ -161,7 +161,7 @@ public class Box : MonoBehaviour
 			return value.ToString();
 	}
 
-	public string GetActorID(int index)
+	string GetActorID(int index)
 	{
 		if(DosBox.SpeedRunMode && index >= 0)
 		{
@@ -180,7 +180,7 @@ public class Box : MonoBehaviour
 		return "▬";
 	}
 
-	private void RefreshMaterial()
+	void RefreshMaterial()
 	{
 		Color32 materialColor = color;
 
