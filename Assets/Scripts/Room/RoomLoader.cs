@@ -283,6 +283,11 @@ public class RoomLoader : MonoBehaviour
 				//interactive box
 				box.Color = new Color32(0, 0, 128, 255);
 			}
+			if (box.Flags == 0)
+			{
+				//non walls
+				box.Color = new Color32(59, 59, 59, 255);
+			}
 
 			i += 16;
 		}
