@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Text;
 
 public class Box : MonoBehaviour
 {
@@ -10,7 +11,8 @@ public class Box : MonoBehaviour
 	private static string[] trackModeInfo = { "NONE", "MANUAL", "FOLLOW", "TRACK" };
 	private static string[] actionTypeInfo = { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
 	private static string[] lifeModeInfo = { "FLOOR", "ROOM", "CAMERA" };
-	private static string[] particleNames = { "BUBBLES", "BLOOD/DEBRIS", "", "FLASH", "SMOKE" };
+	private static string[] particleNames = { "BUBBLES", "BLOOD/DEBRIS", string.Empty, "FLASH", "SMOKE" };
+	private static string[] flagsNames = { "ANIM", string.Empty, string.Empty, "BACK", "PUSH", "COLL", "TRIG", "PICK", "GRAV" };
 
 	public int ID;
 	public int Flags;
@@ -180,6 +182,31 @@ public class Box : MonoBehaviour
 		return "▬";
 	}
 
+	string GetFlags(int flags)
+	{
+		if(flags == 0)
+		{
+			return "NONE";
+		}
+
+		StringBuilder result = new StringBuilder();
+		int flag = 1;
+		for (int i = 0 ; i < flagsNames.Length ; i++)
+		{
+			if ((flags & flag) != 0 && !string.IsNullOrEmpty(flagsNames[i])) 
+			{				
+				if (result.Length > 0) 
+				{
+					result.Append(' ');
+				}
+				result.Append(flagsNames[i]);
+			}
+			flag <<= 1;
+		}
+		
+		return result.ToString();
+	}
+
 	void RefreshMaterial()
 	{
 		Color32 materialColor = color;
@@ -244,11 +271,6 @@ public class Box : MonoBehaviour
 			info.Append(name.ToUpperInvariant(), "#{0}", ID);
 		}
 		
-		if (name == "Collider" || name == "Trigger")
-		{
-			info.Append("FLAGS", "0x{0:X4}", Flags);
-		}
-
 		if (name == "Camera" && DosBox.ShowAdditionalInfo)
 		{
 			Vector3Int position = CameraPosition * 10;
@@ -265,11 +287,11 @@ public class Box : MonoBehaviour
 		{
 			if(DosBox.ShowAdditionalInfo)
 			{
-				info.Append("FLAGS/COL", "0x{0:X4} 0x{1:X4}", Flags, ColFlags);
+				info.Append("FLAGS/COL", "{0}; {1}", GetFlags(Flags), ColFlags != 0 ? "YES" : "NO");
 			}
 			else
 			{
-				info.Append("FLAGS", "0x{0:X4}", Flags);
+				info.Append("FLAGS", GetFlags(Flags));
 			}
 
 			if (DosBox.ShowAdditionalInfo)
