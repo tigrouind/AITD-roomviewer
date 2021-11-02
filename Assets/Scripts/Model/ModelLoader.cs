@@ -891,20 +891,23 @@ public class ModelLoader : MonoBehaviour
 		}
 		
 		Regex match = new Regex(@"CAMERA\d\d\.PAK", RegexOptions.IgnoreCase);
-		filePath = Directory.GetFiles(Config.BaseDirectory)
-			.Where(x => match.IsMatch(Path.GetFileName(x)))
-			.OrderByDescending(x => x)
-			.FirstOrDefault();
+		var cameraFiles = Directory.GetFiles(Config.BaseDirectory)
+			.Where(x => match.IsMatch(Path.GetFileName(x)))			
+			.OrderByDescending(x => x);
 
-		if (filePath != null)
+		foreach (var cameraFile in cameraFiles)
 		{
-			using (var pak = new UnPAK(filePath))
+			using (var pak = new UnPAK(cameraFile))
 			{
-				var buffer = pak.GetEntry(0);
-				if (buffer.Length == 64768)
+				var entries = pak.GetEntriesSize();
+				for (int i = 0 ; i < entries.Count ; i++)
 				{
-					return LoadPalette(buffer, 64000);
-				}				
+					if (entries[i] == 64768)	
+					{
+						var buffer = pak.GetEntry(i);
+						return LoadPalette(buffer, 64000);			
+					}
+				}
 			}
 		}
 		
