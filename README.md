@@ -20,80 +20,80 @@ The following games are supported :
 
 ## Commands
 
-- Mouse wheel : zoom in / out
-- Left mouse button : drag map / highlight box
-- Middle mouse button : reset camera zoom and position
-- Right mouse button : show options menu
-- Up or down arrows : change floor
-- Left right arrows : change room
-- Esc : quit (only in fullscreen mode)
-
-- W : reset last distance for all actors
-- Q : reset total delay (AITD1 only)
-- Shift + Alpha1 : Timer 1 goes back 5 frames (AITD1 only)
-- Shift + Alpha2 : Timer 2 goes back 5 frames (AITD1 only)
+- <kbd>Mouse wheel</kbd> : zoom in / out
+- <kbd>Left mouse button</kbd> : drag map / highlight box
+- <kbd>Middle mouse button</kbd> : reset camera zoom and position
+- <kbd>Right mouse button</kbd> : show options menu
+- <kbd>↑</kbd> or <kbd>↓</kbd> : change floor
+- <kbd>←</kbd> or <kbd>→</kbd> : change room
+- <kbd>Esc</kbd> : quit (only in fullscreen mode)
+- <kbd>W</kbd> : reset last distance for all actors
+- <kbd>Q</kbd> : reset total delay (AITD1 only)
+- <kbd>Shift</kbd> + <kbd>Alpha1</kbd> : Timer 1 goes back 5 frames (AITD1 only)
+- <kbd>Shift</kbd> + <kbd>Alpha2</kbd> : Timer 2 goes back 5 frames (AITD1 only)
 
 ## Shortcuts
 
-- D : display mode
-- F : camera follow mode
-- R : room's visibility
-- C : camera area's visibility
-- T : trigger's visibility
-- A : actor's visibility
-- E : show extra info (AITD1 only)
-- Page up / down : camera rotate
-- Tab : switch to model viewer
+- <kbd>D</kbd> : display mode
+- <kbd>F</kbd> : camera follow mode
+- <kbd>R</kbd> : room's visibility
+- <kbd>C</kbd> : camera area's visibility
+- <kbd>T</kbd> : trigger's visibility
+- <kbd>A</kbd> : actor's visibility
+- <kbd>E</kbd> : show extra info (AITD1 only)
+- <kbd>Page up</kbd> / <kbd>page down</kbd> : camera rotate
+- <kbd>Tab</kbd> : switch to model viewer
 
 Put mouse on a box to highlight it.
-- Gray boxes are colliders which player cannot passthrough
+- Light gray boxes are colliders which player cannot passthrough
+- Dark gray boxes are usually non-walls colliders
 - Blue boxes are colliders that player can interact with
-- Purple boxes are links between rooms and is used for pathfinding
+- Teal boxes are links between rooms and is used for pathfinding
 - Red and amber boxes are triggers. It is usually used to switch from one room to another. It can also trigger other things like enemies, sounds, scripted sequences, ...
 
-## Link to DOSBox
-This feature allows to view all active entities in the game, displayed and updated realtime from DOSBox.
+## DOSBox
+It's possible to view all active entities in the game, displayed and updated realtime from DOSBox.
 
 To do this, simply play AITD at the same time room viewer is running.
 If everything is OK, you should view a white square with an arrow, this is player position.
 
-Common issue: if AITD has been started with administrator rights, room viewer will not be able to see DOSBox process (link to DOSBox feature won't work).
+Common issue: if AITD has been started with administrator rights, room viewer will not be able to see DOSBox process.
 To fix this, run room viewer with administrator rights (or run AITD without administrator rights).
 
 ## Warp actor
-When the game is linked to DOSBox, it is possible to change the position of an actor using drag and drop. Hold left mouse button while mouse is on an actor. Move cursor (keeping left button pressed) and right click to warp (you can do this multiple times). Then, release left button. It is also possible to manually edit position of an actor by right clicking on it or by pressing numpad keys :
-- 4, 6, 2, 8 : move actor left / right / down / up
-- 7, 9 : rotate actor left / right
-- If you hold 0 while pressing the numpad keys above, position is updated at a higher rate.
+When the game is linked to DOSBox, it is possible to change the position of an actor using drag and drop. Hold <kbd>left mouse button</kbd> while mouse is on an actor. Move cursor (keeping <kbd>left mouse button</kbd> pressed) and right click to warp (you can do this multiple times). Then, release <kbd>left mouse button</kbd>. It is also possible to manually edit position of an actor by right clicking on it or by pressing numpad keys :
+- <kbd>4</kbd>, <kbd>6</kbd>, <kbd>2</kbd>, <kbd>8</kbd> : move actor left / right / down / up
+- <kbd>7</kbd>, <kbd>9</kbd> : rotate actor left / right
+- If you hold <kbd>0</kbd> while pressing the numpad keys above, position is updated at a higher rate.
 
 ## Actor slot swap
-When the game is linked to DOSBox, you can swap two actors slot positions by highlighting an actor, typing a number (with keypad or alphanumeric keys) then pressing enter.
+When the game is linked to DOSBox, you can swap two actors slot positions by highlighting an actor, typing a number (with keypad or alphanumeric keys) then pressing <kbd>enter</kbd>.
 
 # Model viewer
 
 ## Installation
 
-Repeat room viewer installation steps. Copy the following files :
-- LISTBODY.PAK, LISTBOD2.PAK
-- LISTANIM.PAK, LISTANI2.PAK
+Copy the following files to GAMEDATA folder:
+- LISTBODY.PAK, LISTANIM.PAK
+- LISTBOD2.PAK, LISTANI2.PAK (AITD1 only)
 - ITD_RESS.PAK
-- CAMERA16.PAK (JITD only)
+- CAMERAxx.PAK (JITD only)
 - TEXTURES.PAK (Time Gate only)
 
 ## Commands
 
-- Left, right arrows : change model
-- Up, down arrows : change animation
-- Space : change model folder (Edward or Emily)
-- Shift : hold it while pressing left or right keys to skip 10 models at once
-- Mouse wheel : zoom in / out
-- Left mouse button : click on model and drag to rotate it
-- Right mouse button : show options menu / move model
+- <kbd>←</kbd> or <kbd>→</kbd> : change model
+- <kbd>↑</kbd> or <kbd>↓</kbd> : change animation
+- <kbd>Space</kbd> : change model folder (Edward or Emily)
+- <kbd>Shift</kbd> : hold it while pressing left or right keys to skip 10 models at once
+- <kbd>Mouse wheel</kbd> : zoom in / out
+- <kbd>Left mouse button</kbd> : click on model and drag to rotate it
+- <kbd>Right mouse button</kbd> : show options menu / move model
 
 ## Shortcuts
 
-- D : details high / low
-- R : camera auto rotate mode
-- E : show extra information
-- A : enable animation
-- Tab : switch to room viewer
+- <kbd>D</kbd> : details high / low
+- <kbd>R</kbd> : camera auto rotate mode
+- <kbd>E</kbd> : show extra information
+- <kbd>A</kbd> : enable animation
+- <kbd>Tab</kbd> : switch to room viewer
