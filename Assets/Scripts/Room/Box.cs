@@ -13,6 +13,8 @@ public class Box : MonoBehaviour
 	private static string[] lifeModeInfo = { "FLOOR", "ROOM", "CAMERA" };
 	private static string[] particleNames = { "BUBBLES", "BLOOD/DEBRIS", string.Empty, "FLASH", "SMOKE" };
 	private static string[] flagsNames = { "ANIM", string.Empty, string.Empty, "BACK", "PUSH", "COLL", "TRIG", "PICK", "GRAV" };
+	private static string[] speedNames = { "BACK", "IDLE", "WALK", "WALK", "WALK", "WALK", "RUN" };
+
 
 	public int ID;
 	public int Flags;
@@ -287,7 +289,7 @@ public class Box : MonoBehaviour
 		{
 			if(DosBox.ShowAdditionalInfo)
 			{
-				info.Append("FLAGS/COL", "{0}; {1}", GetFlags(Flags), ColFlags != 0 ? "YES" : "NO");
+				info.Append("FLAGS/COL", "{0}; {1}", GetFlags(Flags), ColFlags != 0 ? "Y" : "N");
 			}
 			else
 			{
@@ -364,7 +366,10 @@ public class Box : MonoBehaviour
 					info.Append("FRAME", "{0}/{1}", Math.Min(Math.Max(DosBox.InternalTimer2 - KeyFrameTime, 0), KeyFrameLength), KeyFrameLength);
 				}
 
-				info.Append("SPEED", Speed);
+				if (Speed >= -1 && Speed <= 5)
+				{
+					info.Append("SPEED", "{0} ({1})", speedNames[Speed + 1], Speed);	
+				}				
 			}
 
 			if (DosBox.ShowAITD1Vars && Chrono != 0)
