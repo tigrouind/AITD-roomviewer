@@ -264,7 +264,7 @@ public class Box : MonoBehaviour
 	{
 		info.Clear();
 		
-		if (name == "Actor" && DosBox.IsCDROMVersion && ID == -2 && (Anim == 0 || Anim == 1 || Anim == 3 || Anim == 4))
+		if (name == "Actor" && DosBox.IsCDROMVersion && ID == -2 && Anim >= 0 && Anim <= 4 && !string.IsNullOrEmpty(particleNames[Anim]))
 		{			
 			info.Append(particleNames[Anim], "#{0}", Keyframe);
 		}
@@ -358,7 +358,7 @@ public class Box : MonoBehaviour
 				}					
 			}
 
-			if (DosBox.ShowAITD1Vars && Anim != -1 && (Flags & 1) == 1)
+			if (DosBox.ShowAITD1Vars && Anim != -1 && (Flags & 1) == 1) //animated
 			{
 				if (Keyframe != -1)
 				{
