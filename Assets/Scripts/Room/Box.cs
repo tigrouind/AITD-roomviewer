@@ -98,8 +98,11 @@ public class Box : MonoBehaviour
 	{
 		set
 		{
-			highlighted = value;
-			RefreshMaterial();
+			if (value != highlighted)
+			{
+				highlighted = value;
+				RefreshMaterial();
+			}			
 		}
 		get
 		{
@@ -111,8 +114,11 @@ public class Box : MonoBehaviour
 	{
 		set
 		{
-			color = new Color32(color.r, color.g, color.b, value);
-			RefreshMaterial();
+			if (value != color.a)
+			{
+				color = new Color32(color.r, color.g, color.b, value);
+				RefreshMaterial();
+			}			
 		}
 	}
 
@@ -120,8 +126,11 @@ public class Box : MonoBehaviour
 	{
 		set
 		{
-			alwaysOnTop = value;
-			RefreshMaterial();
+			if (value != alwaysOnTop)
+			{
+				alwaysOnTop = value;
+				RefreshMaterial();
+			}
 		}
 	}
 
@@ -129,8 +138,11 @@ public class Box : MonoBehaviour
 	{
 		set
 		{
-			color = value;
-			RefreshMaterial();
+			if (value.r != color.r || value.g != color.g || value.b != color.b || value.a != color.a)
+			{
+				color = value;
+				RefreshMaterial();
+			}			
 		}
 	}
 
