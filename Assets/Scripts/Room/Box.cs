@@ -15,7 +15,6 @@ public class Box : MonoBehaviour
 	private static string[] flagsNames = { "ANIM", string.Empty, string.Empty, "BACK", "PUSH", "COLL", "TRIG", "PICK", "GRAV" };
 	private static string[] speedNames = { "BACK", "IDLE", "WALK", "WALK", "WALK", "WALK", "RUN" };
 
-
 	public int ID;
 	public int Flags;
 	public int ColFlags;
@@ -387,9 +386,14 @@ public class Box : MonoBehaviour
 			if(DosBox.ShowAITD1Vars)
 			{
 				if (Chrono != 0)
+				{
 					info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer1 - Chrono) / 60), (DosBox.InternalTimer1 - Chrono) % 60);
+				}
+					
 				if (RoomChrono != 0)
+				{
 					info.Append("ROOM_CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer1 - RoomChrono) / 60), (DosBox.InternalTimer1 - RoomChrono) % 60);
+				}					
 			}
 
 			if (DosBox.ShowAdditionalInfo && TrackMode >= 0 && TrackMode <= 3)
@@ -400,13 +404,20 @@ public class Box : MonoBehaviour
 				if (TrackNumber != -1)
 				{
 					if (TrackMode == 3) //track
+					{
 						info.Append("TRACKNUM/POS", "{0} {1}", TrackNumber, PositionInTrack);
+					}
+						
 					if (TrackMode == 2) //follow
+					{
 						info.Append("TRACKNUM", "{0}", TrackNumber);				
+					}						
 				}
 									
 				if (ActionType >= 0 && ActionType <= 10)
+				{
 					info.Append("ACTIONTYPE", actionTypeInfo[ActionType]);
+				}					
 					
 				info.Append("2DBOX", "{0} {1}; {2} {3}", DashIfEmpty(Box2DLower.x), DashIfEmpty(Box2DLower.y), DashIfEmpty(Box2DUpper.x), DashIfEmpty(Box2DUpper.y));
 				info.Append("HITFORCE", HitForce);
@@ -415,7 +426,9 @@ public class Box : MonoBehaviour
 			}
 			
 			if (DosBox.ShowAdditionalInfo)
+			{
 				info.Append("SLOT", Slot);
+			}				
 		}
 
 		info.UpdateText();
