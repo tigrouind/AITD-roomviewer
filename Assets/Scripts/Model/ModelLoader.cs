@@ -78,7 +78,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		//clear model
-		SkinnedMeshRenderer filter = this.gameObject.GetComponent<SkinnedMeshRenderer>();
+		SkinnedMeshRenderer filter = GetComponent<SkinnedMeshRenderer>();
 		filter.sharedMesh = null;
 
 		//delete all bones
@@ -1056,10 +1056,10 @@ public class ModelLoader : MonoBehaviour
 			if (Input.GetMouseButton(1))
 			{
 				Vector3 newMousePosition = Input.mousePosition;
-				if (newMousePosition != this.mousePosition)
+				if (newMousePosition != mousePosition)
 				{
 					Vector3 cameraDistance = new Vector3(0.0f, 0.0f, cameraZoom);
-					Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraDistance)
+					Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(mousePosition + cameraDistance)
 						- Camera.main.ScreenToWorldPoint(newMousePosition + cameraDistance);
 					displayMenuAfterDrag = false;
 					cameraPosition += mouseDelta;

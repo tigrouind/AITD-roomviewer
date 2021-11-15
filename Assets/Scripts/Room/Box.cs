@@ -203,7 +203,7 @@ public class Box : MonoBehaviour
 			return "NONE";
 		}
 
-		StringBuilder result = new StringBuilder();
+		var result = new StringBuilder();
 		int flag = 1;
 		for (int i = 0 ; i < flagsNames.Length ; i++)
 		{
@@ -240,7 +240,7 @@ public class Box : MonoBehaviour
 			}
 		}
 
-		Renderer renderer = this.GetComponent<Renderer>();
+		Renderer renderer = GetComponent<Renderer>();
 		Material material = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor, alwaysOnTop);
 		if ((renderer.sharedMaterial == null || renderer.sharedMaterial != material))
 		{

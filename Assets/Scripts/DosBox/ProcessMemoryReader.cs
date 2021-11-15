@@ -45,7 +45,7 @@ public class ProcessMemoryReader
 
 	public ProcessMemoryReader(int processId)
 	{
-		this.processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, processId);
+		processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, processId);
 	}
 
 	~ProcessMemoryReader()

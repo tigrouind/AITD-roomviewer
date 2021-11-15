@@ -504,13 +504,13 @@ public class RoomLoader : MonoBehaviour
 			if (Input.GetMouseButton(0))
 			{
 				Vector3 newMousePosition = Input.mousePosition;
-				if (newMousePosition != this.mousePosition)
+				if (newMousePosition != mousePosition)
 				{
 					if (warpActor == null)
 					{
 						//move camera
 						Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
-						Vector3 mouseDelta = Camera.main.ScreenToWorldPoint(this.mousePosition + cameraHeight)
+						Vector3 mouseDelta = Camera.main.ScreenToWorldPoint(mousePosition + cameraHeight)
 											- Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
 
 						Camera.main.transform.position += mouseDelta;
