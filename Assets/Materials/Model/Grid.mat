@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: Grid
-  m_Shader: {fileID: 4800000, guid: 2091bedd3a0b365499a32d0f68632fe2, type: 3}
+  m_Shader: {fileID: 4800000, guid: 2674e7cf5c0bc414f86385ebdc0d4b3a, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_CustomRenderQueue: -1
@@ -121,7 +121,7 @@ Material:
     m_Colors:
     - first:
         name: _Color
-      second: {r: 0, g: 0.78431374, b: 0.39215687, a: 0.3764706}
+      second: {r: 0, g: 0.47058824, b: 0.23529412, a: 0.3764706}
     - first:
         name: _EmissionColor
       second: {r: 0, g: 0, b: 0, a: 1}
