@@ -29,8 +29,8 @@ The following games are supported :
 - <kbd>Esc</kbd> : quit (only in fullscreen mode)
 - <kbd>W</kbd> : reset last distance for all actors
 - <kbd>Q</kbd> : reset total delay (AITD1 only)
-- <kbd>Shift</kbd> + <kbd>Alpha1</kbd> : Timer 1 goes back 5 frames (AITD1 only)
-- <kbd>Shift</kbd> + <kbd>Alpha2</kbd> : Timer 2 goes back 5 frames (AITD1 only)
+- <kbd>Shift</kbd> + <kbd>Alpha1</kbd> : Timer 1 goes back 5 seconds (AITD1 only)
+- <kbd>Shift</kbd> + <kbd>Alpha2</kbd> : Timer 2 goes back 5 seconds (AITD1 only)
 
 ## Shortcuts
 
@@ -76,8 +76,8 @@ When the game is linked to DOSBox, you can swap two actors slot positions by hig
 Copy the following files to GAMEDATA folder:
 - LISTBODY.PAK, LISTANIM.PAK
 - LISTBOD2.PAK, LISTANI2.PAK (AITD1 only)
-- ITD_RESS.PAK
-- CAMERAxx.PAK (JITD only)
+- ITD_RESS.PAK (for palette)
+- CAMERAxx.PAK (for palette, JITD only)
 - TEXTURES.PAK (Time Gate only)
 
 ## Commands
