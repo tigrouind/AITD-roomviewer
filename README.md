@@ -88,7 +88,8 @@ Copy the following files to GAMEDATA folder:
 - <kbd>Shift</kbd> : hold it while pressing left or right keys to skip 10 models at once
 - <kbd>Mouse wheel</kbd> : zoom in / out
 - <kbd>Left mouse button</kbd> : click on model and drag to rotate it
-- <kbd>Right mouse button</kbd> : show options menu / move model
+- <kbd>Middle mouse button</kbd> : move model
+- <kbd>Right mouse button</kbd> : show options menu
 
 ## Shortcuts
 

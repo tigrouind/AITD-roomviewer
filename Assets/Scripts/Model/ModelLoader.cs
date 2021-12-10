@@ -54,7 +54,6 @@ public class ModelLoader : MonoBehaviour
 
 	private Vector3 mousePosition;
 	//mouse drag
-	private bool displayMenuAfterDrag;
 	private bool menuEnabled;
 
 	public RectTransform Panel;
@@ -1045,15 +1044,14 @@ public class ModelLoader : MonoBehaviour
 			}
 
 			//start drag (pan)
-			if (Input.GetMouseButtonDown(1))
+			if (Input.GetMouseButtonDown(2))
 			{
 				mousePosition = Input.mousePosition;
 				AutoRotate.BoolValue = false;
-				displayMenuAfterDrag = true;
 			}
 
 			//dragging (pan)
-			if (Input.GetMouseButton(1))
+			if (Input.GetMouseButton(2))
 			{
 				Vector3 newMousePosition = Input.mousePosition;
 				if (newMousePosition != mousePosition)
@@ -1061,36 +1059,31 @@ public class ModelLoader : MonoBehaviour
 					Vector3 cameraDistance = new Vector3(0.0f, 0.0f, cameraZoom);
 					Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(mousePosition + cameraDistance)
 						- Camera.main.ScreenToWorldPoint(newMousePosition + cameraDistance);
-					displayMenuAfterDrag = false;
 					cameraPosition += mouseDelta;
 					mousePosition = newMousePosition;
 				}
 			}
 		}
 
-		//end drag (pan)
-		if (Input.GetMouseButtonUp(1))
-		{
-			//show/hide menu
-			if (displayMenuAfterDrag)
+		//show/hide menu
+		if (Input.GetMouseButtonDown(1))
+		{	
+			menuEnabled = !menuEnabled;
+			if (menuEnabled)
 			{
-				menuEnabled = !menuEnabled;
-				if (menuEnabled)
+				if(modelCount > 0)
 				{
-					if(modelCount > 0)
-					{
-						ModelInput.text = modelIndex.ToString();
-					}
+					ModelInput.text = modelIndex.ToString();
+				}
 
-					if (animCount > 0)
-					{
-						AnimationInput.text = animIndex.ToString();
-					}
+				if (animCount > 0)
+				{
+					AnimationInput.text = animIndex.ToString();
 				}
 			}
 		}
 
-		if (Input.GetMouseButtonUp(0)
+		if ((Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(2))
 			&& !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
 		{
 			menuEnabled = false;
