@@ -43,8 +43,8 @@ public class DosBox : MonoBehaviour
 		{ GameVersion.AITD3        , new GameConfig(0x38180, 182, 90) },
 		{ GameVersion.AITD3_DEMO   , new GameConfig(0x377A0, 182, 90) },
 		{ GameVersion.JACK         , new GameConfig(0x39EC4, 180, 90) },
-		{ GameVersion.TIMEGATE     , new GameConfig(0x2ADD0, 202, 90) },
-		{ GameVersion.TIMEGATE_DEMO, new GameConfig(0x45B98, 202, 90) },
+		{ GameVersion.TIMEGATE     , new GameConfig(0x00000, 202, 90, 0x2ADD0) },
+		{ GameVersion.TIMEGATE_DEMO, new GameConfig(0x00000, 202, 90, 0x45B98) },
 	};
 
 	private Vector3 lastPlayerPosition;
@@ -111,12 +111,17 @@ public class DosBox : MonoBehaviour
 
 	public void UpdateAllActors()
 	{
+		if (ProcessReader == null)
+		{
+			return;
+		}
+
 		Player = null;
 
 		//read actors info
 		for (int i = 0 ; i < Boxes.Length ; i++) //up to 50 actors max
 		{
-			int k = gameConfig.ActorsAddress + i * gameConfig.ActorStructSize;
+			int k = GetActorMemoryAddress(i);
 			int id = memory.ReadShort(k + 0);
 
 			if (id != -1)
@@ -353,7 +358,10 @@ public class DosBox : MonoBehaviour
 				InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x1B0F6);
 			}
 		}
-
+	}
+	
+	public void UpdateArrowVisibility()
+	{
 		//arrow is only active if actors are active and player is active
 		Arrow.gameObject.SetActive(Actors.activeSelf
 			&& Player != null
@@ -736,7 +744,6 @@ public class DosBox : MonoBehaviour
 		}
 
 		gameConfig = gameConfigs[gameVersion];
-		gameConfig.ActorsAddress += entryPoint; 
 		return true;
 	}
 
@@ -755,12 +762,12 @@ public class DosBox : MonoBehaviour
 			}
 
 			gameConfig = gameConfigs[gameVersion];
-			ProcessReader.Read(memory, dataSegment + gameConfig.ActorsAddress, 4);
+			ProcessReader.Read(memory, dataSegment + gameConfig.ActorsPointer, 4);
 			var result = memory.ReadUnsignedInt(0); //read pointer value
 			if (result != 0)
 			{
-				gameConfig.ActorsAddress = 0; //only 640KB is fetched from memory
 				ProcessReader.BaseAddress += result;
+				entryPoint = 0;
 				return true;
 			}
 		}
@@ -827,7 +834,7 @@ public class DosBox : MonoBehaviour
 
 	public int GetActorMemoryAddress(int index)
 	{
-		return gameConfig.ActorsAddress + index * gameConfig.ActorStructSize;
+		return gameConfig.ActorsAddress + entryPoint + index * gameConfig.ActorStructSize;
 	}
 
 	public int GetActorSize()

@@ -595,6 +595,7 @@ public class RoomLoader : MonoBehaviour
 		dosBox.CalculateFPS();
 		dosBox.CheckDelay();
 		dosBox.UpdateAllActors();
+		dosBox.UpdateArrowVisibility();
 		dosBox.UpdateBoxInfo();
 		if(dosBox.IsCDROMVersion) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
 		RefreshHighLightedBox();

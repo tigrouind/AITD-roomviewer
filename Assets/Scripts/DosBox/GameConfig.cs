@@ -1,13 +1,15 @@
-public struct GameConfig
+public class GameConfig
 {
-	public int ActorsAddress;
-	public int ActorStructSize;
-	public int TrackModeOffset;
+	public readonly int ActorsAddress;
+	public readonly int ActorStructSize;
+	public readonly int TrackModeOffset;
+	public readonly int ActorsPointer;
 
-	public GameConfig(int actorsAddress, int actorStructSize, int trackModeOffset)
+	public GameConfig(int actorsAddress, int actorStructSize, int trackModeOffset, int actorsPointer = 0)
 	{
 		ActorsAddress = actorsAddress;
 		ActorStructSize = actorStructSize;
 		TrackModeOffset = trackModeOffset;
+		ActorsPointer = actorsPointer;
 	}
 }
