@@ -854,7 +854,6 @@ public class RoomLoader : MonoBehaviour
 			}
 
 			selectedBox = null;
-			selectedBoxId = -1;
 			GetComponent<WarpDialog>().WarpMenuEnabled = false; //hide warp
 		}
 
