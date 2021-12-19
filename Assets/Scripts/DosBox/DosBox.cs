@@ -487,8 +487,8 @@ public class DosBox : MonoBehaviour
 				int calculatedFps = previousFrames.Sum(x => x.Key);
 				TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
 
-				BoxInfo.Append("Timer 1", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer1 / 60), InternalTimer1 % 60);
-				BoxInfo.Append("Timer 2", "{0}.{1:D2}", TimeSpan.FromSeconds(InternalTimer2 / 60), InternalTimer2 % 60);
+				BoxInfo.Append("Timer 1", "{0}.{1:D2} {2}", TimeSpan.FromSeconds(InternalTimer1 / 60), InternalTimer1 % 60, saveTimerFlag ? "F" : string.Empty);
+				BoxInfo.Append("Timer 2", "{0}.{1:D2} {2}", TimeSpan.FromSeconds(InternalTimer2 / 60), InternalTimer2 % 60, saveTimerFlag ? "F" : string.Empty);
 				BoxInfo.Append("FPS/Frame/Delay", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.FloorToInt(lastDelay * 1000));
 				BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			}
