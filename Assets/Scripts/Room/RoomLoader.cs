@@ -726,6 +726,12 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 
+		//make sure selectbox ID still match
+		if(selectedBox != null && selectedBox.ID != selectedBoxId)
+		{
+			selectedBox = null;
+		}
+
 		if (selectedBox == null && selectedBoxId != -1)
 		{
 			//if actor is no more available (eg : after room switch) search for it
