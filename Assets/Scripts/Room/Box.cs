@@ -285,7 +285,7 @@ public class Box : MonoBehaviour
 			info.Append(name.ToUpperInvariant(), "#{0}", ID);
 		}
 		
-		if (name == "Camera" && DosBox.ShowAdditionalInfo)
+		if (name == "Camera" && RoomLoader.ShowAdditionalInfo.BoolValue)
 		{
 			Vector3Int position = CameraPosition * 10;
 			Vector3 rotation = (Vector3)CameraRotation * (360.0f / 1024.0f);

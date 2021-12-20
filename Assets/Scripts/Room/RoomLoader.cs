@@ -902,7 +902,6 @@ public class RoomLoader : MonoBehaviour
 	private void ToggleMenuDOSBoxOptions(bool enabled)
 	{
 		ShowActors.transform.parent.gameObject.SetActive(enabled);
-		ShowAdditionalInfo.transform.parent.gameObject.SetActive(enabled);
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
 	}
 
