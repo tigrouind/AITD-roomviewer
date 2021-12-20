@@ -399,6 +399,7 @@ public class RoomLoader : MonoBehaviour
 				area.Color = new Color32((byte)((colorRGB >> 16) & 0xFF), (byte)((colorRGB >> 8) & 0xFF), (byte)(colorRGB & 0xFF), 100);
 				area.ID = cameraID;
 				area.DosBox = GetComponent<DosBox>();
+				area.RoomLoader = this;
 				MeshFilter filter = area.GetComponent<MeshFilter>();
 
 				// Use the triangulator to get indices for creating triangles
@@ -880,6 +881,11 @@ public class RoomLoader : MonoBehaviour
 			mousePosition -= roomPosition;
 		}
 		return mousePosition;
+	}
+
+	public int GetCameraSlot(int index)
+	{
+		return room >= 0 && room < camerasPerRoom.Count ? camerasPerRoom[room].IndexOf(index) : -1;					
 	}
 
 	#endregion

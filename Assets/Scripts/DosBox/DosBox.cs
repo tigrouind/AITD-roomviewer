@@ -76,6 +76,7 @@ public class DosBox : MonoBehaviour
 			box.name = "Actor";
 			box.Slot = index;
 			box.DosBox = this;
+			box.RoomLoader = GetComponent<RoomLoader>();
 			Boxes[index] = box;
 		}
 

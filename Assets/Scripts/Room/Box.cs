@@ -65,6 +65,7 @@ public class Box : MonoBehaviour
 	public int HardCol;
 	public int HardTrigger;
 	public DosBox DosBox;
+	public RoomLoader RoomLoader;
 	public Vector3Int CameraPosition;
 	public Vector3Int CameraRotation;
 	public Vector3Int CameraFocal;
@@ -294,6 +295,8 @@ public class Box : MonoBehaviour
 				(-rotation.y + 540.0f) % 360.0f,
 				rotation.z > 180.0f ? (rotation.z - 360.0f) : rotation.z);
 			info.Append("FOCAL", "{0} {1} {2}", CameraFocal.y, CameraFocal.z, CameraFocal.x);
+			int slot = RoomLoader.GetCameraSlot(ID);
+			if (slot != -1) info.Append("SLOT", slot);
 		}
 
 		if (name == "Actor")
