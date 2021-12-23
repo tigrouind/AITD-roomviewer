@@ -36,18 +36,7 @@ public class WarpDialog : MonoBehaviour
 			WarpMenuEnabled = false;
 		}
 
-		if (WarpActorBox == null && WarpActorBoxId != -1)
-		{
-			//if actor is no more available (eg : after loading savegame) search for it
-			foreach (Box box in GetComponent<DosBox>().Boxes)
-			{
-				if (box != null && box.ID == WarpActorBoxId)
-				{
-					WarpActorBox = box;
-					break;
-				}
-			}
-		}
+		WarpActorBox = GetComponent<DosBox>().RefreshBoxUsingID(WarpActorBox, WarpActorBoxId);
 
 		Panel.gameObject.SetActive(WarpMenuEnabled);
 

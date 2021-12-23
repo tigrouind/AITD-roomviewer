@@ -27,6 +27,7 @@ public class RoomLoader : MonoBehaviour
 	private Vector3 startDragPosition;
 	private bool allowWarp;
 	private Box warpActor;
+	private int warpActorId = -1;
 	private bool refreshSelectedBoxAllowed = true;
 	private bool highLightedBoxAllowed = true;
 	private Box currentCameraBox;
@@ -499,6 +500,7 @@ public class RoomLoader : MonoBehaviour
 				if(highLightedBox != null && highLightedBox.name == "Actor")
 				{
 					warpActor = highLightedBox;
+					warpActorId = highLightedBox.ID;
 					allowWarp = true;
 				}
 			}
@@ -603,6 +605,7 @@ public class RoomLoader : MonoBehaviour
 		if(dosBox.IsCDROMVersion) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
+		warpActor = GetComponent<DosBox>().RefreshBoxUsingID(warpActor, warpActorId);
 
 		if (dosBox.CurrentCamera != currentCamera)
 		{
@@ -729,24 +732,7 @@ public class RoomLoader : MonoBehaviour
 			}
 		}
 
-		//make sure selectbox ID still match
-		if(selectedBox != null && selectedBox.ID != selectedBoxId)
-		{
-			selectedBox = null;
-		}
-
-		if (selectedBox == null && selectedBoxId != -1)
-		{
-			//if actor is no more available (eg : after room switch) search for it
-			foreach (Box box in GetComponent<DosBox>().Boxes)
-			{
-				if (box != null && box.ID == selectedBoxId)
-				{
-					selectedBox = box;
-					break;
-				}
-			}
-		}
+		selectedBox = GetComponent<DosBox>().RefreshBoxUsingID(selectedBox, selectedBoxId);
 
 		if (selectedBox == null && speedRunMode && defaultBoxSelectionTimer.Elapsed > 1.0f)
 		{

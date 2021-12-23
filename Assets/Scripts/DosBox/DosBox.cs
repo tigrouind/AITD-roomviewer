@@ -848,6 +848,30 @@ public class DosBox : MonoBehaviour
 		int objectAddress = memory.ReadFarPointer(entryPoint + 0x2400E);
 		return objectAddress + index * 52;
 	}
+	
+	public Box RefreshBoxUsingID(Box box, int boxId)
+	{
+		//make sure ID still match
+		if(box != null && box.ID != boxId)
+		{
+			box = null;
+		}
+
+		if (box == null && boxId != -1)
+		{
+			//if actor is no more available (eg : after room switch) search for it
+			foreach (Box b in Boxes)
+			{
+				if (b != null && b.ID == boxId)
+				{
+					box = b;
+					break;
+				}
+			}
+		}
+
+		return box;
+	}
 
 	#endregion
 }
