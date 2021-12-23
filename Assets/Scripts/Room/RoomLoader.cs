@@ -25,6 +25,7 @@ public class RoomLoader : MonoBehaviour
 	private Timer linkToDosBoxTimer = new Timer();
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
+	private bool allowWarp;
 	private Box warpActor;
 	private bool refreshSelectedBoxAllowed = true;
 	private bool highLightedBoxAllowed = true;
@@ -498,6 +499,7 @@ public class RoomLoader : MonoBehaviour
 				if(highLightedBox != null && highLightedBox.name == "Actor")
 				{
 					warpActor = highLightedBox;
+					allowWarp = true;
 				}
 			}
 
@@ -507,7 +509,7 @@ public class RoomLoader : MonoBehaviour
 				Vector3 newMousePosition = Input.mousePosition;
 				if (newMousePosition != mousePosition)
 				{
-					if (warpActor == null)
+					if (!allowWarp)
 					{
 						//move camera
 						Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
@@ -515,27 +517,27 @@ public class RoomLoader : MonoBehaviour
 											- Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
 
 						Camera.main.transform.position += mouseDelta;
-						mousePosition = newMousePosition;
-
-						if((startDragPosition - newMousePosition).magnitude > 4.0f)
-						{
-							refreshSelectedBoxAllowed = false;
-						}
+						mousePosition = newMousePosition;						
 					}
-					else  
+
+					if ((startDragPosition - newMousePosition).magnitude > 4.0f)
 					{
-						//warp actor
-						if (Input.GetMouseButtonDown(1))
+						refreshSelectedBoxAllowed = false;
+						if (allowWarp)
 						{
-							mustWarpActor = true;
-						}
-
-						if((startDragPosition - newMousePosition).magnitude > 4.0f)
-						{
-							refreshSelectedBoxAllowed = false;
 							highLightedBoxAllowed = false;
-						}
+						}						
 					}
+				}
+
+				//warp actor
+				if (Input.GetMouseButtonDown(1) && warpActor != null)
+				{
+					refreshSelectedBoxAllowed = false;
+					highLightedBoxAllowed = false;
+
+					allowWarp = true;
+					mustWarpActor = true;
 				}
 			}
 
@@ -543,12 +545,12 @@ public class RoomLoader : MonoBehaviour
 			if (Input.GetMouseButtonUp(0))
 			{
 				highLightedBoxAllowed = true;
-				warpActor = null;
+				allowWarp = false;
 			}
 		}
 
 		//menu
-		if (Input.GetMouseButtonDown(1) && warpActor == null)
+		if (Input.GetMouseButtonDown(1) && (!Input.GetMouseButton(0) || warpActor == null))
 		{
 			WarpDialog warpDialog = GetComponent<WarpDialog>();
 			if(menuEnabled)
