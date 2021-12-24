@@ -22,12 +22,40 @@ public class CameraHelper : MonoBehaviour
 		9, 10, 11, 8            //parallel lines behind
 	};
 
-	public void SetupTransform(Transform transform, Vector3Int cameraPosition)
+	public void SetupCameraFrustum(GameObject cameraFrustum, Box box)
+	{
+		cameraFrustum.GetComponent<MeshRenderer>().material.color = new Color32(255, 203, 75, 255);
+		SetupTransform(cameraFrustum.transform, box.CameraPosition);
+
+		var filter = cameraFrustum.GetComponent<MeshFilter>();
+		filter.sharedMesh = CreateMesh(box.CameraRotation, box.CameraFocal);
+	}
+
+	public Mesh GetMeshFromPoints(List<Vector2> vertices2D, List<int> indices)
+	{
+		// Create the Vector3 vertices
+		Vector3[] vertices = new Vector3[vertices2D.Count];
+		for (int i = 0; i < vertices.Length; i++)
+		{
+			vertices[i] = new Vector3(vertices2D[i].x, 0.0f, vertices2D[i].y);
+		}
+
+		// Create the mesh
+		Mesh mesh = new Mesh();
+		mesh.vertices = vertices;
+		mesh.triangles = indices.ToArray();
+		mesh.RecalculateNormals();
+		mesh.RecalculateBounds();
+
+		return mesh;
+	}
+
+	void SetupTransform(Transform transform, Vector3Int cameraPosition)
 	{
 		transform.position = new Vector3(cameraPosition.x, cameraPosition.y, -cameraPosition.z) / 100.0f;
 	}
 
-	public Mesh CreateMesh(Vector3Int cameraRotation, Vector3Int cameraFocal)
+	Mesh CreateMesh(Vector3Int cameraRotation, Vector3Int cameraFocal)
 	{
 		var qrot = Quaternion.Euler((Vector3)cameraRotation / 1024.0f * 360.0f);
 		var offset = qrot * new Vector3(0.0f, 0.0f, cameraFocal.x) / 1000.0f;

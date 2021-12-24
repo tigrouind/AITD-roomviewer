@@ -403,7 +403,7 @@ public class RoomLoader : MonoBehaviour
 				MeshFilter filter = area.GetComponent<MeshFilter>();
 
 				// Use the triangulator to get indices for creating triangles
-				filter.sharedMesh = GetMeshFromPoints(points, indices);
+				filter.sharedMesh = GetComponent<CameraHelper>().GetMeshFromPoints(points, indices);
 				Destroy(area.gameObject.GetComponent<BoxCollider>());
 				area.gameObject.AddComponent<MeshCollider>();
 
@@ -1044,30 +1044,11 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	Mesh GetMeshFromPoints(List<Vector2> vertices2D, List<int> indices)
-	{
-		// Create the Vector3 vertices
-		Vector3[] vertices = new Vector3[vertices2D.Count];
-		for (int i = 0; i < vertices.Length; i++)
-		{
-			vertices[i] = new Vector3(vertices2D[i].x, 0.0f, vertices2D[i].y);
-		}
-
-		// Create the mesh
-		Mesh mesh = new Mesh();
-		mesh.vertices = vertices;
-		mesh.triangles = indices.ToArray();
-		mesh.RecalculateNormals();
-		mesh.RecalculateBounds();
-
-		return mesh;
-	}
-
 	void RefreshSelectedCamera()
 	{
 		if(highLightedBox != currentCameraBox)
 		{
-			SetupCameraFrustum(highLightedBox);
+			GetComponent<CameraHelper>().SetupCameraFrustum(CameraFrustum, highLightedBox);
 			currentCameraBox = highLightedBox;
 		}
 		else
@@ -1078,13 +1059,4 @@ public class RoomLoader : MonoBehaviour
 		SetRoomObjectsVisibility(room);
 	}
 
-	void SetupCameraFrustum(Box box)
-	{
-		CameraFrustum.GetComponent<MeshRenderer>().material.color = new Color32(255, 203, 75, 255);
-		CameraHelper cameraHelper = GetComponent<CameraHelper>();
-		cameraHelper.SetupTransform(CameraFrustum.transform, box.CameraPosition);
-
-		var filter = CameraFrustum.GetComponent<MeshFilter>();
-		filter.sharedMesh = cameraHelper.CreateMesh(box.CameraRotation, box.CameraFocal);
-	}
 }
