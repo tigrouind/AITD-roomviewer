@@ -109,22 +109,21 @@ public class WarpDialog : MonoBehaviour
 		}
 	}
 
-	public void WarpActor(Box actor)
+	public void WarpActor()
 	{
 		//select player by default
-		if (actor == null)
+		if (WarpActorBox == null)
 		{
-			actor = GetComponent<DosBox>().Player;
-			WarpActorBox = actor;
-			WarpActorBoxId = actor.ID;
+			WarpActorBox = GetComponent<DosBox>().Player;
+			WarpActorBoxId = WarpActorBox.ID;
 		}
 
 		//warp to mouse position
-		if (actor != null && GetComponent<DosBox>().ProcessReader != null)
+		if (WarpActorBox != null && GetComponent<DosBox>().ProcessReader != null)
 		{
-			Vector3Int offset = GetComponent<RoomLoader>().GetMousePosition(actor.Room, actor.Floor) - (actor.BoundingPos);
+			Vector3Int offset = GetComponent<RoomLoader>().GetMousePosition(WarpActorBox.Room, WarpActorBox.Floor) - (WarpActorBox.BoundingPos);
 			offset = new Vector3Int(offset.x, 0, offset.z);
-			MoveActor(actor, offset);
+			MoveActor(WarpActorBox, offset);
 		}
 	}
 

@@ -26,8 +26,6 @@ public class RoomLoader : MonoBehaviour
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
 	private bool allowWarp;
-	private Box warpActor;
-	private int warpActorId = -1;
 	private bool refreshSelectedBoxAllowed = true;
 	private bool highLightedBoxAllowed = true;
 	private Box currentCameraBox;
@@ -463,6 +461,7 @@ public class RoomLoader : MonoBehaviour
 
 	void Update()
 	{
+		WarpDialog warpDialog = GetComponent<WarpDialog>();
 		float mouseWheel = Input.GetAxis("Mouse ScrollWheel");
 		if(mouseWheel != 0.0f)
 		{
@@ -489,7 +488,7 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		bool mustWarpActor = false;
-		if (!menuEnabled && !GetComponent<WarpDialog>().WarpMenuEnabled)
+		if (!menuEnabled && !warpDialog.WarpMenuEnabled)
 		{
 			//start drag
 			if (Input.GetMouseButtonDown(0))
@@ -499,8 +498,8 @@ public class RoomLoader : MonoBehaviour
 
 				if(highLightedBox != null && highLightedBox.name == "Actor")
 				{
-					warpActor = highLightedBox;
-					warpActorId = highLightedBox.ID;
+					warpDialog.WarpActorBox = highLightedBox;
+					warpDialog.WarpActorBoxId = highLightedBox.ID;
 					allowWarp = true;
 				}
 			}
@@ -533,7 +532,7 @@ public class RoomLoader : MonoBehaviour
 				}
 
 				//warp actor
-				if (Input.GetMouseButtonDown(1) && warpActor != null)
+				if (Input.GetMouseButtonDown(1) && warpDialog.WarpActorBox != null)
 				{
 					refreshSelectedBoxAllowed = false;
 					highLightedBoxAllowed = false;
@@ -552,9 +551,8 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//menu
-		if (Input.GetMouseButtonDown(1) && (!Input.GetMouseButton(0) || warpActor == null))
-		{
-			WarpDialog warpDialog = GetComponent<WarpDialog>();
+		if (Input.GetMouseButtonDown(1) && (!Input.GetMouseButton(0) || warpDialog.WarpActorBox == null))
+		{			
 			if(menuEnabled)
 			{
 				menuEnabled = false;
@@ -605,7 +603,6 @@ public class RoomLoader : MonoBehaviour
 		if(dosBox.IsCDROMVersion) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
-		warpActor = GetComponent<DosBox>().RefreshBoxUsingID(warpActor, warpActorId);
 
 		if (dosBox.CurrentCamera != currentCamera)
 		{
@@ -617,11 +614,11 @@ public class RoomLoader : MonoBehaviour
 		if (mustWarpActor) 
 		{
 			mustWarpActor = false;
-			GetComponent<WarpDialog>().WarpActor(warpActor);
+			warpDialog.WarpActor();
 		}
 
 		//process keys
-		if (!GetComponent<WarpDialog>().WarpMenuEnabled)
+		if (!warpDialog.WarpMenuEnabled)
 		{
 			foreach (var key in keyCodes)
 			{
