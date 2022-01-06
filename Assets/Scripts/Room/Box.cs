@@ -379,11 +379,11 @@ public class Box : MonoBehaviour
 					info.Append("KEYFRAME", "{0}/{1}; {2} {3}", Keyframe, TotalFrames - 1, EndFrame, EndAnim);
 					info.Append("FRAME", "{0}/{1}", Math.Min(Math.Max(DosBox.Timer2 - KeyFrameTime, 0), KeyFrameLength), KeyFrameLength);
 				}
+			}
 
-				if (Speed >= -1 && Speed <= 5)
-				{
-					info.Append("SPEED", "{0} ({1})", speedNames[Speed + 1], Speed);	
-				}				
+			if (DosBox.ShowAITD1Vars && TrackMode > 0 && TrackMode <= 3 && Speed >= -1 && Speed <= 5)
+			{
+				info.Append("SPEED", "{0} ({1})", speedNames[Speed + 1], Speed);
 			}
 
 			if(DosBox.ShowAITD1Vars)
