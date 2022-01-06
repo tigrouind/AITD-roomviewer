@@ -372,22 +372,19 @@ public class Box : MonoBehaviour
 				}					
 			}
 
-			if (DosBox.ShowAITD1Vars && Anim != -1 && (Flags & 1) == 1) //animated
+			if (DosBox.ShowAITD1Vars) 
 			{
-				if (Keyframe != -1)
+				if (Keyframe != -1 && Anim != -1 && (Flags & 1) == 1) //animated
 				{
 					info.Append("KEYFRAME", "{0}/{1}; {2} {3}", Keyframe, TotalFrames - 1, EndFrame, EndAnim);
 					info.Append("FRAME", "{0}/{1}", Math.Min(Math.Max(DosBox.Timer2 - KeyFrameTime, 0), KeyFrameLength), KeyFrameLength);
 				}
-			}
 
-			if (DosBox.ShowAITD1Vars && TrackMode > 0 && TrackMode <= 3 && Speed >= -1 && Speed <= 5)
-			{
-				info.Append("SPEED", "{0} ({1})", speedNames[Speed + 1], Speed);
-			}
+				if (TrackMode > 0 && TrackMode <= 3 && Speed >= -1 && Speed <= 5)
+				{
+					info.Append("SPEED", "{0} ({1})", speedNames[Speed + 1], Speed);
+				}
 
-			if(DosBox.ShowAITD1Vars)
-			{
 				if (Chrono != 0)
 				{
 					info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.Timer1 - Chrono) / 60), (DosBox.Timer1 - Chrono) % 60);
@@ -400,7 +397,9 @@ public class Box : MonoBehaviour
 			}
 
 			if (DosBox.ShowAdditionalInfo && TrackMode >= 0 && TrackMode <= 3)
+			{
 				info.Append("TRACKMODE", trackModeInfo[TrackMode]);
+			}
 
 			if(DosBox.ShowAITD1Vars)
 			{
