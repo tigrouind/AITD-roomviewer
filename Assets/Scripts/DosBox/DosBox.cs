@@ -14,8 +14,6 @@ public class DosBox : MonoBehaviour
 	public Arrow Arrow;
 	public Box BoxPrefab;
 	public Box[] Boxes;
-	public uint InternalTimer1;
-	public int InternalTimer2;
 	public bool ShowAdditionalInfo;
 	public bool ShowAITD1Vars;
 	public bool SpeedRunMode;
@@ -65,6 +63,8 @@ public class DosBox : MonoBehaviour
 	private int inHand;
 	private bool allowInventory;
 	private bool saveTimerFlag;
+	private uint internalTimer1, internalTimer1Frozen;
+	private int internalTimer2, internalTimer2Frozen;
 
 	Box GetActor(int index)
 	{
@@ -348,16 +348,27 @@ public class DosBox : MonoBehaviour
 			//set by AITD when long running code is started (eg: loading ressource)
 			saveTimerFlag = memory[entryPoint + 0x1B0FC] == 1;
 
-			if (!saveTimerFlag)
-			{
-				InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x19D12);
-				InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x242E0);
-			}
-			else
-			{
-				InternalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x1B0F8);
-				InternalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x1B0F6);
-			}
+			internalTimer1 = memory.ReadUnsignedInt(entryPoint + 0x19D12);
+			internalTimer2 = memory.ReadUnsignedShort(entryPoint + 0x242E0);
+
+			internalTimer1Frozen = memory.ReadUnsignedInt(entryPoint + 0x1B0F8);
+			internalTimer2Frozen = memory.ReadUnsignedShort(entryPoint + 0x1B0F6);
+		}
+	}
+
+	public uint Timer1
+	{
+		get
+		{
+			return saveTimerFlag ? internalTimer1Frozen : internalTimer1;
+		}
+	}
+
+	public int Timer2
+	{
+		get
+		{
+			return saveTimerFlag ? internalTimer2Frozen : internalTimer2;
 		}
 	}
 	
@@ -487,9 +498,11 @@ public class DosBox : MonoBehaviour
 			{
 				int calculatedFps = previousFrames.Sum(x => x.Key);
 				TimeSpan totalDelayTS = TimeSpan.FromSeconds(totalDelay.Elapsed);
+				uint timer1Delay = internalTimer1 - internalTimer1Frozen;
+				int timer2Delay = internalTimer2 - internalTimer2Frozen;
 
-				BoxInfo.Append("Timer 1", "{0}.{1:D2} {2}", TimeSpan.FromSeconds(InternalTimer1 / 60), InternalTimer1 % 60, saveTimerFlag ? "F" : string.Empty);
-				BoxInfo.Append("Timer 2", "{0}.{1:D2} {2}", TimeSpan.FromSeconds(InternalTimer2 / 60), InternalTimer2 % 60, saveTimerFlag ? "F" : string.Empty);
+				BoxInfo.Append("Timer 1", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer1 / 60), Timer1 % 60, timer1Delay / 60 % 60, timer1Delay % 60);
+				BoxInfo.Append("Timer 2", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer2 / 60), Timer2 % 60, timer2Delay / 60 % 60, timer2Delay % 60);				
 				BoxInfo.Append("FPS/Frame/Delay", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.FloorToInt(lastDelay * 1000));
 				BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			}
@@ -529,17 +542,15 @@ public class DosBox : MonoBehaviour
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
 				//internal timer 1
-				InternalTimer1 -= 60 * 5; //back 5 frames
 				byte[] buffer = new byte[4];
-				buffer.Write(InternalTimer1, 0);
+				buffer.Write(Timer1 - 60 * 5, 0);  //back 5 frames
 				ProcessReader.Write(buffer, entryPoint + 0x19D12, buffer.Length);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha2))
 			{
 				//internal timer 2
-				InternalTimer2 -= 60 * 5; //back 5 frames
 				byte[] buffer = new byte[2];
-				buffer.Write((ushort)InternalTimer2, 0);
+				buffer.Write((ushort)(Timer2 - 60 * 5), 0);  //back 5 frames
 				ProcessReader.Write(buffer, entryPoint + 0x242E0, buffer.Length);
 			}
 		}

@@ -377,7 +377,7 @@ public class Box : MonoBehaviour
 				if (Keyframe != -1)
 				{
 					info.Append("KEYFRAME", "{0}/{1}; {2} {3}", Keyframe, TotalFrames - 1, EndFrame, EndAnim);
-					info.Append("FRAME", "{0}/{1}", Math.Min(Math.Max(DosBox.InternalTimer2 - KeyFrameTime, 0), KeyFrameLength), KeyFrameLength);
+					info.Append("FRAME", "{0}/{1}", Math.Min(Math.Max(DosBox.Timer2 - KeyFrameTime, 0), KeyFrameLength), KeyFrameLength);
 				}
 
 				if (Speed >= -1 && Speed <= 5)
@@ -390,12 +390,12 @@ public class Box : MonoBehaviour
 			{
 				if (Chrono != 0)
 				{
-					info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer1 - Chrono) / 60), (DosBox.InternalTimer1 - Chrono) % 60);
+					info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.Timer1 - Chrono) / 60), (DosBox.Timer1 - Chrono) % 60);
 				}
 					
 				if (RoomChrono != 0)
 				{
-					info.Append("ROOM_CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.InternalTimer1 - RoomChrono) / 60), (DosBox.InternalTimer1 - RoomChrono) % 60);
+					info.Append("ROOM_CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.Timer1 - RoomChrono) / 60), (DosBox.Timer1 - RoomChrono) % 60);
 				}					
 			}
 
