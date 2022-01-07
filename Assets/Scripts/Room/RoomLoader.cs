@@ -12,17 +12,17 @@ public class RoomLoader : MonoBehaviour
 	private int floor;
 	private int room;
 	private int currentCamera = -1;
-	private int[] cameraColors = { 0xFF8080, 0x789CF0, 0xB0DE6F, 0xCC66C0, 0x5DBAAB, 0xF2BA79, 0x8E71E3, 0x6ED169, 0xBF6080, 0x7CCAF7 };
+	private readonly int[] cameraColors = { 0xFF8080, 0x789CF0, 0xB0DE6F, 0xCC66C0, 0x5DBAAB, 0xF2BA79, 0x8E71E3, 0x6ED169, 0xBF6080, 0x7CCAF7 };
 	private Vector3 mousePosition;
-	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
+	private readonly KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
 	private List<int> floors = new List<int>();
 	private List<Transform> rooms = new List<Transform>();
 	private List<Vector3Int> roomsPosition = new List<Vector3Int>();
 	private List<List<int>> camerasPerRoom = new List<List<int>>();
-	private BoxComparer boxComparer = new BoxComparer();
+	private readonly BoxComparer boxComparer = new BoxComparer();
 	private float defaultCameraZoom = 10.0f;
-	private Timer defaultBoxSelectionTimer = new Timer();
-	private Timer linkToDosBoxTimer = new Timer();
+	private readonly Timer defaultBoxSelectionTimer = new Timer();
+	private readonly Timer linkToDosBoxTimer = new Timer();
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
 	private bool allowWarp;
@@ -453,12 +453,6 @@ public class RoomLoader : MonoBehaviour
 		return 0;
 	}
 
-	bool IsPointVisible(Vector3 point)
-	{
-		Vector3 screen = Camera.main.WorldToViewportPoint(point);
-		return screen.x >= 0.0f && screen.x <= 1.0f && screen.y >= 0.0f && screen.y <= 1.0f;
-	}
-
 	void Update()
 	{
 		WarpDialog warpDialog = GetComponent<WarpDialog>();
@@ -613,7 +607,6 @@ public class RoomLoader : MonoBehaviour
 		//must be done after DosBox update
 		if (mustWarpActor) 
 		{
-			mustWarpActor = false;
 			warpDialog.WarpActor();
 		}
 

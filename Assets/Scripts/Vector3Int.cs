@@ -52,7 +52,7 @@ public struct Vector3Int
 		return new Vector3(v.x, v.y, v.z);
 	}
 
-	public static Vector3Int zero { get { return s_Zero; } }
+	public static Vector3Int Zero { get { return s_Zero; } }
 
 	private static readonly Vector3Int s_Zero = new Vector3Int(0, 0, 0);
 }

@@ -33,10 +33,12 @@ public static class Utils
 	{
 		unchecked
 		{
-			Vector3Int value = new Vector3Int();
-			value.x = ReadShort(data, offset + 0);
-			value.y = ReadShort(data, offset + 2);
-			value.z = ReadShort(data, offset + 4);
+			Vector3Int value = new Vector3Int
+			{
+				x = ReadShort(data, offset + 0),
+				y = ReadShort(data, offset + 2),
+				z = ReadShort(data, offset + 4)
+			};
 			return value;
 		}
 	}

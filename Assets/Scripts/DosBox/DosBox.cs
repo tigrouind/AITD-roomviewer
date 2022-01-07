@@ -26,11 +26,11 @@ public class DosBox : MonoBehaviour
 	public bool IsCDROMVersion;
 
 	private int entryPoint;
-	private Dictionary<int, int> bodyIdToMemoryAddress = new Dictionary<int, int>();
-	private Dictionary<int, int> animIdToMemoryAddress = new Dictionary<int, int>();
+	private readonly Dictionary<int, int> bodyIdToMemoryAddress = new Dictionary<int, int>();
+	private readonly Dictionary<int, int> animIdToMemoryAddress = new Dictionary<int, int>();
 
 	private GameConfig gameConfig;
-	private Dictionary<GameVersion, GameConfig> gameConfigs = new Dictionary<GameVersion, GameConfig>
+	private readonly Dictionary<GameVersion, GameConfig> gameConfigs = new Dictionary<GameVersion, GameConfig>
 	{
 		{ GameVersion.AITD1        , new GameConfig(0x220CE, 160, 82) },
 		{ GameVersion.AITD1_FLOPPY , new GameConfig(0x20542, 160, 82) },
@@ -49,16 +49,16 @@ public class DosBox : MonoBehaviour
 	private int lastValidPlayerIndex = -1;
 	private int linkfloor;
 	private int linkroom;
-	private byte[] memory = new byte[640 * 1024];
+	private readonly byte[] memory = new byte[640 * 1024];
 
 	//fps
 	private int oldFramesCount;
-	private Queue<KeyValuePair<int, float>> previousFrames = new Queue<KeyValuePair<int, float>>();
+	private readonly Queue<KeyValuePair<int, float>> previousFrames = new Queue<KeyValuePair<int, float>>();
 	private int frameCounter;
 
 	private float lastDelay;
-	private Timer delayCounter = new Timer();
-	private Timer totalDelay = new Timer();
+	private readonly Timer delayCounter = new Timer();
+	private readonly Timer totalDelay = new Timer();
 
 	private int inHand;
 	private bool allowInventory;
@@ -178,7 +178,7 @@ public class DosBox : MonoBehaviour
 				}
 				else
 				{
-					box.Mod = Vector3Int.zero;
+					box.Mod = Vector3Int.Zero;
 				}
 
 				box.OldAngle = memory.ReadShort(k + 106);
@@ -521,7 +521,7 @@ public class DosBox : MonoBehaviour
 		BoxInfo.UpdateText();
 	}
 
-	public void Update()
+	void Update()
 	{
 		if (Input.GetKeyDown(KeyCode.Q))
 		{

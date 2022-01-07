@@ -16,12 +16,12 @@ public class ModelLoader : MonoBehaviour
 	private int animIndex = 0;
 	private int modelFolderIndex = 0;
 
-	private KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
-	private VarParser varParser = new VarParser();
+	private readonly KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
+	private readonly VarParser varParser = new VarParser();
 
-	private string[] modelFolders = { Config.GetPath("LISTBODY.PAK"), Config.GetPath("LISTBOD2.PAK") };
-	private string[] animFolders = { Config.GetPath("LISTANIM.PAK"), Config.GetPath("LISTANI2.PAK") };
-	private string textureFolder = Config.GetPath("TEXTURES.PAK");
+	private readonly string[] modelFolders = { Config.GetPath("LISTBODY.PAK"), Config.GetPath("LISTBOD2.PAK") };
+	private readonly string[] animFolders = { Config.GetPath("LISTANIM.PAK"), Config.GetPath("LISTANI2.PAK") };
+	private readonly string textureFolder = Config.GetPath("TEXTURES.PAK");
 
 	private int modelCount;
 	private int animCount;
@@ -504,7 +504,7 @@ public class ModelLoader : MonoBehaviour
 		RefreshLeftText();
 		if (resetcamera)
 		{
-			frameDistance = Vector3Int.zero;
+			frameDistance = Vector3Int.Zero;
 		}
 	}
 
@@ -710,7 +710,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		RefreshLeftText();
-		frameDistance = Vector3Int.zero;
+		frameDistance = Vector3Int.Zero;
 	}
 
 	Quaternion GetRotation(Vector3 angles)
@@ -834,11 +834,6 @@ public class ModelLoader : MonoBehaviour
 		if (File.Exists(varPath))
 		{
 			varParser.Load(varPath, VarEnum.BODYS, VarEnum.ANIMS);
-		}
-
-		if(!File.Exists(modelFolders[1]))
-		{
-			Array.Resize(ref modelFolders, 1);
 		}
 
 		//load first model
@@ -1374,7 +1369,7 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.Space:
-				if (modelFolders.Length > 1)
+				if (File.Exists(modelFolders[1]) && File.Exists(animFolders[1]))
 				{
 					modelFolderIndex = (modelFolderIndex + 1) % modelFolders.Length;
 					LoadModels(modelFolders[modelFolderIndex]);

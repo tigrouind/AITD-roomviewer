@@ -20,7 +20,7 @@ public class WarpDialog : MonoBehaviour
 	public InputField AngleX, AngleY, AngleZ;
 	public ToggleButton AdvancedMode;
 
-	private Timer timer = new Timer();
+	private readonly Timer timer = new Timer();
 
 	void Start()
 	{

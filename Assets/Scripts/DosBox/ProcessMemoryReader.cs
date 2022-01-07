@@ -84,7 +84,7 @@ public class ProcessMemoryReader
 
 	public long SearchFor16MRegion()
 	{
-		MEMORY_BASIC_INFORMATION mem_info = new MEMORY_BASIC_INFORMATION();
+		MEMORY_BASIC_INFORMATION mem_info;
 
 		long min_address = 0;
 		long max_address = 0x7FFFFFFF;

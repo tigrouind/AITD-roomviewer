@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class MaterialCache : MonoBehaviour
 {
-	private static Dictionary<long, Material> materialsCache = new Dictionary<long, Material>();
+	private static readonly Dictionary<long, Material> materialsCache = new Dictionary<long, Material>();
 	public Material TransparentMaterial;
 	public Material OpaqueMaterial;
 	public Material AlwaysOnTopMaterial;

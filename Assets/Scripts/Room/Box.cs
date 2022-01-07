@@ -7,13 +7,13 @@ public class Box : MonoBehaviour
 	private Color32 color;
 	private bool highlighted;
 	private bool alwaysOnTop;
-	private static string[] animTypeInfo = { "ONCE", "REPEAT", "UNINTERRUPT" };
-	private static string[] trackModeInfo = { "NONE", "MANUAL", "FOLLOW", "TRACK" };
-	private static string[] actionTypeInfo = { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
-	private static string[] lifeModeInfo = { "FLOOR", "ROOM", "CAMERA" };
-	private static string[] particleNames = { "BUBBLES", "BLOOD/DEBRIS", string.Empty, "FLASH", "SMOKE" };
-	private static string[] flagsNames = { "ANIM", string.Empty, string.Empty, "BACK", "PUSH", "COLL", "TRIG", "PICK", "GRAV" };
-	private static string[] speedNames = { "BACK", "IDLE", "WALK", "WALK", "WALK", "WALK", "RUN" };
+	private static readonly string[] animTypeInfo = { "ONCE", "REPEAT", "UNINTERRUPT" };
+	private static readonly string[] trackModeInfo = { "NONE", "MANUAL", "FOLLOW", "TRACK" };
+	private static readonly string[] actionTypeInfo = { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
+	private static readonly string[] lifeModeInfo = { "FLOOR", "ROOM", "CAMERA" };
+	private static readonly string[] particleNames = { "BUBBLES", "BLOOD/DEBRIS", string.Empty, "FLASH", "SMOKE" };
+	private static readonly string[] flagsNames = { "ANIM", string.Empty, string.Empty, "BACK", "PUSH", "COLL", "TRIG", "PICK", "GRAV" };
+	private static readonly string[] speedNames = { "BACK", "IDLE", "WALK", "WALK", "WALK", "WALK", "RUN" };
 
 	public int ID;
 	public int Flags;
