@@ -792,8 +792,8 @@ public class RoomLoader : MonoBehaviour
 
 	public void LinkToDosBox()
 	{
-		if ((Application.platform != RuntimePlatform.WindowsEditor &&
-			 Application.platform != RuntimePlatform.WindowsPlayer))
+		if (Application.platform != RuntimePlatform.WindowsEditor &&
+			 Application.platform != RuntimePlatform.WindowsPlayer)
 		{
 			return;
 		}
@@ -1027,7 +1027,7 @@ public class RoomLoader : MonoBehaviour
 
 	void CheckCommandLine()
 	{
-		var args = System.Environment.GetCommandLineArgs();
+		var args = Environment.GetCommandLineArgs();
 		if (args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
 		{
 			speedRunMode = true;

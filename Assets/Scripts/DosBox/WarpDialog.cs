@@ -121,7 +121,7 @@ public class WarpDialog : MonoBehaviour
 		//warp to mouse position
 		if (WarpActorBox != null && GetComponent<DosBox>().ProcessReader != null)
 		{
-			Vector3Int offset = GetComponent<RoomLoader>().GetMousePosition(WarpActorBox.Room, WarpActorBox.Floor) - (WarpActorBox.BoundingPos);
+			Vector3Int offset = GetComponent<RoomLoader>().GetMousePosition(WarpActorBox.Room, WarpActorBox.Floor) - WarpActorBox.BoundingPos;
 			offset = new Vector3Int(offset.x, 0, offset.z);
 			MoveActor(WarpActorBox, offset);
 		}
@@ -242,9 +242,9 @@ public class WarpDialog : MonoBehaviour
 	void TryParseAngle(InputField angleX, InputField angleY, InputField angleZ, out Vector3Int intValue, Vector3Int defaultValue)
 	{
 		int x, y, z;
-		TryParseAngle(angleX, out x, (int)defaultValue.x);
-		TryParseAngle(angleY, out y, (int)defaultValue.y);
-		TryParseAngle(angleZ, out z, (int)defaultValue.z);
+		TryParseAngle(angleX, out x, defaultValue.x);
+		TryParseAngle(angleY, out y, defaultValue.y);
+		TryParseAngle(angleZ, out z, defaultValue.z);
 
 		intValue = new Vector3Int(x, y, z);
 	}
@@ -255,7 +255,7 @@ public class WarpDialog : MonoBehaviour
 		if(float.TryParse(inputField.text, out floatValue))
 		{
 			floatValue = floatValue >= 0.0f ? floatValue % 360.0f : 360.0f - ((-floatValue) % 360.0f);
-			intValue = Mathf.RoundToInt((floatValue * 1024.0f) / 360.0f);
+			intValue = Mathf.RoundToInt(floatValue * 1024.0f / 360.0f);
 		}
 		else
 		{
@@ -266,9 +266,9 @@ public class WarpDialog : MonoBehaviour
 	void TryParsePosition(InputField posX, InputField posY, InputField posZ, out Vector3Int intValue, Vector3Int defaultValue)
 	{
 		int x, y, z;
-		TryParsePosition(posX, out x, (int)defaultValue.x);
-		TryParsePosition(posY, out y, (int)defaultValue.y);
-		TryParsePosition(posZ, out z, (int)defaultValue.z);
+		TryParsePosition(posX, out x, defaultValue.x);
+		TryParsePosition(posY, out y, defaultValue.y);
+		TryParsePosition(posZ, out z, defaultValue.z);
 
 		intValue = new Vector3Int(x, y, z);
 	}

@@ -229,20 +229,20 @@ public class Box : MonoBehaviour
 		{
 			if (materialColor.a == 255)
 			{
-				materialColor = new Color32((byte)(Math.Min(materialColor.r + 75, 255)),
-					(byte)(Math.Min(materialColor.g + 75, 255)),
-					(byte)(Math.Min(materialColor.b + 75, 255)),
+				materialColor = new Color32((byte)Math.Min(materialColor.r + 75, 255),
+					(byte)Math.Min(materialColor.g + 75, 255),
+					(byte)Math.Min(materialColor.b + 75, 255),
 					materialColor.a);
 			}
 			else
 			{
-				materialColor = new Color32(materialColor.r, materialColor.g, materialColor.b, (byte)(Math.Min(materialColor.a + 100, 255)));
+				materialColor = new Color32(materialColor.r, materialColor.g, materialColor.b, (byte)Math.Min(materialColor.a + 100, 255));
 			}
 		}
 
 		Renderer renderer = GetComponent<Renderer>();
 		Material material = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor, alwaysOnTop);
-		if ((renderer.sharedMaterial == null || renderer.sharedMaterial != material))
+		if (renderer.sharedMaterial == null || renderer.sharedMaterial != material)
 		{
 			renderer.sharedMaterial = material;
 		}
@@ -423,7 +423,7 @@ public class Box : MonoBehaviour
 					
 				info.Append("2DBOX", "{0} {1}; {2} {3}", DashIfEmpty(Box2DLower.x), DashIfEmpty(Box2DLower.y), DashIfEmpty(Box2DUpper.x), DashIfEmpty(Box2DUpper.y));
 				info.Append("HITFORCE", HitForce);
-				info.Append("HIT/BY COL/BY", "{0} {1}  {2} {3} {4} {5}", GetActorID(Hit), GetActorID(HitBy), GetActorID((int)Col.x), GetActorID((int)Col.y), GetActorID((int)Col.z), GetActorID(ColBy));
+				info.Append("HIT/BY COL/BY", "{0} {1}  {2} {3} {4} {5}", GetActorID(Hit), GetActorID(HitBy), GetActorID(Col.x), GetActorID(Col.y), GetActorID(Col.z), GetActorID(ColBy));
 				info.Append("HARDCOL/TRIG", "{0} {1}", DashIfEmpty(HardCol), DashIfEmpty(HardTrigger));
 			}
 			

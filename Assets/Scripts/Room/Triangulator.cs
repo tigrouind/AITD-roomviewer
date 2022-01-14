@@ -28,14 +28,14 @@ public class Triangulator
 		else
 		{
 			for (int v = 0; v < n; v++)
-				V[v] = (n - 1) - v;
+				V[v] = n - 1 - v;
 		}
 
 		int nv = n;
 		int count = 2 * nv;
 		for (int m = 0, v = nv - 1; nv > 2;)
 		{
-			if ((count--) <= 0)
+			if (count-- <= 0)
 				return indices.ToArray();
 
 			int u = v;
@@ -79,7 +79,7 @@ public class Triangulator
 			Vector2 qval = m_points[q];
 			A += pval.x * qval.y - qval.x * pval.y;
 		}
-		return (A * 0.5f);
+		return A * 0.5f;
 	}
 
 	private bool Snip(int u, int v, int w, int n, int[] V)
@@ -123,7 +123,7 @@ public class Triangulator
 		cCROSSap = cx * apy - cy * apx;
 		bCROSScp = bx * cpy - by * cpx;
 
-		return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
+		return (aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f);
 	}
 
 }

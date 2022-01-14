@@ -85,7 +85,7 @@ public class ModelLoader : MonoBehaviour
 		{
 			if(child.gameObject != BoundingBox)
 			{
-				GameObject.Destroy(child.gameObject);
+				Destroy(child.gameObject);
 			}			
 		}
 
@@ -251,7 +251,7 @@ public class ModelLoader : MonoBehaviour
 						uvDepth.AddRange(CubeMesh.vertices.Select(x => Vector2.zero));
 						indices[0].AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x =>
-							rotation * (Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude)))
+							rotation * Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude))
 							+ middle));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
 						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[x.z > 0 ? pointIndexA : pointIndexB], weight0 = 1 }));
@@ -416,9 +416,9 @@ public class ModelLoader : MonoBehaviour
 
 						if (primitiveType == 8 || primitiveType == 10)
 						{
-							uvIndex = uvStart + (buffer.ReadUnsignedShort(i + 1) / 16) * 3;
+							uvIndex = uvStart + buffer.ReadUnsignedShort(i + 1) / 16 * 3;
 							bool texModel = (buffer[i + 1] & 0xF) == 0;
-							textureHeight = (float)(texModel ? texAHeight : texBHeight);
+							textureHeight = texModel ? texAHeight : texBHeight;
 							indicesIndex = texModel ? 5 : 6;
 						}
 						else
@@ -544,8 +544,8 @@ public class ModelLoader : MonoBehaviour
 		if (polyType == 1 && DetailsLevel.BoolValue)
 		{
 			//noise
-			color.r = (byte)((colorIndex % 16) * 16);
-			color.g = (byte)((colorIndex / 16) * 16);
+			color.r = (byte)(colorIndex % 16 * 16);
+			color.g = (byte)(colorIndex / 16 * 16);
 		}
 		else if (polyType == 2)
 		{
@@ -556,8 +556,8 @@ public class ModelLoader : MonoBehaviour
 		{
 			//horizontal or vertical gradient
 			color.r = (byte)((polyType == 5) ? 127 : 255); //vertical gradient x2
-			color.b = (byte)((colorIndex / 16) * 16); //vertical palette index
-			color.a = (byte)((colorIndex % 16) * 16); //horizontal palette index
+			color.b = (byte)(colorIndex / 16 * 16); //vertical palette index
+			color.a = (byte)(colorIndex % 16 * 16); //horizontal palette index
 		}
 
 		return color;
@@ -749,7 +749,7 @@ public class ModelLoader : MonoBehaviour
 			frameDistance += animFrames[frame % animFrames.Count].Offset;
 		}
 
-		if((animFrames.Count == 1 && animCounter != previousAnimCounter))
+		if(animFrames.Count == 1 && animCounter != previousAnimCounter)
 		{
 			previousAnimCounter = animCounter;
 			frameDistance += animFrames[0].Offset;
@@ -1328,7 +1328,7 @@ public class ModelLoader : MonoBehaviour
 
 	void CheckCommandLine()
 	{
-		var args = System.Environment.GetCommandLineArgs();
+		var args = Environment.GetCommandLineArgs();
 		if (args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
 		{
 			ProcessKey(KeyCode.E); //extra info

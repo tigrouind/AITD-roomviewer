@@ -17,7 +17,7 @@ public static class Utils
 	{
 		unchecked
 		{
-			return (int)(data[offset] | data[offset + 1] << 8 | data[offset + 2] << 16 | data[offset + 3] << 24);
+			return data[offset] | data[offset + 1] << 8 | data[offset + 2] << 16 | data[offset + 3] << 24;
 		}
 	}
 
