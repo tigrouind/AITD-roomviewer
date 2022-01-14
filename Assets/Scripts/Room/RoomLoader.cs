@@ -256,13 +256,8 @@ public class RoomLoader : MonoBehaviour
 			box.Room = currentroom;
 			box.transform.parent = roomObject.transform;
 
-			Vector3Int lower, upper;
-			buffer.ReadBoundingBox(i + 0, out lower, out upper);
-
-			Vector3Int position = lower + upper;
-			box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
-			box.transform.localScale = (Vector3)(upper - lower) / 1000.0f;
-			box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.01f);
+			buffer.ReadBoundingBox(i + 0, out box.BoundingLower, out box.BoundingUpper);
+			box.SetPositionAndSize();
 
 			box.ID = buffer.ReadShort(i + 12);
 			box.Flags = buffer.ReadShort(i + 14);
@@ -304,12 +299,8 @@ public class RoomLoader : MonoBehaviour
 			box.Room = currentroom;
 			box.transform.parent = roomObject.transform;
 
-			Vector3Int lower, upper;
-			buffer.ReadBoundingBox(i + 0, out lower, out upper);
-
-			Vector3Int position = lower + upper;
-			box.transform.localPosition = new Vector3(position.x, -position.y, position.z) / 2000.0f;
-			box.transform.localScale = (Vector3)(upper - lower) / 1000.0f;
+			buffer.ReadBoundingBox(i + 0, out box.BoundingLower, out box.BoundingUpper);
+			box.SetPositionAndSize();
 
 			box.ID = buffer.ReadShort(i + 12);
 			box.Flags = buffer.ReadShort(i + 14);

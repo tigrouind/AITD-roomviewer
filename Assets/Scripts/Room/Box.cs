@@ -146,6 +146,15 @@ public class Box : MonoBehaviour
 		}
 	}
 
+	public void SetPositionAndSize()
+	{
+		var position = (Vector3)(BoundingUpper + BoundingLower) / 2000.0f;		
+		var scale = (Vector3)BoundingSize / 1000.0f;
+
+		transform.localPosition = new Vector3(position.x, -position.y, position.z);		
+		transform.localScale = Vector3.Max(scale, Vector3.one * 0.01f);
+	}
+
 	string RotateDir
 	{
 		get

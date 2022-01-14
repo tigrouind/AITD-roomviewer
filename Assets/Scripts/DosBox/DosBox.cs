@@ -247,7 +247,7 @@ public class DosBox : MonoBehaviour
 				if (GetComponent<RoomLoader>().TryGetRoomPosition(box.Floor, box.Room, out roomPosition))
 				{
 					//local to global position
-					Vector3 boxPosition = (Vector3)(box.BoundingPos + roomPosition) / 1000.0f;
+					Vector3 boxPosition = (Vector3)(box.BoundingUpper + box.BoundingLower) / 2000.0f + (Vector3)roomPosition / 1000.0f;
 					boxPosition = new Vector3(boxPosition.x, -boxPosition.y, boxPosition.z);
 
 					if (box.transform.position != boxPosition)
@@ -464,7 +464,7 @@ public class DosBox : MonoBehaviour
 				}
 
 				Vector3 finalPos = (Vector3)(box.WorldPosition + box.Mod + currentRoomPos) / 1000.0f;
-				float height = -box.BoundingPos.y / 1000.0f;
+				float height = -(box.BoundingUpper.y + box.BoundingUpper.y) / 2000.0f;
 				finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z);
 				worldPos.transform.position = finalPos;
 				worldPos.transform.localScale = box.transform.localScale;
