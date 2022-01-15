@@ -40,7 +40,7 @@ public class WarpDialog : MonoBehaviour
 
 		Panel.gameObject.SetActive(WarpMenuEnabled);
 
-		if (GetComponent<DosBox>().ProcessReader != null)
+		if (GetComponent<DosBox>().ProcessMemory != null)
 		{
 			if (WarpActorBox != null && !Panel.GetComponentsInChildren<InputField>().Any(x => x.isFocused) && !GetComponent<ExchangeSlot>().ExchangeEnabled)
 			{
@@ -119,7 +119,7 @@ public class WarpDialog : MonoBehaviour
 		}
 
 		//warp to mouse position
-		if (WarpActorBox != null && GetComponent<DosBox>().ProcessReader != null)
+		if (WarpActorBox != null && GetComponent<DosBox>().ProcessMemory != null)
 		{
 			Vector3Int offset = GetComponent<RoomLoader>().GetMousePosition(WarpActorBox.Room, WarpActorBox.Floor) - WarpActorBox.BoundingPos;
 			offset = new Vector3Int(offset.x, 0, offset.z);
@@ -287,19 +287,19 @@ public class WarpDialog : MonoBehaviour
 
 	void WriteActorAngle(Box actor, Vector3Int angle)
 	{
-		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
+		ProcessMemory processMemory = GetComponent<DosBox>().ProcessMemory;
 
 		int address = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
 		byte[] buffer = new byte[6];
 		buffer.Write(angle, 0);
-		processReader.Write(buffer, address + 40, buffer.Length);
+		processMemory.Write(buffer, address + 40, buffer.Length);
 
 		actor.Angles = angle;
 	}
 
 	void WriteActorPosition(Box actor, Vector3Int lowerBound, Vector3Int upperBound, Vector3Int localPosition, Vector3Int worldPosition)
 	{
-		ProcessMemoryReader processReader = GetComponent<DosBox>().ProcessReader;
+		ProcessMemory processReader = GetComponent<DosBox>().ProcessMemory;
 
 		//get object offset
 		int address = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);

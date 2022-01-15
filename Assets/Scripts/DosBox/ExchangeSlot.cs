@@ -106,8 +106,8 @@ public class ExchangeSlot : MonoBehaviour
 
 	void ExchangeActorSlots(int slotFrom, int slotTo)
 	{
-		var processReader = GetComponent<DosBox>().ProcessReader;
-		if (processReader != null)
+		var process = GetComponent<DosBox>().ProcessMemory;
+		if (process != null)
 		{
 			if (slotFrom != slotTo)
 			{
@@ -119,18 +119,18 @@ public class ExchangeSlot : MonoBehaviour
 				byte[] memoryTo = new byte[actorSize];
 
 				//exchange slots
-				processReader.Read(memoryFrom, offsetFrom, actorSize);
-				processReader.Read(memoryTo, offsetTo, actorSize);
+				process.Read(memoryFrom, offsetFrom, actorSize);
+				process.Read(memoryTo, offsetTo, actorSize);
 
-				processReader.Write(memoryTo, offsetFrom, actorSize);
-				processReader.Write(memoryFrom, offsetTo, actorSize);
+				process.Write(memoryTo, offsetFrom, actorSize);
+				process.Write(memoryFrom, offsetTo, actorSize);
 
 				//update ownerID
 				int objectIdFrom = memoryFrom.ReadShort(0);
 				int objectIdTo = memoryTo.ReadShort(0);
 
-				UpdateObjectOwnerID(objectIdFrom, slotTo, processReader);
-				UpdateObjectOwnerID(objectIdTo, slotFrom, processReader);
+				UpdateObjectOwnerID(objectIdFrom, slotTo, process);
+				UpdateObjectOwnerID(objectIdTo, slotFrom, process);
 			}
 		}
 		else
@@ -139,7 +139,7 @@ public class ExchangeSlot : MonoBehaviour
 		}
 	}
 
-	void UpdateObjectOwnerID(int objectID, int ownerID, ProcessMemoryReader processReader)
+	void UpdateObjectOwnerID(int objectID, int ownerID, ProcessMemory processReader)
 	{
 		if (objectID != -1)
 		{

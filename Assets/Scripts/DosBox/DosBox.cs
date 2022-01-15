@@ -21,7 +21,7 @@ public class DosBox : MonoBehaviour
 	public int CurrentCameraRoom;
 	public int CurrentCameraFloor;
 
-	public ProcessMemoryReader ProcessReader;
+	public ProcessMemory ProcessMemory;
 	public Box Player;
 	public bool IsCDROMVersion;
 
@@ -95,15 +95,15 @@ public class DosBox : MonoBehaviour
 
 	void OnDestroy()
 	{
-		if (ProcessReader != null)
+		if (ProcessMemory != null)
 		{
-			ProcessReader.Close();
+			ProcessMemory.Close();
 		}
 	}
 
 	public void RefreshMemory()
 	{
-		if (ProcessReader != null && ProcessReader.Read(memory, 0, memory.Length) == 0)
+		if (ProcessMemory != null && ProcessMemory.Read(memory, 0, memory.Length) == 0)
 		{
 			//unlink DOSBOX
 			GetComponent<RoomLoader>().LinkToDosBox();
@@ -112,7 +112,7 @@ public class DosBox : MonoBehaviour
 
 	public void UpdateAllActors()
 	{
-		if (ProcessReader == null)
+		if (ProcessMemory == null)
 		{
 			return;
 		}
@@ -537,21 +537,21 @@ public class DosBox : MonoBehaviour
 				}
 			}
 		}
-		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && IsCDROMVersion && ProcessReader != null)
+		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && IsCDROMVersion && ProcessMemory != null)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
 				//internal timer 1
 				byte[] buffer = new byte[4];
 				buffer.Write(Timer1 - 60 * 5, 0);  //back 5 frames
-				ProcessReader.Write(buffer, entryPoint + 0x19D12, buffer.Length);
+				ProcessMemory.Write(buffer, entryPoint + 0x19D12, buffer.Length);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha2))
 			{
 				//internal timer 2
 				byte[] buffer = new byte[2];
 				buffer.Write((ushort)(Timer2 - 60 * 5), 0);  //back 5 frames
-				ProcessReader.Write(buffer, entryPoint + 0x242E0, buffer.Length);
+				ProcessMemory.Write(buffer, entryPoint + 0x242E0, buffer.Length);
 			}
 		}
 	}
@@ -671,12 +671,12 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	bool TryGetMemoryReader(out ProcessMemoryReader reader)
+	bool TryGetMemoryReader(out ProcessMemory reader)
 	{
 		int processId = SearchDOSBoxProcess();
 		if (processId != -1)
 		{
-			reader = new ProcessMemoryReader(processId);
+			reader = new ProcessMemory(processId);
 			reader.BaseAddress = reader.SearchFor16MRegion();
 			if (reader.BaseAddress != -1)
 			{
@@ -709,7 +709,7 @@ public class DosBox : MonoBehaviour
 
 	bool FindActorsAddressAITD(GameVersion gameVersion)
 	{
-		ProcessReader.Read(memory, 0, memory.Length);
+		ProcessMemory.Read(memory, 0, memory.Length);
 
 		if (!TryGetExeEntryPoint(out entryPoint))
 		{
@@ -763,22 +763,22 @@ public class DosBox : MonoBehaviour
 	{
 		//scan range: 0x110000 (extended memory) - 0x300000 (3MB)
 		byte[] pattern = Encoding.ASCII.GetBytes("HARD_DEC");
-		int dataSegment = ProcessReader.SearchForBytePattern(0x110000, 0x1F0000, buffer => Utils.IndexOf(buffer, pattern, 28, 16));
+		int dataSegment = ProcessMemory.SearchForBytePattern(0x110000, 0x1F0000, buffer => Utils.IndexOf(buffer, pattern, 28, 16));
 
 		if (dataSegment != -1)
 		{
-			ProcessReader.Read(memory, dataSegment, memory.Length);
+			ProcessMemory.Read(memory, dataSegment, memory.Length);
 			if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("Time Gate not found")) == -1)
 			{
 				gameVersion = GameVersion.TIMEGATE_DEMO;
 			}
 
 			gameConfig = gameConfigs[gameVersion];
-			ProcessReader.Read(memory, dataSegment + gameConfig.ActorsPointer, 4);
+			ProcessMemory.Read(memory, dataSegment + gameConfig.ActorsPointer, 4);
 			var result = memory.ReadUnsignedInt(0); //read pointer value
 			if (result != 0)
 			{
-				ProcessReader.BaseAddress += result;
+				ProcessMemory.BaseAddress += result;
 				entryPoint = 0;
 				return true;
 			}
@@ -793,15 +793,15 @@ public class DosBox : MonoBehaviour
 
 	public bool LinkToDosBOX(int floor, int room, GameVersion gameVersion)
 	{
-		if (!TryGetMemoryReader(out ProcessReader))
+		if (!TryGetMemoryReader(out ProcessMemory))
 		{
 			return false;
 		}	
 
 		if (!FindActorsAddress(gameVersion))
 		{
-			ProcessReader.Close();
-			ProcessReader = null;
+			ProcessMemory.Close();
+			ProcessMemory = null;
 			return false;
 		}
 
@@ -814,10 +814,10 @@ public class DosBox : MonoBehaviour
 
 	public void UnlinkDosBox()
 	{
-		if (ProcessReader != null)
+		if (ProcessMemory != null)
 		{
-			ProcessReader.Close();
-			ProcessReader = null;
+			ProcessMemory.Close();
+			ProcessMemory = null;
 		}
 
 		BoxInfo.Clear(true);
