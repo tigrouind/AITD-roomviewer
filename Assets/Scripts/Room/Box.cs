@@ -257,27 +257,15 @@ public class Box : MonoBehaviour
 		}
 	}
 
-	void OnDisable()
+	void OnDestroy()
 	{
-		if(BoxHotPoint != null)
+		if (BoxHotPoint != null)
 		{
-			BoxHotPoint.gameObject.SetActive(false);
+			Destroy(BoxHotPoint.gameObject);
 		}
-		if(BoxWorldPos != null)
+		if (BoxWorldPos != null)
 		{
-			BoxWorldPos.gameObject.SetActive(false);
-		}
-	}
-
-	void OnEnable()
-	{
-		if(BoxHotPoint != null)
-		{
-			BoxHotPoint.gameObject.SetActive(true);
-		}
-		if(BoxWorldPos != null)
-		{
-			BoxWorldPos.gameObject.SetActive(true);
+			Destroy(BoxWorldPos.gameObject);
 		}
 	}
 

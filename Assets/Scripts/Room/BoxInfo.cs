@@ -26,14 +26,9 @@ public class BoxInfo : MonoBehaviour
 		}
 	}
 
-	public void AppendLine()
-	{
-		AppendLineIfNecessary();
-	}
-
 	public void Append(string name, Vector3Int value)
 	{
-		AppendLineIfNecessary();
+		AppendLine();
 		names.Append(name);
 		values.Append(value.x);
 		values.Append(' ');
@@ -44,19 +39,19 @@ public class BoxInfo : MonoBehaviour
 
 	public void Append<T>(string name, T value)
 	{
-		AppendLineIfNecessary();
+		AppendLine();
 		names.Append(name);
 		values.Append(value.ToString());
 	}
 
 	public void Append(string name, string format, params object[] args)
 	{
-		AppendLineIfNecessary();
+		AppendLine();
 		names.Append(name);
 		values.AppendFormat(format, args);
 	}
 
-	private void AppendLineIfNecessary()
+	public void AppendLine()
 	{
 		if (names.Length > 0) names.AppendLine();
 		if (values.Length > 0) values.AppendLine();
