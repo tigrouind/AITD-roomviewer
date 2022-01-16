@@ -47,6 +47,8 @@ public class ModelLoader : MonoBehaviour
 	private List<Vector2> uvDepth;
 	private Vector3Int boundingLower;
 	private Vector3Int boundingUpper;
+	private int boundingBoxMode;
+	private readonly string[] boundingBoxModes = { "normal", "cube", "max" };
 
 	private Vector2 cameraRotation = new Vector2(0.0f, 20.0f);
 	private Vector2 cameraPosition;
@@ -100,11 +102,8 @@ public class ModelLoader : MonoBehaviour
 		//header
 		modelFlags = buffer.ReadShort(i + 0);
 
-		//bounding box
-		buffer.ReadBoundingBox(i + 2, out boundingLower, out boundingUpper);
-		BoundingBox.transform.localScale = (Vector3)(boundingUpper - boundingLower) / 1000.0f;
-		Vector3 pos = (Vector3)(boundingUpper + boundingLower) / 2000.0f;
-		BoundingBox.transform.localPosition = new Vector3(pos.x, -pos.y, pos.z);
+		//bounding box		
+		LoadBoundingBox(buffer, i + 2);
 
 		i += 0xE;
 		i += buffer.ReadShort(i + 0) + 2;
@@ -644,6 +643,28 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		Array.Copy(result, tex256, tex256.Length);
+	}
+
+	void LoadBoundingBox(byte[] buffer, int position)
+	{
+		buffer.ReadBoundingBox(position, out boundingLower, out boundingUpper);
+
+		switch(boundingBoxMode)
+		{
+			case 1: //cube
+				boundingUpper.x = boundingUpper.z = (boundingUpper.x + boundingUpper.z) / 2;
+				boundingLower.x = boundingLower.z = -boundingUpper.z;
+				break;
+
+			case 2: //max
+				boundingUpper.x = boundingUpper.z = Math.Max(boundingUpper.x - boundingLower.x, boundingUpper.z - boundingUpper.x) / 2;
+				boundingLower.x = boundingLower.z = -boundingUpper.z;
+				break;
+		}
+
+		BoundingBox.transform.localScale = (Vector3)(boundingUpper - boundingLower) / 1000.0f;
+		Vector3 pos = (Vector3)(boundingUpper + boundingLower) / 2000.0f;
+		BoundingBox.transform.localPosition = new Vector3(pos.x, -pos.y, pos.z);
 	}
 
 	void LoadAnim()
@@ -1269,10 +1290,11 @@ public class ModelLoader : MonoBehaviour
 		if(ShowAdditionalInfo.BoolValue)
 		{
 			stringBuilder.Append("\r\n\r\n");
-			stringBuilder.AppendFormat("Bounding box: <color=#00c864>{0} {1} {2}</color>\r\n",
+			stringBuilder.AppendFormat("Bounding box ({3}): <color=#00c864>{0} {1} {2}</color>\r\n",
 				boundingUpper.x - boundingLower.x,
 				boundingUpper.y - boundingLower.y,
-				boundingUpper.z - boundingLower.z);
+				boundingUpper.z - boundingLower.z,
+				boundingBoxModes[boundingBoxMode]);
 		}
 
 		if(EnableAnimation.BoolValue && ShowAdditionalInfo.BoolValue && animFrames != null)
@@ -1432,6 +1454,14 @@ public class ModelLoader : MonoBehaviour
 			case KeyCode.D:
 				DetailsLevel.BoolValue = !DetailsLevel.BoolValue;
 				LoadBody(false);
+				break;
+
+			case KeyCode.B:
+				if (ShowAdditionalInfo.BoolValue)
+				{
+					boundingBoxMode = (boundingBoxMode + 1) % 3;
+					LoadBody(false);
+				}				
 				break;
 
 			case KeyCode.R:

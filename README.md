@@ -86,6 +86,7 @@ Copy the following files to GAMEDATA folder:
 - <kbd>↑</kbd> or <kbd>↓</kbd> : change animation
 - <kbd>Space</kbd> : change model folder (Edward or Emily)
 - <kbd>Shift</kbd> : hold it while pressing left or right keys to skip 10 models at once
+- <kbd>B</kbd> : bounding box default / cube / max 
 - <kbd>Mouse wheel</kbd> : zoom in / out
 - <kbd>Left mouse button</kbd> : click on model and drag to rotate it
 - <kbd>Middle mouse button</kbd> : move model
