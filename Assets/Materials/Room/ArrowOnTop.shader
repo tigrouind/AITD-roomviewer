@@ -14,7 +14,6 @@
 
 		struct Input
 		{
-			float4 color : COLOR;
 			float2 uv_MainTex;
 		};
 
