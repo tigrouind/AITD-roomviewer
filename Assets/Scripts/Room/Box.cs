@@ -250,7 +250,7 @@ public class Box : MonoBehaviour
 		}
 
 		Renderer renderer = GetComponent<Renderer>();
-		Material material = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor, alwaysOnTop);
+		Material material = GetComponent<MaterialCache>().GetMaterialFromCache(materialColor, alwaysOnTop, highlighted);
 		if (renderer.sharedMaterial == null || renderer.sharedMaterial != material)
 		{
 			renderer.sharedMaterial = material;

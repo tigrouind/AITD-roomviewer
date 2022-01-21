@@ -20,12 +20,6 @@ public class BoxComparer : IComparer<RaycastHit>
 			return isActorA.CompareTo(isActorB);
 		}
 
-		// check distance
-		if (Mathf.Abs(a.distance - b.distance) >= 0.0005f)
-		{
-			return a.distance.CompareTo(b.distance);
-		}
-
 		//if objects are too close each other, check current room
 		int aCurrentRoom = boxA.Room == Room ? 0 : 1;
 		int bCurrentRoom = boxB.Room == Room ? 0 : 1;
@@ -38,6 +32,12 @@ public class BoxComparer : IComparer<RaycastHit>
 		{
 			return -boxA.GetComponent<Renderer>().sharedMaterial.renderQueue
 				.CompareTo(boxB.GetComponent<Renderer>().sharedMaterial.renderQueue);
+		}
+
+		// check distance
+		if (Mathf.Abs(a.distance - b.distance) >= 0.0005f)
+		{
+			return a.distance.CompareTo(b.distance);
 		}
 
 		return 0;

@@ -8,27 +8,32 @@ public class MaterialCache : MonoBehaviour
 	public Material TransparentMaterial;
 	public Material OpaqueMaterial;
 	public Material AlwaysOnTopMaterial;
+	public Material HighlightMaterial;
 
-	public Material GetMaterialFromCache(Color32 color, bool alwaysOnTop)
+	public Material GetMaterialFromCache(Color32 color, bool alwaysOnTop, bool highlighted)
 	{
 		Material material;
-		var key = (alwaysOnTop ? 0L : 1L) << 32 | (long)color.r << 24 | (long)color.g << 16 | (long)color.b << 8 | color.a;
+		var key = (highlighted ? 0L : 1L) << 33 | (alwaysOnTop ? 0L : 1L) << 32 | (long)color.r << 24 | (long)color.g << 16 | (long)color.b << 8 | color.a;
 		if (!materialsCache.TryGetValue(key, out material))
 		{
-			if (alwaysOnTop)
+			 if (alwaysOnTop)
 			{
 				material = new Material(AlwaysOnTopMaterial);
 			}
-			else
+			else if (color.a == 255)
 			{
-				if (color.a == 255)
+				if (highlighted)
 				{
-					material = new Material(OpaqueMaterial);
+					material = new Material(HighlightMaterial);
 				}
 				else
 				{
-					material = new Material(TransparentMaterial);
+					material = new Material(OpaqueMaterial);
 				}
+			}
+			else
+			{
+				material = new Material(TransparentMaterial);
 			}
 
 			material.color = color;

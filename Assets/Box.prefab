@@ -94,8 +94,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27276e615a2c822418417273ecb8abb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowAITD1Vars: 0
-  ShowAdditionalInfo: 0
   ID: 0
   Flags: 0
   ColFlags: 0
@@ -106,7 +104,10 @@ MonoBehaviour:
   Anim: 0
   NextAnim: 0
   AnimType: 0
+  ActionType: 0
   Keyframe: 0
+  EndFrame: 0
+  EndAnim: 0
   TotalFrames: 0
   Speed: 0
   Room: 0
@@ -117,18 +118,23 @@ MonoBehaviour:
   PositionInTrack: 0
   Slot: 0
   HitForce: 0
-  LocalPosition: {x: 0, y: 0, z: 0}
-  WorldPosition: {x: 0, y: 0, z: 0}
-  BoundingLower: {x: 0, y: 0, z: 0}
-  BoundingUpper: {x: 0, y: 0, z: 0}
-  Angles: {x: 0, y: 0, z: 0}
+  KeyFrameTime: 0
+  KeyFrameLength: 0
   LastOffset: 0
   LastDistance: 0
+  HotBoxSize: 0
   BoxHotPoint: {fileID: 0}
   BoxWorldPos: {fileID: 0}
   OldAngle: 0
   NewAngle: 0
   RotateTime: 0
+  HitBy: 0
+  Hit: 0
+  ColBy: 0
+  HardCol: 0
+  HardTrigger: 0
+  DosBox: {fileID: 0}
+  RoomLoader: {fileID: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
@@ -186,3 +192,4 @@ MonoBehaviour:
   TransparentMaterial: {fileID: 2100000, guid: af2637388dca884479c70aecba1bb5eb, type: 2}
   OpaqueMaterial: {fileID: 2100000, guid: d9b8feb287a1f4642a512ad0d2004e53, type: 2}
   AlwaysOnTopMaterial: {fileID: 2100000, guid: fa7fa0b1b891ba445b858cf5350eb859, type: 2}
+  HighlightMaterial: {fileID: 2100000, guid: 1441671c37139e7438ac21ac419a4c89, type: 2}
