@@ -20,29 +20,36 @@ The following games are supported :
 
 ## Commands
 
-- <kbd>Mouse wheel</kbd> : zoom in / out
-- <kbd>Left mouse button</kbd> : drag map / highlight box
-- <kbd>Middle mouse button</kbd> : reset camera zoom and position
-- <kbd>Right mouse button</kbd> : show options menu
-- <kbd>↑</kbd> or <kbd>↓</kbd> : change floor
-- <kbd>←</kbd> or <kbd>→</kbd> : change room
-- <kbd>Esc</kbd> : quit (only in fullscreen mode)
-- <kbd>W</kbd> : reset last distance for all actors
-- <kbd>Q</kbd> : reset total delay (AITD1 only)
-- <kbd>Shift</kbd> + <kbd>Alpha1</kbd> : Timer 1 goes back 5 seconds (AITD1 only)
-- <kbd>Shift</kbd> + <kbd>Alpha2</kbd> : Timer 2 goes back 5 seconds (AITD1 only)
+| Mouse | Description |
+| :-: | - |
+| <kbd>Wheel</kbd> | zoom in / out |
+| <kbd>Left button</kbd> | drag map / select box |
+| <kbd>Middle button</kbd> | reset camera zoom and position
+| <kbd>Right button</kbd> | show options menu
+
+| Key | Description |
+| :-: | - |
+| <kbd>↑</kbd> <br/> <kbd>↓</kbd> | change floor
+| <kbd>←</kbd> <kbd>→</kbd> | change room
+| <kbd>W</kbd> | reset last distance for all actors
+| <kbd>Q</kbd> | reset total delay (AITD1 only)
+| <kbd>Shift</kbd> + <kbd>Alpha1</kbd> | Timer 1 goes back 5 seconds (AITD1 only)
+| <kbd>Shift</kbd> + <kbd>Alpha2</kbd> | Timer 2 goes back 5 seconds (AITD1 only)
+| <kbd>Esc</kbd> | quit (only in fullscreen mode)
 
 ## Shortcuts
 
-- <kbd>D</kbd> : display mode
-- <kbd>F</kbd> : camera follow mode
-- <kbd>R</kbd> : room's visibility
-- <kbd>C</kbd> : camera area's visibility
-- <kbd>T</kbd> : trigger's visibility
-- <kbd>A</kbd> : actor's visibility
-- <kbd>E</kbd> : show extra info (AITD1 only)
-- <kbd>Page up</kbd> / <kbd>page down</kbd> : camera rotate
-- <kbd>Tab</kbd> : switch to model viewer
+| Key | Description |
+| :-: | - |
+| <kbd>D</kbd> | display mode
+| <kbd>F</kbd> | camera follow mode
+| <kbd>R</kbd> | room's visibility
+| <kbd>C</kbd> | camera area's visibility
+| <kbd>T</kbd> | trigger's visibility
+| <kbd>A</kbd> | actor's visibility
+| <kbd>E</kbd> | show extra info (AITD1 only)
+| <kbd>Page up</kbd> <br/> <kbd>page down</kbd> | camera rotate
+| <kbd>Tab</kbd> | switch to model viewer
 
 Put mouse on a box to highlight it.
 - Light gray boxes are colliders which player cannot passthrough
@@ -62,9 +69,13 @@ To fix this, run room viewer with administrator rights (or run AITD without admi
 
 ## Warp actor
 When the game is linked to DOSBox, it is possible to change the position of an actor using drag and drop. Hold <kbd>left mouse button</kbd> while mouse is on an actor. Move cursor (keeping <kbd>left mouse button</kbd> pressed) and right click to warp (you can do this multiple times). Then, release <kbd>left mouse button</kbd>. It is also possible to manually edit position of an actor by right clicking on it or by pressing numpad keys :
-- <kbd>4</kbd>, <kbd>6</kbd>, <kbd>2</kbd>, <kbd>8</kbd> : move actor left / right / down / up
-- <kbd>7</kbd>, <kbd>9</kbd> : rotate actor left / right
-- If you hold <kbd>0</kbd> while pressing the numpad keys above, position is updated at a higher rate.
+
+| Key | Description |
+| :-: | - |
+| <kbd>4</kbd>  <kbd>6</kbd>| move actor left / right
+| <kbd>8</kbd> <br/> <kbd>2</kbd> | move actor down / up
+| <kbd>7</kbd>  <kbd>9</kbd> | rotate actor left / right
+| <kbd>0</kbd> | hold it while pressing the numpad keys above to update at a higher rate
 
 ## Actor slot swap
 When the game is linked to DOSBox, you can swap two actors slot positions by highlighting an actor, typing a number (with keypad or alphanumeric keys) then pressing <kbd>enter</kbd>.
@@ -82,20 +93,28 @@ Copy the following files to GAMEDATA folder:
 
 ## Commands
 
-- <kbd>←</kbd> or <kbd>→</kbd> : change model
-- <kbd>↑</kbd> or <kbd>↓</kbd> : change animation
-- <kbd>Space</kbd> : change model folder (Edward or Emily)
-- <kbd>Shift</kbd> : hold it while pressing left or right keys to skip 10 models at once
-- <kbd>B</kbd> : bounding box default / cube / max 
-- <kbd>Mouse wheel</kbd> : zoom in / out
-- <kbd>Left mouse button</kbd> : click on model and drag to rotate it
-- <kbd>Middle mouse button</kbd> : move model
-- <kbd>Right mouse button</kbd> : show options menu
+| Mouse | Description |
+| :-: | - |
+| <kbd>Wheel</kbd> | zoom in / out
+| <kbd>Left button</kbd> | click on model and drag to rotate it
+| <kbd>Middle button</kbd> | move model
+| <kbd>Right button</kbd> | show options menu
+
+| Key | Description |
+| :-: | - |
+| <kbd>←</kbd> <kbd>→</kbd> | change model
+| <kbd>↑</kbd> <br/> <kbd>↓</kbd> | change animation
+| <kbd>Shift</kbd> | hold it while pressing <kbd>←</kbd> or <kbd>→</kbd> to skip 10 models at once
+| <kbd>Space</kbd> | change model folder (Edward or Emily)
+| <kbd>B</kbd> | bounding box mode (default / cube / max)
+| <kbd>Esc</kbd> | quit (only in fullscreen mode)
 
 ## Shortcuts
 
-- <kbd>D</kbd> : details high / low
-- <kbd>R</kbd> : camera auto rotate mode
-- <kbd>E</kbd> : show extra information
-- <kbd>A</kbd> : enable animation
-- <kbd>Tab</kbd> : switch to room viewer
+| Key | Description |
+| :-: | - |
+| <kbd>D</kbd> | details high / low
+| <kbd>R</kbd> | camera auto rotate mode
+| <kbd>E</kbd> | show extra information
+| <kbd>A</kbd> | enable animation
+| <kbd>Tab</kbd> | switch to room viewer
