@@ -92,6 +92,14 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	void RemoveAllActors()
+	{
+		for(int i = 0; i < Boxes.Length; i++)
+		{
+			RemoveActor(i);
+		}
+	}
+
 	void OnDestroy()
 	{
 		if (ProcessMemory != null)
@@ -819,9 +827,11 @@ public class DosBox : MonoBehaviour
 			ProcessMemory = null;
 		}
 
+		Player = null;
 		RightText.Clear(true);
 		CurrentCamera = -1;
 		lastValidPlayerIndex = -1;
+		RemoveAllActors();
 	}
 
 	public bool FindActorsAddress(GameVersion gameVersion)
