@@ -6287,7 +6287,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60c5f913828fed442bb74fbaaa3380f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BoxInfo: {fileID: 866931883}
+  RightText: {fileID: 866931883}
   Actors: {fileID: 1100510531}
   Arrow: {fileID: 845929843}
   BoxPrefab: {fileID: 11478822, guid: 7df16bc6b930dc646a268b583326e2e9, type: 2}

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class DosBox : MonoBehaviour
 {
-	public BoxInfo BoxInfo;
+	public BoxInfo RightText;
 	public GameObject Actors;
 	public Arrow Arrow;
 	public Box BoxPrefab;
@@ -477,21 +477,21 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	public void UpdateBoxInfo()
+	public void UpdateRightText()
 	{
-		BoxInfo.Clear();
+		RightText.Clear();
 		if (Player != null)
 		{
 			float angle = Player.Angles.y * 360.0f / 1024.0f;
 			float sideAngle = (angle + 45.0f) % 90.0f - 45.0f;
 
-			BoxInfo.Append("Position", Player.LocalPosition + Player.Mod);
-			BoxInfo.Append("Angle", "{0:N1} {1:N1}", angle, sideAngle);
+			RightText.Append("Position", Player.LocalPosition + Player.Mod);
+			RightText.Append("Angle", "{0:N1} {1:N1}", angle, sideAngle);
 		}
 
 		if (ShowAITD1Vars || ShowAdditionalInfo)
 		{
-			if(Player != null) BoxInfo.AppendLine();
+			if(Player != null) RightText.AppendLine();
 
 			if (ShowAITD1Vars)
 			{
@@ -500,24 +500,24 @@ public class DosBox : MonoBehaviour
 				uint timer1Delay = internalTimer1 - internalTimer1Frozen;
 				int timer2Delay = internalTimer2 - internalTimer2Frozen;
 
-				BoxInfo.Append("Timer 1", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer1 / 60), Timer1 % 60, timer1Delay / 60 % 60, timer1Delay % 60);
-				BoxInfo.Append("Timer 2", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer2 / 60), Timer2 % 60, timer2Delay / 60 % 60, timer2Delay % 60);				
-				BoxInfo.Append("FPS/Frame/Delay", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.FloorToInt(lastDelay * 1000));
-				BoxInfo.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
+				RightText.Append("Timer 1", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer1 / 60), Timer1 % 60, timer1Delay / 60 % 60, timer1Delay % 60);
+				RightText.Append("Timer 2", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer2 / 60), Timer2 % 60, timer2Delay / 60 % 60, timer2Delay % 60);				
+				RightText.Append("FPS/Frame/Delay", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.FloorToInt(lastDelay * 1000));
+				RightText.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
 			}
 
 			Vector3Int mousePosition = GetComponent<RoomLoader>().GetMousePosition(linkroom, linkfloor);
-			BoxInfo.Append("Cursor position", "{0} {1}", Math.Min(Math.Max(mousePosition.x, -32768), 32767), Math.Min(Math.Max(mousePosition.z, -32768), 32767));
-			if(Player != null) BoxInfo.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
+			RightText.Append("Cursor position", "{0} {1}", Math.Min(Math.Max(mousePosition.x, -32768), 32767), Math.Min(Math.Max(mousePosition.z, -32768), 32767));
+			if(Player != null) RightText.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
 
 			if (ShowAITD1Vars)
 			{
-				BoxInfo.Append("Allow inventory", allowInventory ? "Yes" : "No");
-				BoxInfo.Append("In hand", inHand);
+				RightText.Append("Allow inventory", allowInventory ? "Yes" : "No");
+				RightText.Append("In hand", inHand);
 			}
 		}
 
-		BoxInfo.UpdateText();
+		RightText.UpdateText();
 	}
 
 	void Update()
@@ -819,7 +819,7 @@ public class DosBox : MonoBehaviour
 			ProcessMemory = null;
 		}
 
-		BoxInfo.Clear(true);
+		RightText.Clear(true);
 		CurrentCamera = -1;
 		lastValidPlayerIndex = -1;
 	}
