@@ -288,36 +288,40 @@ public class WarpDialog : MonoBehaviour
 	void WriteActorAngle(Box actor, Vector3Int angle)
 	{
 		ProcessMemory processMemory = GetComponent<DosBox>().ProcessMemory;
+		if (processMemory != null)
+		{
+			int address = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
+			byte[] buffer = new byte[6];
+			buffer.Write(angle, 0);
+			processMemory.Write(buffer, address + 40, buffer.Length);
 
-		int address = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
-		byte[] buffer = new byte[6];
-		buffer.Write(angle, 0);
-		processMemory.Write(buffer, address + 40, buffer.Length);
-
-		actor.Angles = angle;
+			actor.Angles = angle;
+		}
 	}
 
 	void WriteActorPosition(Box actor, Vector3Int lowerBound, Vector3Int upperBound, Vector3Int localPosition, Vector3Int worldPosition)
 	{
-		ProcessMemory processReader = GetComponent<DosBox>().ProcessMemory;
+		ProcessMemory processMemory = GetComponent<DosBox>().ProcessMemory;
+		if (processMemory != null)
+		{
+			//get object offset
+			int address = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
 
-		//get object offset
-		int address = GetComponent<DosBox>().GetActorMemoryAddress(actor.Slot);
+			//update to memory
+			//bounds
+			byte[] buffer = new byte[12];
+			buffer.Write(lowerBound, upperBound, 0);
+			processMemory.Write(buffer, address + 8, 12);
 
-		//update to memory
-		//bounds
-		byte[] buffer = new byte[12];
-		buffer.Write(lowerBound, upperBound, 0);
-		processReader.Write(buffer, address + 8, 12);
+			//local+world
+			buffer.Write(localPosition, 0);
+			buffer.Write(worldPosition, 6);
+			processMemory.Write(buffer, address + 28, 12);
 
-		//local+world
-		buffer.Write(localPosition, 0);
-		buffer.Write(worldPosition, 6);
-		processReader.Write(buffer, address + 28, 12);
-
-		actor.LocalPosition = localPosition;
-		actor.WorldPosition = worldPosition;
-		actor.BoundingLower = lowerBound;
-		actor.BoundingUpper = upperBound;
+			actor.LocalPosition = localPosition;
+			actor.WorldPosition = worldPosition;
+			actor.BoundingLower = lowerBound;
+			actor.BoundingUpper = upperBound;
+		}
 	}
 }
