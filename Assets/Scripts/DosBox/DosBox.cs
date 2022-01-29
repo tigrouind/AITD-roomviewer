@@ -171,7 +171,9 @@ public class DosBox : MonoBehaviour
 
 				int bodyAddress, animAddress;
 				if (bodyIdToMemoryAddress.TryGetValue(box.Body, out bodyAddress) &&
-					animIdToMemoryAddress.TryGetValue(box.Anim, out animAddress))
+					animIdToMemoryAddress.TryGetValue(box.Anim, out animAddress) && 
+					animAddress < memory.Length && 
+					bodyAddress < memory.Length)
 				{
 					int bonesInAnim = memory.ReadShort(animAddress + 2);
 					int keyframeAddress = animAddress + box.Keyframe * (bonesInAnim * 8 + 8);
@@ -403,7 +405,7 @@ public class DosBox : MonoBehaviour
 	{
 		entries.Clear();
 		int cacheAddress = memory.ReadFarPointer(entryPoint + address);
-		if (cacheAddress > 0)
+		if (cacheAddress > 0 && cacheAddress < memory.Length)
 		{
 			int numEntries = Math.Min((int)memory.ReadUnsignedShort(cacheAddress + 16), 100);
 			int baseAddress = memory.ReadFarPointer(cacheAddress + 18);
