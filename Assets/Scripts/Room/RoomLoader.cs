@@ -614,7 +614,7 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//automatic link
-		if(!dosBoxEnabled && linkToDosBoxTimer.Elapsed > 1.0f)
+		if(GetComponent<DosBox>().ProcessMemory == null && linkToDosBoxTimer.Elapsed > 1.0f)
 		{
 			LinkToDosBox();
 			linkToDosBoxTimer.Restart();
@@ -763,7 +763,7 @@ public class RoomLoader : MonoBehaviour
 
 	public bool TryGetRoomPosition(int newFloor, int newRoom, out Vector3Int position)
 	{
-		if (floor == newFloor && newRoom >= 0 && newRoom < rooms.Count)
+		if (floor == newFloor && newRoom >= 0 && newRoom < roomsPosition.Count)
 		{
 			position = roomsPosition[newRoom];
 			return true;
@@ -789,10 +789,9 @@ public class RoomLoader : MonoBehaviour
 			return;
 		}
 
-		if (!dosBoxEnabled)
+		if (GetComponent<DosBox>().LinkToDosBOX(floor, room, gameVersion))
 		{
-			dosBoxEnabled = GetComponent<DosBox>().LinkToDosBOX(floor, room, gameVersion);
-			if (dosBoxEnabled)
+			if (!dosBoxEnabled)
 			{
 				//none => current camera
 				if (GetComponent<DosBox>().GameVersion == GameVersion.AITD1 && ShowAreas.Value == 0)
@@ -803,35 +802,17 @@ public class RoomLoader : MonoBehaviour
 				//set follow mode to player
 				CameraFollow.Value = 2;
 				GetComponent<DosBox>().ResetCamera(floor, room);
-
-				//select player by default
-				GetComponent<DosBox>().UpdateAllActors();
-				selectedBox = GetComponent<DosBox>().Player;
-				if (selectedBox != null)
-				{
-					selectedBoxId = selectedBox.ID;
-				}
 			}
-		}
-		else
-		{
-			dosBoxEnabled = false;
-			GetComponent<DosBox>().UnlinkDosBox();
+			
+			dosBoxEnabled = true;
 
-			//follow player => room
-			if (CameraFollow.Value == 2)
+			//select player by default
+			GetComponent<DosBox>().UpdateAllActors();
+			selectedBox = GetComponent<DosBox>().Player;
+			if (selectedBox != null)
 			{
-				CameraFollow.Value = 1;
+				selectedBoxId = selectedBox.ID;
 			}
-
-			//current camera => no
-			if (ShowAreas.Value == 1)
-			{
-				ShowAreas.Value = 0;
-			}
-
-			selectedBox = null;
-			GetComponent<WarpDialog>().WarpMenuEnabled = false; //hide warp
 		}
 
 		Actors.SetActive(dosBoxEnabled && ShowActors.BoolValue);

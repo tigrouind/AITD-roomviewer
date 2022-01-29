@@ -92,14 +92,6 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	void RemoveAllActors()
-	{
-		for(int i = 0; i < Boxes.Length; i++)
-		{
-			RemoveActor(i);
-		}
-	}
-
 	void OnDestroy()
 	{
 		if (ProcessMemory != null)
@@ -112,14 +104,14 @@ public class DosBox : MonoBehaviour
 	{
 		if (ProcessMemory != null && ProcessMemory.Read(memory, 0, memory.Length) == 0)
 		{
-			//unlink DOSBOX
-			GetComponent<RoomLoader>().LinkToDosBox();
+			ProcessMemory.Close();
+			ProcessMemory = null;
 		}
 	}
 
 	public void UpdateAllActors()
 	{
-		if (ProcessMemory == null)
+		if (gameConfig == null)
 		{
 			return;
 		}
@@ -576,6 +568,11 @@ public class DosBox : MonoBehaviour
 
 	public void CalculateFPS()
 	{
+		if (ProcessMemory == null)
+		{
+			return;
+		}
+
 		if (ShowAITD1Vars)
 		{
 			//fps
@@ -614,6 +611,13 @@ public class DosBox : MonoBehaviour
 
 	public void CheckDelay()
 	{
+		if(ProcessMemory == null)
+		{			
+			totalDelay.Stop();
+			delayCounter.Stop();
+			return;
+		}
+
 		if(ShowAITD1Vars)
 		{
 			if(delayCounter.Elapsed >= 0.1f) //100ms
@@ -819,22 +823,10 @@ public class DosBox : MonoBehaviour
 		linkfloor = floor;
 		linkroom = room;
 
-		return true;
-	}
-
-	public void UnlinkDosBox()
-	{
-		if (ProcessMemory != null)
-		{
-			ProcessMemory.Close();
-			ProcessMemory = null;
-		}
-
 		Player = null;
-		RightText.Clear(true);
-		CurrentCamera = -1;
 		lastValidPlayerIndex = -1;
-		RemoveAllActors();
+		
+		return true;
 	}
 
 	public bool FindActorsAddress(GameVersion gameVersion)
