@@ -8,7 +8,6 @@ using UnityEngine.UI;
 
 public class DosBox : MonoBehaviour
 {
-	public Text RightText;
 	public BoxInfo BoxInfo;
 	public GameObject Actors;
 	public Arrow Arrow;
