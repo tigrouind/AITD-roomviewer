@@ -273,7 +273,7 @@ public class Box : MonoBehaviour
 	{
 		info.Clear();
 		
-		if (name == "Actor" && DosBox.IsCDROMVersion && ID == -2 && Anim >= 0 && Anim <= 4 && !string.IsNullOrEmpty(particleNames[Anim]))
+		if (name == "Actor" && DosBox.GameVersion == GameVersion.AITD1 && ID == -2 && Anim >= 0 && Anim <= 4 && !string.IsNullOrEmpty(particleNames[Anim]))
 		{			
 			info.Append(particleNames[Anim], "#{0}", Keyframe);
 		}

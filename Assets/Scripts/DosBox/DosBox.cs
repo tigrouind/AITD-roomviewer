@@ -22,12 +22,12 @@ public class DosBox : MonoBehaviour
 
 	public ProcessMemory ProcessMemory;
 	public Box Player;
-	public bool IsCDROMVersion;
 
 	private int entryPoint;
 	private readonly Dictionary<int, int> bodyIdToMemoryAddress = new Dictionary<int, int>();
 	private readonly Dictionary<int, int> animIdToMemoryAddress = new Dictionary<int, int>();
 
+	public GameVersion GameVersion;
 	private GameConfig gameConfig;
 	private readonly Dictionary<GameVersion, GameConfig> gameConfigs = new Dictionary<GameVersion, GameConfig>
 	{
@@ -181,7 +181,7 @@ public class DosBox : MonoBehaviour
 					box.KeyFrameLength = memory.ReadShort(keyframeAddress + 4);
 				}
 
-				if (IsCDROMVersion)
+				if (GameVersion == GameVersion.AITD1)
 				{
 					box.Mod = memory.ReadVector(k + 90);
 				}
@@ -214,7 +214,7 @@ public class DosBox : MonoBehaviour
 
 		//search current camera target (fallback if player not found)
 		int cameraTargetID = -1;
-		if (IsCDROMVersion)
+		if (GameVersion == GameVersion.AITD1)
 		{
 			int currentCameraTarget = memory.ReadShort(entryPoint + 0x19B6C);
 			foreach (Box box in Boxes)
@@ -275,7 +275,7 @@ public class DosBox : MonoBehaviour
 					//make sure very small actors are visible
 					box.transform.localScale = Vector3.Max(box.transform.localScale, Vector3.one * 0.1f);
 
-					if (IsCDROMVersion)
+					if (GameVersion == GameVersion.AITD1)
 					{
 						UpdateHotPointBox(box, roomPosition);
 					}
@@ -328,7 +328,7 @@ public class DosBox : MonoBehaviour
 						}
 					}
 
-					if (IsCDROMVersion)
+					if (GameVersion == GameVersion.AITD1)
 					{
 						UpdateWorldPosBox(box, roomPosition, isPlayer);
 					}
@@ -342,7 +342,7 @@ public class DosBox : MonoBehaviour
 			}
 		}
 
-		if (IsCDROMVersion)
+		if (GameVersion == GameVersion.AITD1)
 		{
 			CurrentCamera = memory.ReadShort(entryPoint + 0x24056);
 			CurrentCameraFloor = memory.ReadShort(entryPoint + 0x24058);
@@ -546,7 +546,7 @@ public class DosBox : MonoBehaviour
 				}
 			}
 		}
-		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && IsCDROMVersion && ProcessMemory != null)
+		if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && GameVersion == GameVersion.AITD1 && ProcessMemory != null)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
@@ -728,8 +728,7 @@ public class DosBox : MonoBehaviour
 		switch (gameVersion) 
 		{
 			case GameVersion.AITD1:
-				IsCDROMVersion = Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CD Not Found")) != -1;
-				if (!IsCDROMVersion)
+				if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CD Not Found")) == -1)
 				{
 					if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("USA.PAK")) != -1)
 					{
@@ -764,6 +763,7 @@ public class DosBox : MonoBehaviour
 				break;
 		}
 
+		GameVersion = gameVersion;
 		gameConfig = gameConfigs[gameVersion];
 		return true;
 	}
@@ -782,6 +782,7 @@ public class DosBox : MonoBehaviour
 				gameVersion = GameVersion.TIMEGATE_DEMO;
 			}
 
+			GameVersion = gameVersion;
 			gameConfig = gameConfigs[gameVersion];
 			ProcessMemory.Read(memory, dataSegment + gameConfig.ActorsPointer, 4);
 			var result = memory.ReadUnsignedInt(0); //read pointer value
@@ -838,8 +839,6 @@ public class DosBox : MonoBehaviour
 
 	public bool FindActorsAddress(GameVersion gameVersion)
 	{
-		IsCDROMVersion = false;
-
 		if (gameVersion == GameVersion.TIMEGATE)
 		{
 			return FindActorsAddressTimeGate(gameVersion);

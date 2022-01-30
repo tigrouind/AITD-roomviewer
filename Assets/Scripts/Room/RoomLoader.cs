@@ -575,7 +575,7 @@ public class RoomLoader : MonoBehaviour
 
 		DosBox dosBox = GetComponent<DosBox>();
 		dosBox.ShowAdditionalInfo = ShowAdditionalInfo.BoolValue && dosBoxEnabled;
-		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && dosBox.IsCDROMVersion;
+		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && dosBox.GameVersion == GameVersion.AITD1;
 		dosBox.SpeedRunMode = speedRunMode;
 
 		dosBox.RefreshMemory();
@@ -585,7 +585,7 @@ public class RoomLoader : MonoBehaviour
 		dosBox.UpdateAllActors();
 		dosBox.UpdateArrowVisibility();
 		dosBox.UpdateRightText();
-		if(dosBox.IsCDROMVersion) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
+		if (dosBox.GameVersion == GameVersion.AITD1) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
 
@@ -795,7 +795,7 @@ public class RoomLoader : MonoBehaviour
 			if (dosBoxEnabled)
 			{
 				//none => current camera
-				if (GetComponent<DosBox>().IsCDROMVersion && ShowAreas.Value == 0)
+				if (GetComponent<DosBox>().GameVersion == GameVersion.AITD1 && ShowAreas.Value == 0)
 				{
 					ShowAreas.Value = 1;
 				}
@@ -927,7 +927,7 @@ public class RoomLoader : MonoBehaviour
 
 			case KeyCode.C:
 				ShowAreas.Value = (ShowAreas.Value + 1) % 5;
-				if (!(dosBoxEnabled && GetComponent<DosBox>().IsCDROMVersion) && ShowAreas.Value == 1)
+				if (!(dosBoxEnabled && GetComponent<DosBox>().GameVersion == GameVersion.AITD1) && ShowAreas.Value == 1)
 				{
 					ShowAreas.Value++; //skip value
 				}
