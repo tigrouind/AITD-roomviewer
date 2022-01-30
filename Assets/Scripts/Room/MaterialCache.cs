@@ -16,24 +16,25 @@ public class MaterialCache : MonoBehaviour
 		var key = (highlighted ? 0L : 1L) << 33 | (alwaysOnTop ? 0L : 1L) << 32 | (long)color.r << 24 | (long)color.g << 16 | (long)color.b << 8 | color.a;
 		if (!materialsCache.TryGetValue(key, out material))
 		{
-			 if (alwaysOnTop)
+			if (alwaysOnTop)
 			{
 				material = new Material(AlwaysOnTopMaterial);
+				if (highlighted)
+				{
+					material.renderQueue++;
+				}
 			}
 			else if (color.a == 255)
 			{
-				if (highlighted)
-				{
-					material = new Material(HighlightMaterial);
-				}
-				else
-				{
-					material = new Material(OpaqueMaterial);
-				}
+				material = new Material(highlighted ? HighlightMaterial : OpaqueMaterial);
 			}
 			else
 			{
 				material = new Material(TransparentMaterial);
+				if (highlighted)
+				{
+					material.renderQueue++;
+				}
 			}
 
 			material.color = color;

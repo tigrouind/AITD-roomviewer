@@ -642,19 +642,9 @@ public class RoomLoader : MonoBehaviour
 				if (highLightedBox != null)
 				{
 					highLightedBox.HighLight = false;
-					if(highLightedBox.name == "Camera")
-					{
-						highLightedBox.GetComponent<Renderer>().sharedMaterial.renderQueue = 3000;
-					}
 				}
 
 				box.HighLight = true;
-
-				if(box.name == "Camera")
-				{
-					box.GetComponent<Renderer>().sharedMaterial.renderQueue = 3500;
-				}
-
 				highLightedBox = box;
 			}
 
