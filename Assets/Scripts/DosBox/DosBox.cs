@@ -100,6 +100,21 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	bool AreActorsInitialized()
+	{
+		for (int i = 0 ; i < Boxes.Length ; i++) 
+		{
+			int k = GetActorMemoryAddress(i);
+			int id = memory.ReadShort(k);
+			if (id != 0)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public void RefreshMemory()
 	{
 		if (ProcessMemory != null && ProcessMemory.Read(memory, 0, memory.Length) == 0)
@@ -117,6 +132,7 @@ public class DosBox : MonoBehaviour
 		}
 
 		Player = null;
+		bool initialized = AreActorsInitialized();
 
 		//read actors info
 		for (int i = 0 ; i < Boxes.Length ; i++) //up to 50 actors max
@@ -124,7 +140,7 @@ public class DosBox : MonoBehaviour
 			int k = GetActorMemoryAddress(i);
 			int id = memory.ReadShort(k + 0);
 
-			if (id != -1)
+			if (id != -1 && initialized)
 			{
 				Box box = GetActor(i);
 				box.ID = id;
