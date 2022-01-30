@@ -617,7 +617,7 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	private void RefreshHighLightedBox()
+	void RefreshHighLightedBox()
 	{
 		Vector3 mousePosition = Input.mousePosition;
 		RaycastHit[] hitInfos = null;
@@ -682,7 +682,7 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
-	private void RefreshSelectedBox()
+	void RefreshSelectedBox()
 	{
 		//toggle selected box
 		if (Input.GetMouseButtonUp(0) && highLightedBox != null && refreshSelectedBoxAllowed
@@ -746,6 +746,16 @@ public class RoomLoader : MonoBehaviour
 		}
 	}	
 	
+	Transform GetRoom(int newFloor, int newRoom)
+	{
+		if (floor == newFloor && newRoom >= 0 && newRoom < rooms.Count)
+		{
+			return rooms[newRoom];
+		}
+
+		return null;
+	}
+
 	#region DOSBOX
 
 	public void RefreshRooms(int newfloor, int newroom)
@@ -759,16 +769,6 @@ public class RoomLoader : MonoBehaviour
 				RefreshRooms();
 			}
 		}
-	}
-
-	private Transform GetRoom(int newFloor, int newRoom)
-	{
-		if (floor == newFloor && newRoom >= 0 && newRoom < rooms.Count)
-		{
-			return rooms[newRoom];
-		}
-
-		return null;
 	}
 
 	public bool TryGetRoomPosition(int newFloor, int newRoom, out Vector3Int position)
@@ -854,12 +854,12 @@ public class RoomLoader : MonoBehaviour
 
 	private bool menuEnabled;
 
-	public void SetCameraRotation(Slider slider)
+	void SetCameraRotation(Slider slider)
 	{
 		Camera.main.transform.rotation = Quaternion.Euler(90.0f, 0.0f, slider.value * 22.5f);
 	}
 
-	private void ToggleMenuDOSBoxOptions(bool enabled)
+	void ToggleMenuDOSBoxOptions(bool enabled)
 	{
 		ShowActors.transform.parent.gameObject.SetActive(enabled);
 		Panel.sizeDelta = new Vector2(Panel.sizeDelta.x, Panel.Cast<Transform>().Count(x => x.gameObject.activeSelf) * 30.0f);
@@ -871,7 +871,7 @@ public class RoomLoader : MonoBehaviour
 		ProcessKey(keyCodeEnum);
 	}
 
-	public void ProcessKey(KeyCode keyCode)
+	void ProcessKey(KeyCode keyCode)
 	{
 		switch (keyCode)
 		{
