@@ -17,8 +17,8 @@ public class DosBox : MonoBehaviour
 	public bool ShowAITD1Vars;
 	public bool SpeedRunMode;
 	public int CurrentCamera = -1;
-	public int CurrentCameraRoom;
-	public int CurrentCameraFloor;
+	public int CurrentCameraRoom = -1;
+	public int CurrentCameraFloor = -1;
 
 	public ProcessMemory ProcessMemory;
 	public Box Player;

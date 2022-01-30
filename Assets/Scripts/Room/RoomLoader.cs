@@ -12,6 +12,8 @@ public class RoomLoader : MonoBehaviour
 	private int floor;
 	private int room;
 	private int currentCamera = -1;
+	private int currentCameraRoom = -1;
+	private int currentCameraFloor = -1;
 	private readonly int[] cameraColors = { 0xFF8080, 0x789CF0, 0xB0DE6F, 0xCC66C0, 0x5DBAAB, 0xF2BA79, 0x8E71E3, 0x6ED169, 0xBF6080, 0x7CCAF7 };
 	private Vector3 mousePosition;
 	private readonly KeyCode[] keyCodes = Enum.GetValues(typeof(KeyCode)).Cast<KeyCode>().ToArray();
@@ -120,10 +122,9 @@ public class RoomLoader : MonoBehaviour
 		bool showAreas = ShowAreas.Value != 0;
 
 		int roomIndex = 0;
-		var dosBox = GetComponent<DosBox>();
-		int currentCameraID = dosBox.CurrentCameraFloor == floor &&
-			dosBox.CurrentCameraRoom >= 0 && dosBox.CurrentCameraRoom < camerasPerRoom.Count &&
-			currentCamera >= 0 && currentCamera < camerasPerRoom[dosBox.CurrentCameraRoom].Count ? camerasPerRoom[dosBox.CurrentCameraRoom][currentCamera] : -1;
+		int currentCameraID = currentCameraFloor == floor &&
+			currentCameraRoom >= 0 && currentCameraRoom < camerasPerRoom.Count &&
+			currentCamera >= 0 && currentCamera < camerasPerRoom[currentCameraRoom].Count ? camerasPerRoom[currentCameraRoom][currentCamera] : -1;
 
 		CameraFrustum.SetActive(showAreas && currentCameraBox != null);
 
@@ -588,12 +589,7 @@ public class RoomLoader : MonoBehaviour
 		if (dosBox.GameVersion == GameVersion.AITD1) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
-
-		if (dosBox.CurrentCamera != currentCamera)
-		{
-			currentCamera = dosBox.CurrentCamera;
-			SetRoomObjectsVisibility(room);
-		}
+		RefreshCurrentCamera();
 
 		//must be done after DosBox update
 		if (mustWarpActor) 
@@ -736,6 +732,20 @@ public class RoomLoader : MonoBehaviour
 		}
 	}
 
+	void RefreshCurrentCamera()
+	{
+		var dosBox = GetComponent<DosBox>();
+		if (dosBox.CurrentCamera != currentCamera 
+		 || dosBox.CurrentCameraRoom != currentCameraRoom 
+		 || dosBox.CurrentCameraFloor != currentCameraFloor)
+		{
+			currentCamera = dosBox.CurrentCamera;
+			currentCameraRoom = dosBox.CurrentCameraRoom;
+			currentCameraFloor = dosBox.CurrentCameraFloor;
+			SetRoomObjectsVisibility(room);
+		}
+	}	
+	
 	#region DOSBOX
 
 	public void RefreshRooms(int newfloor, int newroom)
