@@ -932,14 +932,13 @@ public class ModelLoader : MonoBehaviour
 	Color32[] LoadPalette(byte[] buffer, int offset)
 	{
 		bool mapTo255 = true;
-		var dest = 0;
+		var src = offset;
 		var colors = new Color32[256];
 		for (int i = 0; i < 256; i++)
 		{					
-			byte r = buffer[dest + 0 + offset];
-			byte g = buffer[dest + 1 + offset];
-			byte b = buffer[dest + 2 + offset];
-			dest += 3;
+			byte r = buffer[src++];
+			byte g = buffer[src++];
+			byte b = buffer[src++];
 
 			if(r > 63 || g > 63 || b > 63)
 			{

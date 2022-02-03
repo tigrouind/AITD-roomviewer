@@ -371,10 +371,10 @@ public class Box : MonoBehaviour
 
 			if (DosBox.ShowAITD1Vars) 
 			{
-				if (Keyframe != -1 && Anim != -1 && (Flags & 1) == 1) //animated
+				if (Keyframe != -1 && Body != -1 && Anim != -1 && (Flags & 1) == 1) //animated
 				{
 					info.Append("KEYFRAME", "{0}/{1}; {2} {3}", Keyframe, TotalFrames - 1, EndFrame, EndAnim);
-					info.Append("FRAME", "{0}/{1}", Math.Min(Math.Max(DosBox.Timer2 - KeyFrameTime, 0), KeyFrameLength), KeyFrameLength);
+					info.Append("FRAME", "{0}/{1}", Mathf.Clamp(DosBox.Timer2 - KeyFrameTime, 0, KeyFrameLength), KeyFrameLength);
 				}
 
 				if (TrackMode > 0 && TrackMode <= 3 && Speed >= -1 && Speed <= 5)

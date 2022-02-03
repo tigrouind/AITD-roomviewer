@@ -525,7 +525,7 @@ public class DosBox : MonoBehaviour
 			}
 
 			Vector3Int mousePosition = GetComponent<RoomLoader>().GetMousePosition(linkroom, linkfloor);
-			RightText.Append("Cursor position", "{0} {1}", Math.Min(Math.Max(mousePosition.x, -32768), 32767), Math.Min(Math.Max(mousePosition.z, -32768), 32767));
+			RightText.Append("Cursor position", "{0} {1}", Mathf.Clamp(mousePosition.x, -32768, 32767), Mathf.Clamp(mousePosition.z, -32768, 32767));
 			if(Player != null) RightText.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
 
 			if (ShowAITD1Vars)
