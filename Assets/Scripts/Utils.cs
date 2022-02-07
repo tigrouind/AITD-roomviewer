@@ -135,7 +135,7 @@ public static class Utils
 	{
 		for (int index = offset; index < buffer.Length - pattern.Length + 1; index += stride)
 		{
-			if (IsMatch(buffer, pattern, index))
+			if (buffer[index] == pattern[0] && IsMatch(buffer, pattern, index))
 			{
 				return index - offset;
 			}
