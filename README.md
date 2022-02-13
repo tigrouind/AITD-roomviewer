@@ -53,7 +53,7 @@ The following games are supported :
 
 Put mouse on a box to highlight it.
 - Light gray boxes are colliders which player cannot passthrough
-- Blue boxes are colliders that player can interact with
+- Blue boxes are colliders that player can interact with or used for actor instantiation
 - Teal boxes are links between rooms and is used for pathfinding
 - Red and amber boxes are triggers. It is usually used to switch from one room to another. It can also trigger other things like enemies, sounds, scripted sequences, ...
 

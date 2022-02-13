@@ -277,6 +277,10 @@ public class Box : MonoBehaviour
 		{			
 			info.Append(particleNames[Anim], "#{0}", Keyframe);
 		}
+		else if (name == "Collider" && (Flags & 4) != 4 && (Flags & 8) != 8)
+		{
+			info.Append(name.ToUpperInvariant());
+		}
 		else
 		{
 			info.Append(name.ToUpperInvariant(), "#{0}", ID);
