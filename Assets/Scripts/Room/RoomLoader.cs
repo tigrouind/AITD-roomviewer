@@ -72,7 +72,7 @@ public class RoomLoader : MonoBehaviour
 		floor = floors.FirstOrDefault();
 		gameVersion = DetectGame();
 
-		CheckCommandLine();
+		ParseCommandLine();
 		if (floors.Count > 0)
 		{
 			RefreshRooms();
@@ -929,10 +929,7 @@ public class RoomLoader : MonoBehaviour
 				Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
 				Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);				
 				Camera.main.transform.position = new Vector3(position.x, Camera.main.transform.position.y, position.z);
-
-				//reset zoom
-				float planeWidth = Mathf.Tan(Camera.main.fieldOfView * Mathf.Deg2Rad / 2.0f);
-				Camera.main.orthographicSize = defaultCameraZoom * planeWidth;
+				ResetCameraZoom();
 				break;
 
 			case KeyCode.Escape:
@@ -992,15 +989,15 @@ public class RoomLoader : MonoBehaviour
 
 	#endregion
 
-	void CheckCommandLine()
+	void ParseCommandLine()
 	{
 		var args = Environment.GetCommandLineArgs();
 		if (args.Contains("-speedrun", StringComparer.InvariantCultureIgnoreCase))
 		{
 			speedRunMode = true;
 			defaultCameraZoom = 10.0f / Mathf.Pow(0.9f, 5.0f);
-			ProcessKey(KeyCode.Mouse2); //reset camera zoom
-			ProcessKey(KeyCode.E); //extra info
+			ResetCameraZoom();
+			ShowAdditionalInfo.BoolValue = true;
 		}
 	}
 
@@ -1019,4 +1016,9 @@ public class RoomLoader : MonoBehaviour
 		SetRoomObjectsVisibility(room);
 	}
 
+	void ResetCameraZoom()
+	{
+		float planeWidth = Mathf.Tan(Camera.main.fieldOfView * Mathf.Deg2Rad / 2.0f);
+		Camera.main.orthographicSize = defaultCameraZoom * planeWidth;
+	}
 }
