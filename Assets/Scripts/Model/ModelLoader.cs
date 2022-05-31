@@ -880,7 +880,7 @@ public class ModelLoader : MonoBehaviour
 	{
 		Color32[] colors = LoadPalette();
 		
-		var texture = new Texture2D(16, 16);
+		var texture = new Texture2D(16, 16, TextureFormat.RGBA32, false);
 		texture.SetPixels32(colors);
 		texture.wrapMode = TextureWrapMode.Clamp;
 		texture.Apply();
