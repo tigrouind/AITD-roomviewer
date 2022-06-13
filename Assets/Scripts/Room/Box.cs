@@ -57,6 +57,7 @@ public class Box : MonoBehaviour
 	public Box BoxWorldPos;
 	public int OldAngle;
 	public int NewAngle;
+	public int RotateParam;
 	public int RotateTime;
 	public int HitBy;
 	public int Hit;
@@ -153,29 +154,6 @@ public class Box : MonoBehaviour
 
 		transform.localPosition = new Vector3(position.x, -position.y, position.z);		
 		transform.localScale = Vector3.Max(scale, Vector3.one * 0.01f);
-	}
-
-	string RotateDir
-	{
-		get
-		{
-			int diff = NewAngle - OldAngle;
-			if(RotateTime != 0 && diff != 0)
-			{
-				if(diff > 0)
-				{
-					return "▲";
-				}
-				else
-				{
-					return "▼";
-				}
-			}
-			else
-			{
-				return string.Empty;
-			}
-		}
 	}
 
 	string DashIfEmpty(int value)
@@ -323,9 +301,18 @@ public class Box : MonoBehaviour
 				info.Append("DISTANCE", Mathf.RoundToInt(LastDistance));
 				if(Angles.x == 0.0f && Angles.z == 0.0f)
 				{
-					info.Append("ANGLE", "{0:N1} {1}",
-						Angles.y * 360.0f / 1024.0f,
-						RotateDir);
+					int diff = NewAngle - OldAngle;
+					if(RotateParam != 0 && diff != 0)
+					{	
+						string direction = diff > 0 ? "▲" : "▼";
+						info.Append("ANGLE", "{0:N1} {1} {2}/{3}",
+							Angles.y * 360.0f / 1024.0f, direction, Mathf.Clamp(DosBox.Timer2 - RotateTime, 0, RotateParam), RotateParam);
+					}
+					else
+					{
+						info.Append("ANGLE", "{0:N1}",
+							Angles.y * 360.0f / 1024.0f);
+					}
 				}
 				else
 				{

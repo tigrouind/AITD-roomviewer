@@ -200,7 +200,9 @@ public class DosBox : MonoBehaviour
 
 				box.OldAngle = memory.ReadShort(k + 106);
 				box.NewAngle = memory.ReadShort(k + 108);
-				box.RotateTime = memory.ReadShort(k + 110);
+				box.RotateParam = memory.ReadShort(k + 110);
+				box.RotateTime = memory.ReadShort(k + 112);
+
 				box.Speed = memory.ReadShort(k + 116);
 
 				box.Col = memory.ReadVector(k + 126);
