@@ -31,7 +31,7 @@ public class ModelLoader : MonoBehaviour
 	private List<Transform> bones;
 	private List<Vector3> initialBonesPosition;
 	private int modelFlags;
-	private int previousFrame;
+	private int previousFrame, previousHighlightFrame;
 	private float previousAnimCounter;
 	private Vector3Int frameDistance;
 
@@ -770,6 +770,12 @@ public class ModelLoader : MonoBehaviour
 			frameDistance += animFrames[frame % animFrames.Count].Offset;
 		}
 
+		int highLightFrame = (frame + 1) % animFrames.Count;
+		if(highLightFrame != previousHighlightFrame)
+		{
+			RefreshLeftText(highLightFrame);
+		}
+
 		if(animFrames.Count == 1 && animCounter != previousAnimCounter)
 		{
 			previousAnimCounter = animCounter;
@@ -1268,7 +1274,7 @@ public class ModelLoader : MonoBehaviour
 		mesh.SetUVs(1, uvDepth);
 	}
 
-	void RefreshLeftText()
+	void RefreshLeftText(int frameIndex = -1)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 
@@ -1289,7 +1295,7 @@ public class ModelLoader : MonoBehaviour
 		if(ShowAdditionalInfo.BoolValue)
 		{
 			stringBuilder.Append("\r\n\r\n");
-			stringBuilder.AppendFormat("Bounding box ({3}): <color=#00c864>{0} {1} {2}</color>\r\n",
+			stringBuilder.AppendFormat("Bounding box ({3}): <color=#00c864>{0} {1} {2}</color>",
 				boundingUpper.x - boundingLower.x,
 				boundingUpper.y - boundingLower.y,
 				boundingUpper.z - boundingLower.z,
@@ -1298,12 +1304,19 @@ public class ModelLoader : MonoBehaviour
 
 		if(EnableAnimation.BoolValue && ShowAdditionalInfo.BoolValue && animFrames != null)
 		{
+			stringBuilder.Append("\r\n");
+
 			int index = 0;
 			foreach(Frame frame in animFrames)
 			{
-				stringBuilder.AppendFormat("Frame {0}: <color=#00c864>{1} {2} {3} {4}</color>\r\n", index, frame.Time, frame.Offset.x, frame.Offset.y, -frame.Offset.z);
+				bool selected = index == frameIndex || frameIndex == -1;
+				string colorA = selected ? "#ffffff" : "#aaaaaa";
+				string colorB = selected ? "#00c864" : "#008040";
+				stringBuilder.AppendFormat("<color={5}>Frame {0}:</color> <color={6}>{1} {2} {3} {4}</color>\r\n", index, frame.Time, frame.Offset.x, frame.Offset.y, -frame.Offset.z, colorA, colorB);
 				index++;
 			}
+
+			previousHighlightFrame = frameIndex;
 		}
 
 		LeftText.text = stringBuilder.ToString();
