@@ -55,9 +55,15 @@ public class DosBox : MonoBehaviour
 	private readonly Queue<KeyValuePair<int, float>> previousFrames = new Queue<KeyValuePair<int, float>>();
 	private int frameCounter;
 
+	//delay
 	private float lastDelay;
 	private readonly Timer delayCounter = new Timer();
 	private readonly Timer totalDelay = new Timer();
+
+	//frame time
+	private readonly Timer frameTime = new Timer();
+	private int oldFrames;
+	private float frameTimeElapsed;
 
 	private int inHand;
 	private bool allowInventory;
@@ -522,8 +528,8 @@ public class DosBox : MonoBehaviour
 
 				RightText.Append("Timer 1", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer1 / 60), Timer1 % 60, timer1Delay / 60 % 60, timer1Delay % 60);
 				RightText.Append("Timer 2", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer2 / 60), Timer2 % 60, timer2Delay / 60 % 60, timer2Delay % 60);				
-				RightText.Append("FPS/Frame/Delay", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.FloorToInt(lastDelay * 1000));
-				RightText.Append("Total delay", "{0:D2}:{1:D2}:{2:D2}.{3:D3} ", totalDelayTS.Hours, totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds);
+				RightText.Append("FPS/Frame/Time", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.RoundToInt(frameTimeElapsed * 1000));
+				RightText.Append("Total delay/Delay", "{0:D2}:{1:D2}.{2:D3}; {3} ms", totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds, Mathf.FloorToInt(lastDelay * 1000));
 			}
 
 			Vector3Int mousePosition = GetComponent<RoomLoader>().GetMousePosition(linkroom, linkfloor);
@@ -598,6 +604,17 @@ public class DosBox : MonoBehaviour
 
 			//frames counter (reset to zero every second by AITD)
 			int frames = memory.ReadShort(entryPoint + 0x2117C);
+
+			//frame time
+			if (frames != oldFrames)
+			{
+				oldFrames = frames;
+				if(frames != 0)
+				{
+					frameTimeElapsed = frameTime.Elapsed;
+					frameTime.Restart();
+				}
+			}
 
 			//check how much frames elapsed since last time
 			int diff;
