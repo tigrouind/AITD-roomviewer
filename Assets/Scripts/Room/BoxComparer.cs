@@ -28,10 +28,12 @@ public class BoxComparer : IComparer<RaycastHit>
 			return aCurrentRoom.CompareTo(bCurrentRoom);
 		}
 
-		if (boxA.name == "Camera" && boxB.name == "Camera")
+		//highlighted box has priority
+		int highlightA = boxA.HighLight ? 0 : 1;
+		int highlightB = boxB.HighLight ? 0 : 1;
+		if (highlightA != highlightB)
 		{
-			return -boxA.GetComponent<Renderer>().sharedMaterial.renderQueue
-				.CompareTo(boxB.GetComponent<Renderer>().sharedMaterial.renderQueue);
+			return highlightA.CompareTo(highlightB);
 		}
 
 		// check distance
