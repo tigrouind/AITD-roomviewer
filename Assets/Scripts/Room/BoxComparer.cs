@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class BoxComparer : IComparer<RaycastHit>
 {
-	public int Room { get; set; }
+	public int Room;
 
 	public int Compare(RaycastHit a, RaycastHit b)
 	{
@@ -28,18 +28,18 @@ public class BoxComparer : IComparer<RaycastHit>
 			return aCurrentRoom.CompareTo(bCurrentRoom);
 		}
 
+		// check distance
+		if (Mathf.Abs(a.distance - b.distance) >= 0.0005f)
+		{
+			return a.distance.CompareTo(b.distance);
+		}
+
 		//highlighted box has priority
 		int highlightA = boxA.HighLight ? 0 : 1;
 		int highlightB = boxB.HighLight ? 0 : 1;
 		if (highlightA != highlightB)
 		{
 			return highlightA.CompareTo(highlightB);
-		}
-
-		// check distance
-		if (Mathf.Abs(a.distance - b.distance) >= 0.0005f)
-		{
-			return a.distance.CompareTo(b.distance);
 		}
 
 		return 0;
