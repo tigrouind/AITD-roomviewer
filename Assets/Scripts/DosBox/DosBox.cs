@@ -66,6 +66,7 @@ public class DosBox : MonoBehaviour
 	private float frameTimeElapsed;
 
 	private int inHand;
+	private int redrawFlag;
 	private bool allowInventory;
 	private bool saveTimerFlag;
 	private uint internalTimer1, internalTimer1Frozen;
@@ -368,6 +369,7 @@ public class DosBox : MonoBehaviour
 		if (ShowAITD1Vars)
 		{
 			allowInventory = memory.ReadShort(entryPoint + 0x19B6E) == 1;
+			redrawFlag = memory.ReadShort(entryPoint + 0x19BC6);
 			inHand = memory.ReadShort(entryPoint + 0x24054);
 
 			//set by AITD when long running code is started (eg: loading ressource)
@@ -538,7 +540,7 @@ public class DosBox : MonoBehaviour
 
 			if (ShowAITD1Vars)
 			{
-				RightText.Append("Allow inventory", allowInventory ? "Yes" : "No");
+				RightText.Append("Allow inventory", "{0}; {1}", allowInventory ? "Yes" : "No", redrawFlag);
 				RightText.Append("In hand", inHand);
 			}
 		}
