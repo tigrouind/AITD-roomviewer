@@ -305,8 +305,15 @@ public class Box : MonoBehaviour
 					if(RotateParam != 0 && diff != 0)
 					{	
 						string direction = diff > 0 ? "▲" : "▼";
-						info.Append("ANGLE", "{0:N1} {1} {2}/{3}",
-							Angles.y * 360.0f / 1024.0f, direction, Mathf.Clamp(DosBox.Timer2 - RotateTime, 0, RotateParam), RotateParam);
+						if  (DosBox.ShowAITD1Vars)
+						{
+							info.Append("ANGLE", "{0:N1} {1} {2}/{3}",
+								Angles.y * 360.0f / 1024.0f, direction, Mathf.Clamp(DosBox.Timer2 - RotateTime, 0, RotateParam), RotateParam);
+						}
+						else
+						{
+							info.Append("ANGLE", "{0:N1} {1}", Angles.y * 360.0f / 1024.0f, direction);
+						}
 					}
 					else
 					{
