@@ -4,7 +4,6 @@ using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine.UI;
 
 public class DosBox : MonoBehaviour
 {
@@ -29,6 +28,7 @@ public class DosBox : MonoBehaviour
 
 	public GameVersion GameVersion;
 	private GameConfig gameConfig;
+	private readonly Rand rand = new Rand();
 	private readonly Dictionary<GameVersion, GameConfig> gameConfigs = new Dictionary<GameVersion, GameConfig>
 	{
 		{ GameVersion.AITD1        , new GameConfig(0x220CE, 160, 82) },
@@ -71,6 +71,7 @@ public class DosBox : MonoBehaviour
 	private bool saveTimerFlag;
 	private uint internalTimer1, internalTimer1Frozen;
 	private int internalTimer2, internalTimer2Frozen;
+	private uint random;
 
 	Box GetActor(int index)
 	{
@@ -380,6 +381,8 @@ public class DosBox : MonoBehaviour
 
 			internalTimer1Frozen = memory.ReadUnsignedInt(entryPoint + 0x1B0F8);
 			internalTimer2Frozen = memory.ReadUnsignedShort(entryPoint + 0x1B0F6);
+
+			random = memory.ReadUnsignedInt(entryPoint + 0x214C0);			
 		}
 	}
 
@@ -542,10 +545,30 @@ public class DosBox : MonoBehaviour
 			{
 				RightText.Append("Allow inventory", "{0}; {1}", allowInventory ? "Yes" : "No", redrawFlag);
 				RightText.Append("In hand", inHand);
+				RightText.Append("Random", "{0:X8}", random);
+				AppendRandomInfo();
 			}
 		}
 
 		RightText.UpdateText();
+	}
+
+	void AppendRandomInfo()
+	{
+		rand.Seed = random;
+		for(int i = 0 ; i < 3 ; i++)
+		{
+			int value;
+			int count = 0;
+			do
+			{						
+				value = rand.Next(300);
+				count++;
+			}	
+			while(value > 2);
+
+			RightText.Append(i == 0 ? "Next noise" : string.Empty, "{0}; {1} ", TimeSpan.FromSeconds(count), value);
+		}
 	}
 
 	void Update()
