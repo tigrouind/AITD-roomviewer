@@ -494,7 +494,7 @@ public class DosBox : MonoBehaviour
 				}
 
 				Vector3 finalPos = (Vector3)(box.WorldPosition + box.Mod + currentRoomPos) / 1000.0f;
-				float height = -(box.BoundingUpper.y + box.BoundingUpper.y) / 2000.0f;
+				float height = -(box.BoundingUpper.y + box.BoundingLower.y) / 2000.0f;
 				finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z);
 				worldPos.transform.position = finalPos;
 				worldPos.transform.localScale = box.transform.localScale;
