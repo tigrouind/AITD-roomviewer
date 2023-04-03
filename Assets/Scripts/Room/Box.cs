@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Text;
 
@@ -103,7 +103,7 @@ public class Box : MonoBehaviour
 			{
 				highlighted = value;
 				RefreshMaterial();
-			}			
+			}
 		}
 		get
 		{
@@ -119,7 +119,7 @@ public class Box : MonoBehaviour
 			{
 				color = new Color32(color.r, color.g, color.b, value);
 				RefreshMaterial();
-			}			
+			}
 		}
 	}
 
@@ -143,16 +143,16 @@ public class Box : MonoBehaviour
 			{
 				color = value;
 				RefreshMaterial();
-			}			
+			}
 		}
 	}
 
 	public void SetPositionAndSize()
 	{
-		var position = (Vector3)(BoundingUpper + BoundingLower) / 2000.0f;		
+		var position = (Vector3)(BoundingUpper + BoundingLower) / 2000.0f;
 		var scale = (Vector3)BoundingSize / 1000.0f;
 
-		transform.localPosition = new Vector3(position.x, -position.y, position.z);		
+		transform.localPosition = new Vector3(position.x, -position.y, position.z);
 		transform.localScale = Vector3.Max(scale, Vector3.one * 0.01f);
 	}
 
@@ -194,9 +194,9 @@ public class Box : MonoBehaviour
 		int flag = 1;
 		for (int i = 0 ; i < flagsNames.Length ; i++)
 		{
-			if ((flags & flag) != 0 && !string.IsNullOrEmpty(flagsNames[i])) 
-			{				
-				if (result.Length > 0) 
+			if ((flags & flag) != 0 && !string.IsNullOrEmpty(flagsNames[i]))
+			{
+				if (result.Length > 0)
 				{
 					result.Append(' ');
 				}
@@ -204,7 +204,7 @@ public class Box : MonoBehaviour
 			}
 			flag <<= 1;
 		}
-		
+
 		return result.ToString();
 	}
 
@@ -250,9 +250,9 @@ public class Box : MonoBehaviour
 	public void UpdateText(BoxInfo info)
 	{
 		info.Clear();
-		
+
 		if (name == "Actor" && DosBox.GameVersion == GameVersion.AITD1 && ID == -2 && Anim >= 0 && Anim <= 4 && !string.IsNullOrEmpty(particleNames[Anim]))
-		{			
+		{
 			info.Append(particleNames[Anim], "#{0}", Keyframe);
 		}
 		else if (name == "Collider" && (Flags & 4) != 4 && (Flags & 8) != 8)
@@ -263,7 +263,7 @@ public class Box : MonoBehaviour
 		{
 			info.Append(name.ToUpperInvariant(), "#{0}", ID);
 		}
-		
+
 		if (name == "Camera" && RoomLoader.ShowAdditionalInfo.BoolValue)
 		{
 			Vector3Int position = CameraPosition * 10;
@@ -303,7 +303,7 @@ public class Box : MonoBehaviour
 				{
 					int diff = NewAngle - OldAngle;
 					if(RotateParam != 0 && diff != 0)
-					{	
+					{
 						string direction = diff > 0 ? "▲" : "▼";
 						if  (DosBox.ShowAITD1Vars)
 						{
@@ -350,11 +350,11 @@ public class Box : MonoBehaviour
 					if(DosBox.ShowAITD1Vars && NextAnim != -1)
 					{
 						info.Append("BODY/ANIM", "{0}; {1}; {2}", Body, Anim, NextAnim);
-					}						
+					}
 					else
 					{
 						info.Append("BODY/ANIM", "{0}; {1}", Body, Anim);
-					}						
+					}
 
 					if (DosBox.ShowAITD1Vars && AnimType >= 0 && AnimType <= 2)
 					{
@@ -364,10 +364,10 @@ public class Box : MonoBehaviour
 				else
 				{
 					info.Append("BODY", Body);
-				}					
+				}
 			}
 
-			if (DosBox.ShowAITD1Vars) 
+			if (DosBox.ShowAITD1Vars)
 			{
 				if (Keyframe != -1 && Body != -1 && Anim != -1 && (Flags & 1) == 1) //animated
 				{
@@ -384,11 +384,11 @@ public class Box : MonoBehaviour
 				{
 					info.Append("CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.Timer1 - Chrono) / 60), (DosBox.Timer1 - Chrono) % 60);
 				}
-					
+
 				if (RoomChrono != 0)
 				{
 					info.Append("ROOM_CHRONO", "{0}.{1:D2}", TimeSpan.FromSeconds((DosBox.Timer1 - RoomChrono) / 60), (DosBox.Timer1 - RoomChrono) % 60);
-				}					
+				}
 			}
 
 			if (DosBox.ShowAdditionalInfo && TrackMode >= 0 && TrackMode <= 3)
@@ -404,28 +404,28 @@ public class Box : MonoBehaviour
 					{
 						info.Append("TRACKNUM/POS", "{0} {1}", TrackNumber, PositionInTrack);
 					}
-						
+
 					if (TrackMode == 2) //follow
 					{
-						info.Append("TRACKNUM", "{0}", TrackNumber);				
-					}						
+						info.Append("TRACKNUM", "{0}", TrackNumber);
+					}
 				}
-									
+
 				if (ActionType >= 0 && ActionType <= 10)
 				{
 					info.Append("ACTIONTYPE", actionTypeInfo[ActionType]);
-				}					
-					
+				}
+
 				info.Append("2DBOX", "{0} {1}; {2} {3}", DashIfEmpty(Box2DLower.x), DashIfEmpty(Box2DLower.y), DashIfEmpty(Box2DUpper.x), DashIfEmpty(Box2DUpper.y));
 				info.Append("HITFORCE", HitForce);
 				info.Append("HIT/BY COL/BY", "{0} {1}  {2} {3} {4} {5}", GetActorID(Hit), GetActorID(HitBy), GetActorID(Col.x), GetActorID(Col.y), GetActorID(Col.z), GetActorID(ColBy));
 				info.Append("HARDCOL/TRIG", "{0} {1}", DashIfEmpty(HardCol), DashIfEmpty(HardTrigger));
 			}
-			
+
 			if (DosBox.ShowAdditionalInfo)
 			{
 				info.Append("SLOT", Slot);
-			}				
+			}
 		}
 
 		info.UpdateText();

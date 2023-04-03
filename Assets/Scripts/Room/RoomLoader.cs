@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Linq;
 using System.IO;
@@ -415,7 +415,7 @@ public class RoomLoader : MonoBehaviour
 	{
 		//detect game based on number of floors
 		if (GetEntriesCount("ETAGE00.PAK") > 2)
-			return GameVersion.TIMEGATE; 
+			return GameVersion.TIMEGATE;
 		else if (floors.Count >= 15 || (floors.Count == 2 && floors.Contains(0) && floors.Contains(8)))
 			return GameVersion.AITD2;
 		else if (floors.Count >= 14 || (floors.Count == 2 && floors.Contains(0) && floors.Contains(2)))
@@ -423,7 +423,7 @@ public class RoomLoader : MonoBehaviour
 		else if (floors.Count == 1 && floors.Contains(16))
 			return GameVersion.JACK;
 		else
-			return GameVersion.AITD1; 
+			return GameVersion.AITD1;
 	}
 
 	int GetEntriesCount(string filePath)
@@ -499,7 +499,7 @@ public class RoomLoader : MonoBehaviour
 											- Camera.main.ScreenToWorldPoint(newMousePosition + cameraHeight);
 
 						Camera.main.transform.position += mouseDelta;
-						mousePosition = newMousePosition;						
+						mousePosition = newMousePosition;
 					}
 
 					if ((startDragPosition - newMousePosition).magnitude > 4.0f)
@@ -508,7 +508,7 @@ public class RoomLoader : MonoBehaviour
 						if (allowWarp)
 						{
 							highLightedBoxAllowed = false;
-						}						
+						}
 					}
 				}
 
@@ -533,7 +533,7 @@ public class RoomLoader : MonoBehaviour
 
 		//menu
 		if (Input.GetMouseButtonDown(1) && (!Input.GetMouseButton(0) || warpDialog.WarpActorBox == null))
-		{			
+		{
 			if(menuEnabled)
 			{
 				menuEnabled = false;
@@ -587,7 +587,7 @@ public class RoomLoader : MonoBehaviour
 		RefreshCurrentCamera();
 
 		//must be done after DosBox update
-		if (mustWarpActor) 
+		if (mustWarpActor)
 		{
 			warpDialog.WarpActor();
 		}
@@ -720,17 +720,17 @@ public class RoomLoader : MonoBehaviour
 	void RefreshCurrentCamera()
 	{
 		var dosBox = GetComponent<DosBox>();
-		if (dosBox.CurrentCamera != currentCamera 
-		 || dosBox.CurrentCameraRoom != currentCameraRoom 
-		 || dosBox.CurrentCameraFloor != currentCameraFloor)
+		if (dosBox.CurrentCamera != currentCamera
+		|| dosBox.CurrentCameraRoom != currentCameraRoom
+		|| dosBox.CurrentCameraFloor != currentCameraFloor)
 		{
 			currentCamera = dosBox.CurrentCamera;
 			currentCameraRoom = dosBox.CurrentCameraRoom;
 			currentCameraFloor = dosBox.CurrentCameraFloor;
 			SetRoomObjectsVisibility(room);
 		}
-	}	
-	
+	}
+
 	Transform GetRoom(int newFloor, int newRoom)
 	{
 		if (floor == newFloor && newRoom >= 0 && newRoom < rooms.Count)
@@ -779,7 +779,7 @@ public class RoomLoader : MonoBehaviour
 	public void LinkToDosBox()
 	{
 		if (Application.platform != RuntimePlatform.WindowsEditor &&
-			 Application.platform != RuntimePlatform.WindowsPlayer)
+			Application.platform != RuntimePlatform.WindowsPlayer)
 		{
 			return;
 		}
@@ -798,7 +798,7 @@ public class RoomLoader : MonoBehaviour
 				CameraFollow.Value = 2;
 				GetComponent<DosBox>().ResetCamera(floor, room);
 			}
-			
+
 			dosBoxEnabled = true;
 
 			//select player by default
@@ -830,7 +830,7 @@ public class RoomLoader : MonoBehaviour
 
 	public int GetCameraSlot(int index)
 	{
-		return room >= 0 && room < camerasPerRoom.Count ? camerasPerRoom[room].IndexOf(index) : -1;					
+		return room >= 0 && room < camerasPerRoom.Count ? camerasPerRoom[room].IndexOf(index) : -1;
 	}
 
 	#endregion
@@ -927,7 +927,7 @@ public class RoomLoader : MonoBehaviour
 			case KeyCode.Mouse2:
 				//reset position
 				Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
-				Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);				
+				Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
 				Camera.main.transform.position = new Vector3(position.x, Camera.main.transform.position.y, position.z);
 				ResetCameraZoom();
 				break;

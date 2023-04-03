@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -86,13 +86,13 @@ public class ProcessMemory
 	public long SearchFor16MRegion()
 	{
 		byte[] memory = new byte[4096];
-		
+
 		//scan process memory regions
 		foreach (var mem_info in GetMemoryRegions())
 		{
 			IntPtr bytesRead;
 			//check if memory region is accessible
-			//skip regions smaller than 16M (default DOSBOX memory size)			
+			//skip regions smaller than 16M (default DOSBOX memory size)
 			if (mem_info.Protect == PAGE_READWRITE && mem_info.State == MEM_COMMIT && (mem_info.Type & MEM_PRIVATE) == MEM_PRIVATE
 				&& (int)mem_info.RegionSize >= 1024 * 1024 * 16
 				&& ReadProcessMemory(processHandle, mem_info.BaseAddress, memory, memory.Length, out bytesRead)

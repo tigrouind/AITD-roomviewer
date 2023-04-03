@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -83,12 +83,12 @@ public class ModelLoader : MonoBehaviour
 		filter.sharedMesh = null;
 
 		//delete all bones
-		foreach (Transform child in transform) 
+		foreach (Transform child in transform)
 		{
 			if(child.gameObject != BoundingBox)
 			{
 				Destroy(child.gameObject);
-			}			
+			}
 		}
 
 		//load data
@@ -102,7 +102,7 @@ public class ModelLoader : MonoBehaviour
 		//header
 		modelFlags = buffer.ReadShort(i + 0);
 
-		//bounding box		
+		//bounding box
 		LoadBoundingBox(buffer, i + 2);
 
 		i += 0xE;
@@ -881,11 +881,11 @@ public class ModelLoader : MonoBehaviour
 		skinnedMeshRenderer.materials[4] //gradientV
 			.SetTexture("_Palette", paletteTexture);
 	}
-	
+
 	Texture2D GetPaletteTexture()
 	{
 		Color32[] colors = LoadPalette();
-		
+
 		var texture = new Texture2D(16, 16, TextureFormat.RGBA32, false);
 		texture.SetPixels32(colors);
 		texture.wrapMode = TextureWrapMode.Clamp;
@@ -894,7 +894,7 @@ public class ModelLoader : MonoBehaviour
 	}
 
 	Color32[] LoadPalette()
-	{	
+	{
 		string filePath = Config.GetPath("ITD_RESS.PAK");
 		if (File.Exists(filePath))
 		{
@@ -905,15 +905,15 @@ public class ModelLoader : MonoBehaviour
 				{
 					if (entries[i] == 768)
 					{
-						return LoadPalette(pak.GetEntry(i), 0);	
+						return LoadPalette(pak.GetEntry(i), 0);
 					}
 				}
 			}
 		}
-		
+
 		Regex match = new Regex(@"CAMERA\d\d\.PAK", RegexOptions.IgnoreCase);
 		var cameraFiles = Directory.GetFiles(Config.BaseDirectory)
-			.Where(x => match.IsMatch(Path.GetFileName(x)))			
+			.Where(x => match.IsMatch(Path.GetFileName(x)))
 			.OrderByDescending(x => x);
 
 		foreach (var cameraFile in cameraFiles)
@@ -923,15 +923,15 @@ public class ModelLoader : MonoBehaviour
 				var entries = pak.GetEntriesSize();
 				for (int i = 0 ; i < entries.Count ; i++)
 				{
-					if (entries[i] == 64768)	
+					if (entries[i] == 64768)
 					{
 						var buffer = pak.GetEntry(i);
-						return LoadPalette(buffer, 64000);			
+						return LoadPalette(buffer, 64000);
 					}
 				}
 			}
 		}
-		
+
 		return LoadDefaultPalette();
 	}
 
@@ -941,7 +941,7 @@ public class ModelLoader : MonoBehaviour
 		var src = offset;
 		var colors = new Color32[256];
 		for (int i = 0; i < 256; i++)
-		{					
+		{
 			byte r = buffer[src++];
 			byte g = buffer[src++];
 			byte b = buffer[src++];
@@ -1088,7 +1088,7 @@ public class ModelLoader : MonoBehaviour
 
 		//show/hide menu
 		if (Input.GetMouseButtonDown(1))
-		{	
+		{
 			menuEnabled = !menuEnabled;
 			if (menuEnabled)
 			{
@@ -1132,7 +1132,7 @@ public class ModelLoader : MonoBehaviour
 		if (AutoRotate.BoolValue && AutoRotate.BoolValue)
 		{
 			float damp = 1.0f - Mathf.Pow(0.0001f, Time.deltaTime);
-			cameraRotation.x += Time.deltaTime * 100.0f;			
+			cameraRotation.x += Time.deltaTime * 100.0f;
 			cameraRotation.y = Mathf.Lerp(cameraRotation.y, 20.0f, damp);
 			cameraPosition = Vector2.Lerp(cameraPosition, Vector2.zero, damp);
 		}
@@ -1146,7 +1146,7 @@ public class ModelLoader : MonoBehaviour
 
 		//rotate model around center
 		transform.parent.rotation = Quaternion.identity;
-		transform.position = Vector3.zero;						
+		transform.position = Vector3.zero;
 		Vector3 center = Vector3.Scale(gameObject.GetComponent<Renderer>().bounds.center, Vector3.up);
 		transform.localPosition = -center;
 		Grid.transform.localPosition = -center - new Vector3(offset.x, offset.y, Mathf.Repeat(offset.z, 1.0f));
@@ -1192,7 +1192,7 @@ public class ModelLoader : MonoBehaviour
 		if (gradientPolygonList != null && gradientPolygonList.Count > 0)
 		{
 			UpdateGradients(mesh, mat);
-		}		
+		}
 	}
 
 	void UpdateGradients(Mesh mesh, Matrix4x4 mat)
@@ -1201,7 +1201,7 @@ public class ModelLoader : MonoBehaviour
 		float gminY = float.MaxValue;
 		float gmaxZ = float.MinValue;
 		float gminZ = float.MaxValue;
-		
+
 		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
 		{
 			float maxX = float.MinValue;
@@ -1408,7 +1408,7 @@ public class ModelLoader : MonoBehaviour
 					modelFolderIndex = (modelFolderIndex + 1) % modelFolders.Length;
 					LoadModels(modelFolders[modelFolderIndex]);
 					LoadAnims(animFolders[modelFolderIndex]);
-				}				
+				}
 				break;
 
 			case KeyCode.UpArrow:
@@ -1473,7 +1473,7 @@ public class ModelLoader : MonoBehaviour
 				{
 					boundingBoxMode = (boundingBoxMode + 1) % 3;
 					LoadBody(false);
-				}				
+				}
 				break;
 
 			case KeyCode.R:

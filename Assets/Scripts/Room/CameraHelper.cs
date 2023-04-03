@@ -64,11 +64,11 @@ public class CameraHelper : MonoBehaviour
 		Matrix4x4 matrix = Matrix4x4.TRS(-offset, qrot * Quaternion.Euler(90.0f, 0.0f, 0.0f), Vector3.one);
 
 		var pts = quad.Select(x => x * 32.768f)
-		  .Concat(quad.Select(x => x * 0.4f))
-		  .Select(x => Vector3.Scale(x, focal))
-		  .Concat(quad.Select(x => Vector3.Scale(x, new Vector3(-500.0f, 0.0f, 2.0f))))
-		  .Select(x => matrix.MultiplyPoint3x4(x))
-		  .ToArray();
+		.Concat(quad.Select(x => x * 0.4f))
+		.Select(x => Vector3.Scale(x, focal))
+		.Concat(quad.Select(x => Vector3.Scale(x, new Vector3(-500.0f, 0.0f, 2.0f))))
+		.Select(x => matrix.MultiplyPoint3x4(x))
+		.ToArray();
 
 		var vertices = new List<Vector3>();
 		var triangles = new List<int>();

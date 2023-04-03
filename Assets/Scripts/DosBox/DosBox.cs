@@ -110,7 +110,7 @@ public class DosBox : MonoBehaviour
 
 	bool AreActorsInitialized()
 	{
-		for (int i = 0 ; i < Boxes.Length ; i++) 
+		for (int i = 0 ; i < Boxes.Length ; i++)
 		{
 			int k = GetActorMemoryAddress(i);
 			int id = memory.ReadShort(k);
@@ -187,8 +187,8 @@ public class DosBox : MonoBehaviour
 
 				int bodyAddress, animAddress;
 				if (bodyIdToMemoryAddress.TryGetValue(box.Body, out bodyAddress) &&
-					animIdToMemoryAddress.TryGetValue(box.Anim, out animAddress) && 
-					animAddress < memory.Length && 
+					animIdToMemoryAddress.TryGetValue(box.Anim, out animAddress) &&
+					animAddress < memory.Length &&
 					bodyAddress < memory.Length)
 				{
 					int bonesInAnim = memory.ReadShort(animAddress + 2);
@@ -382,7 +382,7 @@ public class DosBox : MonoBehaviour
 			internalTimer1Frozen = memory.ReadUnsignedInt(entryPoint + 0x1B0F8);
 			internalTimer2Frozen = memory.ReadUnsignedShort(entryPoint + 0x1B0F6);
 
-			random = memory.ReadUnsignedInt(entryPoint + 0x214C0);			
+			random = memory.ReadUnsignedInt(entryPoint + 0x214C0);
 		}
 	}
 
@@ -401,7 +401,7 @@ public class DosBox : MonoBehaviour
 			return saveTimerFlag ? internalTimer2Frozen : internalTimer2;
 		}
 	}
-	
+
 	public void UpdateArrowVisibility()
 	{
 		//arrow is only active if actors are active and player is active
@@ -481,8 +481,8 @@ public class DosBox : MonoBehaviour
 
 			//worldpos unsync
 			if (isPlayer &&
-				  (boundingPos.x != box.BoundingPos.x ||
-				   boundingPos.z != box.BoundingPos.z))
+				(boundingPos.x != box.BoundingPos.x ||
+				boundingPos.z != box.BoundingPos.z))
 			{
 				if (worldPos == null)
 				{
@@ -532,7 +532,7 @@ public class DosBox : MonoBehaviour
 				int timer2Delay = internalTimer2 - internalTimer2Frozen;
 
 				RightText.Append("Timer 1", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer1 / 60), Timer1 % 60, timer1Delay / 60 % 60, timer1Delay % 60);
-				RightText.Append("Timer 2", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer2 / 60), Timer2 % 60, timer2Delay / 60 % 60, timer2Delay % 60);				
+				RightText.Append("Timer 2", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer2 / 60), Timer2 % 60, timer2Delay / 60 % 60, timer2Delay % 60);
 				RightText.Append("FPS/Frame/Time", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.RoundToInt(frameTimeElapsed * 1000));
 				RightText.Append("Total delay/Delay", "{0:D2}:{1:D2}.{2:D3}; {3} ms", totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds, Mathf.FloorToInt(lastDelay * 1000));
 			}
@@ -561,10 +561,10 @@ public class DosBox : MonoBehaviour
 			int value;
 			int count = 0;
 			do
-			{						
+			{
 				value = rand.Next(300);
 				count++;
-			}	
+			}
 			while(value > 2);
 
 			RightText.Append(i == 0 ? "Next noise" : string.Empty, "{0}; {1} ", TimeSpan.FromSeconds(count), value);
@@ -661,7 +661,7 @@ public class DosBox : MonoBehaviour
 			}
 
 			//remove any frame info older than one second
-			while (previousFrames.Count > 0 && 
+			while (previousFrames.Count > 0 &&
 				previousFrames.Peek().Value < (time - 1.0f))
 			{
 				previousFrames.Dequeue();
@@ -672,7 +672,7 @@ public class DosBox : MonoBehaviour
 	public void CheckDelay()
 	{
 		if(ProcessMemory == null)
-		{			
+		{
 			totalDelay.Stop();
 			delayCounter.Stop();
 			return;
@@ -788,15 +788,15 @@ public class DosBox : MonoBehaviour
 		{
 			return false;
 		}
-		
-		switch (gameVersion) 
+
+		switch (gameVersion)
 		{
 			case GameVersion.AITD1:
 				if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CD Not Found")) == -1)
 				{
 					if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("USA.PAK")) != -1)
 					{
-						gameVersion = GameVersion.AITD1_DEMO; 
+						gameVersion = GameVersion.AITD1_DEMO;
 					}
 					else
 					{
@@ -870,7 +870,7 @@ public class DosBox : MonoBehaviour
 		if (!TryGetMemoryReader(out ProcessMemory))
 		{
 			return false;
-		}	
+		}
 
 		if (!FindActorsAddress(gameVersion))
 		{
@@ -885,7 +885,7 @@ public class DosBox : MonoBehaviour
 
 		Player = null;
 		lastValidPlayerIndex = -1;
-		
+
 		return true;
 	}
 
@@ -921,7 +921,7 @@ public class DosBox : MonoBehaviour
 		int objectAddress = memory.ReadFarPointer(entryPoint + 0x2400E);
 		return objectAddress + index * 52;
 	}
-	
+
 	public Box RefreshBoxUsingID(Box box, int boxId)
 	{
 		//make sure ID still match

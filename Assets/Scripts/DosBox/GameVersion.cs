@@ -1,4 +1,4 @@
-public enum GameVersion 
+public enum GameVersion
 {
 	AITD1,
 	AITD1_FLOPPY,

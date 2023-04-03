@@ -89,7 +89,7 @@ public class UnPAK : IDisposable
 
 		return count;
 	}
-	
+
 	public List<uint> GetEntriesSize()
 	{
 		var header = ReadHeader();
@@ -112,7 +112,7 @@ public class UnPAK : IDisposable
 
 		var entries = new List<uint>();
 		do
-		{			
+		{
 			entries.Add(offset + 4);
 		}
 		while(stream.Position < startOffset && (offset = reader.ReadUInt32()) != 0);
