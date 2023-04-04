@@ -302,7 +302,7 @@ public class DosBox : MonoBehaviour
 					if(box.ID == cameraTargetID)
 					{
 						//check if player has moved
-						if (box.transform.position.x != lastPlayerPosition.x || box.transform.position.z != lastPlayerPosition.z)
+						if (box.transform.position != lastPlayerPosition)
 						{
 							//center camera to player position
 							GetComponent<RoomLoader>().CenterCamera(new Vector2(box.transform.position.x, box.transform.position.z));
