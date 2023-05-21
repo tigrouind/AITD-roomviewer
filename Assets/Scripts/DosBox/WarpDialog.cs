@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -252,7 +252,7 @@ public class WarpDialog : MonoBehaviour
 	void TryParseAngle(InputField inputField, out int intValue, int defaultValue)
 	{
 		float floatValue;
-		if(float.TryParse(inputField.text, out floatValue))
+		if (float.TryParse(inputField.text, out floatValue))
 		{
 			floatValue = floatValue >= 0.0f ? floatValue % 360.0f : 360.0f - ((-floatValue) % 360.0f);
 			intValue = Mathf.RoundToInt(floatValue * 1024.0f / 360.0f);
@@ -275,7 +275,7 @@ public class WarpDialog : MonoBehaviour
 
 	void TryParsePosition(InputField inputField, out int intValue, int defaultValue)
 	{
-		if(int.TryParse(inputField.text, out intValue))
+		if (int.TryParse(inputField.text, out intValue))
 		{
 			intValue = Mathf.Clamp(intValue, short.MinValue, short.MaxValue);
 		}

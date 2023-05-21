@@ -85,7 +85,7 @@ public class ModelLoader : MonoBehaviour
 		//delete all bones
 		foreach (Transform child in transform)
 		{
-			if(child.gameObject != BoundingBox)
+			if (child.gameObject != BoundingBox)
 			{
 				Destroy(child.gameObject);
 			}
@@ -166,7 +166,7 @@ public class ModelLoader : MonoBehaviour
 					startindex++;
 				}
 
-				if((modelFlags & 8) == 8)
+				if ((modelFlags & 8) == 8)
 				{
 					i += 0x18;
 				}
@@ -385,7 +385,7 @@ public class ModelLoader : MonoBehaviour
 						Vector3 position = vertices[cubeIndex];
 
 						float pointsize = linesize;
-						switch(primitiveType)
+						switch (primitiveType)
 						{
 							case 6:
 								pointsize = linesize * 2.5f;
@@ -428,7 +428,7 @@ public class ModelLoader : MonoBehaviour
 
 						i += 3;
 
-						for(int k = 0 ; k < 3 ; k++)
+						for (int k = 0 ; k < 3 ; k++)
 						{
 							int pointIndex = buffer.ReadShort(i + 0) / 6;
 							i += 2;
@@ -439,7 +439,7 @@ public class ModelLoader : MonoBehaviour
 							allVertices.Add(vertices[pointIndex]);
 							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
 
-							if(primitiveType == 8 || primitiveType == 10)
+							if (primitiveType == 8 || primitiveType == 10)
 							{
 								uv.Add(new Vector2(
 									buffer.ReadShort(uvIndex + 0) / 256.0f,
@@ -489,7 +489,7 @@ public class ModelLoader : MonoBehaviour
 		msh.RecalculateBounds();
 
 		//apply bones
-		if(bones.Count > 0)
+		if (bones.Count > 0)
 		{
 			msh.boneWeights = boneWeights.ToArray();
 			msh.bindposes = bindPoses.ToArray();
@@ -649,7 +649,7 @@ public class ModelLoader : MonoBehaviour
 	{
 		buffer.ReadBoundingBox(position, out boundingLower, out boundingUpper);
 
-		switch(boundingBoxMode)
+		switch (boundingBoxMode)
 		{
 			case 1: //cube
 				boundingUpper.x = boundingUpper.z = (boundingUpper.x + boundingUpper.z) / 2;
@@ -684,7 +684,7 @@ public class ModelLoader : MonoBehaviour
 
 		var isAITD2 = ((boneCount * 16 + 8) * frameCount + 4) == buffer.Length;
 		animFrames = new List<Frame>();
-		for(int frame = 0 ; frame < frameCount ; frame++)
+		for (int frame = 0 ; frame < frameCount ; frame++)
 		{
 			Frame f = new Frame();
 			f.Time = buffer.ReadShort(i + 0);
@@ -692,16 +692,16 @@ public class ModelLoader : MonoBehaviour
 
 			f.Bones = new List<Bone>();
 			i += 8;
-			for(int bone = 0 ; bone < boneCount ; bone++)
+			for (int bone = 0 ; bone < boneCount ; bone++)
 			{
 				Bone b = new Bone();
 				b.Type = buffer.ReadShort(i + 0);
 				Vector3Int boneTransform = buffer.ReadVector(i + 2);
 
-				switch(b.Type)
+				switch (b.Type)
 				{
 					case 0: //rotate
-						if(!isAITD2)
+						if (!isAITD2)
 						{
 							b.Rotate = GetRotation(new Vector3(-boneTransform.x * 360 / 1024.0f, -boneTransform.y * 360 / 1024.0f, -boneTransform.z * 360 / 1024.0f));
 						}
@@ -754,7 +754,7 @@ public class ModelLoader : MonoBehaviour
 		for (int i = 0 ; i < animFrames.Count ; i++)
 		{
 			totaltime += animFrames[(i + 1) % animFrames.Count].Time;
-			if(time < totaltime)
+			if (time < totaltime)
 			{
 				frame = i;
 				break;
@@ -764,19 +764,19 @@ public class ModelLoader : MonoBehaviour
 		Frame currentFrame = animFrames[frame % animFrames.Count];
 		Frame nextFrame = animFrames[(frame + 1) % animFrames.Count];
 		float framePosition = (nextFrame.Time == 0) ? 0.0f : (time - (totaltime - nextFrame.Time)) / nextFrame.Time;
-		if(frame != previousFrame)
+		if (frame != previousFrame)
 		{
 			previousFrame = frame;
 			frameDistance += animFrames[frame % animFrames.Count].Offset;
 		}
 
 		int highLightFrame = (frame + 1) % animFrames.Count;
-		if(highLightFrame != previousHighlightFrame)
+		if (highLightFrame != previousHighlightFrame)
 		{
 			RefreshLeftText(highLightFrame);
 		}
 
-		if(animFrames.Count == 1 && animCounter != previousAnimCounter)
+		if (animFrames.Count == 1 && animCounter != previousAnimCounter)
 		{
 			previousAnimCounter = animCounter;
 			frameDistance += animFrames[0].Offset;
@@ -946,7 +946,7 @@ public class ModelLoader : MonoBehaviour
 			byte g = buffer[src++];
 			byte b = buffer[src++];
 
-			if(r > 63 || g > 63 || b > 63)
+			if (r > 63 || g > 63 || b > 63)
 			{
 				mapTo255 = false;
 			}
@@ -1092,7 +1092,7 @@ public class ModelLoader : MonoBehaviour
 			menuEnabled = !menuEnabled;
 			if (menuEnabled)
 			{
-				if(modelCount > 0)
+				if (modelCount > 0)
 				{
 					ModelInput.text = modelIndex.ToString();
 				}
@@ -1139,7 +1139,7 @@ public class ModelLoader : MonoBehaviour
 
 		//animate
 		Vector3 offset = Vector3.zero;
-		if(animFrames != null && (modelFlags & 2) == 2 && animFrames.Count > 0)
+		if (animFrames != null && (modelFlags & 2) == 2 && animFrames.Count > 0)
 		{
 			offset = AnimateModel();
 		}
@@ -1211,7 +1211,7 @@ public class ModelLoader : MonoBehaviour
 
 			int polyType = gradientPolygonType[i];
 
-			foreach(int vertexIndex in gradientPolygonList[i])
+			foreach (int vertexIndex in gradientPolygonList[i])
 			{
 				Vector3 pos = allVertices[vertexIndex];
 				Vector3 point = WorldToViewportPoint(mat, pos);
@@ -1252,7 +1252,7 @@ public class ModelLoader : MonoBehaviour
 		}
 
 		float range = gmaxZ - gminZ;
-		if(range == 0.0f) range = 1.0f;
+		if (range == 0.0f) range = 1.0f;
 
 		for (int i = 0; i < gradientPolygonList.Count; i++)
 		{
@@ -1283,7 +1283,7 @@ public class ModelLoader : MonoBehaviour
 			modelIndex, modelCount - 1,
 			varParser.GetText(VarEnum.BODYS, modelIndex));
 
-		if(EnableAnimation.BoolValue)
+		if (EnableAnimation.BoolValue)
 		{
 			stringBuilder.Append("\r\n");
 			stringBuilder.AppendFormat("{0} {1}/{2} <color=#00c864>{3}</color>",
@@ -1292,7 +1292,7 @@ public class ModelLoader : MonoBehaviour
 				varParser.GetText(VarEnum.ANIMS, animIndex));
 		}
 
-		if(ShowAdditionalInfo.BoolValue)
+		if (ShowAdditionalInfo.BoolValue)
 		{
 			stringBuilder.Append("\r\n\r\n");
 			stringBuilder.AppendFormat("Bounding box ({3}): <color=#00c864>{0} {1} {2}</color>",
@@ -1302,12 +1302,12 @@ public class ModelLoader : MonoBehaviour
 				boundingBoxModes[boundingBoxMode]);
 		}
 
-		if(EnableAnimation.BoolValue && ShowAdditionalInfo.BoolValue && animFrames != null)
+		if (EnableAnimation.BoolValue && ShowAdditionalInfo.BoolValue && animFrames != null)
 		{
 			stringBuilder.Append("\r\n");
 
 			int index = 0;
-			foreach(Frame frame in animFrames)
+			foreach (Frame frame in animFrames)
 			{
 				bool selected = index == frameIndex || frameIndex == -1;
 				string colorA = selected ? "#ffffff" : "#aaaaaa";
@@ -1412,7 +1412,7 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.UpArrow:
-				if(EnableAnimation.BoolValue)
+				if (EnableAnimation.BoolValue)
 				{
 					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 					{
@@ -1426,7 +1426,7 @@ public class ModelLoader : MonoBehaviour
 				break;
 
 			case KeyCode.DownArrow:
-				if(EnableAnimation.BoolValue)
+				if (EnableAnimation.BoolValue)
 				{
 					if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
 					{

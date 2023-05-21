@@ -14,7 +14,7 @@ public class ExchangeSlot : MonoBehaviour
 			if (Input.GetKeyDown(KeyCode.X))
 			{
 				ExchangeEnabled = !ExchangeEnabled;
-				if(ExchangeEnabled)
+				if (ExchangeEnabled)
 				{
 					targetSlot = -1;
 				}
@@ -33,7 +33,7 @@ public class ExchangeSlot : MonoBehaviour
 					targetSlot = targetSlot >= 10 ? targetSlot / 10 : -1;
 					UpdateTargetSlotText();
 				}
-				else if(Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
+				else if (Input.GetKeyDown(KeyCode.KeypadEnter) || Input.GetKeyDown(KeyCode.Return))
 				{
 					if (targetSlot >= 0 && targetSlot < 50 && highLightedBox != null)
 					{
@@ -90,7 +90,7 @@ public class ExchangeSlot : MonoBehaviour
 
 	bool IsKeypadKeyDown(out int value)
 	{
-		for(int digit = 0 ; digit <= 9 ; digit++)
+		for (int digit = 0 ; digit <= 9 ; digit++)
 		{
 			if (Input.GetKeyDown(KeyCode.Keypad0 + digit)
 			|| Input.GetKeyDown(KeyCode.Alpha0 + digit))

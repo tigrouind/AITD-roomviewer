@@ -166,12 +166,12 @@ public class Box : MonoBehaviour
 
 	string GetActorID(int index)
 	{
-		if(DosBox.SpeedRunMode && index >= 0)
+		if (DosBox.SpeedRunMode && index >= 0)
 		{
 			return index.ToString();
 		}
 
-		if(index >= 0 && index < DosBox.Boxes.Length)
+		if (index >= 0 && index < DosBox.Boxes.Length)
 		{
 			Box box = DosBox.Boxes[index];
 			if (box != null)
@@ -185,7 +185,7 @@ public class Box : MonoBehaviour
 
 	string GetFlags(int flags)
 	{
-		if(flags == 0)
+		if (flags == 0)
 		{
 			return "NONE";
 		}
@@ -299,10 +299,10 @@ public class Box : MonoBehaviour
 				info.Append("MOD", Mod);
 				info.Append("OFFSET", LastOffset);
 				info.Append("DISTANCE", Mathf.RoundToInt(LastDistance));
-				if(Angles.x == 0.0f && Angles.z == 0.0f)
+				if (Angles.x == 0.0f && Angles.z == 0.0f)
 				{
 					int diff = NewAngle - OldAngle;
-					if(RotateParam != 0 && diff != 0)
+					if (RotateParam != 0 && diff != 0)
 					{
 						string direction = diff > 0 ? "▲" : "▼";
 						if  (DosBox.ShowAITD1Vars)
@@ -332,7 +332,7 @@ public class Box : MonoBehaviour
 
 			if (Life != -1)
 			{
-				if(DosBox.ShowAdditionalInfo && LifeMode >= 0 && LifeMode <= 2)
+				if (DosBox.ShowAdditionalInfo && LifeMode >= 0 && LifeMode <= 2)
 				{
 					info.Append("LIFE/LIFEMODE", "{0}; {1}", Life, lifeModeInfo[LifeMode]);
 				}
@@ -345,9 +345,9 @@ public class Box : MonoBehaviour
 
 			if (Body != -1 && ID >= 0)
 			{
-				if(Anim != -1)
+				if (Anim != -1)
 				{
-					if(DosBox.ShowAITD1Vars && NextAnim != -1)
+					if (DosBox.ShowAITD1Vars && NextAnim != -1)
 					{
 						info.Append("BODY/ANIM", "{0}; {1}; {2}", Body, Anim, NextAnim);
 					}
@@ -396,7 +396,7 @@ public class Box : MonoBehaviour
 				info.Append("TRACKMODE", trackModeInfo[TrackMode]);
 			}
 
-			if(DosBox.ShowAITD1Vars)
+			if (DosBox.ShowAITD1Vars)
 			{
 				if (TrackNumber != -1)
 				{

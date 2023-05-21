@@ -299,7 +299,7 @@ public class DosBox : MonoBehaviour
 					}
 
 					//camera target
-					if(box.ID == cameraTargetID)
+					if (box.ID == cameraTargetID)
 					{
 						//check if player has moved
 						if (box.transform.position != lastPlayerPosition)
@@ -522,7 +522,7 @@ public class DosBox : MonoBehaviour
 
 		if (ShowAITD1Vars || ShowAdditionalInfo)
 		{
-			if(Player != null) RightText.AppendLine();
+			if (Player != null) RightText.AppendLine();
 
 			if (ShowAITD1Vars)
 			{
@@ -539,7 +539,7 @@ public class DosBox : MonoBehaviour
 
 			Vector3Int mousePosition = GetComponent<RoomLoader>().GetMousePosition(linkroom, linkfloor);
 			RightText.Append("Cursor position", "{0} {1}", Mathf.Clamp(mousePosition.x, -32768, 32767), Mathf.Clamp(mousePosition.z, -32768, 32767));
-			if(Player != null) RightText.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
+			if (Player != null) RightText.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
 
 			if (ShowAITD1Vars)
 			{
@@ -556,7 +556,7 @@ public class DosBox : MonoBehaviour
 	void AppendRandomInfo()
 	{
 		rand.Seed = random;
-		for(int i = 0 ; i < 3 ; i++)
+		for (int i = 0 ; i < 3 ; i++)
 		{
 			int value;
 			int count = 0;
@@ -565,7 +565,7 @@ public class DosBox : MonoBehaviour
 				value = rand.Next(300);
 				count++;
 			}
-			while(value > 2);
+			while (value > 2);
 
 			RightText.Append(i == 0 ? "Next noise" : string.Empty, "{0}; {1} ", TimeSpan.FromSeconds(count), value);
 		}
@@ -634,7 +634,7 @@ public class DosBox : MonoBehaviour
 			if (frames != oldFrames)
 			{
 				oldFrames = frames;
-				if(frames != 0)
+				if (frames != 0)
 				{
 					frameTimeElapsed = frameTime.Elapsed;
 					frameTime.Restart();
@@ -671,16 +671,16 @@ public class DosBox : MonoBehaviour
 
 	public void CheckDelay()
 	{
-		if(ProcessMemory == null)
+		if (ProcessMemory == null)
 		{
 			totalDelay.Stop();
 			delayCounter.Stop();
 			return;
 		}
 
-		if(ShowAITD1Vars)
+		if (ShowAITD1Vars)
 		{
-			if(delayCounter.Elapsed >= 0.1f) //100ms
+			if (delayCounter.Elapsed >= 0.1f) //100ms
 			{
 				lastDelay = delayCounter.Elapsed;
 			}
@@ -701,9 +701,9 @@ public class DosBox : MonoBehaviour
 
 	void FixBoundingWrap(ref int a, ref int b)
 	{
-		if(a > b)
+		if (a > b)
 		{
-			if(a < -b)
+			if (a < -b)
 			{
 				b += 65536;
 			}
@@ -723,7 +723,7 @@ public class DosBox : MonoBehaviour
 				.Select(x => (int?)x.Id)
 				.FirstOrDefault();
 
-		if(processId.HasValue)
+		if (processId.HasValue)
 		{
 			return processId.Value;
 		}
@@ -925,7 +925,7 @@ public class DosBox : MonoBehaviour
 	public Box RefreshBoxUsingID(Box box, int boxId)
 	{
 		//make sure ID still match
-		if(box != null && box.ID != boxId)
+		if (box != null && box.ID != boxId)
 		{
 			box = null;
 		}

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -14,7 +14,7 @@ public class VarParser
 		if (sections.TryGetValue(section, out sectionDict))
 		{
 			string text;
-			if(sectionDict.TryGetValue(value, out text))
+			if (sectionDict.TryGetValue(value, out text))
 			{
 				return text;
 			}
@@ -76,7 +76,7 @@ public class VarParser
 			int from = int.Parse(fromString);
 			int to = string.IsNullOrEmpty(toString) ? from : int.Parse(toString);
 
-			for(int i = from; i <= to ; i++)
+			for (int i = from; i <= to ; i++)
 			{
 				section[i] = text;
 			}

@@ -69,7 +69,7 @@ public class UnPAK : IDisposable
 	{
 		get
 		{
-			if(!entryCount.HasValue)
+			if (!entryCount.HasValue)
 			{
 				entryCount = GetEntryCount();
 			}
@@ -85,7 +85,7 @@ public class UnPAK : IDisposable
 		int count = offset / 4 - 1;
 
 		stream.Seek(offset - 4, SeekOrigin.Begin);
-		if(reader.ReadInt32() == 0) count--; //TIMEGATE
+		if (reader.ReadInt32() == 0) count--; //TIMEGATE
 
 		return count;
 	}
@@ -94,7 +94,7 @@ public class UnPAK : IDisposable
 	{
 		var header = ReadHeader();
 		var entries = new List<uint>();
-		foreach(var pos in header)
+		foreach (var pos in header)
 		{
 			stream.Seek(pos + 4, SeekOrigin.Begin);
 			var uncompressedSize = reader.ReadUInt32();
@@ -115,7 +115,7 @@ public class UnPAK : IDisposable
 		{
 			entries.Add(offset + 4);
 		}
-		while(stream.Position < startOffset && (offset = reader.ReadUInt32()) != 0);
+		while (stream.Position < startOffset && (offset = reader.ReadUInt32()) != 0);
 
 		return entries;
 	}

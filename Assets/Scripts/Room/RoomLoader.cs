@@ -211,7 +211,7 @@ public class RoomLoader : MonoBehaviour
 	{
 		using (var pak = new UnPAK(filePath))
 		{
-			for(int i = 0 ; i < pak.EntryCount ; i++)
+			for (int i = 0 ; i < pak.EntryCount ; i++)
 			{
 				byte[] buffer = pak.GetEntry(i);
 				LoadRoom(buffer, 0, i);
@@ -223,7 +223,7 @@ public class RoomLoader : MonoBehaviour
 		{
 			using (var pak = new UnPAK(filePath))
 			{
-				for(int i = 0 ; i < pak.EntryCount ; i++)
+				for (int i = 0 ; i < pak.EntryCount ; i++)
 				{
 					byte[] buffer = pak.GetEntry(i);
 					LoadCamera(buffer, 0, i);
@@ -375,7 +375,7 @@ public class RoomLoader : MonoBehaviour
 			if (points.Count > 0)
 			{
 				var room = GetRoom(floor, cameraRoom);
-				if(room == null) continue;
+				if (room == null) continue;
 
 				int colorRGB = cameraColors[cameraID % cameraColors.Length];
 
@@ -444,7 +444,7 @@ public class RoomLoader : MonoBehaviour
 	{
 		WarpDialog warpDialog = GetComponent<WarpDialog>();
 		float mouseWheel = Input.GetAxis("Mouse ScrollWheel");
-		if(mouseWheel != 0.0f)
+		if (mouseWheel != 0.0f)
 		{
 			Vector3 cameraHeight = new Vector3(0.0f, 0.0f, Camera.main.transform.position.y);
 			Vector3 mouseBeforeZoom = Camera.main.ScreenToWorldPoint(Input.mousePosition + cameraHeight);
@@ -477,7 +477,7 @@ public class RoomLoader : MonoBehaviour
 				refreshSelectedBoxAllowed = true;
 				mousePosition = startDragPosition = Input.mousePosition;
 
-				if(highLightedBox != null && highLightedBox.name == "Actor")
+				if (highLightedBox != null && highLightedBox.name == "Actor")
 				{
 					warpDialog.WarpActorBox = highLightedBox;
 					warpDialog.WarpActorBoxId = highLightedBox.ID;
@@ -534,14 +534,14 @@ public class RoomLoader : MonoBehaviour
 		//menu
 		if (Input.GetMouseButtonDown(1) && (!Input.GetMouseButton(0) || warpDialog.WarpActorBox == null))
 		{
-			if(menuEnabled)
+			if (menuEnabled)
 			{
 				menuEnabled = false;
 			}
-			else if(warpDialog.WarpMenuEnabled)
+			else if (warpDialog.WarpMenuEnabled)
 			{
 				warpDialog.WarpMenuEnabled = false;
-				if(speedRunMode)
+				if (speedRunMode)
 				{
 					warpDialog.WarpActorBox = null; //reset to player
 					warpDialog.WarpActorBoxId = -1;
@@ -605,7 +605,7 @@ public class RoomLoader : MonoBehaviour
 		}
 
 		//automatic link
-		if(GetComponent<DosBox>().ProcessMemory == null && linkToDosBoxTimer.Elapsed > 1.0f)
+		if (GetComponent<DosBox>().ProcessMemory == null && linkToDosBoxTimer.Elapsed > 1.0f)
 		{
 			LinkToDosBox();
 			linkToDosBoxTimer.Restart();
@@ -1003,7 +1003,7 @@ public class RoomLoader : MonoBehaviour
 
 	void RefreshSelectedCamera()
 	{
-		if(highLightedBox != currentCameraBox)
+		if (highLightedBox != currentCameraBox)
 		{
 			GetComponent<CameraHelper>().SetupCameraFrustum(CameraFrustum, highLightedBox);
 			currentCameraBox = highLightedBox;
