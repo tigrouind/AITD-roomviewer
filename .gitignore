@@ -18,6 +18,7 @@ obj/
 *.user
 *.unityproj
 *.booproj
+.vscode
 
 # ============ #
 # OS generated #
@@ -34,3 +35,4 @@ Thumbs.db
 # AITD #
 # ==== #
 /GAMEDATA
+.vs/
