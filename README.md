@@ -116,4 +116,6 @@ Copy the following files to GAMEDATA folder:
 | <kbd>R</kbd> | camera auto rotate mode
 | <kbd>E</kbd> | show extra information
 | <kbd>A</kbd> | enable animation
+| <kbd>X</kbd> | export current model to OBJ format
+| <kbd>Shift</kbd> + <kbd>X</kbd> | export all models to OBJ format
 | <kbd>Tab</kbd> | switch to room viewer

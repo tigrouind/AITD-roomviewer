@@ -45,10 +45,12 @@ public class ModelLoader : MonoBehaviour
 	private List<Vector3> allVertices;
 	private List<Vector2> uv;
 	private List<Vector2> uvDepth;
+	private List<Color32> colorsRaw;
 	private Vector3Int boundingLower;
 	private Vector3Int boundingUpper;
 	private int boundingBoxMode;
 	private readonly string[] boundingBoxModes = { "normal", "cube", "max" };
+	private readonly string[] materialNames = { "shadeless", "glass", "noise", "metal_horizontal", "metal_vertical", "texture_a", "texture_b" };
 
 	private Vector2 cameraRotation = new Vector2(0.0f, 20.0f);
 	private Vector2 cameraPosition;
@@ -224,6 +226,7 @@ public class ModelLoader : MonoBehaviour
 
 		gradientPolygonList = new List<List<int>>();
 		gradientPolygonType = new List<int>();
+		colorsRaw = new List<Color32>();
 
 		for (int n = 0; n < count; n++)
 		{
@@ -253,6 +256,7 @@ public class ModelLoader : MonoBehaviour
 							rotation * Vector3.Scale(x, new Vector3(linesize, linesize, directionVector.magnitude))
 							+ middle));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
+						colorsRaw.AddRange(CubeMesh.vertices.Select(x => color));
 						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[x.z > 0 ? pointIndexA : pointIndexB], weight0 = 1 }));
 
 						i += 4;
@@ -267,6 +271,7 @@ public class ModelLoader : MonoBehaviour
 						i += 3;
 
 						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
+						Color32 colorRaw = paletteColors[colorIndex];
 						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
 
 						//add vertices
@@ -278,6 +283,7 @@ public class ModelLoader : MonoBehaviour
 							i += 2;
 
 							colors.Add(color);
+							colorsRaw.Add(colorRaw);
 							polyVertices.Add(allVertices.Count);
 							allVertices.Add(vertices[pointIndex]);
 							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
@@ -343,6 +349,7 @@ public class ModelLoader : MonoBehaviour
 						i++;
 						int colorIndex = buffer[i];
 						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
+						Color32 colorRaw = paletteColors[colorIndex];
 						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
 
 						i += 2;
@@ -367,6 +374,7 @@ public class ModelLoader : MonoBehaviour
 						triangleList.AddRange(SphereMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(SphereMesh.vertices.Select(x => x * scale + position));
 						colors.AddRange(SphereMesh.vertices.Select(x => color));
+						colorsRaw.AddRange(SphereMesh.vertices.Select(x => colorRaw));
 						boneWeights.AddRange(SphereMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[pointSphereIndex], weight0 = 1 }));
 						break;
 					}
@@ -400,6 +408,7 @@ public class ModelLoader : MonoBehaviour
 						indices[0].AddRange(CubeMesh.triangles.Select(x => x + allVertices.Count));
 						allVertices.AddRange(CubeMesh.vertices.Select(x => x * pointsize + position));
 						colors.AddRange(CubeMesh.vertices.Select(x => color));
+						colorsRaw.AddRange(CubeMesh.vertices.Select(x => color));
 						boneWeights.AddRange(CubeMesh.vertices.Select(x => new BoneWeight() { boneIndex0 = bonesPerVertex[cubeIndex], weight0 = 1 }));
 						break;
 					}
@@ -436,6 +445,7 @@ public class ModelLoader : MonoBehaviour
 							uvDepth.Add(Vector2.zero);
 							indices[indicesIndex].Add(allVertices.Count);
 							colors.Add(color);
+							colorsRaw.Add(color);
 							allVertices.Add(vertices[pointIndex]);
 							boneWeights.Add(new BoneWeight() { boneIndex0 = bonesPerVertex[pointIndex], weight0 = 1 });
 
@@ -604,7 +614,6 @@ public class ModelLoader : MonoBehaviour
 
 			return tex;
 		}
-
 
 		return EmptyTexture();
 	}
@@ -1112,8 +1121,8 @@ public class ModelLoader : MonoBehaviour
 
 		Panel.gameObject.SetActive(menuEnabled);
 
-		modelIndex = Math.Min(Math.Max(modelIndex, 0), modelCount - 1);
-		animIndex = Math.Min(Math.Max(animIndex, 0), animCount - 1);
+		modelIndex = Math.Max(Math.Min(modelIndex, modelCount - 1), 0);
+		animIndex = Math.Max(Math.Min(animIndex, animCount - 1), 0);
 
 		//load new model if needed
 		if (modelCount > 0 && oldModelIndex != modelIndex)
@@ -1172,7 +1181,7 @@ public class ModelLoader : MonoBehaviour
 
 	void UpdateMesh()
 	{
-		Mesh mesh = gameObject.GetComponent<SkinnedMeshRenderer>().sharedMesh;
+		Mesh mesh = GetComponent<SkinnedMeshRenderer>().sharedMesh;
 		if (mesh == null) return;
 
 		if (EnableAnimation.BoolValue)
@@ -1182,7 +1191,7 @@ public class ModelLoader : MonoBehaviour
 				bakedMesh = new Mesh();
 			}
 
-			gameObject.GetComponent<SkinnedMeshRenderer>().BakeMesh(bakedMesh);
+			GetComponent<SkinnedMeshRenderer>().BakeMesh(bakedMesh);
 			bakedMesh.GetVertices(allVertices);
 		}
 
@@ -1480,6 +1489,35 @@ public class ModelLoader : MonoBehaviour
 				AutoRotate.BoolValue = !AutoRotate.BoolValue;
 				break;
 
+			case KeyCode.X:
+				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+				{
+					int previousModelIndex = modelIndex;
+
+					for (int i = 0; i < modelCount; i++)
+					{
+						modelIndex = i;
+						try
+						{
+							LoadBody();
+						}
+						catch
+						{
+							continue;
+						}
+						ExportToOBJ();
+					}
+
+					modelIndex = previousModelIndex;
+					LoadBody();
+				}
+				else
+				{
+					ExportToOBJ();
+				}
+				menuEnabled = false;
+				break;
+
 			case KeyCode.Escape:
 				if (Screen.fullScreen)
 				{
@@ -1490,6 +1528,73 @@ public class ModelLoader : MonoBehaviour
 			case KeyCode.Tab:
 				SceneManager.LoadScene("room");
 				break;
+		}
+	}
+
+	void ExportToOBJ()
+	{
+		Mesh mesh = GetComponent<SkinnedMeshRenderer>().sharedMesh;
+		if (mesh == null) return;
+
+		string exportFolder = "Export OBJ";
+		Directory.CreateDirectory(exportFolder);
+
+		string fileName = Path.Combine(exportFolder, string.Format("{0:D8}.obj", modelIndex));
+		if (File.Exists(fileName)) return;
+
+		using (StreamWriter writer = new StreamWriter(fileName))
+		{
+			writer.WriteLine("# Exported from AITD room viewer");
+
+			var vertices = new List<Vector3>();
+			mesh.GetVertices(vertices);
+
+			for (int i = 0; i < vertices.Count && i < colorsRaw.Count ; i++)
+			{
+				Vector3 v = vertices[i];
+				Color32 c = colorsRaw[i];
+				writer.WriteLine("v {0} {1} {2} {3} {4} {5}", v.x, v.y, v.z, c.r / 255.0f, c.g / 255.0f, c.b / 255.0f);
+			}
+
+			foreach (Vector2 uv in mesh.uv)
+			{
+				writer.WriteLine("vt {0} {1}", uv.x, uv.y);
+			}
+
+			for (int material = 0; material < mesh.subMeshCount; material++)
+			{
+				int[] triangles = mesh.GetTriangles(material);
+				if (triangles.Any())
+				{
+					writer.WriteLine("usemtl {0}", materialNames[material]);
+					for (int i = 0; i < triangles.Length; i += 3)
+					{
+						writer.WriteLine("f {0}/{0} {1}/{1} {2}/{2}",
+							triangles[i + 0] + 1,
+							triangles[i + 1] + 1,
+							triangles[i + 2] + 1);
+					}
+				}
+			}
+		}
+
+		ExportTextures(exportFolder);
+	}
+
+	void ExportTextures(string exportFolder) //TIMEGATE only
+	{
+		var materials = GetComponent<SkinnedMeshRenderer>().sharedMaterials;
+		var textureA = (Texture2D)materials[5].mainTexture;
+		var textureB = (Texture2D)materials[6].mainTexture;
+
+		if (textureA != null && textureA.height > 1)
+		{
+			File.WriteAllBytes(Path.Combine(exportFolder, string.Format("{0:D8}_a.png", modelIndex)), textureA.EncodeToPNG());
+		}
+
+		if (textureB != null && textureB.height > 1)
+		{
+			File.WriteAllBytes(Path.Combine(exportFolder, string.Format("{0:D8}_b.png", modelIndex)), textureB.EncodeToPNG());
 		}
 	}
 }
