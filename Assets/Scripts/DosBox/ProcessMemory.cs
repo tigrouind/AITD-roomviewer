@@ -2,7 +2,9 @@ using System.Runtime.InteropServices;
 using System;
 using System.Text;
 using System.Collections.Generic;
+using UnityEngine;
 
+[Serializable]
 public class ProcessMemory
 {
 	const uint PROCESS_QUERY_INFORMATION = 0x0400;
@@ -40,24 +42,20 @@ public class ProcessMemory
 	[DllImport("kernel32.dll")]
 	private static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
 
-	private IntPtr processHandle;
+	[SerializeField]
+	private long processHandle;
 
 	public long BaseAddress;
 
 	public ProcessMemory(int processId)
 	{
-		processHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, processId);
-	}
-
-	~ProcessMemory()
-	{
-		Close();
+		processHandle = (long)OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, false, processId);
 	}
 
 	public int Read(byte[] buffer, int offset, int count)
 	{
 		IntPtr bytesRead;
-		if (ReadProcessMemory(processHandle, new IntPtr(BaseAddress + offset), buffer, count, out bytesRead))
+		if (ReadProcessMemory(new IntPtr(processHandle), new IntPtr(BaseAddress + offset), buffer, count, out bytesRead))
 		{
 			return (int)bytesRead;
 		}
@@ -67,7 +65,7 @@ public class ProcessMemory
 	public int Write(byte[] buffer, int offset, int count)
 	{
 		IntPtr bytesWritten;
-		if (WriteProcessMemory(processHandle, new IntPtr(BaseAddress + offset), buffer, count, out bytesWritten))
+		if (WriteProcessMemory(new IntPtr(processHandle), new IntPtr(BaseAddress + offset), buffer, count, out bytesWritten))
 		{
 			return (int)bytesWritten;
 		}
@@ -76,10 +74,10 @@ public class ProcessMemory
 
 	public void Close()
 	{
-		if (processHandle != IntPtr.Zero)
+		if (new IntPtr(processHandle) != IntPtr.Zero)
 		{
-			CloseHandle(processHandle);
-			processHandle = IntPtr.Zero;
+			CloseHandle(new IntPtr(processHandle));
+			processHandle = 0;
 		}
 	}
 
@@ -95,7 +93,7 @@ public class ProcessMemory
 			//skip regions smaller than 16M (default DOSBOX memory size)
 			if (mem_info.Protect == PAGE_READWRITE && mem_info.State == MEM_COMMIT && (mem_info.Type & MEM_PRIVATE) == MEM_PRIVATE
 				&& (int)mem_info.RegionSize >= 1024 * 1024 * 16
-				&& ReadProcessMemory(processHandle, mem_info.BaseAddress, memory, memory.Length, out bytesRead)
+				&& ReadProcessMemory(new IntPtr(processHandle), mem_info.BaseAddress, memory, memory.Length, out bytesRead)
 				&& Utils.IndexOf(memory, Encoding.ASCII.GetBytes("CON ")) != -1)
 			{
 				return (long)mem_info.BaseAddress + 32; //skip Windows 32-bytes memory allocation header
@@ -111,7 +109,7 @@ public class ProcessMemory
 
 		//scan process memory regions
 		while (min_address < max_address
-			&& VirtualQueryEx(processHandle, (IntPtr)min_address, out mem_info, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION))) > 0)
+			&& VirtualQueryEx(new IntPtr(processHandle), (IntPtr)min_address, out mem_info, (uint)Marshal.SizeOf(typeof(MEMORY_BASIC_INFORMATION))) > 0)
 		{
 			yield return mem_info;
 
@@ -126,7 +124,7 @@ public class ProcessMemory
 
 		long readPosition = BaseAddress + offset;
 		IntPtr bytesRead;
-		while (bytesToRead > 0 && ReadProcessMemory(processHandle, new IntPtr(readPosition), buffer, Math.Min(buffer.Length, bytesToRead), out bytesRead))
+		while (bytesToRead > 0 && ReadProcessMemory(new IntPtr(processHandle), new IntPtr(readPosition), buffer, Math.Min(buffer.Length, bytesToRead), out bytesRead))
 		{
 			//search bytes pattern
 			int index = searchFunction(buffer);

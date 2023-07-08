@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[System.Serializable]
 public struct Vector3Int
 {
 	public int x;

@@ -1,10 +1,13 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
+[System.Serializable]
 public class Timer
 {
+	[SerializeField]
 	private float started;
+	[SerializeField]
 	private bool running;
+	[SerializeField]
 	private float elapsed;
 
 	public void Start()

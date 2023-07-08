@@ -23,8 +23,8 @@ public class RoomLoader : MonoBehaviour
 	private List<List<int>> camerasPerRoom = new List<List<int>>();
 	private readonly BoxComparer boxComparer = new BoxComparer();
 	private float defaultCameraZoom = 10.0f;
-	private readonly Timer defaultBoxSelectionTimer = new Timer();
-	private readonly Timer linkToDosBoxTimer = new Timer();
+	private Timer defaultBoxSelectionTimer = new Timer();
+	private Timer linkToDosBoxTimer = new Timer();
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
 	private bool allowWarp;

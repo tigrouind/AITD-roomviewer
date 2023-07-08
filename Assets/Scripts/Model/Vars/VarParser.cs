@@ -1,20 +1,23 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
+[Serializable]
 public class VarParser
 {
-	readonly Dictionary<VarEnum, Dictionary<int, string>> sections
-			= new Dictionary<VarEnum, Dictionary<int, string>>();
+	[SerializeField]
+	VarSectionDictionary sections = new VarSectionDictionary();
 
 	public string GetText(VarEnum section, int value)
 	{
-		Dictionary<int, string> sectionDict;
-		if (sections.TryGetValue(section, out sectionDict))
+		VarEntryDictionary entryDict;
+		if (sections.TryGetValue(section, out entryDict))
 		{
 			string text;
-			if (sectionDict.TryGetValue(value, out text))
+			if (entryDict.TryGetValue(value, out text))
 			{
 				return text;
 			}
@@ -64,9 +67,9 @@ public class VarParser
 
 	Dictionary<int, string> CreateNewSection(VarEnum section)
 	{
-		Dictionary<int, string> sectionDict = new Dictionary<int, string>();
-		sections.Add(section, sectionDict);
-		return sectionDict;
+		VarEntryDictionary entryDict = new VarEntryDictionary();
+		sections.Add(section, entryDict);
+		return entryDict;
 	}
 
 	void AddEntry(Dictionary<int, string> section, string fromString, string toString, string text)
