@@ -209,7 +209,12 @@ public class ModelLoader : MonoBehaviour
 		int uvStart = 0;
 		if (File.Exists(textureFolder)) //TIMEGATE
 		{
-			LoadTextures(buffer, paletteColors, out uvStart, out texAHeight, out texBHeight);
+			Texture2D texA, texB;
+			Texture.LoadTextures(buffer, paletteColors, textureFolder, textureCount, DetailsLevel.BoolValue, out uvStart, out texAHeight, out texBHeight, out texA, out texB);
+
+			var materials = GetComponent<SkinnedMeshRenderer>().materials;
+			materials[5].mainTexture = texA;
+			materials[6].mainTexture = texB;
 		}
 
 		List<BoneWeight> boneWeights = new List<BoneWeight>();
@@ -270,7 +275,7 @@ public class ModelLoader : MonoBehaviour
 						int colorIndex = buffer[i + 2];
 						i += 3;
 
-						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
+						Color32 color = Palette.GetPaletteColor(paletteColors, colorIndex, polyType, DetailsLevel.BoolValue);
 						Color32 colorRaw = paletteColors[colorIndex];
 						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
 
@@ -348,7 +353,7 @@ public class ModelLoader : MonoBehaviour
 						int polyType = buffer[i];
 						i++;
 						int colorIndex = buffer[i];
-						Color32 color = GetPaletteColor(paletteColors, colorIndex, polyType);
+						Color32 color = Palette.GetPaletteColor(paletteColors, colorIndex, polyType, DetailsLevel.BoolValue);
 						Color32 colorRaw = paletteColors[colorIndex];
 						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
 
@@ -544,114 +549,6 @@ public class ModelLoader : MonoBehaviour
 			case 5:
 				return 4;
 		}
-	}
-
-	Color32 GetPaletteColor(Color32[] paletteColors, int colorIndex, int polyType)
-	{
-		Color32 color = paletteColors[colorIndex];
-
-		if (polyType == 1 && DetailsLevel.BoolValue)
-		{
-			//noise
-			color.r = (byte)(colorIndex % 16 * 16);
-			color.g = (byte)(colorIndex / 16 * 16);
-		}
-		else if (polyType == 2)
-		{
-			//transparency
-			color.a = 128;
-		}
-		else if ((polyType == 3 || polyType == 6 || polyType == 4 || polyType == 5) && DetailsLevel.BoolValue)
-		{
-			//horizontal or vertical gradient
-			color.r = (byte)((polyType == 5) ? 127 : 255); //vertical gradient x2
-			color.b = (byte)(colorIndex / 16 * 16); //vertical palette index
-			color.a = (byte)(colorIndex % 16 * 16); //horizontal palette index
-		}
-
-		return color;
-	}
-
-	void LoadTextures(byte[] buffer, Color32[] paletteColors, out int uvStart, out int texAHeight, out int texBHeight)
-	{
-		var offset = buffer[0xE];
-		Texture2D texA, texB;
-		paletteColors[0] = Color.clear;
-
-		using (var pak = new UnPAK(textureFolder))
-		{
-			texA = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 12), paletteColors);
-			texB = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 14), paletteColors);
-		}
-
-		uvStart = buffer.ReadShort(offset + 6);
-		texAHeight = texA.height;
-		texBHeight = texB.height;
-
-		var materials = GetComponent<SkinnedMeshRenderer>().materials;
-		materials[5].mainTexture = texA;
-		materials[6].mainTexture = texB;
-	}
-
-	Texture2D LoadTexture(UnPAK pak, int textureIndex, Color32[] paletteColors)
-	{
-		if (textureIndex >= 0 && textureIndex < textureCount)
-		{
-			var tex256 = pak.GetEntry(textureIndex);
-			FixBlackBorders(tex256);
-
-			var texSize = tex256.Length;
-			Color32[] textureData = new Color32[texSize];
-			for (int i = 0 ; i < tex256.Length ; i++)
-			{
-				textureData[i] = paletteColors[tex256[i]];
-			}
-
-			Texture2D tex = new Texture2D(256, texSize / 256, TextureFormat.ARGB32, false);
-			tex.filterMode = DetailsLevel.BoolValue ? FilterMode.Bilinear : FilterMode.Point;
-			tex.SetPixels32(textureData);
-			tex.Apply();
-
-			return tex;
-		}
-
-		return EmptyTexture();
-	}
-
-	Texture2D EmptyTexture()
-	{
-		Texture2D tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-		tex.SetPixel(1, 1, Color.magenta);
-		tex.Apply();
-		return tex;
-	}
-
-	void FixBlackBorders(byte[] tex256)
-	{
-		int width = 256;
-		int height = tex256.Length / 256;
-
-		byte[] result = tex256.ToArray();
-		for (int j = 1 ; j < height - 1 ; j++)
-		{
-			for (int i = 1 ; i < width - 1 ; i++)
-			{
-				int n = i + j * 256;
-				if (tex256[n] == 0) //black/transparent
-				{
-					if (tex256[n + 1] != 0) result[n] = tex256[n + 1];
-					else if (tex256[n - 1] != 0) result[n] = tex256[n - 1];
-					else if (tex256[n + 256] != 0) result[n] = tex256[n + 256];
-					else if (tex256[n - 256] != 0) result[n] = tex256[n - 256];
-					else if (tex256[n + 256 + 1] != 0) result[n] = tex256[n + 256 + 1];
-					else if (tex256[n + 256 - 1] != 0) result[n] = tex256[n + 256 - 1];
-					else if (tex256[n - 256 + 1] != 0) result[n] = tex256[n - 256 + 1];
-					else if (tex256[n - 256 - 1] != 0) result[n] = tex256[n - 256 - 1];
-				}
-			}
-		}
-
-		Array.Copy(result, tex256, tex256.Length);
 	}
 
 	void LoadBoundingBox(byte[] buffer, int position)
@@ -874,7 +771,7 @@ public class ModelLoader : MonoBehaviour
 
 		//load first model
 		modelIndex = 0;
-		LoadTextures(textureFolder);
+		textureCount = Texture.LoadTextures(textureFolder);
 		LoadModels(modelFolders[modelFolderIndex]);
 		LoadAnims(animFolders[modelFolderIndex]);
 		ToggleAnimationMenuItems(false);
@@ -891,102 +788,6 @@ public class ModelLoader : MonoBehaviour
 			.SetTexture("_Palette", paletteTexture);
 	}
 
-	Texture2D GetPaletteTexture()
-	{
-		Color32[] colors = LoadPalette();
-
-		var texture = new Texture2D(16, 16, TextureFormat.RGBA32, false);
-		texture.SetPixels32(colors);
-		texture.wrapMode = TextureWrapMode.Clamp;
-		texture.Apply();
-		return texture;
-	}
-
-	Color32[] LoadPalette()
-	{
-		string filePath = Config.GetPath("ITD_RESS.PAK");
-		if (File.Exists(filePath))
-		{
-			using (var pak = new UnPAK(filePath))
-			{
-				var entries = pak.GetEntriesSize();
-				for (int i = entries.Count - 1 ; i >= 0 ; i--)
-				{
-					if (entries[i] == 768)
-					{
-						return LoadPalette(pak.GetEntry(i), 0);
-					}
-				}
-			}
-		}
-
-		Regex match = new Regex(@"CAMERA\d\d\.PAK", RegexOptions.IgnoreCase);
-		var cameraFiles = Directory.GetFiles(Config.BaseDirectory)
-			.Where(x => match.IsMatch(Path.GetFileName(x)))
-			.OrderByDescending(x => x);
-
-		foreach (var cameraFile in cameraFiles)
-		{
-			using (var pak = new UnPAK(cameraFile))
-			{
-				var entries = pak.GetEntriesSize();
-				for (int i = 0 ; i < entries.Count ; i++)
-				{
-					if (entries[i] == 64768)
-					{
-						var buffer = pak.GetEntry(i);
-						return LoadPalette(buffer, 64000);
-					}
-				}
-			}
-		}
-
-		return LoadDefaultPalette();
-	}
-
-	Color32[] LoadPalette(byte[] buffer, int offset)
-	{
-		bool mapTo255 = true;
-		var src = offset;
-		var colors = new Color32[256];
-		for (int i = 0; i < 256; i++)
-		{
-			byte r = buffer[src++];
-			byte g = buffer[src++];
-			byte b = buffer[src++];
-
-			if (r > 63 || g > 63 || b > 63)
-			{
-				mapTo255 = false;
-			}
-
-			colors[i] = new Color32(r, g, b, 255);
-		}
-
-		if (mapTo255)
-		{
-			for (int i = 0; i < 256; i++)
-			{
-				Color32 c = colors[i];
-				colors[i] = new Color32((byte)(c.r << 2 | c.r >> 4), (byte)(c.g << 2 | c.g >> 4), (byte)(c.b << 2 | c.b >> 4), 255);
-			}
-		}
-
-		return colors;
-	}
-
-	Color32[] LoadDefaultPalette()
-	{
-		var colors = new Color32[256];
-		for (int i = 0 ; i < 256 ; i++)
-		{
-			var color = (byte)i;
-			colors[i] = new Color32(color, color, color, 255);
-		}
-
-		return colors;
-	}
-
 	void LoadModels(string filePath)
 	{
 		if (File.Exists(filePath))
@@ -996,7 +797,7 @@ public class ModelLoader : MonoBehaviour
 				modelCount = pak.EntryCount;
 			}
 
-			paletteTexture = GetPaletteTexture();
+			paletteTexture = Palette.GetPaletteTexture();
 			SetPalette();
 
 			LoadBody();
@@ -1015,17 +816,6 @@ public class ModelLoader : MonoBehaviour
 			if (EnableAnimation.BoolValue)
 			{
 				LoadAnim();
-			}
-		}
-	}
-
-	void LoadTextures(string filePath)
-	{
-		if (File.Exists(filePath))
-		{
-			using (var pak = new UnPAK(filePath))
-			{
-				textureCount = pak.EntryCount;
 			}
 		}
 	}
