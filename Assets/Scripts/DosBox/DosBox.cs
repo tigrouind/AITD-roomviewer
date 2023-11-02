@@ -197,7 +197,9 @@ public class DosBox : MonoBehaviour
 					box.KeyFrameLength = memory.ReadShort(keyframeAddress + 4);
 				}
 
-				if (GameVersion == GameVersion.AITD1)
+				if (GameVersion == GameVersion.AITD1
+					|| GameVersion == GameVersion.AITD1_FLOPPY
+					|| GameVersion == GameVersion.AITD1_DEMO)
 				{
 					box.Mod = memory.ReadVector(k + 90);
 				}
