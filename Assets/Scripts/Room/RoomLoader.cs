@@ -581,7 +581,7 @@ public class RoomLoader : MonoBehaviour
 		dosBox.UpdateAllActors();
 		dosBox.UpdateArrowVisibility();
 		dosBox.UpdateRightText();
-		if (dosBox.GameVersion == GameVersion.AITD1) GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
+		GetComponent<ExchangeSlot>().UpdateTargetSlot(highLightedBox);
 		RefreshHighLightedBox();
 		RefreshSelectedBox();
 		RefreshCurrentCamera();
