@@ -77,7 +77,11 @@ When the game is linked to DOSBox, it is possible to change the position of an a
 | <kbd>0</kbd> | hold it while pressing the numpad keys above to update at a higher rate
 
 ## Actor slot swap
-When the game is linked to DOSBox, you can swap two actors slot positions by highlighting an actor, typing a number (with keypad or alphanumeric keys) then pressing <kbd>enter</kbd>.
+When the game is linked to DOSBox, you can swap two actors slot positions this way : 
+- Highlight an actor
+- Press <kbd>X</kbd>
+- Type a number between 0 - 49 (with keypad or alphanumeric keys)
+- Press <kbd>Enter</kbd>
 
 # Model viewer
 
@@ -119,3 +123,12 @@ Copy the following files to GAMEDATA folder:
 | <kbd>X</kbd> | export current model to OBJ format
 | <kbd>Shift</kbd> + <kbd>X</kbd> | export all models to OBJ format
 | <kbd>Tab</kbd> | switch to room viewer
+
+# Multi-monitor setup
+
+It's not possible to have the viewer running fullscreen and at same time focus to be on another window (eg: the game itself).
+One solution is to play the viewer in window mode (by pressing <kbd>Alt</kbd> + <kbd>Enter</kbd>)
+
+# Building it from the source
+
+You can use any recent version of but Unity [5.5.4p3](https://unity.com/releases/editor/archive) is recommended.
