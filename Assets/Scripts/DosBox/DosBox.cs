@@ -822,7 +822,7 @@ public class DosBox : MonoBehaviour
 				break;
 
 			case GameVersion.AITD3:
-				if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("AN3.PAK")) == -1)
+				if (Utils.IndexOf(memory, Encoding.ASCII.GetBytes("usa.pak")) != -1)
 				{
 					gameVersion = GameVersion.AITD3_DEMO;
 				}
