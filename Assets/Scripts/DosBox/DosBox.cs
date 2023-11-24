@@ -83,6 +83,7 @@ public class DosBox : MonoBehaviour
 			box.name = "Actor";
 			box.Slot = index;
 			box.DosBox = this;
+			box.PreviousID = -1;
 			box.RoomLoader = GetComponent<RoomLoader>();
 			Boxes[index] = box;
 		}
@@ -283,8 +284,12 @@ public class DosBox : MonoBehaviour
 					{
 						Vector3 offset = 1000.0f * (box.transform.position - boxPosition);
 						float distance = new Vector3(Mathf.Round(offset.x), 0.0f, Mathf.Round(offset.z)).magnitude;
-						box.LastOffset = Mathf.RoundToInt(distance);
-						box.LastDistance += distance;
+						if (box.ID == box.PreviousID)
+						{
+							box.LastOffset = Mathf.RoundToInt(distance);
+							box.LastDistance += distance;
+						}
+
 						box.transform.position = boxPosition;
 					}
 
@@ -354,6 +359,7 @@ public class DosBox : MonoBehaviour
 					}
 
 					box.AlwaysOnTop = Camera.main.orthographic;
+					box.PreviousID = box.ID;
 				}
 				else
 				{

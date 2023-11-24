@@ -70,6 +70,7 @@ public class Box : MonoBehaviour
 	public Vector3Int CameraPosition;
 	public Vector3Int CameraRotation;
 	public Vector3Int CameraFocal;
+	public int PreviousID;
 
 	public Vector3Int BoundingPos
 	{
