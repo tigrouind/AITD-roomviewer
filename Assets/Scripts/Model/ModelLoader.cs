@@ -276,7 +276,7 @@ public class ModelLoader : MonoBehaviour
 						i += 3;
 
 						Color32 color = Palette.GetPaletteColor(paletteColors, colorIndex, polyType, DetailsLevel.BoolValue);
-						Color32 colorRaw = paletteColors[colorIndex];
+						Color32 colorRaw = Palette.GetRawPaletteColor(paletteColors, colorIndex, polyType);
 						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
 
 						//add vertices
@@ -354,7 +354,7 @@ public class ModelLoader : MonoBehaviour
 						i++;
 						int colorIndex = buffer[i];
 						Color32 color = Palette.GetPaletteColor(paletteColors, colorIndex, polyType, DetailsLevel.BoolValue);
-						Color32 colorRaw = paletteColors[colorIndex];
+						Color32 colorRaw = Palette.GetRawPaletteColor(paletteColors, colorIndex, polyType);
 						List<int> triangleList = indices[GetTriangleListIndex(polyType)];
 
 						i += 2;

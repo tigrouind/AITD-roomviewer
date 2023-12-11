@@ -103,6 +103,16 @@ public class Palette
 		return colors;
 	}
 
+	public static Color32 GetRawPaletteColor(Color32[] paletteColors, int colorIndex, int polyType)
+	{
+		if (polyType == 3 || polyType == 6 || polyType == 4 || polyType == 5)
+		{
+			return paletteColors[(colorIndex / 16) * 16 + 8];
+		}
+
+		return paletteColors[colorIndex];
+	}
+
 	public static Color32 GetPaletteColor(Color32[] paletteColors, int colorIndex, int polyType, bool detailLevel)
 	{
 		Color32 color = paletteColors[colorIndex];
