@@ -83,6 +83,15 @@ When the game is linked to DOSBox, you can swap two actors slot positions this w
 - Type a number between 0 - 49 (with keypad or alphanumeric keys)
 - Press <kbd>Enter</kbd>
 
+# Multi-monitor setup
+
+It's not possible to have the viewer running fullscreen and at same time focus to be on another window (eg: the game itself).
+One solution is to play the viewer in window mode (by pressing <kbd>Alt</kbd> + <kbd>Enter</kbd>)
+
+# Building it from the source
+
+You can use any recent version of but Unity [5.5.4p3](https://unity.com/releases/editor/archive) is recommended.
+
 # Model viewer
 
 ## Installation
@@ -124,11 +133,78 @@ Copy the following files to GAMEDATA folder:
 | <kbd>Shift</kbd> + <kbd>X</kbd> | export all models to OBJ format
 | <kbd>Tab</kbd> | switch to room viewer
 
-# Multi-monitor setup
+## OBJ export
 
-It's not possible to have the viewer running fullscreen and at same time focus to be on another window (eg: the game itself).
-One solution is to play the viewer in window mode (by pressing <kbd>Alt</kbd> + <kbd>Enter</kbd>)
+To view models properly you have to create custom shaders.
+Here is the custom materials that can be created under Blender : 
 
-# Building it from the source
+### shadeless (vertex colors)
+```mermaid
+flowchart LR
+color("<b>Color Attribute</b>")
+output("<b>Material Output</b>")
 
-You can use any recent version of but Unity [5.5.4p3](https://unity.com/releases/editor/archive) is recommended.
+color--> |Color / Surface| output
+```
+
+### noise
+
+```mermaid
+flowchart LR
+color("<b>Color Attribute</b>")
+image("<b>Image Texture</b><br>noise.png")
+output("<b>Material Output</b>")
+mix("<b>Mix</b><br>Color<br>Multiply<br>Factor 0.5")
+
+color --> |Color / A| mix
+image --> |Color / B| mix
+mix --> |Result / Surface| output
+```
+
+You can use this [white noise texture](https://github.com/tigrouind/AITD-roomviewer/raw/master/Assets/Materials/Model/noise.png)
+
+### glass (transparency)
+
+```mermaid
+flowchart LR
+color("<b>Color Attribute</b>")
+output("<b>Material Output</b>")
+transparent("<b>Transparent BSDF</b>")
+
+color --> |Color| transparent
+transparent --> |BSDF / Surface| output
+```
+
+In Material properties (right tab), set "Blend Mode" to "Alpha Blend"
+
+### metal_vertical / metal_horizontal (gradients)
+
+```mermaid
+flowchart LR
+tex("<b>Texture Coordinate</b>")
+sep("<b>Separate XYZ</b>")
+mul("<b>Math</b><br>Multiply<br>Value 5.0")
+ping("<b>Math</b><br>Ping-Pong<br>Scale 1.0")
+add("<b>Math</b><br>Add<br>Value 0.5")
+gamma("<b>Gamma</b>")
+color("<b>Color Attribute</b>")
+output("<b>Material Output</b><br>Surface")
+
+color --> |Color| gamma
+tex --> |Window / Vector| sep
+sep --> |X / Value<br>or<br>Y / Value| mul
+mul --> |Value| ping
+ping --> |Value| add
+add --> |Value Gamma| gamma
+gamma --> |Color / Surface| output
+```
+
+### texture_a / texture_b (Time Gate only)
+
+```mermaid
+flowchart LR
+image("<b>Image Texture</b>")
+output("<b>Material Output</b>")
+
+image --> |Color / Surface| output
+```
