@@ -11,9 +11,9 @@ class Texture
 	{
 		if (File.Exists(filePath))
 		{
-			using (var pak = new UnPAK(filePath))
+			using (var pak = new PakArchive(filePath))
 			{
-				return pak.EntryCount;
+				return pak.Count;
 			}
 		}
 
@@ -26,7 +26,7 @@ class Texture
 		var offset = buffer[0xE];
 		paletteColors[0] = Color.clear;
 
-		using (var pak = new UnPAK(textureFolder))
+		using (var pak = new PakArchive(textureFolder))
 		{
 			texA = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 12), paletteColors, textureCount, detailLevel);
 			texB = LoadTexture(pak, buffer.ReadUnsignedShort(offset + 14), paletteColors, textureCount, detailLevel);
@@ -37,11 +37,11 @@ class Texture
 		texBHeight = texB.height;
 	}
 
-	static Texture2D LoadTexture(UnPAK pak, int textureIndex, Color32[] paletteColors, int textureCount, bool detailLevel)
+	static Texture2D LoadTexture(PakArchive pak, int textureIndex, Color32[] paletteColors, int textureCount, bool detailLevel)
 	{
 		if (textureIndex >= 0 && textureIndex < textureCount)
 		{
-			var tex256 = pak.GetEntry(textureIndex);
+			var tex256 = pak[textureIndex].Read();
 			FixBlackBorders(tex256);
 
 			var texSize = tex256.Length;

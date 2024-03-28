@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -21,15 +21,12 @@ public class Palette
 		string filePath = Config.GetPath("ITD_RESS.PAK");
 		if (File.Exists(filePath))
 		{
-			using (var pak = new UnPAK(filePath))
+			using (var pak = new PakArchive(filePath))
 			{
-				var entries = pak.GetEntriesSize();
-				for (int i = entries.Count - 1; i >= 0; i--)
+				var entry = pak.Reverse().FirstOrDefault(x => x.UncompressedSize == 768);
+				if (entry != null)
 				{
-					if (entries[i] == 768)
-					{
-						return LoadPalette(pak.GetEntry(i), 0);
-					}
+					return LoadPalette(entry.Read(), 0);
 				}
 			}
 		}
@@ -41,16 +38,12 @@ public class Palette
 
 		foreach (var cameraFile in cameraFiles)
 		{
-			using (var pak = new UnPAK(cameraFile))
+			using (var pak = new PakArchive(cameraFile))
 			{
-				var entries = pak.GetEntriesSize();
-				for (int i = 0; i < entries.Count; i++)
+				var entry = pak.FirstOrDefault(x => x.UncompressedSize == 64768);
+				if (entry != null)
 				{
-					if (entries[i] == 64768)
-					{
-						var buffer = pak.GetEntry(i);
-						return LoadPalette(buffer, 64000);
-					}
+					return LoadPalette(entry.Read(), 64000);
 				}
 			}
 		}

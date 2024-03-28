@@ -95,9 +95,9 @@ public class ModelLoader : MonoBehaviour
 
 		//load data
 		byte[] buffer;
-		using (var pak = new UnPAK(filePath))
+		using (var pak = new PakArchive(filePath))
 		{
-			buffer = pak.GetEntry(modelIndex);
+			buffer = pak[modelIndex].Read();
 		}
 		int i = 0;
 
@@ -579,9 +579,9 @@ public class ModelLoader : MonoBehaviour
 
 		int i = 0;
 		byte[] buffer;
-		using (var pak = new UnPAK(filePath))
+		using (var pak = new PakArchive(filePath))
 		{
-			buffer = pak.GetEntry(animIndex);
+			buffer = pak[animIndex].Read();
 		}
 
 		int frameCount = buffer.ReadShort(i + 0);
@@ -802,9 +802,9 @@ public class ModelLoader : MonoBehaviour
 	{
 		if (File.Exists(filePath))
 		{
-			using (var pak = new UnPAK(filePath))
+			using (var pak = new PakArchive(filePath))
 			{
-				modelCount = pak.EntryCount;
+				modelCount = pak.Count;
 			}
 
 			paletteTexture = Palette.GetPaletteTexture();
@@ -818,9 +818,9 @@ public class ModelLoader : MonoBehaviour
 	{
 		if (File.Exists(filePath))
 		{
-			using (var pak = new UnPAK(filePath))
+			using (var pak = new PakArchive(filePath))
 			{
-				animCount = pak.EntryCount;
+				animCount = pak.Count;
 			}
 
 			if (EnableAnimation.BoolValue)

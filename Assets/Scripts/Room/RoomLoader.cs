@@ -182,9 +182,9 @@ public class RoomLoader : MonoBehaviour
 
 	void LoadRoomsSingle(string filePath)
 	{
-		using (var pak = new UnPAK(filePath))
+		using (var pak = new PakArchive(filePath))
 		{
-			var buffer = pak.GetEntry(0);
+			var buffer = pak[0].Read();
 			int maxrooms = buffer.ReadInt(0) / 4;
 			for (int currentroom = 0; currentroom < maxrooms; currentroom++)
 			{
@@ -198,7 +198,7 @@ public class RoomLoader : MonoBehaviour
 				LoadRoom(buffer, roomheader, currentroom);
 			}
 
-			buffer = pak.GetEntry(1);
+			buffer = pak[1].Read();
 			foreach (int cameraID in camerasPerRoom.SelectMany(x => x).Distinct())
 			{
 				int cameraHeader = buffer.ReadInt(cameraID * 4);
@@ -209,24 +209,22 @@ public class RoomLoader : MonoBehaviour
 
 	void LoadRoomsMulti(string filePath)
 	{
-		using (var pak = new UnPAK(filePath))
+		using (var pak = new PakArchive(filePath))
 		{
-			for (int i = 0 ; i < pak.EntryCount ; i++)
+			foreach (var entry in pak)
 			{
-				byte[] buffer = pak.GetEntry(i);
-				LoadRoom(buffer, 0, i);
+				LoadRoom(entry.Read(), 0, entry.Index);
 			}
 		}
 
 		filePath = Config.GetPath("CAMSAL{0:D2}.PAK", floor);
 		if (File.Exists(filePath))
 		{
-			using (var pak = new UnPAK(filePath))
+			using (var pak = new PakArchive(filePath))
 			{
-				for (int i = 0 ; i < pak.EntryCount ; i++)
+				foreach (var entry in pak)
 				{
-					byte[] buffer = pak.GetEntry(i);
-					LoadCamera(buffer, 0, i);
+					LoadCamera(entry.Read(), 0, entry.Index);
 				}
 			}
 		}
@@ -431,9 +429,9 @@ public class RoomLoader : MonoBehaviour
 		string firstFloorFilePath = Config.GetPath(filePath);
 		if (File.Exists(firstFloorFilePath))
 		{
-			using (var pak = new UnPAK(firstFloorFilePath))
+			using (var pak = new PakArchive(firstFloorFilePath))
 			{
-				return pak.EntryCount;
+				return pak.Count;
 			}
 		}
 
