@@ -772,7 +772,17 @@ public class ModelLoader : MonoBehaviour
 		//load first model
 		modelIndex = 0;
 		textureCount = Texture.LoadTextures(textureFolder);
-		LoadModels(modelFolders[modelFolderIndex]);
+
+		try
+		{
+			LoadModels(modelFolders[modelFolderIndex]);
+		}
+		catch (FileNotFoundException ex)
+		{
+			LeftText.text = ex.Message;
+			return;
+		}
+
 		LoadAnims(animFolders[modelFolderIndex]);
 		ToggleAnimationMenuItems(false);
 	}

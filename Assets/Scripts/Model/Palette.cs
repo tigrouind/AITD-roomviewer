@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -57,7 +55,7 @@ public class Palette
 			}
 		}
 
-		return LoadDefaultPalette();
+		throw new FileNotFoundException("ITD_RESS.PAK (AITD1) or CAMERAxx.PAK (>= AITD2) not found");
 	}
 
 	static Color32[] LoadPalette(byte[] buffer, int offset)
@@ -86,18 +84,6 @@ public class Palette
 				Color32 c = colors[i];
 				colors[i] = new Color32((byte)(c.r << 2 | c.r >> 4), (byte)(c.g << 2 | c.g >> 4), (byte)(c.b << 2 | c.b >> 4), 255);
 			}
-		}
-
-		return colors;
-	}
-
-	static Color32[] LoadDefaultPalette()
-	{
-		var colors = new Color32[256];
-		for (int i = 0; i < 256; i++)
-		{
-			var color = (byte)i;
-			colors[i] = new Color32(color, color, color, 255);
 		}
 
 		return colors;
