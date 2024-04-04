@@ -575,7 +575,7 @@ public class DosBox : MonoBehaviour
 			}
 			while (value > 2);
 
-			RightText.Append(i == 0 ? "Next noise" : string.Empty, "{0}; {1} ", TimeSpan.FromSeconds(count), value);
+			RightText.Append(i == 0 ? "Next noise" : string.Empty, "{0:D2}.{1:D2}; {2} ", count / 60 % 60, count % 60, value);
 		}
 	}
 
