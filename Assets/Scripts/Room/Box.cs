@@ -36,7 +36,7 @@ public class Box : MonoBehaviour
 	public uint Chrono;
 	public uint RoomChrono;
 	public int TrackNumber;
-	public int PositionInTrack;
+	public int TrackPosition;
 	public int Slot;
 	public int HitForce;
 	public int KeyFrameTime;
@@ -55,6 +55,7 @@ public class Box : MonoBehaviour
 	public Vector3Int HotPosition;
 	public Box BoxHotPoint;
 	public Box BoxWorldPos;
+	public Box BoxTrack;
 	public int OldAngle;
 	public int NewAngle;
 	public int RotateParam;
@@ -246,6 +247,10 @@ public class Box : MonoBehaviour
 		{
 			Destroy(BoxWorldPos.gameObject);
 		}
+		if (BoxTrack != null)
+		{
+			Destroy(BoxTrack.gameObject);
+		}
 	}
 
 	public void UpdateText(BoxInfo info)
@@ -403,7 +408,7 @@ public class Box : MonoBehaviour
 				{
 					if (TrackMode == 3) //track
 					{
-						info.Append("TRACKNUM/POS", "{0} {1}", TrackNumber, PositionInTrack);
+						info.Append("TRACKNUM/POS", "{0} {1}", TrackNumber, TrackPosition);
 					}
 
 					if (TrackMode == 2) //follow

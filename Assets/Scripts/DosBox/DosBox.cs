@@ -25,6 +25,7 @@ public class DosBox : MonoBehaviour
 	private int entryPoint;
 	private readonly Dictionary<int, int> bodyIdToMemoryAddress = new Dictionary<int, int>();
 	private readonly Dictionary<int, int> animIdToMemoryAddress = new Dictionary<int, int>();
+	private readonly Dictionary<int, int> trackIdToMemoryAddress = new Dictionary<int, int>();
 
 	public GameVersion GameVersion;
 	private GameConfig gameConfig;
@@ -184,7 +185,7 @@ public class DosBox : MonoBehaviour
 
 				box.TrackMode = memory.ReadShort(k + gameConfig.TrackModeOffset);
 				box.TrackNumber = memory.ReadShort(k + 84);
-				box.PositionInTrack = memory.ReadShort(k + 88);
+				box.TrackPosition = memory.ReadShort(k + 88);
 
 				int bodyAddress, animAddress;
 				if (bodyIdToMemoryAddress.TryGetValue(box.Body, out bodyAddress) &&
@@ -303,6 +304,7 @@ public class DosBox : MonoBehaviour
 					if (GameVersion == GameVersion.AITD1)
 					{
 						UpdateHotPointBox(box, roomPosition);
+						UpdateTrackBox(box, roomPosition);
 					}
 
 					//camera target
@@ -394,6 +396,90 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	void UpdateWorldPosBox(Box box, Vector3Int roomPosition, bool isPlayer)
+	{
+		Vector3Int currentRoomPos;
+		if (GetComponent<RoomLoader>().TryGetRoomPosition(CurrentCameraFloor, CurrentCameraRoom, out currentRoomPos))
+		{
+			Vector3 finalPos = (Vector3)(box.WorldPosition + box.Mod + currentRoomPos) / 1000.0f;
+			float height = -(box.BoundingUpper.y + box.BoundingLower.y) / 2000.0f;
+			finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z);
+
+			Vector3Int boundingPos = box.WorldPosition + box.Mod + currentRoomPos - roomPosition;
+			bool visible = isPlayer && (boundingPos.x != box.BoundingPos.x || boundingPos.z != box.BoundingPos.z);
+
+			box.BoxWorldPos = CreateChildBox(box.BoxWorldPos,
+				finalPos, box.transform.localScale, Quaternion.identity,
+				"WorldPos", new Color32(255, 0, 0, 128),
+				visible);
+		}
+	}
+
+	void UpdateHotPointBox(Box box, Vector3Int roomPosition)
+	{
+		Vector3 finalPos = (Vector3)(box.LocalPosition + box.Mod + box.HotPosition + roomPosition) / 1000.0f;
+		finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z);
+
+		box.BoxHotPoint = CreateChildBox(box.BoxHotPoint,
+			finalPos, Vector3.one * (box.HotBoxSize / 500.0f), Quaternion.identity,
+			"HotPoint", new Color32(255, 0, 0, 255),
+			box.ActionType == 2);
+	}
+
+	void UpdateTrackBox(Box box, Vector3Int roomPosition)
+	{
+		bool visible = false;
+		Vector3 position = Vector3.zero;
+		Vector3 scale = Vector3.one;
+		Quaternion rotation = Quaternion.identity;
+
+		int trackAddress;
+		if (box.TrackMode == 3 && box.TrackNumber != -1 && trackIdToMemoryAddress.TryGetValue(box.TrackNumber, out trackAddress))
+		{
+			int trackPos = trackAddress + box.TrackPosition * 2;
+			int instruction = memory.ReadShort(trackPos);
+			Vector3Int targetPos = Vector3Int.Zero;
+
+			switch (instruction)
+			{
+				case 1: //goto pos
+					int room = memory.ReadShort(trackPos + 2);
+					if (GetComponent<RoomLoader>().TryGetRoomPosition(box.Floor, room, out roomPosition))
+					{
+						float size = Mathf.Sqrt(0.8f * 0.8f / 2.0f);
+						scale = new Vector3(size, size, size);
+						rotation = Quaternion.Euler(0.0f, 45.0f, 0.0f);
+						targetPos = new Vector3Int(memory.ReadShort(trackPos + 4), 0, memory.ReadShort(trackPos + 6));
+						visible = true;
+					}
+					break;
+
+				case 9: //rotate X
+					float rotate = memory.ReadShort(trackPos + 2) * (360.0f / 1024.0f);
+					targetPos = box.LocalPosition + box.Mod + new Vector3Int(Quaternion.Euler(0.0f, -rotate, 0.0f)
+						* new Vector3(0.0f, 0.0f, -500.0f));
+					scale = new Vector3(0.2f, 0.2f, 0.2f);
+					visible = true;
+					break;
+
+				case 17: //stairs X
+				case 18: //stairs Y
+					targetPos = memory.ReadVector(trackPos + 2);
+					scale = new Vector3(0.2f, 0.2f, 0.2f);
+					visible = true;
+					break;
+			}
+
+			position = (Vector3)(targetPos + roomPosition) / 1000.0f;
+			position = new Vector3(position.x, -position.y, position.z);
+		}
+
+		box.BoxTrack = CreateChildBox(box.BoxTrack,
+						position, scale, rotation,
+						"BoxTrack", new Color32(255, 255, 0, 128),
+						visible);
+	}
+
 	public uint Timer1
 	{
 		get
@@ -449,71 +535,30 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	void UpdateHotPointBox(Box box, Vector3Int roomPosition)
+	Box CreateChildBox(Box box, Vector3 position, Vector3 scale, Quaternion rotation, string name, Color32 color, bool visible)
 	{
-		//hot point
-		Box hotPoint = box.BoxHotPoint;
-
-		if (box.ActionType == 2)
+		if (visible)
 		{
-			if (hotPoint == null)
+			if (box == null)
 			{
-				hotPoint = Instantiate(BoxPrefab);
-				hotPoint.name = "HotPoint";
-				hotPoint.Color = new Color32(255, 0, 0, 255);
-				Destroy(hotPoint.gameObject.GetComponent<BoxCollider>());
-				box.BoxHotPoint = hotPoint;
+				box = Instantiate(BoxPrefab);
+				box.name = name;
+				box.Color = color;
+				Destroy(box.gameObject.GetComponent<BoxCollider>());
 			}
-
-			Vector3 finalPos = (Vector3)(box.HotPosition + box.LocalPosition + box.Mod + roomPosition) / 1000.0f;
-			finalPos = new Vector3(finalPos.x, -finalPos.y, finalPos.z);
-			hotPoint.transform.position = finalPos;
-
-			hotPoint.transform.localScale = Vector3.one * (box.HotBoxSize / 500.0f);
-			hotPoint.AlwaysOnTop = Camera.main.orthographic;
+			
+			box.transform.position = position;
+			box.transform.localScale = scale;
+			box.transform.localRotation = rotation;
+			box.AlwaysOnTop = Camera.main.orthographic;
 		}
-		else if (hotPoint != null)
+		else if (box != null)
 		{
-			Destroy(hotPoint.gameObject);
-			box.BoxHotPoint = null;
+			Destroy(box.gameObject);
+			box = null;
 		}
-	}
 
-	void UpdateWorldPosBox(Box box, Vector3Int roomPosition, bool isPlayer)
-	{
-		Vector3Int currentRoomPos;
-		if (GetComponent<RoomLoader>().TryGetRoomPosition(CurrentCameraFloor, CurrentCameraRoom, out currentRoomPos))
-		{
-			Box worldPos = box.BoxWorldPos;
-			Vector3Int boundingPos = box.WorldPosition + box.Mod + currentRoomPos - roomPosition;
-
-			//worldpos unsync
-			if (isPlayer &&
-				(boundingPos.x != box.BoundingPos.x ||
-				boundingPos.z != box.BoundingPos.z))
-			{
-				if (worldPos == null)
-				{
-					worldPos = Instantiate(BoxPrefab);
-					worldPos.name = "WorldPos";
-					worldPos.Color = new Color32(255, 0, 0, 128);
-					Destroy(worldPos.gameObject.GetComponent<BoxCollider>());
-					box.BoxWorldPos = worldPos;
-				}
-
-				Vector3 finalPos = (Vector3)(box.WorldPosition + box.Mod + currentRoomPos) / 1000.0f;
-				float height = -(box.BoundingUpper.y + box.BoundingLower.y) / 2000.0f;
-				finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z);
-				worldPos.transform.position = finalPos;
-				worldPos.transform.localScale = box.transform.localScale;
-				worldPos.AlwaysOnTop = Camera.main.orthographic;
-			}
-			else if (worldPos != null)
-			{
-				Destroy(worldPos.gameObject);
-				box.BoxWorldPos = null;
-			}
-		}
+		return box;
 	}
 
 	public void UpdateRightText()
@@ -620,6 +665,7 @@ public class DosBox : MonoBehaviour
 		{
 			RefreshCacheEntries(animIdToMemoryAddress, 0x218D3);
 			RefreshCacheEntries(bodyIdToMemoryAddress, 0x218D7);
+			RefreshCacheEntries(trackIdToMemoryAddress, 0x218C7);
 		}
 	}
 
