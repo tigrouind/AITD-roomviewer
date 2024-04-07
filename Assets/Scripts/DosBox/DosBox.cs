@@ -344,7 +344,7 @@ public class DosBox : MonoBehaviour
 					}
 					else
 					{
-						if (box.Slot == 0)
+						if (box.Slot == 0 && SpeedRunMode)
 						{
 							box.Color = new Color32(255, 255, 255, 255);
 						}
