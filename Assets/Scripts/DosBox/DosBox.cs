@@ -9,7 +9,7 @@ public class DosBox : MonoBehaviour
 {
 	public BoxInfo RightText;
 	public GameObject Actors;
-	public Arrow Arrow;
+	public Arrow arrowPrefab;
 	public Box BoxPrefab;
 	public Box[] Boxes;
 	public bool ShowAdditionalInfo;
@@ -323,23 +323,8 @@ public class DosBox : MonoBehaviour
 					bool isPlayer = box.ID == lastValidPlayerIndex;
 					if (isPlayer)
 					{
-						//arrow follow player
-						Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
-
-						//face camera
-						float angle = box.Angles.y * 360.0f / 1024.0f;
-						Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
-						Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
-
-						float minBoxScale = Mathf.Min(box.transform.localScale.x, box.transform.localScale.z);
-						Arrow.transform.localScale = new Vector3(
-							minBoxScale * 0.9f,
-							minBoxScale * 0.9f,
-							1.0f);
-
 						//player is white
 						box.Color = new Color32(255, 255, 255, 255);
-						Arrow.AlwaysOnTop = Camera.main.orthographic;
 						Player = box;
 					}
 					else
@@ -353,6 +338,35 @@ public class DosBox : MonoBehaviour
 							//other actors are green
 							box.Color = new Color32(0, 128, 0, 255);
 						}
+					}
+
+					//arrow
+					if ((box.TrackMode != 0 || box == Player) && box.transform.localScale.magnitude > 0.01f && Actors.activeSelf)
+					{
+						if (box.Arrow == null)
+						{
+							box.Arrow = Instantiate(arrowPrefab);
+						}
+
+						box.Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
+
+						//face camera
+						float angle = box.Angles.y * 360.0f / 1024.0f;
+						box.Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
+						box.Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
+
+						float minBoxScale = Mathf.Min(box.transform.localScale.x, box.transform.localScale.z);
+						box.Arrow.transform.localScale = new Vector3(
+							minBoxScale * 0.9f,
+							minBoxScale * 0.9f,
+							1.0f);
+
+						box.Arrow.AlwaysOnTop = Camera.main.orthographic;
+					}
+					else if (box.Arrow != null)
+					{
+						Destroy(box.Arrow.gameObject);
+						box.Arrow = null;
 					}
 
 					if (GameVersion == GameVersion.AITD1)
@@ -496,15 +510,6 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
-	public void UpdateArrowVisibility()
-	{
-		//arrow is only active if actors are active and player is active
-		Arrow.gameObject.SetActive(Actors.activeSelf
-			&& Player != null
-			&& Player.gameObject.activeSelf
-			&& Player.transform.localScale.magnitude > 0.01f);
-	}
-
 	void SwitchRoom(int floor, int room)
 	{
 		if (linkfloor != floor || linkroom != room)
@@ -546,7 +551,7 @@ public class DosBox : MonoBehaviour
 				box.Color = color;
 				Destroy(box.gameObject.GetComponent<BoxCollider>());
 			}
-			
+
 			box.transform.position = position;
 			box.transform.localScale = scale;
 			box.transform.localRotation = rotation;

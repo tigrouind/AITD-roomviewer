@@ -56,6 +56,7 @@ public class Box : MonoBehaviour
 	public Box BoxHotPoint;
 	public Box BoxWorldPos;
 	public Box BoxTrack;
+	public Arrow Arrow;
 	public int OldAngle;
 	public int NewAngle;
 	public int RotateParam;
@@ -250,6 +251,10 @@ public class Box : MonoBehaviour
 		if (BoxTrack != null)
 		{
 			Destroy(BoxTrack.gameObject);
+		}
+		if (Arrow != null)
+		{
+			Destroy(Arrow.gameObject);
 		}
 	}
 
