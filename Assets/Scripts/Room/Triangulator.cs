@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
-//from http://wiki.unity3d.com/
+//from http://wiki.unity3d.com/index.php?title=Triangulator (ear clipping)
 public class Triangulator
 {
 	private readonly List<Vector2> m_points = new List<Vector2>();
@@ -17,18 +17,24 @@ public class Triangulator
 
 		int n = m_points.Count;
 		if (n < 3)
+		{
 			return indices.ToArray();
+		}
 
 		int[] V = new int[n];
-		if (Area() > 0)
+		if (Area() > 0) //clockwise vs counter clockwise, reverse polygon if needed
 		{
 			for (int v = 0; v < n; v++)
+			{
 				V[v] = v;
+			}
 		}
 		else
 		{
 			for (int v = 0; v < n; v++)
+			{
 				V[v] = n - 1 - v;
+			}
 		}
 
 		int nv = n;
@@ -36,30 +42,39 @@ public class Triangulator
 		for (int m = 0, v = nv - 1; nv > 2;)
 		{
 			if (count-- <= 0)
+			{
 				return indices.ToArray();
+			}
 
 			int u = v;
 			if (nv <= u)
+			{
 				u = 0;
+			}
+
 			v = u + 1;
 			if (nv <= v)
+			{
 				v = 0;
+			}
+
 			int w = v + 1;
 			if (nv <= w)
-				w = 0;
-
-			if (Snip(u, v, w, nv, V))
 			{
-				int a, b, c, s, t;
-				a = V[u];
-				b = V[v];
-				c = V[w];
-				indices.Add(a);
-				indices.Add(b);
-				indices.Add(c);
+				w = 0;
+			}
+
+			if (Snip(u, v, w, nv, V)) //is ear clipping possible ?
+			{
+				indices.Add(V[u]); //create a new triangle
+				indices.Add(V[v]);
+				indices.Add(V[w]);
 				m++;
-				for (s = v, t = v + 1; t < nv; s++, t++)
+				for (int s = v, t = v + 1; t < nv; s++, t++)
+				{
 					V[s] = V[t];
+				}
+
 				nv--;
 				count = 2 * nv;
 			}
@@ -88,15 +103,24 @@ public class Triangulator
 		Vector2 A = m_points[V[u]];
 		Vector2 B = m_points[V[v]];
 		Vector2 C = m_points[V[w]];
-		if (Mathf.Epsilon > (((B.x - A.x) * (C.y - A.y)) - ((B.y - A.y) * (C.x - A.x))))
+
+		if (Mathf.Epsilon > (((B.x - A.x) * (C.y - A.y)) - ((B.y - A.y) * (C.x - A.x)))) //is angle convex ?
+		{
 			return false;
+		}
+
 		for (p = 0; p < n; p++)
 		{
 			if ((p == u) || (p == v) || (p == w))
+			{
 				continue;
+			}
+
 			Vector2 P = m_points[V[p]];
 			if (InsideTriangle(A, B, C, P))
+			{
 				return false;
+			}
 		}
 		return true;
 	}
