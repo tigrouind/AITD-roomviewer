@@ -4,9 +4,7 @@ This is a room viewer (and 3D model viewer) for Alone in the Dark series.
 It has been created mostly for speedrunning.
 
 The following games are supported :
-- Alone in the Dark 1 (CD-ROM, floppy, demo)
-- Alone in the Dark 2 (CD-ROM, floppy, demo)
-- Alone in the Dark 3 (CD-ROM, demo)
+- Alone in the Dark 1 / 2 / 3 (CD-ROM, floppy, demo)
 - Jack in the Dark
 - Time Gate: Knight's Chase (CD-ROM, demo)
 

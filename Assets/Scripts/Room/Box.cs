@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Text;
+using System.Linq;
 
 public class Box : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class Box : MonoBehaviour
 	private static readonly string[] actionTypeInfo = { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
 	private static readonly string[] lifeModeInfo = { "FLOOR", "ROOM", "CAMERA" };
 	private static readonly string[] particleNames = { "BUBBLES", "BLOOD/DEBRIS", string.Empty, "FLASH", "SMOKE" };
-	private static readonly string[] flagsNames = { "ANIM", string.Empty, string.Empty, "BACK", "PUSH", "COLL", "TRIG", "PICK", "GRAV" };
+	private static readonly string[] flagsNames = { "ANIM", "", "", "BACK", "PUSH", "", "TRIG", "PICK", "FALL" };
 	private static readonly string[] speedNames = { "BACK", "IDLE", "WALK", "WALK", "WALK", "WALK", "RUN" };
 
 	public int ID;
@@ -193,22 +194,11 @@ public class Box : MonoBehaviour
 			return "NONE";
 		}
 
-		var result = new StringBuilder();
-		int flag = 1;
-		for (int i = 0 ; i < flagsNames.Length ; i++)
-		{
-			if ((flags & flag) != 0 && !string.IsNullOrEmpty(flagsNames[i]))
-			{
-				if (result.Length > 0)
-				{
-					result.Append(' ');
-				}
-				result.Append(flagsNames[i]);
-			}
-			flag <<= 1;
-		}
-
-		return result.ToString();
+		return string.Join(" ", flagsNames
+			.Select((Name, Index) => new { Name, Index })
+			.Where(x => (flags & 1 << x.Index) != 0 && !string.IsNullOrEmpty(x.Name))
+			.Select(x => x.Name)
+			.ToArray());
 	}
 
 	void RefreshMaterial()
