@@ -13,7 +13,7 @@ public class Box : MonoBehaviour
 	private static readonly string[] actionTypeInfo = { "NONE", "PRE_HIT", "HIT", "UNKNOWN", "PRE_FIRE", "FIRE", "PRE_THROW", "THROW", "HIT_OBJ", "DURING_THROW", "PRE_HIT" };
 	private static readonly string[] lifeModeInfo = { "FLOOR", "ROOM", "CAMERA" };
 	private static readonly string[] particleNames = { "BUBBLES", "BLOOD/DEBRIS", string.Empty, "FLASH", "SMOKE" };
-	private static readonly string[] flagsNames = { "ANIM", "", "", "BACK", "PUSH", "", "TRIG", "PICK", "FALL" };
+	private static readonly string[] flagsNames = { "ANIM", "", "", "BACK", "PUSH", "SPECIAL", "TRIG", "PICK", "FALL" };
 	private static readonly string[] speedNames = { "BACK", "IDLE", "WALK", "WALK", "WALK", "WALK", "RUN" };
 
 	public int ID;
