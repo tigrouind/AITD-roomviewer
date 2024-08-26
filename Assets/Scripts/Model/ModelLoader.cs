@@ -618,7 +618,7 @@ public class ModelLoader : MonoBehaviour
 						break;
 
 					case 2: //scale
-						b.Scale = new Vector3(boneTransform.x / 1024.0f + 1.0f, boneTransform.y / 1024.0f + 1.0f, boneTransform.z / 1024.0f + 1.0f);
+						b.Scale = new Vector3(boneTransform.x / 256.0f + 1.0f, boneTransform.y / 256.0f + 1.0f, boneTransform.z / 256.0f + 1.0f);
 						break;
 				}
 
