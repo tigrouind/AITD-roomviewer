@@ -42,6 +42,7 @@ public class Box : MonoBehaviour
 	public int HitForce;
 	public int KeyFrameTime;
 	public int KeyFrameLength;
+	public int KeyFrameOffset;
 	public Vector3Int Mod;
 	public Vector3Int LocalPosition;
 	public Vector3Int WorldPosition;
@@ -57,6 +58,7 @@ public class Box : MonoBehaviour
 	public Box BoxHotPoint;
 	public Box BoxWorldPos;
 	public Box BoxTrack;
+	public Box BoxMod;
 	public Arrow Arrow;
 	public int OldAngle;
 	public int NewAngle;
@@ -241,6 +243,10 @@ public class Box : MonoBehaviour
 		if (BoxTrack != null)
 		{
 			Destroy(BoxTrack.gameObject);
+		}
+		if (BoxMod != null)
+		{
+			Destroy(BoxMod.gameObject);
 		}
 		if (Arrow != null)
 		{

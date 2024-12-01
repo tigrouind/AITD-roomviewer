@@ -197,6 +197,7 @@ public class DosBox : MonoBehaviour
 					int keyframeAddress = animAddress + box.Keyframe * (bonesInAnim * 8 + 8);
 					box.KeyFrameTime = memory.ReadUnsignedShort(bodyAddress + 20);
 					box.KeyFrameLength = memory.ReadShort(keyframeAddress + 4);
+					box.KeyFrameOffset = memory.ReadShort(keyframeAddress + 10);
 				}
 
 				if (GameVersion == GameVersion.AITD1
@@ -325,6 +326,7 @@ public class DosBox : MonoBehaviour
 					{
 						//player is white
 						box.Color = new Color32(255, 255, 255, 255);
+						UpdateModBox(box, roomPosition);
 						Player = box;
 					}
 					else
@@ -408,6 +410,16 @@ public class DosBox : MonoBehaviour
 
 			random = memory.ReadUnsignedInt(entryPoint + 0x214C0);
 		}
+	}
+
+	void UpdateModBox(Box box, Vector3Int roomPosition)
+	{
+		int offset = box.KeyFrameLength == 0 ? 0 : Mathf.Clamp(Timer2 - box.KeyFrameTime, 0, box.KeyFrameLength) * -box.KeyFrameOffset / box.KeyFrameLength;
+		Vector3 finalPos = (box.LocalPosition + roomPosition + Quaternion.Euler(0.0f, -box.Angles.y * 360.0f / 1024.0f + 90.0f, 0.0f) * new Vector3(offset, 0.0f, 0.0f)) / 1000.0f;
+
+		box.BoxMod = CreateChildBox(box.BoxMod,
+			finalPos, box.transform.localScale, Quaternion.identity,
+			"Mod", new Color32(255, 255, 0, 64), box.KeyFrameLength != 0);
 	}
 
 	void UpdateWorldPosBox(Box box, Vector3Int roomPosition, bool isPlayer)
