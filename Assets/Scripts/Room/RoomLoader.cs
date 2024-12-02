@@ -636,6 +636,7 @@ public class RoomLoader : MonoBehaviour
 					highLightedBox.HighLight = false;
 				}
 
+				BoxInfo.Reset();
 				box.HighLight = true;
 				highLightedBox = box;
 			}
@@ -681,6 +682,7 @@ public class RoomLoader : MonoBehaviour
 				{
 					selectedBox = highLightedBox;
 					selectedBoxId = highLightedBox.ID;
+					BottomText.Reset();
 				}
 				else
 				{

@@ -9,6 +9,8 @@ public class BoxInfo : MonoBehaviour
 {
 	public Text LeftText;
 	public Text RightText;
+	public LayoutElement Layout;
+	public int MinimumSize;
 
 	readonly StringBuilder names = new StringBuilder();
 	readonly StringBuilder values = new StringBuilder();
@@ -24,6 +26,11 @@ public class BoxInfo : MonoBehaviour
 			RightText.text = string.Empty;
 			gameObject.SetActive(false);
 		}
+	}
+
+	public void Reset()
+	{
+		Layout.minWidth = 0;
 	}
 
 	public void Append(string name)
@@ -69,6 +76,7 @@ public class BoxInfo : MonoBehaviour
 		RightText.gameObject.SetActive(values.Length > 0);
 		LeftText.text = names.ToString();
 		RightText.text = values.ToString();
+		Layout.minWidth = Math.Max(Math.Max(Layout.minWidth, RightText.preferredWidth), MinimumSize);
 	}
 }
 
