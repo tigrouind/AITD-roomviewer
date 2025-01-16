@@ -23,8 +23,8 @@ public class RoomLoader : MonoBehaviour
 	private List<List<int>> camerasPerRoom = new List<List<int>>();
 	private readonly BoxComparer boxComparer = new BoxComparer();
 	private float defaultCameraZoom = 10.0f;
-	private Timer defaultBoxSelectionTimer = new Timer();
-	private Timer linkToDosBoxTimer = new Timer();
+	private readonly Timer defaultBoxSelectionTimer = new Timer();
+	private readonly Timer linkToDosBoxTimer = new Timer();
 	private bool speedRunMode;
 	private Vector3 startDragPosition;
 	private bool allowWarp;
@@ -86,8 +86,6 @@ public class RoomLoader : MonoBehaviour
 
 	void RefreshRooms()
 	{
-		LeftText.text = string.Format("E{0}R{1}", floor, room);
-
 		//load new floor only if needed
 		if (name != "FLOOR" + floor)
 		{
@@ -158,6 +156,15 @@ public class RoomLoader : MonoBehaviour
 				}
 			}
 			roomIndex++;
+		}
+
+		if (floor == currentCameraFloor && room == currentCameraRoom && currentCameraID != -1 && ShowAdditionalInfo.BoolValue)
+		{
+			LeftText.text = string.Format("E{0}R{1} C{2}", floor, room, currentCameraID);
+		}
+		else
+		{
+			LeftText.text = string.Format("E{0}R{1}", floor, room);
 		}
 	}
 
@@ -921,6 +928,7 @@ public class RoomLoader : MonoBehaviour
 
 			case KeyCode.E:
 				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
+				SetRoomObjectsVisibility(room);
 				break;
 
 			case KeyCode.Mouse2:
