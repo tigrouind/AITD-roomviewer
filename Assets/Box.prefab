@@ -115,26 +115,82 @@ MonoBehaviour:
   Chrono: 0
   RoomChrono: 0
   TrackNumber: 0
-  PositionInTrack: 0
+  TrackPosition: 0
   Slot: 0
   HitForce: 0
   KeyFrameTime: 0
   KeyFrameLength: 0
+  KeyFrameOffset: 0
+  Mod:
+    x: 0
+    y: 0
+    z: 0
+  LocalPosition:
+    x: 0
+    y: 0
+    z: 0
+  WorldPosition:
+    x: 0
+    y: 0
+    z: 0
+  BoundingLower:
+    x: 0
+    y: 0
+    z: 0
+  BoundingUpper:
+    x: 0
+    y: 0
+    z: 0
+  Box2DLower:
+    x: 0
+    y: 0
+  Box2DUpper:
+    x: 0
+    y: 0
+  Angles:
+    x: 0
+    y: 0
+    z: 0
   LastOffset: 0
   LastDistance: 0
   HotBoxSize: 0
+  HotPosition:
+    x: 0
+    y: 0
+    z: 0
   BoxHotPoint: {fileID: 0}
   BoxWorldPos: {fileID: 0}
+  BoxTrack: {fileID: 0}
+  BoxMod: {fileID: 0}
+  Arrow: {fileID: 0}
   OldAngle: 0
   NewAngle: 0
+  RotateParam: 0
   RotateTime: 0
   HitBy: 0
   Hit: 0
   ColBy: 0
+  Col:
+    x: 0
+    y: 0
+    z: 0
   HardCol: 0
   HardTrigger: 0
   DosBox: {fileID: 0}
   RoomLoader: {fileID: 0}
+  CameraPosition:
+    x: 0
+    y: 0
+    z: 0
+  CameraRotation:
+    x: 0
+    y: 0
+    z: 0
+  CameraFocal:
+    x: 0
+    y: 0
+    z: 0
+  PreviousID: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

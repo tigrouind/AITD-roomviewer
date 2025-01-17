@@ -3,14 +3,14 @@ Shader "Custom/AlwaysOnTop"
 	Properties
 	{
 		_Color ("Main Color", Color) = (1,1,1,1)
+		_OffsetUnits ("Depth Bias", Float) = 0
 	}
 	SubShader
 	{
-		Tags { "Queue"="Overlay" "RenderType"="Overlay"  }
-		ZTest Always
+		Offset 0, [_OffsetUnits]
 
 		CGPROGRAM
-		#pragma surface surf Lambert alpha
+		#pragma surface surf Lambert
 
 		struct Input
 		{

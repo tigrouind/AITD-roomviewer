@@ -8,7 +8,6 @@ public class MaterialCache : MonoBehaviour
 	public Material TransparentMaterial;
 	public Material OpaqueMaterial;
 	public Material AlwaysOnTopMaterial;
-	public Material HighlightMaterial;
 
 	public Material GetMaterialFromCache(Color32 color, bool alwaysOnTop, bool highlighted)
 	{
@@ -19,14 +18,19 @@ public class MaterialCache : MonoBehaviour
 			if (alwaysOnTop)
 			{
 				material = new Material(AlwaysOnTopMaterial);
-				if (highlighted)
-				{
-					material.renderQueue++;
-				}
+				material.SetFloat("_OffsetUnits", highlighted ? - 1000000 : -500000);
 			}
 			else if (color.a == 255)
 			{
-				material = new Material(highlighted ? HighlightMaterial : OpaqueMaterial);
+				if (highlighted)
+				{
+					material = new Material(AlwaysOnTopMaterial);
+					material.SetFloat("_OffsetUnits", -1000);
+				}
+				else
+				{
+					material = new Material(OpaqueMaterial);
+				}
 			}
 			else
 			{

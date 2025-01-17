@@ -348,6 +348,7 @@ public class DosBox : MonoBehaviour
 						if (box.Arrow == null)
 						{
 							box.Arrow = Instantiate(arrowPrefab);
+							box.Arrow.RefreshMaterial(Camera.main.orthographic, box.HighLight);
 						}
 
 						box.Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
@@ -362,8 +363,6 @@ public class DosBox : MonoBehaviour
 							minBoxScale * 0.9f,
 							minBoxScale * 0.9f,
 							1.0f);
-
-						box.Arrow.AlwaysOnTop = Camera.main.orthographic;
 					}
 					else if (box.Arrow != null)
 					{

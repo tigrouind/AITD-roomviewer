@@ -108,6 +108,10 @@ public class Box : MonoBehaviour
 			if (value != highlighted)
 			{
 				highlighted = value;
+				if (Arrow != null)
+				{
+					Arrow.RefreshMaterial(Camera.main.orthographic, value);
+				}
 				RefreshMaterial();
 			}
 		}

@@ -3,11 +3,11 @@
 	Properties
 	{
 		_MainTex ("Texture", 2D) = "white" {}
+		_OffsetUnits ("Depth Bias", Float) = 0
 	}
 	SubShader
 	{
-		Tags { "Queue"="Overlay" "RenderType"="Overlay"  }
-		ZTest Always
+		Offset 0, [_OffsetUnits]
 
 		CGPROGRAM
 		#pragma surface surf Lambert alpha
