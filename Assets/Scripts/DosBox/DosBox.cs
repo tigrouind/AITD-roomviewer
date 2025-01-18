@@ -72,6 +72,7 @@ public class DosBox : MonoBehaviour
 	private bool saveTimerFlag;
 	private uint internalTimer1, internalTimer1Frozen;
 	private int internalTimer2, internalTimer2Frozen;
+	private int keyboard, joy, click;
 	private uint random;
 
 	Box GetActor(int index)
@@ -406,6 +407,9 @@ public class DosBox : MonoBehaviour
 
 			internalTimer1Frozen = memory.ReadUnsignedInt(entryPoint + 0x1B0F8);
 			internalTimer2Frozen = memory.ReadUnsignedShort(entryPoint + 0x1B0F6);
+			keyboard = memory.ReadShort(entryPoint + 0x21164);
+			joy = memory.ReadShort(entryPoint + 0x21160);
+			click = memory.ReadShort(entryPoint + 0x2116A);
 
 			random = memory.ReadUnsignedInt(entryPoint + 0x214C0);
 		}
@@ -614,12 +618,57 @@ public class DosBox : MonoBehaviour
 			{
 				RightText.Append("Allow inventory", "{0}; {1}", allowInventory ? "Yes" : "No", redrawFlag);
 				RightText.Append("In hand", inHand);
+				RightText.Append("Keyboard", GetKeyboardStatus());
 				RightText.Append("Random", "{0:X8}", random);
 				AppendRandomInfo();
 			}
 		}
 
 		RightText.UpdateText();
+	}
+
+	string GetKeyboardStatus()
+	{
+		var sb = new StringBuilder();
+
+		if ((joy & 0x01) != 0)
+		{
+			sb.Append("▲");
+		}
+		if ((joy & 0x02) != 0)
+		{
+			sb.Append("▼");
+		}
+		if ((joy & 0x04) != 0)
+		{
+			sb.Append("◄");
+		}
+		if ((joy & 0x08) != 0)
+		{
+			sb.Append("►");
+		}
+
+		switch (keyboard)
+		{
+			case 0x01:
+				sb.Append("ESC");
+				break;
+
+			case 0x19:
+				sb.Append("PAUSE");
+				break;
+
+			case 0x1C:
+				sb.Append("ENTER");
+				break;
+		}
+
+		if (click != 0)
+		{
+			sb.Append("SPACE");
+		}
+
+		return sb.Length == 0 ? "▬" : sb.ToString();
 	}
 
 	void AppendRandomInfo()
