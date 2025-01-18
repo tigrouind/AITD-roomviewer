@@ -452,7 +452,7 @@ public class DosBox : MonoBehaviour
 		box.BoxHotPoint = CreateChildBox(box.BoxHotPoint,
 			finalPos, Vector3.one * (box.HotBoxSize / 500.0f), Quaternion.identity,
 			"HotPoint", new Color32(255, 0, 0, 255),
-			box.ActionType == 2);
+			box.ActionType == 2 || box.ActionType == 6); //HIT / PRE_THROW
 	}
 
 	void UpdateTrackBox(Box box, Vector3Int roomPosition)
