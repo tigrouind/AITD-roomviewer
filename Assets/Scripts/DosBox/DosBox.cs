@@ -58,11 +58,11 @@ public class DosBox : MonoBehaviour
 
 	//delay
 	private float lastDelay;
-	private Timer delayCounter = new Timer();
-	private Timer totalDelay = new Timer();
+	private readonly Timer delayCounter = new Timer();
+	private readonly Timer totalDelay = new Timer();
 
 	//frame time
-	private Timer frameTime = new Timer();
+	private readonly Timer frameTime = new Timer();
 	private int oldFrames;
 	private float frameTimeElapsed;
 

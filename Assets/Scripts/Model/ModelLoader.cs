@@ -1,14 +1,11 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Globalization;
 using System;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Text;
-using System.Text.RegularExpressions;
 
 public class ModelLoader : MonoBehaviour
 {
