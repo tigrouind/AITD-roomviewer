@@ -56,6 +56,8 @@ public class RoomLoader : MonoBehaviour
 	public ToggleButton CameraMode;
 	public GameObject Border;
 	public GameObject CameraFrustum;
+	public ColorTheme ColorTheme;
+	public Button Theme;
 
 	void Start()
 	{
@@ -73,6 +75,7 @@ public class RoomLoader : MonoBehaviour
 		gameVersion = DetectGame();
 
 		ParseCommandLine();
+		LoadTheme(ColorTheme.Theme);
 		if (floors.Count > 0)
 		{
 			RefreshRooms();
@@ -926,6 +929,16 @@ public class RoomLoader : MonoBehaviour
 				Actors.SetActive(dosBoxEnabled && ShowActors.BoolValue);
 				break;
 
+			case KeyCode.H:
+				if (ColorTheme.Themes.Count > 0)
+				{
+					var themeIndex = ColorTheme.Themes.IndexOf(ColorTheme.Theme);
+					var theme = ColorTheme.Themes[(themeIndex + 1) % ColorTheme.Themes.Count];
+					LoadTheme(theme);
+					ColorTheme.Theme = theme;
+				}
+				break;
+
 			case KeyCode.E:
 				ShowAdditionalInfo.BoolValue = !ShowAdditionalInfo.BoolValue;
 				SetRoomObjectsVisibility(room);
@@ -1006,6 +1019,20 @@ public class RoomLoader : MonoBehaviour
 			ResetCameraZoom();
 			ShowAdditionalInfo.BoolValue = true;
 		}
+	}
+
+	public void LoadTheme(ColorTheme colorTheme)
+	{
+		BottomText.GetComponent<Image>().color = colorTheme.BoxColor;
+		BoxInfo.GetComponent<Image>().color = colorTheme.BoxColor;
+		Camera.main.backgroundColor = colorTheme.ClearColor;
+		Panel.GetComponent<Image>().color = colorTheme.MenuColor;
+	}
+
+	void LoadTheme(Theme theme)
+	{
+		ColorTheme.LoadTheme(theme);
+		Theme.GetComponentInChildren<Text>().text = theme.Name;
 	}
 
 	void RefreshSelectedCamera()

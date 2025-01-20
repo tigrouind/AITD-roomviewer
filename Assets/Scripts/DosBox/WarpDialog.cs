@@ -25,6 +25,11 @@ public class WarpDialog : MonoBehaviour
 		ToggleAdvanceMode(false);
 	}
 
+	public void LoadTheme(ColorTheme colorTheme)
+	{
+		Panel.GetComponent<Image>().color = colorTheme.MenuColor;
+	}
+
 	void Update()
 	{
 		if (Input.GetMouseButtonUp(0)
