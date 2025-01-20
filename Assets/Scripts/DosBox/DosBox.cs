@@ -4,6 +4,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine.UI;
 
 public class DosBox : MonoBehaviour
 {
@@ -74,6 +75,11 @@ public class DosBox : MonoBehaviour
 	private int internalTimer2, internalTimer2Frozen;
 	private int keyboard, joy, click;
 	private uint random;
+
+	public void LoadTheme(ColorTheme colorTheme)
+	{
+		RightText.GetComponent<Image>().color = colorTheme.BoxColor;
+	}
 
 	Box GetActor(int index)
 	{

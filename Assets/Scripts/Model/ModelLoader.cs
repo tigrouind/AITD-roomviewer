@@ -66,6 +66,7 @@ public class ModelLoader : MonoBehaviour
 	public ToggleButton ShowAdditionalInfo;
 	public GameObject BoundingBox;
 	public GameObject Grid;
+	public ColorTheme ColorTheme;
 
 	void LoadBody(bool resetcamera = true)
 	{
@@ -758,6 +759,7 @@ public class ModelLoader : MonoBehaviour
 	void Start()
 	{
 		CheckCommandLine();
+		ColorTheme.LoadTheme(ColorTheme.Theme);
 
 		//parse vars.txt file
 		string varPath = Config.GetPath("vars.txt");
@@ -1174,6 +1176,11 @@ public class ModelLoader : MonoBehaviour
 			ProcessKey(KeyCode.E); //extra info
 			ProcessKey(KeyCode.A); //animation
 		}
+	}
+
+	public void LoadTheme(ColorTheme colorTheme)
+	{
+		Panel.GetComponent<Image>().color = colorTheme.MenuColor;
 	}
 
 	public void ProcessKey(string keyCode)
