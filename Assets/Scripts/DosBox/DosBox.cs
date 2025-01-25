@@ -835,22 +835,17 @@ public class DosBox : MonoBehaviour
 
 	#region SearchDOSBox
 
-	int SearchDOSBoxProcess()
+	static IEnumerable<int> GetProcesses()
 	{
-		int? processId = Process.GetProcesses()
+		foreach (var processId in Process.GetProcesses()
 				.Where(x => GetProcessName(x).StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase))
-				.Select(x => (int?)x.Id)
-				.FirstOrDefault();
-
-		if (processId.HasValue)
+				.Select(x => x.Id))
 		{
-			return processId.Value;
+			yield return processId;
 		}
-
-		return -1;
 	}
 
-	string GetProcessName(Process process)
+	static string GetProcessName(Process process)
 	{
 		try
 		{
@@ -863,28 +858,43 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	static IEnumerable<ProcessMemory> GetProcessReaders()
+	{
+		foreach (var processId in GetProcesses())
+		{
+			var proc = new ProcessMemory(processId);
+			proc.BaseAddress = proc.SearchFor16MRegion();
+			yield return proc;
+		}
+	}
+
 	bool TryGetMemoryReader(out ProcessMemory reader)
 	{
-		int processId = SearchDOSBoxProcess();
-		if (processId != -1)
-		{
-			reader = new ProcessMemory(processId);
-			reader.BaseAddress = reader.SearchFor16MRegion();
-			if (reader.BaseAddress != -1)
-			{
-				return true;
-			}
+		var processes = GetProcessReaders()
+			.ToArray();
 
-			reader.Close();
+		var process = processes
+			.FirstOrDefault(IsAITDProcess);
+
+		foreach (var proc in processes.Where(x => x != process))
+		{
+			proc.Close();
 		}
 
-		reader = null;
-		return false;
+		reader = process;
+		return process != null;
+	}
+
+	bool IsAITDProcess(ProcessMemory reader)
+	{
+		var mcbData = new byte[16384];
+		return reader.BaseAddress != -1 && reader.Read(mcbData, 0, mcbData.Length) > 0 && DosMCB.GetMCBs(mcbData)
+			.Any(x => x.Name.StartsWith("AITD") || x.Name.StartsWith("INDARK") || x.Name.StartsWith("TIMEGATE") || x.Name.StartsWith("TATOU"));
 	}
 
 	bool TryGetExeEntryPoint(out int entryPoint)
 	{
-		int psp = memory.ReadUnsignedShort(0x0B30) * 16;
+		int psp = memory.ReadUnsignedShort(0x0B20 + 0x10) * 16; // dos swappable area (SDA) + 10h
 		if (psp > 0)
 		{
 			int exeSize = memory.ReadUnsignedShort(psp - 16 + 3) * 16;
