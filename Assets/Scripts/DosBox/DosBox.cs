@@ -835,19 +835,14 @@ public class DosBox : MonoBehaviour
 
 	#region SearchDOSBox
 
-	int SearchDOSBoxProcess()
+	IEnumerable<int> SearchDOSBoxProcesses()
 	{
-		int? processId = Process.GetProcesses()
+		foreach (var processId in Process.GetProcesses()
 				.Where(x => GetProcessName(x).StartsWith("DOSBOX", StringComparison.InvariantCultureIgnoreCase))
-				.Select(x => (int?)x.Id)
-				.FirstOrDefault();
-
-		if (processId.HasValue)
+				.Select(x => x.Id))
 		{
-			return processId.Value;
+			yield return processId;
 		}
-
-		return -1;
 	}
 
 	string GetProcessName(Process process)
@@ -865,21 +860,37 @@ public class DosBox : MonoBehaviour
 
 	bool TryGetMemoryReader(out ProcessMemory reader)
 	{
-		int processId = SearchDOSBoxProcess();
-		if (processId != -1)
+		var processes = new List<ProcessMemory>();
+		foreach (var processId in SearchDOSBoxProcesses())
 		{
-			reader = new ProcessMemory(processId);
-			reader.BaseAddress = reader.SearchFor16MRegion();
-			if (reader.BaseAddress != -1)
+			var proc = new ProcessMemory(processId);
+			proc.BaseAddress = proc.SearchFor16MRegion();
+			if (proc.BaseAddress != -1)
 			{
-				return true;
+				processes.Add(proc);
 			}
-
-			reader.Close();
 		}
 
-		reader = null;
-		return false;
+		var process = processes.OrderByDescending(IsAITDProcess) //AITD as preference
+					.FirstOrDefault();
+
+		if (process != null)
+		{
+			foreach (var proc in processes.Where(x => x != process))
+			{
+				proc.Close();
+			}
+		}
+
+		reader = process;
+		return reader != null;
+	}
+
+	bool IsAITDProcess(ProcessMemory reader)
+	{
+		var mcbData = new byte[8192];
+		return reader.Read(mcbData, 0, mcbData.Length) > 0 && DosMCB.GetMCBs(mcbData)
+			.Any(x => x.Name.StartsWith("AITD") || x.Name.StartsWith("INDARK") || x.Name.StartsWith("TIMEGATE") || x.Name.StartsWith("TATOU"));
 	}
 
 	bool TryGetExeEntryPoint(out int entryPoint)
