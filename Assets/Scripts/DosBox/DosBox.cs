@@ -900,15 +900,15 @@ public class DosBox : MonoBehaviour
 
 	bool TryGetExeEntryPoint(out int entryPoint)
 	{
-		int psp = memory.ReadUnsignedShort(0x0B20 + 0x10) * 16; // dos swappable area (SDA) + 10h
+		int psp = DosMCB.GetMCBs(memory)
+			.Where(x => x.Size > 100 * 1024 && x.Size < 200 * 1024 && x.Owner != 0) //is AITD exe loaded yet?
+			.Select(x => x.Owner)
+			.FirstOrDefault();
+
 		if (psp > 0)
 		{
-			int exeSize = memory.ReadUnsignedShort(psp - 16 + 3) * 16;
-			if (exeSize > 100 * 1024 && exeSize < 250 * 1024) //is AITD exe loaded yet?
-			{
-				entryPoint = psp + 0x100;
-				return true;
-			}
+			entryPoint = psp + 0x100;
+			return true;
 		}
 
 		entryPoint = -1;
