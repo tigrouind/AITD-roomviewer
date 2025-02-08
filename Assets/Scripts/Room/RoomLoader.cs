@@ -580,6 +580,7 @@ public class RoomLoader : MonoBehaviour
 		DosBox dosBox = GetComponent<DosBox>();
 		dosBox.ShowAdditionalInfo = ShowAdditionalInfo.BoolValue && dosBoxEnabled;
 		dosBox.ShowAITD1Vars = dosBox.ShowAdditionalInfo && dosBox.GameVersion == GameVersion.AITD1;
+		dosBox.ShowActors = ShowActors.BoolValue;
 		dosBox.SpeedRunMode = speedRunMode;
 
 		dosBox.RefreshMemory();
