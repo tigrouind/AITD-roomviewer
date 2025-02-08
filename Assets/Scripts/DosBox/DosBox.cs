@@ -222,7 +222,7 @@ public class DosBox : MonoBehaviour
 				box.OldAngle = memory.ReadShort(k + 106);
 				box.NewAngle = memory.ReadShort(k + 108);
 				box.RotateParam = memory.ReadShort(k + 110);
-				box.RotateTime = memory.ReadShort(k + 112);
+				box.RotateTime = memory.ReadUnsignedShort(k + 112);
 
 				box.Speed = memory.ReadShort(k + 116);
 
@@ -360,10 +360,10 @@ public class DosBox : MonoBehaviour
 						}
 
 						box.Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
+						box.Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left); //face camera
 
-						//face camera
-						float angle = box.Angles.y * 360.0f / 1024.0f;
-						box.Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left);
+						float time = Mathf.Clamp(Timer2 - box.RotateTime, 0, box.RotateParam) / (float)box.RotateParam;
+						float angle = box.RotateParam == 0 || GameVersion != GameVersion.AITD1 ? box.Angles.y * 360.0f / 1024.0f : Mathf.LerpAngle(box.OldAngle * 360.0f / 1024.0f, box.NewAngle * 360.0f / 1024.0f, time);
 						box.Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
 
 						float minBoxScale = Mathf.Min(box.transform.localScale.x, box.transform.localScale.z);
@@ -398,10 +398,7 @@ public class DosBox : MonoBehaviour
 			CurrentCamera = memory.ReadShort(entryPoint + 0x24056);
 			CurrentCameraFloor = memory.ReadShort(entryPoint + 0x24058);
 			CurrentCameraRoom = memory.ReadShort(entryPoint + 0x2405A);
-		}
 
-		if (ShowAITD1Vars)
-		{
 			allowInventory = memory.ReadShort(entryPoint + 0x19B6E) == 1;
 			redrawFlag = memory.ReadShort(entryPoint + 0x19BC6);
 			inHand = memory.ReadShort(entryPoint + 0x24054);
