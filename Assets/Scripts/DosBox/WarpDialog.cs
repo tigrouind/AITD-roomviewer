@@ -12,6 +12,7 @@ public class WarpDialog : MonoBehaviour
 	public InputField LocalPosX, LocalPosY, LocalPosZ;
 	public InputField worldPosX, worldPosY, worldPosZ;
 	public InputField BoundingPosX, BoundingPosY, BoundingPosZ;
+	public InputField SizeX, SizeY, SizeZ;
 	public RectTransform Panel;
 
 	public InputField AngleX, AngleY, AngleZ;
@@ -151,31 +152,33 @@ public class WarpDialog : MonoBehaviour
 		UpdateAngleInputField(actor);
 
 		//parse position
-		Vector3Int lowerBound, upperBound, local, world;
+		Vector3Int lowerBound, upperBound, local, world, size;
 
 		if (!AdvancedMode.BoolValue)
 		{
 			TryParsePosition(PositionX, PositionY, PositionZ, out local, actor.LocalPosition + actor.Mod);
+			TryParsePosition(SizeX, SizeY, SizeZ, out size, actor.BoundingSize);
 			local -= actor.Mod;
 
 			//apply offset to world/bound
 			Vector3Int offset = local - actor.LocalPosition;
 			world = actor.WorldPosition + offset;
-			lowerBound = actor.BoundingLower + offset;
-			upperBound = actor.BoundingUpper + offset;
+			lowerBound = (actor.BoundingLower + actor.BoundingUpper - size) / 2 + offset;
+			upperBound = (actor.BoundingLower + actor.BoundingUpper + size) / 2 + offset;
 		}
 		else
 		{
 			Vector3Int boundingPos;
 			TryParsePosition(BoundingPosX, BoundingPosY, BoundingPosZ, out boundingPos, actor.BoundingPos);
+			TryParsePosition(SizeX, SizeY, SizeZ, out size, actor.BoundingSize);
 			TryParsePosition(LocalPosX, LocalPosY, LocalPosZ, out local, actor.LocalPosition + actor.Mod);
 			TryParsePosition(worldPosX, worldPosY, worldPosZ, out world, actor.WorldPosition + actor.Mod);
 			local -= actor.Mod;
 			world -= actor.Mod;
 
 			Vector3Int offset = boundingPos - actor.BoundingPos;
-			lowerBound = actor.BoundingLower + offset;
-			upperBound = actor.BoundingUpper + offset;
+			lowerBound = (actor.BoundingLower + actor.BoundingUpper - size) / 2 + offset;
+			upperBound = (actor.BoundingLower + actor.BoundingUpper + size) / 2 + offset;
 		}
 
 		WriteActorPosition(actor, lowerBound, upperBound, local, world);
@@ -200,7 +203,7 @@ public class WarpDialog : MonoBehaviour
 	//input keys
 	void RotateActor(Box actor, int offset)
 	{
-		int angle = (int)actor.Angles.y + offset;
+		int angle = actor.Angles.y + offset;
 		angle = (angle + 1024) % 1024;
 
 		WriteActorAngle(actor, new Vector3Int(actor.Angles.x, angle, actor.Angles.z));
@@ -232,6 +235,9 @@ public class WarpDialog : MonoBehaviour
 		worldPosX.text = (actor.WorldPosition.x + actor.Mod.x).ToString();
 		worldPosY.text = (actor.WorldPosition.y + actor.Mod.y).ToString();
 		worldPosZ.text = (actor.WorldPosition.z + actor.Mod.z).ToString();
+		SizeX.text = actor.BoundingSize.x.ToString();
+		SizeY.text = actor.BoundingSize.y.ToString();
+		SizeZ.text = actor.BoundingSize.z.ToString();
 	}
 
 	void UpdateAngleInputField(Box actor)
