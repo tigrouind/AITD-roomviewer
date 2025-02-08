@@ -15,6 +15,7 @@ public class DosBox : MonoBehaviour
 	public Box[] Boxes;
 	public bool ShowAdditionalInfo;
 	public bool ShowAITD1Vars;
+	public bool ShowActors;
 	public bool SpeedRunMode;
 	public int CurrentCamera = -1;
 	public int CurrentCameraRoom = -1;
@@ -421,6 +422,8 @@ public class DosBox : MonoBehaviour
 		}
 	}
 
+	#region Boxes
+
 	void UpdateModBox(Box box, Vector3Int roomPosition)
 	{
 		int offset = box.KeyFrameLength == 0 ? 0 : Mathf.Clamp(Timer2 - box.KeyFrameTime, 0, box.KeyFrameLength) * -box.KeyFrameOffset / box.KeyFrameLength;
@@ -428,7 +431,7 @@ public class DosBox : MonoBehaviour
 
 		box.BoxMod = CreateChildBox(box.BoxMod,
 			finalPos, box.transform.localScale, Quaternion.identity,
-			"Mod", new Color32(255, 255, 0, 64), box.KeyFrameLength != 0);
+			"Mod", new Color32(255, 255, 0, 64), box.KeyFrameLength != 0 && ShowAdditionalInfo && ShowActors);
 	}
 
 	void UpdateWorldPosBox(Box box, Vector3Int roomPosition, bool isPlayer)
@@ -441,7 +444,7 @@ public class DosBox : MonoBehaviour
 			finalPos = new Vector3(finalPos.x, height + 0.001f, finalPos.z);
 
 			Vector3Int boundingPos = box.WorldPosition + box.Mod + currentRoomPos - roomPosition;
-			bool visible = isPlayer && (boundingPos.x != box.BoundingPos.x || boundingPos.z != box.BoundingPos.z);
+			bool visible = isPlayer && (boundingPos.x != box.BoundingPos.x || boundingPos.z != box.BoundingPos.z) && ShowActors;
 
 			box.BoxWorldPos = CreateChildBox(box.BoxWorldPos,
 				finalPos, box.transform.localScale, Quaternion.identity,
@@ -458,7 +461,7 @@ public class DosBox : MonoBehaviour
 		box.BoxHotPoint = CreateChildBox(box.BoxHotPoint,
 			finalPos, Vector3.one * (box.HotBoxSize / 500.0f), Quaternion.identity,
 			"HotPoint", new Color32(255, 0, 0, 255),
-			box.ActionType == 2 || box.ActionType == 6); //HIT / PRE_THROW
+			(box.ActionType == 2 || box.ActionType == 6) && ShowActors); //HIT / PRE_THROW
 	}
 
 	void UpdateTrackBox(Box box, Vector3Int roomPosition)
@@ -512,8 +515,10 @@ public class DosBox : MonoBehaviour
 		box.BoxTrack = CreateChildBox(box.BoxTrack,
 						position, scale, rotation,
 						"BoxTrack", new Color32(255, 255, 0, 128),
-						visible);
+						visible && ShowActors);
 	}
+
+	#endregion
 
 	public uint Timer1
 	{
