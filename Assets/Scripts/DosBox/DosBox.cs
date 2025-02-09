@@ -70,6 +70,7 @@ public class DosBox : MonoBehaviour
 
 	private int inHand;
 	private int redrawFlag;
+	private int initViewFlag, oldInitViewFlag, viewCounter;
 	private bool allowInventory;
 	private bool saveTimerFlag;
 	private uint internalTimer1, internalTimer1Frozen;
@@ -416,6 +417,7 @@ public class DosBox : MonoBehaviour
 			click = memory.ReadShort(entryPoint + 0x2116A);
 
 			random = memory.ReadUnsignedInt(entryPoint + 0x214C0);
+			initViewFlag = memory.ReadShort(entryPoint + 0x19BBC);
 		}
 	}
 
@@ -615,16 +617,17 @@ public class DosBox : MonoBehaviour
 				RightText.Append("Timer 1", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer1 / 60), Timer1 % 60, timer1Delay / 60 % 60, timer1Delay % 60);
 				RightText.Append("Timer 2", !saveTimerFlag ? "{0}.{1:D2}" : "{0}.{1:D2} {2:D2}.{3:D2}", TimeSpan.FromSeconds(Timer2 / 60), Timer2 % 60, timer2Delay / 60 % 60, timer2Delay % 60);
 				RightText.Append("FPS/Frame/Time", "{0}; {1}; {2} ms", calculatedFps, frameCounter, Mathf.RoundToInt(frameTimeElapsed * 1000));
-				RightText.Append("Total delay/Delay", "{0:D2}:{1:D2}.{2:D3}; {3} ms", totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds, Mathf.FloorToInt(lastDelay * 1000));
+				RightText.Append("Total/Delay", totalDelayTS.Minutes == 0 ? "{1}.{2:D2}; {3} ms" : "{0}:{1:D2}.{2:D2}; {3} ms",
+					totalDelayTS.Minutes, totalDelayTS.Seconds, totalDelayTS.Milliseconds / 10, Mathf.FloorToInt(lastDelay * 1000));
 			}
 
 			Vector3Int mousePosition = GetComponent<RoomLoader>().GetMousePosition(linkroom, linkfloor);
 			RightText.Append("Cursor position", "{0} {1}", Mathf.Clamp(mousePosition.x, -32768, 32767), Mathf.Clamp(mousePosition.z, -32768, 32767));
-			if (Player != null) RightText.Append("Last offset/dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
+			if (Player != null) RightText.Append("Last offset/Dist", "{0}; {1}", Player.LastOffset, Mathf.RoundToInt(Player.LastDistance));
 
 			if (ShowAITD1Vars)
 			{
-				RightText.Append("Allow inventory", "{0}; {1}", allowInventory ? "Yes" : "No", redrawFlag);
+				RightText.Append("Allow Inv/Draw", "{0}; {1}; {2}", allowInventory ? "Yes" : "No", redrawFlag, viewCounter);
 				RightText.Append("In hand", inHand);
 				RightText.Append("Keyboard", GetKeyboardStatus());
 				if (SpeedRunMode)
@@ -827,6 +830,15 @@ public class DosBox : MonoBehaviour
 			{
 				delayCounter.Start();
 				totalDelay.Start();
+			}
+
+			if (initViewFlag != oldInitViewFlag)
+			{
+				oldInitViewFlag = initViewFlag;
+				if (initViewFlag != 0)
+				{
+					viewCounter++;
+				}
 			}
 		}
 	}
