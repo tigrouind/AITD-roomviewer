@@ -718,15 +718,17 @@ public class DosBox : MonoBehaviour
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
 				//internal timer 1
-				byte[] buffer = new byte[4];
-				buffer.Write(Timer1 - 60 * 5, 0);  //back 5 frames
+				var timer = memory.ReadUnsignedInt(entryPoint + 0x19D12);
+				var buffer = new byte[4];
+				buffer.Write(timer - 60 * 5, 0);  //back 5 frames
 				ProcessMemory.Write(buffer, entryPoint + 0x19D12, buffer.Length);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha2))
 			{
 				//internal timer 2
-				byte[] buffer = new byte[2];
-				buffer.Write((ushort)(Timer2 - 60 * 5), 0);  //back 5 frames
+				var timer = memory.ReadUnsignedShort(entryPoint + 0x242E0);
+				var buffer = new byte[2];
+				buffer.Write((ushort)(timer - 60 * 5), 0);  //back 5 frames
 				ProcessMemory.Write(buffer, entryPoint + 0x242E0, buffer.Length);
 			}
 		}
