@@ -627,8 +627,11 @@ public class DosBox : MonoBehaviour
 				RightText.Append("Allow inventory", "{0}; {1}", allowInventory ? "Yes" : "No", redrawFlag);
 				RightText.Append("In hand", inHand);
 				RightText.Append("Keyboard", GetKeyboardStatus());
-				RightText.Append("Random", "{0:X8}", random);
-				AppendRandomInfo();
+				if (SpeedRunMode)
+				{
+					RightText.Append("Random", "{0:X8}", random);
+					AppendRandomInfo();
+				}
 			}
 		}
 
