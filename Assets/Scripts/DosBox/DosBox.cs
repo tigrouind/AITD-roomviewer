@@ -362,8 +362,9 @@ public class DosBox : MonoBehaviour
 						box.Arrow.transform.position = box.transform.position + new Vector3(0.0f, box.transform.localScale.y / 2.0f + 0.001f, 0.0f);
 						box.Arrow.transform.rotation = Quaternion.AngleAxis(90.0f, -Vector3.left); //face camera
 
-						float time = Mathf.Clamp(Timer2 - box.RotateTime, 0, box.RotateParam) / (float)box.RotateParam;
-						float angle = box.RotateParam == 0 || GameVersion != GameVersion.AITD1 ? box.Angles.y * 360.0f / 1024.0f : Mathf.LerpAngle(box.OldAngle * 360.0f / 1024.0f, box.NewAngle * 360.0f / 1024.0f, time);
+						float angle = box.RotateParam != 0 && box.TrackMode == 1 && isPlayer && GameVersion == GameVersion.AITD1 ?
+							Mathf.LerpAngle(box.OldAngle * 360.0f / 1024.0f, box.NewAngle * 360.0f / 1024.0f, Mathf.Clamp(Timer2 - box.RotateTime, 0, box.RotateParam) / (float)box.RotateParam) :
+							box.Angles.y * 360.0f / 1024.0f;
 						box.Arrow.transform.rotation *= Quaternion.AngleAxis((angle + 180.0f) % 360.0f, Vector3.forward);
 
 						float minBoxScale = Mathf.Min(box.transform.localScale.x, box.transform.localScale.z);
