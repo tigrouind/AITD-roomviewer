@@ -430,7 +430,8 @@ public class DosBox : MonoBehaviour
 
 		box.BoxMod = CreateChildBox(box.BoxMod,
 			finalPos, box.transform.localScale, Quaternion.identity,
-			"Mod", new Color32(255, 255, 0, 64), box.KeyFrameLength != 0 && ShowAdditionalInfo && ShowActors);
+			"Mod", new Color32(255, 255, 0, 64), box.KeyFrameLength != 0 && ShowAdditionalInfo && ShowActors
+			&& (new Vector2(finalPos.x, finalPos.z) - new Vector2(box.transform.position.x, box.transform.position.z)).magnitude > 0.05f);
 	}
 
 	void UpdateWorldPosBox(Box box, Vector3Int roomPosition, bool isPlayer)
