@@ -13,6 +13,7 @@ public class PakArchive : IDisposable, IEnumerable<PakArchiveEntry>
 	readonly FileStream stream;
 	readonly BinaryReader reader;
 	int[] offsets;
+	bool disposed;
 
 	public PakArchive(string filename)
 	{
@@ -133,9 +134,20 @@ public class PakArchive : IDisposable, IEnumerable<PakArchiveEntry>
 
 	public void Dispose()
 	{
-		reader.Close();
-		stream.Close();
+		Dispose(true);
+		GC.SuppressFinalize(this);
 	}
 
-
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!disposed)
+		{
+			disposed = true;
+			if (disposing)
+			{
+				reader.Close();
+				stream.Close();
+			}
+		}
+	}
 }
