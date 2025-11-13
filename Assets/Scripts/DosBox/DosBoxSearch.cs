@@ -65,7 +65,7 @@ public static class DosBoxSearch
 	public static bool TryGetExeEntryPoint(byte[] memory, out int entryPoint)
 	{
 		int psp = DosMCB.GetMCBs(memory)
-			.Where(x => x.Size > 100 * 1024 && x.Size < 200 * 1024 && x.Owner != 0) //is AITD exe loaded yet?
+			.Where(x => x.Size > 100 * 1024 && x.Size < 250 * 1024 && x.Owner != 0) //is AITD exe loaded yet?
 			.Select(x => x.Owner)
 			.FirstOrDefault();
 
