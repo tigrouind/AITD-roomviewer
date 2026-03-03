@@ -58,8 +58,10 @@ public static class DosBoxSearch
 	static bool IsAITDProcess(ProcessMemory reader)
 	{
 		var mcbData = new byte[16384];
+		var names = new string[] { "AITD", "INDARK", "TIMEGATE", "TATOU", "TEMPLIER" };
+
 		return reader.BaseAddress != -1 && reader.Read(mcbData, 0, mcbData.Length) > 0 && DosMCB.GetMCBs(mcbData)
-			.Any(x => x.Name.StartsWith("AITD") || x.Name.StartsWith("INDARK") || x.Name.StartsWith("TIMEGATE") || x.Name.StartsWith("TATOU"));
+			.Any(x => names.Any(y => x.Name.StartsWith(y, StringComparison.InvariantCultureIgnoreCase)));
 	}
 
 	public static bool TryGetExeEntryPoint(byte[] memory, out int entryPoint)
