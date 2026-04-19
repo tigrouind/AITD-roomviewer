@@ -107,8 +107,7 @@ Copy the following files to GAMEDATA folder:
 | :-: | - |
 | <kbd>Wheel</kbd> | zoom in / out
 | <kbd>Left button</kbd> | click on model and drag to rotate it
-| <kbd>Middle button</kbd> | move model
-| <kbd>Right button</kbd> | show options menu
+| <kbd>Right button</kbd> | show options menu /  move model
 
 | Key | Description |
 | :-: | - |

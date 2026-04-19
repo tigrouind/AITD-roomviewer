@@ -1,11 +1,11 @@
-using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System;
+using System.Text;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.Text;
 
 public class ModelLoader : MonoBehaviour
 {
@@ -53,7 +53,9 @@ public class ModelLoader : MonoBehaviour
 	private Vector2 cameraPosition;
 	private float cameraZoom = 2.0f;
 
+	const float mouseMinimumDistance = 10.0f;
 	private Vector3 mousePosition;
+	private float mouseDistance;
 	//mouse drag
 	private bool menuEnabled;
 
@@ -222,7 +224,7 @@ public class ModelLoader : MonoBehaviour
 		List<Color32> colors = new List<Color32>();
 		List<int>[] indices = new List<int>[7];
 
-		for (int n = 0 ; n < indices.Length ; n++)
+		for (int n = 0; n < indices.Length; n++)
 		{
 			indices[n] = new List<int>();
 		}
@@ -440,7 +442,7 @@ public class ModelLoader : MonoBehaviour
 
 						i += 3;
 
-						for (int k = 0 ; k < 3 ; k++)
+						for (int k = 0; k < 3; k++)
 						{
 							int pointIndex = buffer.ReadShort(i + 0) / 6;
 							i += 2;
@@ -467,7 +469,7 @@ public class ModelLoader : MonoBehaviour
 
 						if (primitiveType == 9 || primitiveType == 10)
 						{
-							i +=6; //normals
+							i += 6; //normals
 						}
 					}
 					break;
@@ -588,7 +590,7 @@ public class ModelLoader : MonoBehaviour
 
 		var isAITD2 = ((boneCount * 16 + 8) * frameCount + 4) == buffer.Length;
 		animFrames = new List<Frame>();
-		for (int frame = 0 ; frame < frameCount ; frame++)
+		for (int frame = 0; frame < frameCount; frame++)
 		{
 			Frame f = new Frame();
 			f.Time = buffer.ReadShort(i + 0);
@@ -596,7 +598,7 @@ public class ModelLoader : MonoBehaviour
 
 			f.Bones = new List<Bone>();
 			i += 8;
-			for (int bone = 0 ; bone < boneCount ; bone++)
+			for (int bone = 0; bone < boneCount; bone++)
 			{
 				Bone b = new Bone();
 				b.Type = buffer.ReadShort(i + 0);
@@ -655,7 +657,7 @@ public class ModelLoader : MonoBehaviour
 		//find current frame
 		totaltime = 0.0f;
 		int frame = 0;
-		for (int i = 0 ; i < animFrames.Count ; i++)
+		for (int i = 0; i < animFrames.Count; i++)
 		{
 			totaltime += animFrames[(i + 1) % animFrames.Count].Time;
 			if (time < totaltime)
@@ -686,7 +688,7 @@ public class ModelLoader : MonoBehaviour
 			frameDistance += animFrames[0].Offset;
 		}
 
-		for (int i = 0 ; i < bones.Count; i++)
+		for (int i = 0; i < bones.Count; i++)
 		{
 			Transform boneTransform = bones[i].transform;
 			Vector3 position = Vector3.zero;
@@ -873,49 +875,62 @@ public class ModelLoader : MonoBehaviour
 			}
 
 			//start drag (pan)
-			if (Input.GetMouseButtonDown(2))
+			if (Input.GetMouseButtonDown(1))
 			{
 				mousePosition = Input.mousePosition;
 				AutoRotate.BoolValue = false;
+				mouseDistance = 0.0f;
 			}
 
 			//dragging (pan)
-			if (Input.GetMouseButton(2))
+			if (Input.GetMouseButton(1))
 			{
 				Vector3 newMousePosition = Input.mousePosition;
 				if (newMousePosition != mousePosition)
 				{
-					Vector3 cameraDistance = new Vector3(0.0f, 0.0f, cameraZoom);
-					Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(mousePosition + cameraDistance)
-						- Camera.main.ScreenToWorldPoint(newMousePosition + cameraDistance);
-					cameraPosition += mouseDelta;
-					mousePosition = newMousePosition;
+					if (mouseDistance >= mouseMinimumDistance)
+					{
+						Vector3 cameraDistance = new Vector3(0.0f, 0.0f, cameraZoom);
+						Vector2 mouseDelta = Camera.main.ScreenToWorldPoint(mousePosition + cameraDistance)
+							- Camera.main.ScreenToWorldPoint(newMousePosition + cameraDistance);
+						cameraPosition += mouseDelta;
+						mousePosition = newMousePosition;
+					}
+
+					mouseDistance = Math.Max(mouseDistance, (newMousePosition - mousePosition).magnitude);
 				}
 			}
 		}
 
 		//show/hide menu
-		if (Input.GetMouseButtonDown(1))
+		if (Input.GetMouseButtonUp(1))
 		{
-			menuEnabled = !menuEnabled;
-			if (menuEnabled)
+			if (mouseDistance < mouseMinimumDistance)
 			{
-				if (modelCount > 0)
+				menuEnabled = !menuEnabled;
+				if (menuEnabled)
 				{
-					ModelInput.text = modelIndex.ToString();
-				}
+					if (modelCount > 0)
+					{
+						ModelInput.text = modelIndex.ToString();
+					}
 
-				if (animCount > 0)
-				{
-					AnimationInput.text = animIndex.ToString();
+					if (animCount > 0)
+					{
+						AnimationInput.text = animIndex.ToString();
+					}
 				}
 			}
+
+			mousePosition = Input.mousePosition;
+			mouseDistance = 0.0f;
 		}
 
-		if ((Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(2))
-			&& !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition))
+		if ((Input.GetMouseButtonUp(0) && !RectTransformUtility.RectangleContainsScreenPoint(Panel, Input.mousePosition) || Input.GetMouseButtonDown(1)))
 		{
 			menuEnabled = false;
+			mousePosition = Input.mousePosition;
+			mouseDistance = 0.0f;
 		}
 
 		Panel.gameObject.SetActive(menuEnabled);
@@ -1010,7 +1025,7 @@ public class ModelLoader : MonoBehaviour
 		float gmaxZ = float.MinValue;
 		float gminZ = float.MaxValue;
 
-		for (int i = 0 ; i < gradientPolygonList.Count ; i++)
+		for (int i = 0; i < gradientPolygonList.Count; i++)
 		{
 			float maxX = float.MinValue;
 			float minX = float.MaxValue;
@@ -1353,7 +1368,7 @@ public class ModelLoader : MonoBehaviour
 			var vertices = new List<Vector3>();
 			mesh.GetVertices(vertices);
 
-			for (int i = 0; i < vertices.Count && i < colorsRaw.Count ; i++)
+			for (int i = 0; i < vertices.Count && i < colorsRaw.Count; i++)
 			{
 				Vector3 v = vertices[i];
 				Color32 c = colorsRaw[i];
